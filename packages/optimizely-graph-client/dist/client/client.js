@@ -20,10 +20,10 @@ export class ContentGraphClient extends GraphQLClient {
             throw new Error("Invalid ContentGraph token");
         const newMode = getAuthMode(newValue);
         if ((newMode == AuthMode.Basic || newMode == AuthMode.HMAC) && !validateConfig(this._config, false)) {
-            throw new Error("[ContentGraph] Configuration is invalid for selected authentication mode");
+            throw new Error("[Optimizely Graph] Configuration is invalid for selected authentication mode");
         }
         if (this.debug)
-            console.log(`[ContentGraph] Updating token to ${newValue}`);
+            console.log(`[Optimizely Graph] Updating token to ${newValue}`);
         this._token = newValue;
     }
     get hmacFetch() {
@@ -62,14 +62,14 @@ export class ContentGraphClient extends GraphQLClient {
             method: "post",
             requestMiddleware: request => {
                 if (QUERY_LOG) {
-                    console.log(`[ContentGraph] [Request Query] ${request.body}`);
-                    console.log(`[ContentGraph] [Request Variables] ${JSON.stringify(request.variables)}`);
+                    console.log(`[Optimizely Graph] [Request Query] ${request.body}`);
+                    console.log(`[Optimizely Graph] [Request Variables] ${JSON.stringify(request.variables)}`);
                 }
                 return request;
             },
             responseMiddleware: response => {
                 if (isError(response)) {
-                    console.error(`[ContentGraph] [Error] ${response.name} => ${response.message}`);
+                    console.error(`[Optimizely Graph] [Error] ${response.name} => ${response.message}`);
                 }
                 else if (response.errors) {
                     response.errors.forEach(({ message, locations, path, name, source }) => {
@@ -79,12 +79,12 @@ export class ContentGraphClient extends GraphQLClient {
                         const errorName = name && name != 'undefined' ? ` ${name}` : "";
                         const sourceInfo = source?.body ?? "";
                         const sourceName = source?.name ? ` in ${source.name}` : "";
-                        console.error(`[ContentGraph] [GraphQL${errorName} error${sourceName}]:\n  Message: ${message}\n  Location: ${locationList}\n  Path: ${path}\n  Query: ${sourceInfo}`);
+                        console.error(`[Optimizely Graph] [GraphQL${errorName} error${sourceName}]:\n  Message: ${message}\n  Location: ${locationList}\n  Path: ${path}\n  Query: ${sourceInfo}`);
                     });
                 }
                 else if (QUERY_LOG) {
-                    console.log(`[ContentGraph] [Response Data] ${JSON.stringify(response.data)}`);
-                    console.log(`[ContentGraph] [Response Cost] ${JSON.stringify(response.extensions?.cost || 0)}`);
+                    console.log(`[Optimizely Graph] [Response Data] ${JSON.stringify(response.data)}`);
+                    console.log(`[Optimizely Graph] [Response Cost] ${JSON.stringify(response.extensions?.cost || 0)}`);
                 }
                 return response;
             }
@@ -123,8 +123,8 @@ export class ContentGraphClient extends GraphQLClient {
         if (temporary)
             this._oldFlags = this._flags;
         this._flags = { ...this._flags, ...newFlags };
-        if (this._config.debug)
-            console.log(`🔵 [ContentGraph] ${temporary ? 'Temporary updating' : 'Updating'} the feature configuration of the client`);
+        if (this.debug)
+            console.log(`🔵 [Optimizely Graph] ${temporary ? 'Temporary updating' : 'Updating'} the feature configuration of the client`);
         // Update the request configuration
         this.updateRequestConfig();
         return this;
@@ -135,8 +135,8 @@ export class ContentGraphClient extends GraphQLClient {
             return this;
         this._flags = this._oldFlags;
         this._oldFlags = undefined;
-        if (this._config.debug)
-            console.log(`🔵 [ContentGraph] Rolling back the feature configuration of the client`);
+        if (this.debug)
+            console.log(`🔵 [Optimizely Graph] Rolling back the feature configuration of the client`);
         // Update the request configuration
         this.updateRequestConfig();
         return this;
@@ -179,11 +179,17 @@ export class ContentGraphClient extends GraphQLClient {
                 this.requestConfig.fetch = fetch;
                 break;
         }
+        this.requestConfig.keepalive = false;
+        this.requestConfig.credentials = 'omit';
+        if (!this._flags.cache) {
+            this.requestConfig.cache = 'no-store';
+        }
         // Update endpoint
         const serviceUrl = new URL("/content/v2", this._config.gateway);
-        if (this._flags.queryCache)
-            serviceUrl.searchParams.set('stored', 'true');
+        serviceUrl.searchParams.set('stored', this._flags.queryCache ? 'true' : 'false');
         serviceUrl.searchParams.set('cache', this._flags.cache ? 'true' : 'false');
+        if (this.debug)
+            console.log(`🔗 [Optimizely Graph] Setting service endpoint to: ${serviceUrl.href}`);
         this.setEndpoint(serviceUrl.href);
     }
 }
