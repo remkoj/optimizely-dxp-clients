@@ -6,3 +6,4 @@ export const OptimizelyWebExperimentationScript = (props) => {
     return _jsxs(_Fragment, { children: [_jsx(Script, { id: 'web-experimentation-startup', strategy: 'beforeInteractive', children: `window["optimizely"] = window["optimizely"] || [];` }), _jsx(Script, { id: 'web-experimentation-project', strategy: 'beforeInteractive', src: `https://cdn.optimizely.com/js/${project_id}.js` })] });
 };
 export default OptimizelyWebExperimentationScript;
+//# sourceMappingURL=optimizely-web-experimentation.js.map

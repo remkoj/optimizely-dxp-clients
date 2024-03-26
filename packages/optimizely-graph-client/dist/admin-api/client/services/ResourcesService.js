@@ -1,5 +1,4 @@
 export class ResourcesService {
-    httpRequest;
     constructor(httpRequest) {
         this.httpRequest = httpRequest;
     }
@@ -47,3 +46,4 @@ export class ResourcesService {
         });
     }
 }
+//# sourceMappingURL=ResourcesService.js.map

@@ -113,3 +113,4 @@ export class DataPlatformError extends Error {
     }
 }
 export default DataPlatformClient;
+//# sourceMappingURL=api.js.map

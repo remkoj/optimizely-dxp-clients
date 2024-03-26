@@ -22,3 +22,4 @@ export function createClient(config) {
     return client;
 }
 export default createClient;
+//# sourceMappingURL=index.js.map

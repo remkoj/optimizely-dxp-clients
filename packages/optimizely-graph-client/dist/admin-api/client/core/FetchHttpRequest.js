@@ -14,3 +14,4 @@ export class FetchHttpRequest extends BaseHttpRequest {
         return __request(this.config, options);
     }
 }
+//# sourceMappingURL=FetchHttpRequest.js.map

@@ -5,3 +5,4 @@ export var AuthMode;
     AuthMode["HMAC"] = "use-hmac";
     AuthMode["Token"] = "use-token";
 })(AuthMode || (AuthMode = {}));
+//# sourceMappingURL=types.js.map

@@ -34,3 +34,4 @@ export const OptimizelyDataPlatformScript = (props) => {
 ` });
 };
 export default OptimizelyDataPlatformScript;
+//# sourceMappingURL=optimizely-data-patform.js.map

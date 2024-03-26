@@ -33,3 +33,4 @@ export class MetaDataResolver {
     }
 }
 export default MetaDataResolver;
+//# sourceMappingURL=metadata.js.map

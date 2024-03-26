@@ -24,3 +24,4 @@ function updateLabel(label) {
     return label;
 }
 export default GraphPanel;
+//# sourceMappingURL=graph-panel.js.map

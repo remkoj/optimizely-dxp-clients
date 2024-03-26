@@ -139,3 +139,4 @@ export const getContentByPath = gql `query getContentByPath($path: String!, $loc
     }
   }
 }`;
+//# sourceMappingURL=queries.js.map

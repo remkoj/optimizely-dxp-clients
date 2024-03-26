@@ -7,14 +7,6 @@ import { QueryGraphQlService } from './services/QueryGraphQlService.js';
 import { ResourcesService } from './services/ResourcesService.js';
 import { WebhooksService } from './services/WebhooksService.js';
 export class OptimizelyGraphAdminApi {
-    definitionV2;
-    definitionV3;
-    logs;
-    oidc;
-    queryGraphQl;
-    resources;
-    webhooks;
-    request;
     constructor(config, HttpRequest = FetchHttpRequest) {
         this.request = new HttpRequest({
             BASE: config?.BASE ?? 'https://prod.cg.optimizely.com',
@@ -36,3 +28,4 @@ export class OptimizelyGraphAdminApi {
         this.webhooks = new WebhooksService(this.request);
     }
 }
+//# sourceMappingURL=OptimizelyGraphAdminApi.js.map

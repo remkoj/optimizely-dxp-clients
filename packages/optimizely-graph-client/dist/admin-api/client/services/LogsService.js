@@ -1,5 +1,4 @@
 export class LogsService {
-    httpRequest;
     constructor(httpRequest) {
         this.httpRequest = httpRequest;
     }
@@ -28,3 +27,4 @@ export class LogsService {
         });
     }
 }
+//# sourceMappingURL=LogsService.js.map

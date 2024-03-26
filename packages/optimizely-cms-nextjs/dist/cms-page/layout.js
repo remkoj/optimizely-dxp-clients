@@ -1,8 +1,8 @@
-import { Utils } from "@remkoj/optimizely-dxp-react";
+import { Utils } from "@remkoj/optimizely-cms-react";
 import { getMetaDataByPath as getMetaDataByPathBase } from './data';
 import { slugToLocale, slugToGraphLocale } from "./utils";
 import { getServerClient } from "../client";
-import { isDebug } from '@remkoj/optimizely-dxp-react/rsc';
+import { isDebug } from '@remkoj/optimizely-cms-react/rsc';
 const defaultCreateLayoutOptions = {
     defaultLocale: "en",
     getMetaDataByPath: getMetaDataByPathBase,
@@ -78,3 +78,4 @@ export function createLayout(channel, options) {
     return pageLayoutDefinition;
 }
 export default createLayout;
+//# sourceMappingURL=layout.js.map

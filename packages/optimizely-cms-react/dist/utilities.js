@@ -95,3 +95,4 @@ export function trim(valueToTrim) {
         return valueToTrim.trim();
     return valueToTrim;
 }
+//# sourceMappingURL=utilities.js.map

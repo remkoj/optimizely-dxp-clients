@@ -1,3 +1,4 @@
+import { jsxs as _jsxs, Fragment as _Fragment, jsx as _jsx } from "react/jsx-runtime";
 import 'server-only';
 import getContentType from './get-content-type';
 import getServerContext from '../context';
@@ -5,7 +6,6 @@ import createClient, { AuthMode } from '@remkoj/optimizely-graph-client';
 import { print } from 'graphql';
 import * as Utils from "../../utilities";
 import * as Queries from './queries';
-import React from 'react';
 /**
  * React Server Side component for the CmsContent
  *
@@ -48,15 +48,10 @@ export const CmsContent = async ({ contentType, contentTypePrefix, contentLink, 
             console.warn(`🟠 [CmsContent] Component of type "${contentType?.join('/') ?? ""}" not resolved by factory`);
         }
         if (context.isDebug || inEditMode || outputEditorWarning) {
-            const errorMsg = React.createElement("div", { className: 'opti-error' },
-                "Component of type \"",
-                contentType?.join('/') ?? "",
-                "\" not resolved by factory");
-            return children ? React.createElement(React.Fragment, null,
-                errorMsg,
-                children) : errorMsg;
+            const errorMsg = _jsxs("div", { className: 'opti-error', children: ["Component of type \"", contentType?.join('/') ?? "", "\" not resolved by factory"] });
+            return children ? _jsxs(_Fragment, { children: [errorMsg, children] }) : errorMsg;
         }
-        return React.createElement(React.Fragment, null, children ? children : undefined);
+        return _jsx(_Fragment, { children: children ? children : undefined });
     }
     if (context.isDebug)
         console.log("⚪ [CmsContent] Rendering item using component:", Component?.displayName ?? Component);
@@ -67,13 +62,13 @@ export const CmsContent = async ({ contentType, contentTypePrefix, contentLink, 
             console.log("⚪ [CmsContent] Rendering CMS Component using fragment information", fragmentProps);
         if (Utils.validatesFragment(Component) && !Component.validateFragment(fragmentData)) {
             console.error("🔴 [CmsContent] Invalid fragment data received for ", Component.displayName ?? contentType?.join("/") ?? "[Undetermined component]");
-            return React.createElement(React.Fragment, null);
+            return _jsx(_Fragment, {});
         }
-        return React.createElement(Component, { inEditMode: inEditMode, contentLink: contentLink, data: fragmentData || {}, client: client });
+        return _jsx(Component, { inEditMode: inEditMode, contentLink: contentLink, data: fragmentData || {}, client: client });
     }
     // If we don't have previously loaded data we cannot load content for inline blocks
     if (isInlineBlock)
-        return (context.isDebug || inEditMode || outputEditorWarning) ? React.createElement("div", { className: 'opti-error' }, "Inline blocks cannot be loaded individually") : React.createElement(React.Fragment, null);
+        return (context.isDebug || inEditMode || outputEditorWarning) ? _jsx("div", { className: 'opti-error', children: "Inline blocks cannot be loaded individually" }) : _jsx(_Fragment, {});
     // Render using included query 
     if (Utils.isCmsComponentWithDataQuery(Component)) {
         const gqlQuery = Component.getDataQuery();
@@ -83,7 +78,7 @@ export const CmsContent = async ({ contentType, contentTypePrefix, contentLink, 
         const gqlResponse = await client.request(gqlQuery, gqlVariables);
         if (context.isDebug)
             console.log("⚪ [CmsContent] Component request the following data:", gqlResponse);
-        return React.createElement(Component, { inEditMode: inEditMode, contentLink: contentLink, data: gqlResponse, client: client });
+        return _jsx(Component, { inEditMode: inEditMode, contentLink: contentLink, data: gqlResponse, client: client });
     }
     // Render using included fragment
     if (Utils.isCmsComponentWithFragment(Component)) {
@@ -100,11 +95,12 @@ export const CmsContent = async ({ contentType, contentTypePrefix, contentLink, 
             throw new Error(`CmsContent expected to load exactly one content item of type ${name}, received ${totalItems} from Optimizely Graph. Content Item: ${JSON.stringify(fragmentVariables)}`);
         if (totalItems > 1 && context.isDebug)
             console.warn(`🟠 [CmsContent] Resolved ${totalItems} content items, expected only 1. Picked the first one`);
-        return React.createElement(Component, { inEditMode: inEditMode, contentLink: contentLink, data: fragmentResponse.contentById.items[0], client: client });
+        return _jsx(Component, { inEditMode: inEditMode, contentLink: contentLink, data: fragmentResponse.contentById.items[0], client: client });
     }
     // Assume there's no server side prepared data needed for the component
     if (context.isDebug)
         console.log(`⚪ [CmsContent] Component of type "${contentType?.join('/') ?? Component.displayName ?? '?'}" did not request pre-loading of data`);
-    return React.createElement(Component, { inEditMode: inEditMode, contentLink: contentLink, data: fragmentData || {}, client: client });
+    return _jsx(Component, { inEditMode: inEditMode, contentLink: contentLink, data: fragmentData || {}, client: client });
 };
 export default CmsContent;
+//# sourceMappingURL=cms-content.js.map

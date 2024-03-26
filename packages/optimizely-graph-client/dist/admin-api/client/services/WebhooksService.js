@@ -1,5 +1,4 @@
 export class WebhooksService {
-    httpRequest;
     constructor(httpRequest) {
         this.httpRequest = httpRequest;
     }
@@ -68,3 +67,4 @@ export class WebhooksService {
         });
     }
 }
+//# sourceMappingURL=WebhooksService.js.map

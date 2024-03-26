@@ -1,7 +1,7 @@
 import 'server-only';
 import React from 'react';
 import createClient from '@remkoj/optimizely-graph-client';
-import { isDebug } from '@remkoj/optimizely-dxp-react/rsc';
+import { isDebug } from '@remkoj/optimizely-cms-react/rsc';
 export const getServerClient = React.cache(() => {
     if (isDebug())
         console.log('⚪ [ContentGraph Shared Client] Creating new Optimizely Graph client');
@@ -17,3 +17,4 @@ export const getAuthorizedServerClient = (token) => {
     return client;
 };
 export default getServerClient();
+//# sourceMappingURL=client.js.map

@@ -10,7 +10,9 @@ function pickTransformOptions(options) {
 exports.pickTransformOptions = pickTransformOptions;
 function isArray(toTest) { return Array.isArray(toTest); }
 const transform = async ({ documents: files, config }) => {
+    //console.log("[STARTED] Optimizely document transformation")
     const injections = config.injections ?? [];
+    // Retrieve component fragments
     const componentFragments = {};
     files.forEach(file => {
         if (!file.document)
@@ -25,6 +27,7 @@ const transform = async ({ documents: files, config }) => {
                     if (!matchingInjections || matchingInjections.length == 0)
                         return false;
                     matchingInjections.forEach(injection => {
+                        //console.log(`[ DEBUG ] Matched ${ node.name.value } for ${ injection.into } in file ${ node.loc?.source?.name }`)
                         if (!componentFragments[injection.into])
                             componentFragments[injection.into] = [];
                         if (!componentFragments[injection.into].some(f => f.name.value == node.name.value))
@@ -35,17 +38,22 @@ const transform = async ({ documents: files, config }) => {
             }
         });
     });
+    // Get the names we actually need to inject into, and return when none are present
     const intoNames = Object.getOwnPropertyNames(componentFragments);
     if (intoNames.length == 0)
         return files;
+    // Process the fragments, add matching spreads if need be
     const recursiveFragments = ["BlockContentAreaItemSearchData", "BlockContentAreaItemData"];
     const componentSpreads = {};
     intoNames.forEach(intoName => {
+        //console.log(`[ DEBUG ] Preparing mutations for ${ intoName }`)
         componentFragments[intoName].forEach(fragment => {
+            //console.log(`[ DEBUG ] Preparing mutations for fragment ${ fragment.name.value } within ${ intoName }`)
             (0, graphql_1.visit)(fragment, {
                 "FragmentSpread": {
                     leave(node, key, parent, path, ancestors) {
                         if (recursiveFragments.includes(node.name.value) && !isArray(ancestors[0]) && ancestors[0].kind == graphql_1.Kind.FRAGMENT_DEFINITION) {
+                            //console.log(`[ DEBUG ] Leaving ${ node.name.value } within  ${ fragment.name.value } for ${ intoName}, creating recursive fragment`)
                             const fields = ancestors.filter(a => !isArray(a) && a.kind != graphql_1.Kind.FRAGMENT_DEFINITION && a.kind != graphql_1.Kind.SELECTION_SET);
                             if (fields.length < 1)
                                 return undefined;
@@ -92,6 +100,7 @@ const transform = async ({ documents: files, config }) => {
                             };
                         });
                         componentSpreads[parent.name.value]?.forEach(spread => {
+                            //console.log("[ DEBUG ] Pushing inline fragment for", parent.name.value)
                             addedSelections.push(spread);
                         });
                         return {
@@ -111,10 +120,12 @@ const transform = async ({ documents: files, config }) => {
             document: document,
         };
     });
+    //console.log("[SUCCESS] Optimizely document transformation")
     return newFiles;
 };
 exports.transform = transform;
 exports.default = { transform: exports.transform };
+// The recursive sections to add
 const recursiveSelections = (0, graphql_1.parse)(`fragment BlockContentAreaItemData on ContentAreaItemModel {
     item: ContentLink {
         data: Expanded @recursive(depth: 3) {

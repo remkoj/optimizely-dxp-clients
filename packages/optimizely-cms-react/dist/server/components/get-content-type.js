@@ -52,3 +52,4 @@ export const getContentTypeQuery = gql `query getContentType($id: Int, $workId: 
     total
   }
 }`;
+//# sourceMappingURL=get-content-type.js.map

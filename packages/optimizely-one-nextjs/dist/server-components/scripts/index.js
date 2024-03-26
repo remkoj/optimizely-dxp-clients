@@ -16,3 +16,4 @@ export const Scripts = {
      */
     Footer
 };
+//# sourceMappingURL=index.js.map

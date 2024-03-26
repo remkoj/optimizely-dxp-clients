@@ -8,3 +8,4 @@ export class InvalidContentLinkError extends Error {
         this._contentLink = invalidContentLink;
     }
 }
+//# sourceMappingURL=errors.js.map

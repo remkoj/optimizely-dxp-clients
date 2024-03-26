@@ -49,3 +49,4 @@ export function createHmacFetch(appKey, secret) {
     };
 }
 export default createHmacFetch;
+//# sourceMappingURL=hmac-fetch.js.map

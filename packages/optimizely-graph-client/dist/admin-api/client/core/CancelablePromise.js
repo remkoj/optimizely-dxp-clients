@@ -1,3 +1,15 @@
+var __classPrivateFieldSet = (this && this.__classPrivateFieldSet) || function (receiver, state, value, kind, f) {
+    if (kind === "m") throw new TypeError("Private method is not writable");
+    if (kind === "a" && !f) throw new TypeError("Private accessor was defined without a setter");
+    if (typeof state === "function" ? receiver !== state || !f : !state.has(receiver)) throw new TypeError("Cannot write private member to an object whose class did not declare it");
+    return (kind === "a" ? f.call(receiver, value) : f ? f.value = value : state.set(receiver, value)), value;
+};
+var __classPrivateFieldGet = (this && this.__classPrivateFieldGet) || function (receiver, state, kind, f) {
+    if (kind === "a" && !f) throw new TypeError("Private accessor was defined without a getter");
+    if (typeof state === "function" ? receiver !== state || !f : !state.has(receiver)) throw new TypeError("Cannot read private member from an object whose class did not declare it");
+    return kind === "m" ? f : kind === "a" ? f.call(receiver) : f ? f.value : state.get(receiver);
+};
+var _CancelablePromise_isResolved, _CancelablePromise_isRejected, _CancelablePromise_isCancelled, _CancelablePromise_cancelHandlers, _CancelablePromise_promise, _CancelablePromise_resolve, _CancelablePromise_reject;
 /* generated using openapi-typescript-codegen -- do not edit */
 /* istanbul ignore file */
 /* tslint:disable */
@@ -12,75 +24,75 @@ export class CancelError extends Error {
     }
 }
 export class CancelablePromise {
-    #isResolved;
-    #isRejected;
-    #isCancelled;
-    #cancelHandlers;
-    #promise;
-    #resolve;
-    #reject;
     constructor(executor) {
-        this.#isResolved = false;
-        this.#isRejected = false;
-        this.#isCancelled = false;
-        this.#cancelHandlers = [];
-        this.#promise = new Promise((resolve, reject) => {
-            this.#resolve = resolve;
-            this.#reject = reject;
+        _CancelablePromise_isResolved.set(this, void 0);
+        _CancelablePromise_isRejected.set(this, void 0);
+        _CancelablePromise_isCancelled.set(this, void 0);
+        _CancelablePromise_cancelHandlers.set(this, void 0);
+        _CancelablePromise_promise.set(this, void 0);
+        _CancelablePromise_resolve.set(this, void 0);
+        _CancelablePromise_reject.set(this, void 0);
+        __classPrivateFieldSet(this, _CancelablePromise_isResolved, false, "f");
+        __classPrivateFieldSet(this, _CancelablePromise_isRejected, false, "f");
+        __classPrivateFieldSet(this, _CancelablePromise_isCancelled, false, "f");
+        __classPrivateFieldSet(this, _CancelablePromise_cancelHandlers, [], "f");
+        __classPrivateFieldSet(this, _CancelablePromise_promise, new Promise((resolve, reject) => {
+            __classPrivateFieldSet(this, _CancelablePromise_resolve, resolve, "f");
+            __classPrivateFieldSet(this, _CancelablePromise_reject, reject, "f");
             const onResolve = (value) => {
-                if (this.#isResolved || this.#isRejected || this.#isCancelled) {
+                if (__classPrivateFieldGet(this, _CancelablePromise_isResolved, "f") || __classPrivateFieldGet(this, _CancelablePromise_isRejected, "f") || __classPrivateFieldGet(this, _CancelablePromise_isCancelled, "f")) {
                     return;
                 }
-                this.#isResolved = true;
-                if (this.#resolve)
-                    this.#resolve(value);
+                __classPrivateFieldSet(this, _CancelablePromise_isResolved, true, "f");
+                if (__classPrivateFieldGet(this, _CancelablePromise_resolve, "f"))
+                    __classPrivateFieldGet(this, _CancelablePromise_resolve, "f").call(this, value);
             };
             const onReject = (reason) => {
-                if (this.#isResolved || this.#isRejected || this.#isCancelled) {
+                if (__classPrivateFieldGet(this, _CancelablePromise_isResolved, "f") || __classPrivateFieldGet(this, _CancelablePromise_isRejected, "f") || __classPrivateFieldGet(this, _CancelablePromise_isCancelled, "f")) {
                     return;
                 }
-                this.#isRejected = true;
-                if (this.#reject)
-                    this.#reject(reason);
+                __classPrivateFieldSet(this, _CancelablePromise_isRejected, true, "f");
+                if (__classPrivateFieldGet(this, _CancelablePromise_reject, "f"))
+                    __classPrivateFieldGet(this, _CancelablePromise_reject, "f").call(this, reason);
             };
             const onCancel = (cancelHandler) => {
-                if (this.#isResolved || this.#isRejected || this.#isCancelled) {
+                if (__classPrivateFieldGet(this, _CancelablePromise_isResolved, "f") || __classPrivateFieldGet(this, _CancelablePromise_isRejected, "f") || __classPrivateFieldGet(this, _CancelablePromise_isCancelled, "f")) {
                     return;
                 }
-                this.#cancelHandlers.push(cancelHandler);
+                __classPrivateFieldGet(this, _CancelablePromise_cancelHandlers, "f").push(cancelHandler);
             };
             Object.defineProperty(onCancel, 'isResolved', {
-                get: () => this.#isResolved,
+                get: () => __classPrivateFieldGet(this, _CancelablePromise_isResolved, "f"),
             });
             Object.defineProperty(onCancel, 'isRejected', {
-                get: () => this.#isRejected,
+                get: () => __classPrivateFieldGet(this, _CancelablePromise_isRejected, "f"),
             });
             Object.defineProperty(onCancel, 'isCancelled', {
-                get: () => this.#isCancelled,
+                get: () => __classPrivateFieldGet(this, _CancelablePromise_isCancelled, "f"),
             });
             return executor(onResolve, onReject, onCancel);
-        });
+        }), "f");
     }
-    get [Symbol.toStringTag]() {
+    get [(_CancelablePromise_isResolved = new WeakMap(), _CancelablePromise_isRejected = new WeakMap(), _CancelablePromise_isCancelled = new WeakMap(), _CancelablePromise_cancelHandlers = new WeakMap(), _CancelablePromise_promise = new WeakMap(), _CancelablePromise_resolve = new WeakMap(), _CancelablePromise_reject = new WeakMap(), Symbol.toStringTag)]() {
         return "Cancellable Promise";
     }
     then(onFulfilled, onRejected) {
-        return this.#promise.then(onFulfilled, onRejected);
+        return __classPrivateFieldGet(this, _CancelablePromise_promise, "f").then(onFulfilled, onRejected);
     }
     catch(onRejected) {
-        return this.#promise.catch(onRejected);
+        return __classPrivateFieldGet(this, _CancelablePromise_promise, "f").catch(onRejected);
     }
     finally(onFinally) {
-        return this.#promise.finally(onFinally);
+        return __classPrivateFieldGet(this, _CancelablePromise_promise, "f").finally(onFinally);
     }
     cancel() {
-        if (this.#isResolved || this.#isRejected || this.#isCancelled) {
+        if (__classPrivateFieldGet(this, _CancelablePromise_isResolved, "f") || __classPrivateFieldGet(this, _CancelablePromise_isRejected, "f") || __classPrivateFieldGet(this, _CancelablePromise_isCancelled, "f")) {
             return;
         }
-        this.#isCancelled = true;
-        if (this.#cancelHandlers.length) {
+        __classPrivateFieldSet(this, _CancelablePromise_isCancelled, true, "f");
+        if (__classPrivateFieldGet(this, _CancelablePromise_cancelHandlers, "f").length) {
             try {
-                for (const cancelHandler of this.#cancelHandlers) {
+                for (const cancelHandler of __classPrivateFieldGet(this, _CancelablePromise_cancelHandlers, "f")) {
                     cancelHandler();
                 }
             }
@@ -89,11 +101,12 @@ export class CancelablePromise {
                 return;
             }
         }
-        this.#cancelHandlers.length = 0;
-        if (this.#reject)
-            this.#reject(new CancelError('Request aborted'));
+        __classPrivateFieldGet(this, _CancelablePromise_cancelHandlers, "f").length = 0;
+        if (__classPrivateFieldGet(this, _CancelablePromise_reject, "f"))
+            __classPrivateFieldGet(this, _CancelablePromise_reject, "f").call(this, new CancelError('Request aborted'));
     }
     get isCancelled() {
-        return this.#isCancelled;
+        return __classPrivateFieldGet(this, _CancelablePromise_isCancelled, "f");
     }
 }
+//# sourceMappingURL=CancelablePromise.js.map

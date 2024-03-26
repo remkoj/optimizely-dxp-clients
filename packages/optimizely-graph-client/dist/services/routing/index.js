@@ -1,7 +1,6 @@
 import { gql } from "graphql-request";
 import createClient, { isContentGraphClient } from '../../client/index.js';
 export class RouteResolver {
-    _cgClient;
     /**
      * Create a new Route Resolver
      *
@@ -244,3 +243,4 @@ export var GetRouteById;
     }
   }`;
 })(GetRouteById || (GetRouteById = {}));
+//# sourceMappingURL=index.js.map

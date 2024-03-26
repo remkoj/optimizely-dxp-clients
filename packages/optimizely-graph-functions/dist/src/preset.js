@@ -25,13 +25,18 @@ var __importStar = (this && this.__importStar) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.preset = void 0;
 const documents_1 = require("./documents");
+// Import base preset
 const client_preset_1 = require("@graphql-codegen/client-preset");
+// Import injected parts
 const index_1 = __importStar(require("./index"));
 const transform_1 = __importStar(require("./transform"));
 exports.preset = {
     prepareDocuments: async (outputFilePath, outputSpecificDocuments) => {
+        // Get the base documents
         const documents = client_preset_1.preset.prepareDocuments ? await client_preset_1.preset.prepareDocuments(outputFilePath, outputSpecificDocuments) : [...outputSpecificDocuments, `!${outputFilePath}`];
+        // Then add the implicit documents to it
         documents.push([...documents_1.fragments, ...documents_1.queries].join("\n"));
+        // Finally return the extended array
         return documents;
     },
     buildGeneratesSection: async (options) => {
@@ -43,6 +48,7 @@ exports.preset = {
             }
         ];
         const section = await client_preset_1.preset.buildGeneratesSection(options);
+        // Add the functions file
         section.push({
             filename: `${options.baseOutputDir}functions.ts`,
             pluginMap: {
@@ -58,6 +64,7 @@ exports.preset = {
             documents: options.documents,
             documentTransforms: options.documentTransforms
         });
+        // Add functions to index plugin
         section.forEach((fileConfig, idx) => {
             if (fileConfig.filename.endsWith("index.ts")) {
                 const currentContent = section[idx].plugins[0]?.add?.content;

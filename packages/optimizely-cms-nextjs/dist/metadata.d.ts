@@ -1,4 +1,4 @@
-import { type ComponentFactory, type ContentLink } from '@remkoj/optimizely-dxp-react';
+import { type ComponentFactory, type ContentLink } from '@remkoj/optimizely-cms-react';
 import { type OptimizelyGraphConfig, type IOptiGraphClient } from '@remkoj/optimizely-graph-client';
 import { Metadata } from 'next';
 export declare class MetaDataResolver {

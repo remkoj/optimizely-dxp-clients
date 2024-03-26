@@ -1,5 +1,4 @@
 export class DefinitionV2Service {
-    httpRequest;
     constructor(httpRequest) {
         this.httpRequest = httpRequest;
     }
@@ -60,3 +59,4 @@ export class DefinitionV2Service {
         });
     }
 }
+//# sourceMappingURL=DefinitionV2Service.js.map

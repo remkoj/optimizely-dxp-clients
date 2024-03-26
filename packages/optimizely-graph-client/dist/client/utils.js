@@ -29,3 +29,4 @@ export function isContentGraphClient(client) {
     return typeof client.updateAuthentication == 'function'
         && typeof client.request == 'function';
 }
+//# sourceMappingURL=utils.js.map

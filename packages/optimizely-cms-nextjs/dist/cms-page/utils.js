@@ -16,3 +16,4 @@ export function slugToGraphLocale(channel, slug, defaultValue) {
     const route = channel.locales.filter(x => x.slug == slug)[0];
     return route?.graphLocale || defaultValue?.replaceAll("-", "_");
 }
+//# sourceMappingURL=utils.js.map

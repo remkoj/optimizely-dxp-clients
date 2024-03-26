@@ -7,3 +7,4 @@ export * from './types';
 export * as Errors from './errors';
 export * as Utils from './utilities';
 export * from './factory';
+//# sourceMappingURL=index.js.map

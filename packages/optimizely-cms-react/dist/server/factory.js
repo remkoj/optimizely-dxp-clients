@@ -15,3 +15,4 @@ export const getFactory = React.cache(() => {
     return factory;
 });
 export default getFactory;
+//# sourceMappingURL=factory.js.map

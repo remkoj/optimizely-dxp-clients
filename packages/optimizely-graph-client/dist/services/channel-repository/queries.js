@@ -90,3 +90,4 @@ export const getByDomain = gql `query GetChannelByDomain($domain: String!, $fall
         }
     }
 }`;
+//# sourceMappingURL=queries.js.map

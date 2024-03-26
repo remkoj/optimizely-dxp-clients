@@ -9,12 +9,6 @@ const defaultFlags = {
     recursive: false
 };
 export class ContentGraphClient extends GraphQLClient {
-    static ForceHmacToken = 'use-hmac';
-    static ForceBasicAuth = 'use-basic';
-    _config;
-    _token;
-    _hmacFetch;
-    _flags;
     get debug() {
         return this._config.debug ?? false;
     }
@@ -95,6 +89,11 @@ export class ContentGraphClient extends GraphQLClient {
                 return response;
             }
         });
+        this.query = (...args) => {
+            //@ts-expect-error
+            return this.request(...args);
+        };
+        this._oldFlags = undefined;
         // Set variables
         this._config = optiConfig;
         this._token = token;
@@ -117,11 +116,6 @@ export class ContentGraphClient extends GraphQLClient {
         this.updateRequestConfig();
         return this;
     }
-    query = (...args) => {
-        //@ts-expect-error
-        return this.request(...args);
-    };
-    _oldFlags = undefined;
     updateFlags(newFlags, temporary = false) {
         // Determine the new flags
         if (this._oldFlags)
@@ -193,5 +187,8 @@ export class ContentGraphClient extends GraphQLClient {
         this.setEndpoint(serviceUrl.href);
     }
 }
+ContentGraphClient.ForceHmacToken = 'use-hmac';
+ContentGraphClient.ForceBasicAuth = 'use-basic';
 export const createClient = (config, token = undefined) => new ContentGraphClient(config, token);
 export default ContentGraphClient;
+//# sourceMappingURL=client.js.map

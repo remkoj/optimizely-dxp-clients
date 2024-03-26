@@ -1,5 +1,5 @@
+import { Fragment as _Fragment, jsx as _jsx } from "react/jsx-runtime";
 import 'server-only';
-import React from 'react';
 import CmsContent from './cms-content';
 import * as Utils from '../../utilities';
 import * as Errors from '../../errors';
@@ -26,7 +26,7 @@ export const CmsContentArea = async ({ items, classMapper, className, fieldName,
     }
     if (!locale) {
         console.error(`🔴 [CmsContentArea] No locale set on the ServerContext, which is required to make the ContentArea${fieldName ? ' ' + fieldName : ''} render its content`);
-        return React.createElement(React.Fragment, null);
+        return _jsx(_Fragment, {});
     }
     // Convert the items to a list of enriched content types and filter out items cannot be loaded
     const actualItems = (items || []).filter(forValidContentAreaItems);
@@ -57,7 +57,7 @@ export const CmsContentArea = async ({ items, classMapper, className, fieldName,
         else
             contentAreaItemContainerProps[childrenTarget] = contentAraeItemContent;
         const ContentAreaItemContainer = contentItemElement || "div";
-        return React.createElement(ContentAreaItemContainer, { ...contentAreaItemContainerProps }, contentAreaItemContainerChildren);
+        return _jsx(ContentAreaItemContainer, { ...contentAreaItemContainerProps, children: contentAreaItemContainerChildren });
     }));
     // Build container element
     const contentAreaContainerProps = {
@@ -72,7 +72,7 @@ export const CmsContentArea = async ({ items, classMapper, className, fieldName,
     else
         contentAreaContainerProps[contentAreaContainerChildrenTarget] = componentData;
     const ContentAreaContainer = elementType ?? "div";
-    return React.createElement(ContentAreaContainer, { ...contentAreaContainerProps }, contentAreaContainerChildren);
+    return _jsx(ContentAreaContainer, { ...contentAreaContainerProps, children: contentAreaContainerChildren });
 };
 function forValidContentAreaItems(itm) {
     if (itm == undefined || itm == null)
@@ -98,3 +98,4 @@ export async function processContentAreaItems(items, locale) {
     }));
 }
 export default CmsContentArea;
+//# sourceMappingURL=cms-content-area.js.map

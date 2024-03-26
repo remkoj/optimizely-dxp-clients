@@ -50,3 +50,4 @@ export const AudiencesPanel = ({ servicePrefix = '/api/me', refreshInterval = 0 
                 })).flat() }), hasMore && _jsx("p", { onClick: () => setSize(size + 1), className: 'oo-text-center oo-inline-block oo-cursor-pointer oo-px-2 oo-py-1 oo-border oo-border-b-0 oo-border-slate-300 oo-rounded-md oo-bg-blue-500 oo-text-white', children: "Load more" }), _jsxs("p", { className: 'oo-text-[12px] oo-m-2 oo-mt-3 oo-p-1 md:oo-p-2 oo-rounded-md oo-bg-amber-200 oo-border oo-border-amber-800 oo-text-amber-800', children: [_jsx("span", { className: 'oo-font-bold', children: "Please note:" }), " Interest based audiences are updated once per hour"] })] });
 };
 export default AudiencesPanel;
+//# sourceMappingURL=audiences-panel.js.map

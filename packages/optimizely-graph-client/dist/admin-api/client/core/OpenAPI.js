@@ -9,3 +9,4 @@ export const OpenAPI = {
     HEADERS: undefined,
     ENCODE_PATH: undefined,
 };
+//# sourceMappingURL=OpenAPI.js.map

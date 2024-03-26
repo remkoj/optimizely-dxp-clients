@@ -1,7 +1,8 @@
+import { jsx as _jsx, jsxs as _jsxs, Fragment as _Fragment } from "react/jsx-runtime";
 import 'server-only';
 import { AuthMode } from '@remkoj/optimizely-graph-client';
-import { Utils } from '@remkoj/optimizely-dxp-react';
-import { CmsContent, getServerContext } from '@remkoj/optimizely-dxp-react/rsc';
+import { Utils } from '@remkoj/optimizely-cms-react';
+import { CmsContent, getServerContext } from '@remkoj/optimizely-cms-react/rsc';
 import { notFound } from 'next/navigation';
 import OnPageEdit from '../components/on-page-edit';
 import { getAuthorizedServerClient } from '../client';
@@ -10,11 +11,9 @@ import Script from 'next/script';
 import { getContentById } from './data';
 const defaultOptions = {
     refreshDelay: 2000,
-    refreshNotice: () => React.createElement("div", { className: 'optly-refresh-notice' }, "Updating preview, please wait...."),
-    errorNotice: props => React.createElement("div", { className: 'optly-error-notice' },
-        React.createElement("div", { className: 'optly-error-title' }, props.title),
-        React.createElement("div", { className: 'optly-error-message' }, props.message)),
-    layout: props => React.createElement("div", { className: 'optly-edit-page', "data-locale": props.locale }, props.children),
+    refreshNotice: () => _jsx("div", { className: 'optly-refresh-notice', children: "Updating preview, please wait...." }),
+    errorNotice: props => _jsxs("div", { className: 'optly-error-notice', children: [_jsx("div", { className: 'optly-error-title', children: props.title }), _jsx("div", { className: 'optly-error-message', children: props.message })] }),
+    layout: props => _jsx("div", { className: 'optly-edit-page', "data-locale": props.locale, children: props.children }),
     loader: getContentById,
     clientFactory: (token) => getAuthorizedServerClient(token)
 };
@@ -128,21 +127,7 @@ export function createEditPageComponent(channel, factory, options) {
             const isPage = contentItem.contentType?.some(x => x?.toLowerCase() == "page") ?? false;
             const loadedContentId = Utils.normalizeContentLinkWithLocale({ ...contentItem?.id, locale: contentItem?.locale?.name });
             const Layout = isPage ? PageLayout : React.Fragment;
-            const output = React.createElement(React.Fragment, null,
-                context.inEditMode && React.createElement(Script, { src: `${dxpUrl}/ui/CMS/latest/clientresources/communicationinjector.js`, strategy: 'afterInteractive' }),
-                React.createElement(Layout, { locale: locale },
-                    React.createElement(OnPageEdit, { timeout: refreshDelay, mode: context.inEditMode ? 'edit' : 'preview', className: 'bg-slate-900 absolute top-0 left-0 w-screen h-screen opacity-60 z-50' },
-                        React.createElement(RefreshNotice, null)),
-                    React.createElement(CmsContent, { contentType: contentType, contentLink: contentLink, fragmentData: contentItem })),
-                React.createElement("div", { className: 'optly-contentLink' },
-                    "ID: ",
-                    loadedContentId?.id ?? "-",
-                    " | Version: ",
-                    loadedContentId?.workId ?? "-",
-                    " | Global ID: ",
-                    loadedContentId?.guidValue ?? "-",
-                    " | Locale: ",
-                    loadedContentId?.locale ?? ""));
+            const output = _jsxs(_Fragment, { children: [context.inEditMode && _jsx(Script, { src: `${dxpUrl}/ui/CMS/latest/clientresources/communicationinjector.js`, strategy: 'afterInteractive' }), _jsxs(Layout, { locale: locale, children: [_jsx(OnPageEdit, { timeout: refreshDelay, mode: context.inEditMode ? 'edit' : 'preview', className: 'bg-slate-900 absolute top-0 left-0 w-screen h-screen opacity-60 z-50', children: _jsx(RefreshNotice, {}) }), _jsx(CmsContent, { contentType: contentType, contentLink: contentLink, fragmentData: contentItem })] }), _jsxs("div", { className: 'optly-contentLink', children: ["ID: ", loadedContentId?.id ?? "-", " | Version: ", loadedContentId?.workId ?? "-", " | Global ID: ", loadedContentId?.guidValue ?? "-", " | Locale: ", loadedContentId?.locale ?? ""] })] });
             return output;
         }
         catch (e) {
@@ -153,3 +138,4 @@ export function createEditPageComponent(channel, factory, options) {
     return EditPage;
 }
 export default createEditPageComponent;
+//# sourceMappingURL=page.js.map

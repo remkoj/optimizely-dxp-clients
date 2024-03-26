@@ -9,3 +9,4 @@ export default function (props) {
     const exp_id = props.experimentationProjectId || EnvTools.readValue(EnvVars.WebExperimentationProject);
     return _jsxs(_Fragment, { children: [odp_id && _jsx(OdpScript, { trackerId: odp_id }), exp_id && _jsx(ExpScript, { projectId: exp_id })] });
 }
+//# sourceMappingURL=header.js.map

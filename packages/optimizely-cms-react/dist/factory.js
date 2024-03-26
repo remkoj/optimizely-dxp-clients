@@ -62,3 +62,4 @@ export const setFactory = (newFactory) => {
     _static.factory = newFactory;
 };
 export default getFactory();
+//# sourceMappingURL=factory.js.map

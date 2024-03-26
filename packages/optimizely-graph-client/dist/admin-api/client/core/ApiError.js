@@ -1,9 +1,4 @@
 export class ApiError extends Error {
-    url;
-    status;
-    statusText;
-    body;
-    request;
     constructor(request, response, message) {
         super(message);
         this.name = 'ApiError';
@@ -14,3 +9,4 @@ export class ApiError extends Error {
         this.request = request;
     }
 }
+//# sourceMappingURL=ApiError.js.map

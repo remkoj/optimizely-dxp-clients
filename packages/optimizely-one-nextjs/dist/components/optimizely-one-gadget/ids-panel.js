@@ -20,3 +20,4 @@ export const IdsPanel = ({ servicePrefix = '/api/me', refreshInterval = 2000 }) 
     return _jsx(_Fragment, { children: _jsxs("dl", { className: 'oo-text-[14px]', children: [_jsx("dt", { className: 'oo-font-bold', children: "Frontend:" }), _jsx("dd", { children: profile?.ids.frontend ?? 'n/a' }), _jsx("dt", { className: 'oo-font-bold oo-pt-1', children: "Web Experimentation:" }), _jsx("dd", { children: profile?.ids.webExperimentation ?? 'n/a' }), _jsx("dt", { className: 'oo-font-bold oo-pt-1', children: "Content Intelligence:" }), _jsx("dd", { children: profile?.ids.contentIntelligence ?? 'n/a' }), _jsx("dt", { className: 'oo-font-bold oo-pt-1', children: "Data Platform:" }), _jsx("dd", { children: profile?.ids.dataPlatform ?? 'n/a' }), _jsx("dt", { className: 'oo-font-bold oo-pt-1', children: "Current path:" }), _jsx("dd", { children: currentPath })] }) });
 };
 export default IdsPanel;
+//# sourceMappingURL=ids-panel.js.map

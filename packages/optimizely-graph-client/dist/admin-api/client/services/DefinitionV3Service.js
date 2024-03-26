@@ -1,5 +1,4 @@
 export class DefinitionV3Service {
-    httpRequest;
     constructor(httpRequest) {
         this.httpRequest = httpRequest;
     }
@@ -95,3 +94,4 @@ export class DefinitionV3Service {
         });
     }
 }
+//# sourceMappingURL=DefinitionV3Service.js.map

@@ -16,3 +16,4 @@ export function isDevelopment() {
     }
 }
 export default isDebug;
+//# sourceMappingURL=is-debug.js.map

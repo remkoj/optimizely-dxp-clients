@@ -1,11 +1,10 @@
 import 'server-only'
 import type { Metadata, ResolvingMetadata } from 'next'
-import React from 'react'
 import deepmerge from 'deepmerge'
 import { notFound } from 'next/navigation'
 import { RouteResolver, type ClientFactory, type ChannelDefinition } from '@remkoj/optimizely-graph-client'
-import { CmsContent, isDebug, getServerContext, type ComponentFactory } from '@remkoj/optimizely-dxp-react/rsc'
-import { Utils } from '@remkoj/optimizely-dxp-react'
+import { CmsContent, isDebug, getServerContext, type ComponentFactory } from '@remkoj/optimizely-cms-react/rsc'
+import { Utils } from '@remkoj/optimizely-cms-react'
 
 import { MetaDataResolver } from '../metadata'
 import { urlToPath, localeToGraphLocale } from './utils'

@@ -1,9 +1,4 @@
 export class ChannelDefinition {
-    id;
-    name;
-    domains;
-    locales;
-    content;
     get isDev() {
         try {
             return process.env.NODE_ENV == 'development';
@@ -19,7 +14,6 @@ export class ChannelDefinition {
         const primaryDomain = this.isDev ? this.domains.filter(x => x.name.includes("localhost"))[0] : this.domains.filter(x => x.isPrimary)[0];
         return primaryDomain?.name ?? "localhost:3000";
     }
-    dxp_url;
     get editDomain() {
         const editDomain = this.domains.filter(x => x.isEdit)[0];
         return editDomain?.name;
@@ -128,3 +122,4 @@ export class ChannelDefinition {
     }
 }
 export default ChannelDefinition;
+//# sourceMappingURL=definition.js.map

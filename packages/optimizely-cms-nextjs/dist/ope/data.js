@@ -25,3 +25,4 @@ const gqlQuery = gql `query getContentByIdBase($id: Int, $workId: Int, $guidValu
         }
     }
 }`;
+//# sourceMappingURL=data.js.map

@@ -39,3 +39,4 @@ export function createOptimizelyOneApi(config) {
     }
     return handler;
 }
+//# sourceMappingURL=index.js.map

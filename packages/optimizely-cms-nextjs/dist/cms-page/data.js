@@ -40,3 +40,4 @@ const metadataQuery = gql `query getGenericMetaData($path: String!, $locale: [Lo
         }
     }
 }`;
+//# sourceMappingURL=data.js.map

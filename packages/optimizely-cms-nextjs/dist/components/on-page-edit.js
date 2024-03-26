@@ -1,5 +1,6 @@
 'use client';
-import React, { useState, useEffect } from 'react';
+import { jsx as _jsx, Fragment as _Fragment } from "react/jsx-runtime";
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 const DEV = process.env.NODE_ENV == 'development';
 export const OnPageEdit = ({ mode, children, className, timeout }) => {
@@ -70,7 +71,7 @@ export const OnPageEdit = ({ mode, children, className, timeout }) => {
             handlerEnabled = false;
         };
     }, [optiCmsReady, router, timeout]);
-    return React.createElement(React.Fragment, null, showMask && React.createElement("div", { className: `loading-mask ${className}`.trimEnd() }, children));
+    return _jsx(_Fragment, { children: showMask && _jsx("div", { className: `loading-mask ${className}`.trimEnd(), children: children }) });
 };
 function tryGetCms() {
     try {
@@ -81,3 +82,4 @@ function tryGetCms() {
     }
 }
 export default OnPageEdit;
+//# sourceMappingURL=on-page-edit.js.map

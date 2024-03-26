@@ -1,10 +1,10 @@
+import { jsx as _jsx } from "react/jsx-runtime";
 import 'server-only';
-import React from 'react';
 import deepmerge from 'deepmerge';
 import { notFound } from 'next/navigation';
 import { RouteResolver } from '@remkoj/optimizely-graph-client';
-import { CmsContent, isDebug, getServerContext } from '@remkoj/optimizely-dxp-react/rsc';
-import { Utils } from '@remkoj/optimizely-dxp-react';
+import { CmsContent, isDebug, getServerContext } from '@remkoj/optimizely-cms-react/rsc';
+import { Utils } from '@remkoj/optimizely-cms-react';
 import { MetaDataResolver } from '../metadata';
 import { urlToPath, localeToGraphLocale } from './utils';
 import getContentByPathBase from './data';
@@ -95,7 +95,7 @@ export function createPage(factory, channel, options) {
                 return notFound();
             }
             // Render the content link
-            return React.createElement(CmsContent, { contentType: contentType, contentLink: contentLink, fragmentData: info });
+            return _jsx(CmsContent, { contentType: contentType, contentLink: contentLink, fragmentData: info });
         }
     };
     return pageDefintion;
@@ -105,3 +105,4 @@ function buildRequestPath({ lang, path }) {
         `/${lang ?? ""}/${path?.join("/") ?? ""}` :
         `/${lang ?? ""}`;
 }
+//# sourceMappingURL=page.js.map

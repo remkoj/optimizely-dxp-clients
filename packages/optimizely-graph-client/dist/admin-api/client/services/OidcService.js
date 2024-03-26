@@ -1,5 +1,4 @@
 export class OidcService {
-    httpRequest;
     constructor(httpRequest) {
         this.httpRequest = httpRequest;
     }
@@ -31,3 +30,4 @@ export class OidcService {
         });
     }
 }
+//# sourceMappingURL=OidcService.js.map

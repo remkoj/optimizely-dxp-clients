@@ -1,7 +1,7 @@
 import 'server-only'
 import React from 'react'
 import createClient, { type IOptiGraphClient } from '@remkoj/optimizely-graph-client'
-import { isDebug } from '@remkoj/optimizely-dxp-react/rsc'
+import { isDebug } from '@remkoj/optimizely-cms-react/rsc'
 
 export const getServerClient : () => IOptiGraphClient = React.cache(() => {
     if (isDebug())

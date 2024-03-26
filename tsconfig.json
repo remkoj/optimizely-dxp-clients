@@ -24,7 +24,7 @@
         "allowUmdGlobalAccess": false,
         "allowSyntheticDefaultImports": true,
         "importHelpers": false,
-        "removeComments": true,
+        "removeComments": false,
         //"resolvePackageJsonImports": true,
         //"resolvePackageJsonExports": true,
     },

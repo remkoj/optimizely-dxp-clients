@@ -20,3 +20,4 @@ export const InterestsPanel = ({ servicePrefix = '/api/me', refreshInterval = 20
     return _jsxs(_Fragment, { children: [(isValidating && !isLoading) && _jsxs("p", { className: 'oo-text-[14px] oo-m-2 md:oo-m-4 oo-rounded-md oo-bg-amber-200 oo-border oo-border-amber-800 oo-text-amber-800 oo-p-1 md:oo-p-2', children: [_jsx(ArrowPathIcon, { className: 'oo-inline-block oo-h-4 oo-w-4 oo-ml-2 oo-animate-spin' }), " Refreshing interests"] }), isLoading && _jsxs("p", { className: 'oo-m-2 md:oo-m-4 oo-rounded-md oo-bg-amber-200 oo-border oo-border-amber-800 oo-text-amber-800 oo-p-1 md:oo-p-2', children: [_jsx(ArrowPathIcon, { className: 'oo-inline-block oo-h-4 oo-w-4 oo-mr-2 oo-animate-spin' }), " Loading interests"] }), _jsx("ul", { className: 'oo-text-[14px] oo-grid oo-grid-cols-1 oo-divide-y oo-divide-slate-200', children: contentTopics })] });
 };
 export default InterestsPanel;
+//# sourceMappingURL=interests-panel.js.map

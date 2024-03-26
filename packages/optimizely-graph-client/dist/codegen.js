@@ -15,3 +15,4 @@ export function getGraphQLCodegenSchema(config) {
     return schemaInfo;
 }
 export default getGraphQLCodegenSchema;
+//# sourceMappingURL=codegen.js.map

@@ -2,7 +2,6 @@ import createClient, { isContentGraphClient } from '../../client/index.js';
 import ChannelDefinition from './definition.js';
 import * as Queries from './queries.js';
 export class ChannelRepository {
-    client;
     constructor(clientOrConfig) {
         this.client = isContentGraphClient(clientOrConfig) ? clientOrConfig : createClient(clientOrConfig);
     }
@@ -73,3 +72,4 @@ export class ChannelRepository {
     }
 }
 export default ChannelRepository;
+//# sourceMappingURL=repository.js.map

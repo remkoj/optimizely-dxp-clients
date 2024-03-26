@@ -1,5 +1,4 @@
 export class QueryGraphQlService {
-    httpRequest;
     constructor(httpRequest) {
         this.httpRequest = httpRequest;
     }
@@ -41,3 +40,4 @@ export class QueryGraphQlService {
         });
     }
 }
+//# sourceMappingURL=QueryGraphQlService.js.map

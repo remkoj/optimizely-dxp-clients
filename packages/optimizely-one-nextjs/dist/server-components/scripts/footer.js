@@ -8,3 +8,4 @@ export default function (props) {
     const crecs_delivery = props.contentRecsDelivery || EnvTools.readValueAsInt(EnvVars.ContentRecsDelivery);
     return _jsx(_Fragment, { children: crecs_client && crecs_delivery && _jsx(CRecsScript, { client: crecs_client, delivery: crecs_delivery }) });
 }
+//# sourceMappingURL=footer.js.map

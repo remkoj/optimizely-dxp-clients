@@ -56,3 +56,4 @@ export class DataPlatformService {
     _contentIntelligenceId = undefined;
 }
 export default DataPlatformService;
+//# sourceMappingURL=client.js.map
