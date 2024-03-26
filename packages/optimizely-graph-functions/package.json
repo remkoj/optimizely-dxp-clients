@@ -54,7 +54,8 @@
     "@graphql-codegen/add": "*",
     "@graphql-codegen/client-preset": "*",
     "@remkoj/optimizely-graph-client": "*",
-    "graphql": "*"
+    "graphql": "*",
+    "tslib": "*"
   },
   "stableVersion": "1.0.0-pre1.0"
 }

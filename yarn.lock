@@ -1215,6 +1215,7 @@ __metadata:
     "@graphql-codegen/client-preset": "*"
     "@remkoj/optimizely-graph-client": "*"
     graphql: "*"
+    tslib: "*"
   languageName: unknown
   linkType: soft
 
