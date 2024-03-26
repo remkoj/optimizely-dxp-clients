@@ -46,8 +46,8 @@
   },
   "scripts": {
     "clean": "tsc --clean",
-    "build": "tsc --build",
-    "rebuild": "tsc --build --clean && tsc --build --force",
+    "compile": "tsc --build",
+    "recompile": "tsc --build --clean && tsc --build --force",
     "watch": "tsc --watch"
   },
   "peerDependencies": {

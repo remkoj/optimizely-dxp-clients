@@ -21,10 +21,10 @@
     "vscode": "^1.22.0"
   },
   "scripts": {
-    "build": "yarn workspaces foreach -Wt --exclude optimizely-dxp-clients run build",
-    "rebuild": "yarn workspaces foreach -Wt --exclude optimizely-dxp-clients run rebuild",
+    "compile": "yarn workspaces foreach -Wt --exclude optimizely-dxp-clients run compile",
+    "recompile": "yarn workspaces foreach -Wt --exclude optimizely-dxp-clients run recompile",
     "watch": "yarn workspaces foreach -Apt --exclude optimizely-dxp-clients run watch",
-    "pack": "yarn install && yarn run build && yarn workspaces foreach -Wt --exclude optimizely-dxp-clients pack --install-if-needed --out ../../artefacts/%s-%v.tgz",
+    "artefacts": "yarn install && yarn run compile && yarn workspaces foreach -Wt --exclude optimizely-dxp-clients pack --install-if-needed --out ../../artefacts/%s-%v.tgz && yarn workspaces foreach -Wt --exclude optimizely-dxp-clients pack --install-if-needed --out ../../artefacts/%s-dev.tgz",
     "update-sdks": "yarn sdks vscode",
     "update-deps": "yarn upgrade-interactive && yarn dedupe && yarn sdks vscode",
     "update-yarn": "yarn set version --yarn-path --only-if-needed stable && yarn install && yarn dedupe && yarn sdks vscode",

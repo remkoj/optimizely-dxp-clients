@@ -71,10 +71,10 @@
   },
   "scripts": {
     "clean": "tsc --build --clean",
-    "build": "tsc --build && tailwindcss -i ./src/styles.css -o ./dist/styles.css --minify",
+    "compile": "tsc --build && tailwindcss -i ./src/styles.css -o ./dist/styles.css --minify",
     "watch": "tsc --watch",
     "watch-styles": "tailwindcss -i ./src/styles.css -o ./dist/styles.css --minify --watch",
-    "rebuild": "tsc --build --clean && tsc --build --force"
+    "recompile": "tsc --build --clean && tsc --build --force"
   },
   "stableVersion": "1.0.0-pre1.0"
 }
