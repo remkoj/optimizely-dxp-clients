@@ -1,0 +1,1 @@
+{"version":3,"file":"index.js","sourceRoot":"","sources":["../../../src/products/data-platform/index.ts"],"names":[],"mappings":"AAAA,OAAO,EAAE,kBAAkB,IAAI,MAAM,EAA0B,MAAM,OAAO,CAAA;AAC5E,OAAO,KAAK,KAAK,MAAM,WAAW,CAAA;AAClC,OAAO,EAAE,kBAAkB,IAAI,MAAM,EAAE,iBAAiB,EAAE,MAAM,OAAO,CAAA;AACvE,OAAO,KAAK,KAAK,MAAM,WAAW,CAAA;AAElC,eAAe;IACX,MAAM;IACN,KAAK;IACL,iBAAiB;CACpB,CAAA"}

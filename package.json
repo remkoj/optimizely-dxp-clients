@@ -1,0 +1,33 @@
+{
+  "name": "optimizely-dxp-clients",
+  "version": "1.0.0-pre1.1",
+  "description": "Javascript client for Optimizely Products",
+  "repository": "https://github.com/remkoj/optimizely-dxp-clients.git",
+  "author": "Remko Jantzen <693172+remkoj@users.noreply.github.com>",
+  "homepage": "https://github.com/remkoj/optimizely-dxp-clients",
+  "license": "Apache-2.0",
+  "private": true,
+  "devDependencies": {
+    "@yarnpkg/sdks": "^3.1.0",
+    "tslib": "^2.6.2",
+    "typescript": "^5.4.3"
+  },
+  "packageManager": "yarn@4.1.1",
+  "workspaces": [
+    "packages/*"
+  ],
+  "engines": {
+    "node": ">=18.0.0 <21.0.0",
+    "vscode": "^1.22.0"
+  },
+  "scripts": {
+    "build": "yarn workspaces foreach -Wt --exclude optimizely-dxp-clients run build",
+    "rebuild": "yarn workspaces foreach -Wt --exclude optimizely-dxp-clients run rebuild",
+    "watch": "yarn workspaces foreach -Apt --exclude optimizely-dxp-clients run watch",
+    "pack": "yarn install && yarn run build && yarn workspaces foreach -Wt --exclude optimizely-dxp-clients pack --install-if-needed --out ../../artefacts/%s-%v.tgz",
+    "update-sdks": "yarn sdks vscode",
+    "update-deps": "yarn upgrade-interactive && yarn dedupe && yarn sdks vscode",
+    "update-yarn": "yarn set version --yarn-path --only-if-needed stable && yarn install && yarn dedupe && yarn sdks vscode",
+    "update-all": "yarn run update-yarn && yarn run update-deps"
+  }
+}

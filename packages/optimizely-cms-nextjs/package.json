@@ -1,0 +1,50 @@
+{
+  "name": "@remkoj/optimizely-cms-nextjs",
+  "license": "Apache-2.0",
+  "version": "1.0.0-pre1.1",
+  "packageManager": "yarn@4.1.1",
+  "private": true,
+  "repository": "https://github.com/remkoj/optimizely-dxp-clients.git",
+  "author": "Remko Jantzen <693172+remkoj@users.noreply.github.com>",
+  "homepage": "https://github.com/remkoj/optimizely-dxp-clients",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "files": [
+    "./dist"
+  ],
+  "devDependencies": {
+    "@remkoj/optimizely-cms-react": "workspace:*",
+    "@remkoj/optimizely-graph-client": "workspace:*",
+    "@types/node": "^20.11.30",
+    "@types/react": "^18.2.71",
+    "@types/react-dom": "18.2.22",
+    "deepmerge": "^4.3.1",
+    "graphql": "^16.8.1",
+    "graphql-request": "^6.1.0",
+    "next": "^14.1.4",
+    "next-auth": "^4.24.7",
+    "prop-types": "^15.8.1",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "scheduler": "^0.23.0",
+    "typescript": "^5.4.3"
+  },
+  "peerDependencies": {
+    "@remkoj/optimizely-cms-react": "1.0.0-pre1.1",
+    "@remkoj/optimizely-graph-client": "1.0.0-pre1.1",
+    "deepmerge": "*",
+    "graphql": "*",
+    "graphql-request": "*",
+    "next": "*",
+    "next-auth": "*",
+    "react": "*"
+  },
+  "scripts": {
+    "clean": "tsc --build --clean",
+    "build": "tsc --build",
+    "watch": "tsc --watch",
+    "rebuild": "tsc --build --clean && tsc --build --force"
+  },
+  "stableVersion": "1.0.0-pre1.0"
+}
