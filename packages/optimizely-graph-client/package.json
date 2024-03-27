@@ -1,9 +1,9 @@
 {
   "name": "@remkoj/optimizely-graph-client",
   "license": "Apache-2.0",
-  "version": "1.0.0-pre1.1",
+  "version": "1.0.1",
   "packageManager": "yarn@4.1.1",
-  "private": true,
+  "private": false,
   "repository": "https://github.com/remkoj/optimizely-dxp-clients.git",
   "author": "Remko Jantzen <693172+remkoj@users.noreply.github.com>",
   "homepage": "https://github.com/remkoj/optimizely-dxp-clients",
@@ -65,10 +65,9 @@
   "scripts": {
     "clean": "tsc --build --clean",
     "compile-ts": "tsc --build",
-    "compile": "openapi --input https://cg.optimizely.com/app/swagger/swagger.json --output ./src/admin-api/client --name OptimizelyGraphAdminApi && node ./build/update-imports.cjs && tsc --build",
+    "prepare": "openapi --input https://cg.optimizely.com/app/swagger/swagger.json --output ./src/admin-api/client --name OptimizelyGraphAdminApi && node ./build/update-imports.cjs && tsc --build",
     "watch": "tsc --watch",
     "recompile": "tsc --build --clean && tsc --build --force",
     "generate-admin": "openapi --input https://cg.optimizely.com/app/swagger/swagger.json --output ./src/admin-api/client --name OptimizelyGraphAdminApi && node ./build/update-imports.cjs"
-  },
-  "stableVersion": "1.0.0-pre1.0"
+  }
 }

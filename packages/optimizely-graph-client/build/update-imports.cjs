@@ -101,7 +101,7 @@ function processFile(filePath, basePath)
                     if (err)
                         reject(err)
                     else {
-                        console.log(`⚡ Updated ${ importCounter } imports in ${ path.relative(basePath, filePath) }`)
+                        //console.log(`⚡ Updated ${ importCounter } imports in ${ path.relative(basePath, filePath) }`)
                         resolve(true)
                     }
                 })

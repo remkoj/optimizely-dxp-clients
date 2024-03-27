@@ -1,6 +1,6 @@
 {
   "name": "optimizely-dxp-clients",
-  "version": "1.0.0-pre1.1",
+  "version": "1.0.1",
   "description": "Javascript client for Optimizely Products",
   "repository": "https://github.com/remkoj/optimizely-dxp-clients.git",
   "author": "Remko Jantzen <693172+remkoj@users.noreply.github.com>",
@@ -21,13 +21,16 @@
     "vscode": "^1.22.0"
   },
   "scripts": {
-    "compile": "yarn workspaces foreach -Wt --exclude optimizely-dxp-clients run compile",
+    "prepare": "yarn workspaces foreach -Wt --exclude optimizely-dxp-clients run prepare",
     "recompile": "yarn workspaces foreach -Wt --exclude optimizely-dxp-clients run recompile",
     "watch": "yarn workspaces foreach -Apt --exclude optimizely-dxp-clients run watch",
-    "artefacts": "yarn install && yarn run compile && yarn workspaces foreach -Wt --exclude optimizely-dxp-clients pack --install-if-needed --out ../../artefacts/%s-%v.tgz && yarn workspaces foreach -Wt --exclude optimizely-dxp-clients pack --install-if-needed --out ../../artefacts/%s-dev.tgz",
+    "artefacts": "yarn run prepare && yarn workspaces foreach -Wt --exclude optimizely-dxp-clients pack --install-if-needed --out ../../artefacts/%s-%v.tgz && yarn workspaces foreach -Wt --exclude optimizely-dxp-clients pack --install-if-needed --out ../../artefacts/%s-dev.tgz",
+    "version-bump-patch": "yarn workspaces foreach -A version -d patch",
+    "version-apply": "yarn workspaces foreach -A version apply",
+    "versions": "yarn workspaces foreach -A version",
     "update-sdks": "yarn sdks vscode",
     "update-deps": "yarn upgrade-interactive && yarn dedupe && yarn sdks vscode",
-    "update-yarn": "yarn set version --yarn-path --only-if-needed stable && yarn install && yarn dedupe && yarn sdks vscode",
+    "update-yarn": "yarn set version stable && yarn install && yarn dedupe && yarn sdks vscode",
     "update-all": "yarn run update-yarn && yarn run update-deps"
   }
 }

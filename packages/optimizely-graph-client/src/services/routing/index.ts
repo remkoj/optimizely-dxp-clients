@@ -198,17 +198,14 @@ export namespace GetAllRoutes {
   {
     Content(
         where: {
-        _and: {
-            RelativePath: {
-            exist: true
-            },
-            ContentType: {
-            in: $typeFilter
+            _and: {
+                _and: {
+                    RelativePath: { exist: true }
+                    ContentType: { in: $typeFilter }
+                    SiteId: { eq: $siteId }
+                }
+                RelativePath: { notIn: [""] }
             }
-            SiteId: {
-            eq: $siteId
-            }
-        }
         },
         limit: $pageSize,
         cursor: $cursor

@@ -1,8 +1,8 @@
 {
   "name": "@remkoj/optimizely-graph-functions",
-  "private": true,
+  "private": false,
   "license": "Apache-2.0",
-  "version": "1.0.0-pre1.1",
+  "version": "1.0.1",
   "packageManager": "yarn@4.1.1",
   "repository": "https://github.com/remkoj/optimizely-dxp-clients.git",
   "author": "Remko Jantzen <693172+remkoj@users.noreply.github.com>",
@@ -46,16 +46,17 @@
   },
   "scripts": {
     "clean": "tsc --clean",
-    "compile": "tsc --build",
+    "prepare": "tsc --build",
     "recompile": "tsc --build --clean && tsc --build --force",
     "watch": "tsc --watch"
   },
   "peerDependencies": {
     "@graphql-codegen/add": "*",
     "@graphql-codegen/client-preset": "*",
-    "@remkoj/optimizely-graph-client": "*",
     "graphql": "*",
     "tslib": "*"
   },
-  "stableVersion": "1.0.0-pre1.0"
+  "optionalDependencies": {
+    "@remkoj/optimizely-graph-client": "1.0.1"
+  }
 }

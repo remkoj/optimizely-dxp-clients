@@ -39,7 +39,7 @@ const RAW_RUNTIME_STATE =
   "fallbackExclusionList": [\
     ["@remkoj/optimizely-cms-nextjs", ["workspace:packages/optimizely-cms-nextjs"]],\
     ["@remkoj/optimizely-cms-react", ["virtual:9d69b74c5ef6ebbaca6fb4ae785083005c413902a1864016f238e79a061f848c3d6a5e39a36222efccf63ff92e97827c97938dc278a35e08b70f27685759c476#workspace:packages/optimizely-cms-react", "workspace:packages/optimizely-cms-react"]],\
-    ["@remkoj/optimizely-graph-client", ["virtual:8a4838f63e146ccb2001a13e2dcfa2ab4bd62ee10854b88886491cbe294f9313aa736ed1d9555812b77aa5e5ad7ed541e2aab42df6d4860f9249dc4c583ca6a8#workspace:packages/optimizely-graph-client", "virtual:9d69b74c5ef6ebbaca6fb4ae785083005c413902a1864016f238e79a061f848c3d6a5e39a36222efccf63ff92e97827c97938dc278a35e08b70f27685759c476#workspace:packages/optimizely-graph-client", "workspace:packages/optimizely-graph-client"]],\
+    ["@remkoj/optimizely-graph-client", ["virtual:9d69b74c5ef6ebbaca6fb4ae785083005c413902a1864016f238e79a061f848c3d6a5e39a36222efccf63ff92e97827c97938dc278a35e08b70f27685759c476#workspace:packages/optimizely-graph-client", "virtual:e938d9c5c867a1b3b2bc9bdb2076cb68c8a7dae22e1c057c544652ce4ad5f88063c87b3b1b3cf0adcbc46870dde32ceddc0963ec4978653e6bfb09f701413688#workspace:packages/optimizely-graph-client", "workspace:packages/optimizely-graph-client"]],\
     ["@remkoj/optimizely-graph-functions", ["workspace:packages/optimizely-graph-functions"]],\
     ["@remkoj/optimizely-one-nextjs", ["workspace:packages/optimizely-one-nextjs"]],\
     ["optimizely-dxp-clients", ["workspace:."]]\
@@ -1912,26 +1912,6 @@ const RAW_RUNTIME_STATE =
       }]\
     ]],\
     ["@remkoj/optimizely-graph-client", [\
-      ["virtual:8a4838f63e146ccb2001a13e2dcfa2ab4bd62ee10854b88886491cbe294f9313aa736ed1d9555812b77aa5e5ad7ed541e2aab42df6d4860f9249dc4c583ca6a8#workspace:packages/optimizely-graph-client", {\
-        "packageLocation": "./.yarn/__virtual__/@remkoj-optimizely-graph-client-virtual-f1903bb4b0/1/packages/optimizely-graph-client/",\
-        "packageDependencies": [\
-          ["@remkoj/optimizely-graph-client", "virtual:8a4838f63e146ccb2001a13e2dcfa2ab4bd62ee10854b88886491cbe294f9313aa736ed1d9555812b77aa5e5ad7ed541e2aab42df6d4860f9249dc4c583ca6a8#workspace:packages/optimizely-graph-client"],\
-          ["@types/crypto-js", "npm:4.2.2"],\
-          ["@types/graphql-request", null],\
-          ["@types/node", "npm:20.11.30"],\
-          ["crypto-js", "npm:4.2.0"],\
-          ["graphql", "npm:16.8.1"],\
-          ["graphql-request", "virtual:9d69b74c5ef6ebbaca6fb4ae785083005c413902a1864016f238e79a061f848c3d6a5e39a36222efccf63ff92e97827c97938dc278a35e08b70f27685759c476#npm:6.1.0"],\
-          ["openapi-typescript-codegen", "npm:0.28.0"],\
-          ["prop-types", "npm:15.8.1"],\
-          ["scheduler", "npm:0.23.0"],\
-          ["typescript", "patch:typescript@npm%3A5.4.3#optional!builtin<compat/typescript>::version=5.4.3&hash=5adc0c"]\
-        ],\
-        "packagePeers": [\
-          "@types/graphql-request"\
-        ],\
-        "linkType": "SOFT"\
-      }],\
       ["virtual:9d69b74c5ef6ebbaca6fb4ae785083005c413902a1864016f238e79a061f848c3d6a5e39a36222efccf63ff92e97827c97938dc278a35e08b70f27685759c476#workspace:packages/optimizely-graph-client", {\
         "packageLocation": "./.yarn/__virtual__/@remkoj-optimizely-graph-client-virtual-c8cd3e4b03/1/packages/optimizely-graph-client/",\
         "packageDependencies": [\
@@ -1950,6 +1930,26 @@ const RAW_RUNTIME_STATE =
         "packagePeers": [\
           "@types/graphql-request",\
           "graphql-request"\
+        ],\
+        "linkType": "SOFT"\
+      }],\
+      ["virtual:e938d9c5c867a1b3b2bc9bdb2076cb68c8a7dae22e1c057c544652ce4ad5f88063c87b3b1b3cf0adcbc46870dde32ceddc0963ec4978653e6bfb09f701413688#workspace:packages/optimizely-graph-client", {\
+        "packageLocation": "./.yarn/__virtual__/@remkoj-optimizely-graph-client-virtual-16e50640b5/1/packages/optimizely-graph-client/",\
+        "packageDependencies": [\
+          ["@remkoj/optimizely-graph-client", "virtual:e938d9c5c867a1b3b2bc9bdb2076cb68c8a7dae22e1c057c544652ce4ad5f88063c87b3b1b3cf0adcbc46870dde32ceddc0963ec4978653e6bfb09f701413688#workspace:packages/optimizely-graph-client"],\
+          ["@types/crypto-js", "npm:4.2.2"],\
+          ["@types/graphql-request", null],\
+          ["@types/node", "npm:20.11.30"],\
+          ["crypto-js", "npm:4.2.0"],\
+          ["graphql", "npm:16.8.1"],\
+          ["graphql-request", "virtual:9d69b74c5ef6ebbaca6fb4ae785083005c413902a1864016f238e79a061f848c3d6a5e39a36222efccf63ff92e97827c97938dc278a35e08b70f27685759c476#npm:6.1.0"],\
+          ["openapi-typescript-codegen", "npm:0.28.0"],\
+          ["prop-types", "npm:15.8.1"],\
+          ["scheduler", "npm:0.23.0"],\
+          ["typescript", "patch:typescript@npm%3A5.4.3#optional!builtin<compat/typescript>::version=5.4.3&hash=5adc0c"]\
+        ],\
+        "packagePeers": [\
+          "@types/graphql-request"\
         ],\
         "linkType": "SOFT"\
       }],\
@@ -1978,6 +1978,7 @@ const RAW_RUNTIME_STATE =
           ["@graphql-codegen/add", "virtual:e938d9c5c867a1b3b2bc9bdb2076cb68c8a7dae22e1c057c544652ce4ad5f88063c87b3b1b3cf0adcbc46870dde32ceddc0963ec4978653e6bfb09f701413688#npm:5.0.2"],\
           ["@graphql-codegen/client-preset", "virtual:e938d9c5c867a1b3b2bc9bdb2076cb68c8a7dae22e1c057c544652ce4ad5f88063c87b3b1b3cf0adcbc46870dde32ceddc0963ec4978653e6bfb09f701413688#npm:4.2.4"],\
           ["@graphql-codegen/plugin-helpers", "virtual:e938d9c5c867a1b3b2bc9bdb2076cb68c8a7dae22e1c057c544652ce4ad5f88063c87b3b1b3cf0adcbc46870dde32ceddc0963ec4978653e6bfb09f701413688#npm:5.0.3"],\
+          ["@remkoj/optimizely-graph-client", "virtual:e938d9c5c867a1b3b2bc9bdb2076cb68c8a7dae22e1c057c544652ce4ad5f88063c87b3b1b3cf0adcbc46870dde32ceddc0963ec4978653e6bfb09f701413688#workspace:packages/optimizely-graph-client"],\
           ["@types/node", "npm:20.11.30"],\
           ["graphql", "npm:16.8.1"],\
           ["tslib", "npm:2.6.2"],\
@@ -1994,7 +1995,7 @@ const RAW_RUNTIME_STATE =
           ["@headlessui/react", "virtual:8a4838f63e146ccb2001a13e2dcfa2ab4bd62ee10854b88886491cbe294f9313aa736ed1d9555812b77aa5e5ad7ed541e2aab42df6d4860f9249dc4c583ca6a8#npm:1.7.18"],\
           ["@headlessui/tailwindcss", "virtual:8a4838f63e146ccb2001a13e2dcfa2ab4bd62ee10854b88886491cbe294f9313aa736ed1d9555812b77aa5e5ad7ed541e2aab42df6d4860f9249dc4c583ca6a8#npm:0.2.0"],\
           ["@heroicons/react", "virtual:8a4838f63e146ccb2001a13e2dcfa2ab4bd62ee10854b88886491cbe294f9313aa736ed1d9555812b77aa5e5ad7ed541e2aab42df6d4860f9249dc4c583ca6a8#npm:2.1.3"],\
-          ["@remkoj/optimizely-graph-client", "virtual:8a4838f63e146ccb2001a13e2dcfa2ab4bd62ee10854b88886491cbe294f9313aa736ed1d9555812b77aa5e5ad7ed541e2aab42df6d4860f9249dc4c583ca6a8#workspace:packages/optimizely-graph-client"],\
+          ["@remkoj/optimizely-graph-client", "virtual:e938d9c5c867a1b3b2bc9bdb2076cb68c8a7dae22e1c057c544652ce4ad5f88063c87b3b1b3cf0adcbc46870dde32ceddc0963ec4978653e6bfb09f701413688#workspace:packages/optimizely-graph-client"],\
           ["@types/node", "npm:20.11.30"],\
           ["@types/react", "npm:18.2.71"],\
           ["@types/react-dom", "npm:18.2.22"],\
