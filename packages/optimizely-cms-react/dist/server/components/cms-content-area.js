@@ -40,8 +40,8 @@ export const CmsContentArea = async ({ items, classMapper, className, fieldName,
         // Read element wrapper configuration
         const { as: contentItemElement, className: contentItemBaseClassName, itemsProperty: contentItemTarget, ...contentItemElementProps } = itemWrapper ?? {};
         // Generate element wrapper properties
+        const contentAreaItemContainerKey = `ContentAreaItem-${idx}-${contentLink.guidValue}-${contentLink.id}-${contentLink.workId}`;
         const contentAreaItemContainerProps = {
-            key: `ContentAreaItem-${idx}-${contentLink.guidValue}-${contentLink.id}-${contentLink.workId}`,
             className: `opti-content-area-item opti-content-area-item-${idx}${contentItemBaseClassName ? ' ' + contentItemBaseClassName : ''} ${classMapper ? classMapper(item.displayOption ?? 'default', contentType ?? null, idx) : ""}`,
             "data-epi-block-id": inEditMode && fieldName ? contentLink?.id || undefined : undefined,
             "data-displayoption": item.displayOption || undefined,
@@ -57,7 +57,7 @@ export const CmsContentArea = async ({ items, classMapper, className, fieldName,
         else
             contentAreaItemContainerProps[childrenTarget] = contentAraeItemContent;
         const ContentAreaItemContainer = contentItemElement || "div";
-        return _jsx(ContentAreaItemContainer, { ...contentAreaItemContainerProps, children: contentAreaItemContainerChildren });
+        return _jsx(ContentAreaItemContainer, { ...contentAreaItemContainerProps, children: contentAreaItemContainerChildren }, contentAreaItemContainerKey);
     }));
     // Build container element
     const contentAreaContainerProps = {

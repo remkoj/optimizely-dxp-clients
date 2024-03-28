@@ -57,8 +57,8 @@ export const CmsContentArea = async <T extends ElementType = "div", I extends El
         } = itemWrapper ?? {}
 
         // Generate element wrapper properties
+        const contentAreaItemContainerKey = `ContentAreaItem-${idx}-${contentLink.guidValue}-${contentLink.id}-${contentLink.workId}`
         const contentAreaItemContainerProps : any = {
-            key: `ContentAreaItem-${idx}-${contentLink.guidValue}-${contentLink.id}-${contentLink.workId}`,
             className: `opti-content-area-item opti-content-area-item-${idx}${ contentItemBaseClassName ? ' ' + contentItemBaseClassName : '' } ${classMapper ? classMapper(item.displayOption ?? 'default', contentType ?? null, idx) : ""}`,
             "data-epi-block-id": inEditMode && fieldName ? contentLink?.id || undefined : undefined,
             "data-displayoption": item.displayOption || undefined,
@@ -77,7 +77,7 @@ export const CmsContentArea = async <T extends ElementType = "div", I extends El
 
         const ContentAreaItemContainer = contentItemElement || "div"
 
-        return <ContentAreaItemContainer {...contentAreaItemContainerProps}>{ contentAreaItemContainerChildren }</ContentAreaItemContainer>
+        return <ContentAreaItemContainer key={ contentAreaItemContainerKey } {...contentAreaItemContainerProps}>{ contentAreaItemContainerChildren }</ContentAreaItemContainer>
     }))
 
     // Build container element
