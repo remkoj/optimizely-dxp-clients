@@ -1,5 +1,6 @@
 import type { PropsWithChildren, ComponentType as ReactComponentType } from "react";
-import type { DocumentNode, TypedQueryDocumentNode as TypedDocumentNode } from "graphql";
+import type { DocumentNode } from "graphql";
+import type { TypedDocumentNode } from '@graphql-typed-document-node/core';
 import type { IOptiGraphClient } from "@remkoj/optimizely-graph-client";
 export type ContentType = string[];
 export type ContentLink = {
@@ -24,7 +25,13 @@ export type ContentLinkWithLocale = ContentLink & {
     locale?: string;
 };
 export type CmsComponentProps<T> = PropsWithChildren<{
+    /**
+     * The identifier of the content item
+     */
     contentLink: ContentLinkWithLocale;
+    /**
+     * The data already pre-fetched for the this component
+     */
     data: T;
     /**
      * Use the Server/Client context instead if you need this information
@@ -57,9 +64,27 @@ export type WithGqlQuery<B, T> = B & {
 };
 export type BaseCmsComponent<T = {}> = T extends never | TypedDocumentNode | DocumentNode ? DynamicCmsComponent<T> : ReactComponentType<CmsComponentProps<T>>;
 export type DynamicCmsComponent<T extends TypedDocumentNode | DocumentNode = DocumentNode> = ReactComponentType<CmsComponentProps<ResponseDataType<T>>>;
-export type CmsComponentWithFragment<T = DocumentNode> = WithGqlFragment<BaseCmsComponent<T>, T>;
-export type CmsComponentWithQuery<T = DocumentNode> = WithGqlQuery<BaseCmsComponent<T>, T>;
-export type CmsComponent<T = DocumentNode> = BaseCmsComponent<T> & (T extends never | TypedDocumentNode | DocumentNode ? Partial<WithGqlQuery<{}, T>> : Partial<WithGqlFragment<{}, T>>);
+export type GraphQLFragmentBase = {
+    ' $fragmentName'?: string;
+};
+export type GraphQLQueryBase = {
+    __typename?: 'Query';
+};
+export type CmsComponentWithFragment<T = DocumentNode> = BaseCmsComponent<T> & WithGqlFragment<{}, T>;
+export type CmsComponentWithQuery<T = DocumentNode> = BaseCmsComponent<T> & WithGqlQuery<{}, T>;
+export type CmsComponentWithOptionalQuery<T = DocumentNode> = BaseCmsComponent<T> & Partial<WithGqlQuery<{}, T>>;
+/**
+ * A generic Optimizely CMS Component that will change the static surface based upon the
+ * provided data type for the component. It will detect automatically whether the component
+ * requires a query or fragment to load the data and allows typechecking of the required
+ * getDataFragement / getDataQuery methods are valid.
+ *
+ * When a type is provided that cannot be resolved to either the output of a Query or a Fragment,
+ * it will assume an optional getDataQuery method.
+ */
+export type CmsComponent<T = DocumentNode> = T extends TypedDocumentNode<infer R, any> ? CmsComponentWithQuery<R> : T extends DocumentNode ? CmsComponentWithQuery<{
+    [key: string]: any;
+}> : T extends GraphQLFragmentBase ? CmsComponentWithFragment<T> : T extends GraphQLQueryBase ? CmsComponentWithQuery<T> : CmsComponentWithOptionalQuery<T>;
 import type { createElement } from 'react';
 export type ComponentType = Parameters<typeof createElement>[0];
 export type ComponentTypeHandle = string | string[];
