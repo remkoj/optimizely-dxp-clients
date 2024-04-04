@@ -11,6 +11,16 @@ function pickPluginOptions(options) {
     };
 }
 exports.pickPluginOptions = pickPluginOptions;
+/**
+ * Validate the plugin configuration
+ *
+ * @param schema
+ * @param document
+ * @param config
+ * @param outputFile
+ * @param allPlugins
+ * @param pluginContext
+ */
 const validate = (schema, document, config, outputFile, allPlugins, pluginContext) => {
     if (config.functions) {
         if (!Array.isArray(config.functions))
@@ -20,10 +30,21 @@ const validate = (schema, document, config, outputFile, allPlugins, pluginContex
     }
 };
 exports.validate = validate;
+/**
+ * Actual Plugin logic
+ *
+ * @param schema
+ * @param documents
+ * @param config
+ * @param info
+ * @returns
+ */
 const plugin = async (schema, documents, config, info) => {
+    // Read the functions to fully build & extend
     const functions = config.functions || [];
     if (functions.length == 0)
         return "// NO FUNCTIONS TO BE EXPORTED";
+    // Output the functions
     const docs = (0, graphql_1.concatAST)(documents.map(x => x.document).filter(utils_1.isNotNullOrUndefined));
     const output = functions.map(fn => {
         try {
@@ -59,6 +80,7 @@ const plugin = async (schema, documents, config, info) => {
 };
 exports.plugin = plugin;
 function resolveSpreads(definition, document, availableFragments = []) {
+    // Collect the fragment names we need to add
     const spreadNames = [];
     (0, graphql_1.visit)(definition, {
         "FragmentSpread": {
@@ -68,6 +90,7 @@ function resolveSpreads(definition, document, availableFragments = []) {
             }
         }
     });
+    // Collect these fragments from the document
     const fragments = [];
     (0, graphql_1.visit)(document, {
         FragmentDefinition: {
@@ -77,10 +100,13 @@ function resolveSpreads(definition, document, availableFragments = []) {
             }
         }
     });
+    // Recurse down the fragments to build the full query
     const dependencies = [];
     const availableFragmentNames = [...availableFragments, ...fragments.map(x => x.name.value)];
     fragments.forEach(fragment => {
+        // Set the available names based on what was previously available, loaded above and loaded within this loop
         const resolvedSpreads = [...availableFragmentNames, ...dependencies.map(x => x.name.value)];
+        // Recurse into fragments
         const fragmentDependencies = resolveSpreads(fragment, document, resolvedSpreads);
         dependencies.push(...fragmentDependencies);
     });

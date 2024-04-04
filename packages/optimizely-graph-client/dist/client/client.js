@@ -37,7 +37,8 @@ export class ContentGraphClient extends GraphQLClient {
     get siteInfo() {
         return {
             frontendDomain: this._config.deploy_domain,
-            cmsURL: this._config.dxp_url
+            cmsURL: this._config.dxp_url,
+            publishToken: this._config.publish
         };
     }
     get currentAuthMode() {

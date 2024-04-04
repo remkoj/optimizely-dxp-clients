@@ -12,6 +12,7 @@ export function readEnvironmentVariables() : Types.OptimizelyGraphConfig
         dxp_url: getOptional('OPTIMIZELY_CMS_URL', () => getOptional('DXP_URL')),
         query_log: getBoolean('OPTIMIZELY_GRAPH_QUERY_LOG', () => getBoolean('OPTIMIZELY_CONTENTGRAPH_QUERY_LOG', false)),
         debug: getBoolean('OPTIMIZELY_DEBUG', () => getBoolean('DXP_DEBUG', false)),
+        publish: getOptional('OPTIMIZELY_PUBLISH_TOKEN')
     }
     return config
 }
