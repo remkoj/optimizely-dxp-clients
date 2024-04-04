@@ -14,6 +14,7 @@ export declare enum AuthMode {
 export type OptiGraphSiteInfo = {
     frontendDomain?: string;
     cmsURL?: string;
+    publishToken?: string;
 };
 export type IOptiGraphClientFlags = {
     queryCache: boolean;

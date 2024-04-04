@@ -1,6 +1,6 @@
 {
   "name": "optimizely-dxp-clients",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "Javascript client for Optimizely Products",
   "repository": "https://github.com/remkoj/optimizely-dxp-clients.git",
   "author": "Remko Jantzen <693172+remkoj@users.noreply.github.com>",
@@ -23,7 +23,7 @@
   "scripts": {
     "prepare": "yarn workspaces foreach -Wt --exclude optimizely-dxp-clients run prepare",
     "recompile": "yarn workspaces foreach -Wt --exclude optimizely-dxp-clients run recompile",
-    "watch": "yarn workspaces foreach -Apt --exclude optimizely-dxp-clients run watch",
+    "watch": "yarn workspaces foreach -Api --exclude optimizely-dxp-clients run watch",
     "artefacts": "yarn run prepare && yarn workspaces foreach -Wt --exclude optimizely-dxp-clients pack --install-if-needed --out ../../artefacts/%s-%v.tgz && yarn workspaces foreach -Wt --exclude optimizely-dxp-clients pack --install-if-needed --out ../../artefacts/%s-dev.tgz",
     "version-bump-patch": "yarn workspaces foreach -A version -d patch",
     "version-apply": "yarn workspaces foreach -A version apply",

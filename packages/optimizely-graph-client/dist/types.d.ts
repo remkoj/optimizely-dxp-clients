@@ -31,6 +31,10 @@ export type OptimizelyGraphConfigInternal = {
      * Optimizely Graph AppKey, this value must never leave the server side
      */
     app_key?: string;
+    /**
+     * Publishing token to validate webhooks - if implemented
+     */
+    publish?: string;
 };
 export type OptimizelyGraphConfig = Partial<Omit<OptimizelyGraphConfigInternal, 'single_key'>> & Pick<OptimizelyGraphConfigInternal, 'single_key'>;
 /**
