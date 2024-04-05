@@ -1,7 +1,7 @@
 import { getArgsConfig, getFrontendURL } from '../app.js';
 import createAdminApi, { isApiError } from '@remkoj/optimizely-graph-client/admin';
 export const publishToVercelModule = {
-    command: ['unregister [path]'],
+    command: ['webhook:delete [path]', 'wd [path]', 'unregister [path]'],
     handler: async (args) => {
         const cgConfig = getArgsConfig(args);
         const hookPath = args.path ?? '/';

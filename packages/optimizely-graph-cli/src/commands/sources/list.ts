@@ -1,10 +1,10 @@
-import { getArgsConfig, type CliModule } from '../app.js'
-import createAdminApi, { isApiError } from '@remkoj/optimizely-graph-client/admin'
+import { getArgsConfig, type CliModule } from '../../app.js'
+import createAdminApi, { isApiError, type SourceInfo } from '@remkoj/optimizely-graph-client/admin'
 import chalk from 'chalk'
 import figures from 'figures'
 import Table from 'cli-table3'
 
-type PublishToVercelProps = { }
+type CommandProps = { }
 
 /**
  * An Yargs Command module
@@ -16,8 +16,8 @@ type PublishToVercelProps = { }
  * exports.handler: a function which will be passed the parsed argv.
  * exports.deprecated: a boolean (or string) to show deprecation notice.
  */
-export const publishToVercelModule : CliModule<PublishToVercelProps> = {
-    command: ['webhook:list','wl','list'],
+export const GraphSourceListCommand : CliModule<CommandProps> = {
+    command: ['source:list','sl'],
     handler: async (args) => {
         // Read configuration
         const cgConfig = getArgsConfig(args)
@@ -28,16 +28,17 @@ export const publishToVercelModule : CliModule<PublishToVercelProps> = {
 
         const adminApi = createAdminApi(cgConfig)
         try {
-            const currentHooks = await adminApi.webhooks.listWebhookHandler()
-            const hooks = new Table({
-                head: [chalk.yellow(chalk.bold("ID")),chalk.yellow(chalk.bold("Method")),chalk.yellow(chalk.bold("Url"))],
-                colWidths: [ 38, 8, 100 ]
+            const currentSources = (await adminApi.definitionV3.getContentV3SourceHandler()) as unknown as SourceInfo[]
+            const sources = new Table({
+                head: [chalk.yellow(chalk.bold("ID")),chalk.yellow(chalk.bold("Label")),chalk.yellow(chalk.bold("Languages"))],
+                colWidths: [ 10, 50, 50 ]
             })
 
-            currentHooks.forEach(x => {
-                hooks.push([x.id, x.request.method, x.request.url])
-            })
-            process.stdout.write(hooks.toString()+"\n")
+            for (const sourceDetails of currentSources) {
+                sources.push([sourceDetails.id, sourceDetails.label, sourceDetails.languages.join(', ')])
+            }
+
+            process.stdout.write(sources.toString()+"\n")
             process.stdout.write(chalk.green(chalk.bold(figures.tick+" Done"))+"\n")
         } catch (e) {
             if (isApiError(e)) {
@@ -54,7 +55,5 @@ export const publishToVercelModule : CliModule<PublishToVercelProps> = {
         }
     },
     aliases: [], 
-    describe: "List all webhooks in ContentGraph",
+    describe: "List all content sources in Optimizely Graph",
 }
-
-export default publishToVercelModule
