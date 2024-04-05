@@ -36,15 +36,15 @@ export function createHmacFetch(appKey, secret) {
         const target = url.pathname + url.search;
         const timestamp = new Date().getTime();
         const nonce = Math.random().toString(36).substring(7);
-        const body = isRequest(input) ? (input.body ? (await readStream(input.body)).map(x => new TextDecoder().decode(x)).join("") : "") : String(init?.body);
+        const body = isRequest(input) ? (input.body ? (await readStream(input.body)).map(x => new TextDecoder().decode(x)).join("") : "") : String(init?.body ?? '');
         const body_b64 = md5(String(body || "")).toString(Base64);
         const message = appKey + method + target + timestamp + nonce + body_b64;
         const hmac = hmacSHA256(message, secretBytes);
         const signature = Base64.stringify(hmac);
         const authHeaderValue = `epi-hmac ${appKey}:${timestamp}:${nonce}:${signature}`;
         //#endregion
-        const newRequest = (isRequest(input) ? input.clone() : new Request(input, init));
-        newRequest.headers.set('Authorization', authHeaderValue);
+        const newRequest = (isRequest(input) ? input.clone() : new Request(url, init));
+        newRequest.headers.set('authorization', authHeaderValue);
         return fetch(newRequest);
     };
 }

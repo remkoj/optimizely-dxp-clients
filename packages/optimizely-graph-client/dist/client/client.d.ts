@@ -1,7 +1,7 @@
 import { type OptimizelyGraphConfigInternal, type OptimizelyGraphConfig } from "../config.js";
 import { GraphQLClient } from "graphql-request";
 import { AuthMode, type RequestMethod, type IOptiGraphClient, type OptiGraphSiteInfo, type IOptiGraphClientFlags } from "./types.js";
-import { type FetchAPI } from "./hmac-fetch.js";
+import { type FetchAPI } from "../hmac-fetch.js";
 export declare class ContentGraphClient extends GraphQLClient implements IOptiGraphClient {
     static readonly ForceHmacToken: string;
     static readonly ForceBasicAuth: string;

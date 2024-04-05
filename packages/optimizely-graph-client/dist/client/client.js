@@ -1,7 +1,7 @@
 import { readEnvironmentVariables, applyConfigDefaults, validateConfig } from "../config.js";
 import { GraphQLClient } from "graphql-request";
 import { AuthMode } from "./types.js";
-import createHmacFetch from "./hmac-fetch.js";
+import createHmacFetch from "../hmac-fetch.js";
 import { base64encode, isError, validateToken, getAuthMode } from "./utils.js";
 const defaultFlags = {
     queryCache: true,
