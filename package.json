@@ -1,6 +1,6 @@
 {
   "name": "optimizely-dxp-clients",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "Javascript client for Optimizely Products",
   "repository": "https://github.com/remkoj/optimizely-dxp-clients.git",
   "author": "Remko Jantzen <693172+remkoj@users.noreply.github.com>",
@@ -10,7 +10,7 @@
   "devDependencies": {
     "@yarnpkg/sdks": "^3.1.0",
     "tslib": "^2.6.2",
-    "typescript": "^5.4.3"
+    "typescript": "^5.4.4"
   },
   "packageManager": "yarn@4.1.1",
   "workspaces": [
