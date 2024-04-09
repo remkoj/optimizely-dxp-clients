@@ -6,7 +6,7 @@ import chalk from 'chalk';
 import figures from 'figures';
 const DEFAULT_CONFIG_FILE = "src/site-config.ts";
 export const createSiteConfigModule = {
-    command: ['site-config [file_path]'],
+    command: ['config:create [file_path]', 'cc [file_path]', 'site-config [file_path]'],
     handler: async (args) => {
         const cgConfig = getArgsConfig(args);
         if (!cgConfig.app_key || !cgConfig.secret)

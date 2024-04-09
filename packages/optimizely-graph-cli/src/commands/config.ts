@@ -19,7 +19,7 @@ const DEFAULT_CONFIG_FILE = "src/site-config.ts"
  * exports.deprecated: a boolean (or string) to show deprecation notice.
  */
 export const createSiteConfigModule : CliModule<CreateSiteConfigProps> = {
-    command: ['site-config [file_path]'],
+    command: ['config:create [file_path]','cc [file_path]','site-config [file_path]'],
     handler: async (args) => {
         const cgConfig = getArgsConfig(args)
         if (!cgConfig.app_key || !cgConfig.secret)

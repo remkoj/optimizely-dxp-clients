@@ -83,7 +83,7 @@ function getFrontendURL(config) {
 }
 
 const publishToVercelModule$2 = {
-    command: ['register [path] [verb]'],
+    command: ['webhook:create [path] [verb]', 'wc [path] [verb]', 'register [path] [verb]'],
     handler: async (args) => {
         const cgConfig = getArgsConfig(args);
         const frontendUrl = getFrontendURL(cgConfig);
@@ -164,7 +164,7 @@ const publishToVercelModule$2 = {
 };
 
 const publishToVercelModule$1 = {
-    command: ['unregister [path]'],
+    command: ['webhook:delete [path]', 'wd [path]', 'unregister [path]'],
     handler: async (args) => {
         const cgConfig = getArgsConfig(args);
         const hookPath = args.path ?? '/';
@@ -245,7 +245,7 @@ const publishToVercelModule$1 = {
 };
 
 const publishToVercelModule = {
-    command: ['list'],
+    command: ['webhook:list', 'wl', 'list'],
     handler: async (args) => {
         const cgConfig = getArgsConfig(args);
         if (!cgConfig.app_key || !cgConfig.secret)
@@ -284,7 +284,7 @@ const publishToVercelModule = {
 
 const DEFAULT_CONFIG_FILE = "src/site-config.ts";
 const createSiteConfigModule = {
-    command: ['site-config [file_path]'],
+    command: ['config:create [file_path]', 'cc [file_path]', 'site-config [file_path]'],
     handler: async (args) => {
         const cgConfig = getArgsConfig(args);
         if (!cgConfig.app_key || !cgConfig.secret)
@@ -404,7 +404,157 @@ function siteQuery(site_url) {
     };
 }
 
-var commands = [publishToVercelModule$2, publishToVercelModule$1, publishToVercelModule, createSiteConfigModule];
+const GraphSourceListCommand = {
+    command: ['source:list', 'sl'],
+    handler: async (args) => {
+        const cgConfig = getArgsConfig(args);
+        if (!cgConfig.app_key || !cgConfig.secret)
+            throw new Error("Make sure both the Optimizely Graph App Key & Secret have been defined");
+        const adminApi = createAdminApi(cgConfig);
+        try {
+            const currentSources = (await adminApi.definitionV3.getContentV3SourceHandler());
+            const sources = new Table({
+                head: [chalk.yellow(chalk.bold("ID")), chalk.yellow(chalk.bold("Label")), chalk.yellow(chalk.bold("Languages"))],
+                colWidths: [10, 50, 50]
+            });
+            for (const sourceDetails of currentSources) {
+                sources.push([sourceDetails.id, sourceDetails.label, sourceDetails.languages.join(', ')]);
+            }
+            process.stdout.write(sources.toString() + "\n");
+            process.stdout.write(chalk.green(chalk.bold(figures.tick + " Done")) + "\n");
+        }
+        catch (e) {
+            if (isApiError(e)) {
+                process.stderr.write(chalk.redBright(`${chalk.bold(figures.cross)} Optimizely Graph returned an error: HTTP ${e.status}: ${e.statusText}`) + "\n");
+                if (args.verbose)
+                    console.error(chalk.redBright(JSON.stringify(e.body, undefined, 4)));
+            }
+            else {
+                process.stderr.write(chalk.redBright(`${chalk.bold(figures.cross)} Optimizely Graph returned an unknown error`) + "\n");
+                if (args.verbose)
+                    console.error(chalk.redBright(e));
+            }
+            process.exitCode = 1;
+            return;
+        }
+    },
+    aliases: [],
+    describe: "List all content sources in Optimizely Graph",
+};
+
+const GraphSourceClearCommand = {
+    command: ['source:clear [sourceId]', 'sc [sourceId]'],
+    handler: async (args) => {
+        const cgConfig = getArgsConfig(args);
+        if (!cgConfig.app_key || !cgConfig.secret)
+            throw new Error("Make sure both the Optimizely Graph App Key & Secret have been defined");
+        const sourceId = args.sourceId;
+        if (!sourceId) {
+            process.stderr.write(chalk.redBright(`${chalk.bold(figures.cross)} Missing source ID, invoke with --help for more details`) + "\n");
+            return process.exit(1);
+        }
+        const adminApi = createAdminApi(cgConfig);
+        try {
+            process.stdout.write(`${chalk.yellow(chalk.bold(figures.arrowRight))} Loading content source: ${chalk.yellow(sourceId)}\n`);
+            const contentSource = (await adminApi.definitionV3.getContentV3SourceHandler(sourceId))[0];
+            if (!(contentSource && contentSource.id == sourceId)) {
+                throw new Error("An incorrect content source was returned by Optimizely Graph");
+            }
+            process.stdout.write(`${chalk.yellow(chalk.bold(figures.arrowRight))} Removing all content from ${chalk.yellow(contentSource.label)} (Languages: ${chalk.yellow(contentSource.languages.join(', '))})\n`);
+            await adminApi.definitionV2.deleteContentV2DataHandler(sourceId, contentSource.languages);
+            process.stdout.write(chalk.green(chalk.bold(figures.tick + " Done")) + "\n");
+        }
+        catch (e) {
+            if (isApiError(e)) {
+                if (e.status == 404) {
+                    process.stderr.write(chalk.redBright(`${chalk.bold(figures.cross)} Optimizely Graph Source with ID ${sourceId} does not exist`) + "\n");
+                }
+                else {
+                    process.stderr.write(chalk.redBright(`${chalk.bold(figures.cross)} Optimizely Graph returned an error: HTTP ${e.status}: ${e.statusText}`) + "\n");
+                }
+                if (args.verbose)
+                    console.error(chalk.redBright(JSON.stringify(e.body, undefined, 4)));
+            }
+            else {
+                process.stderr.write(chalk.redBright(`${chalk.bold(figures.cross)} Optimizely Graph returned an unknown error`) + "\n");
+                if (args.verbose)
+                    console.error(chalk.redBright(e));
+            }
+            process.exitCode = 1;
+            return;
+        }
+    },
+    aliases: [],
+    builder: (args) => {
+        args.positional('sourceId', { type: "string", describe: "The source to clear", demandOption: true });
+        return args;
+    },
+    describe: "Remove all data for the specified source",
+};
+
+const GraphSourceRemoveCommand = {
+    command: ['source:delete [sourceId]', 'sd [sourceId]'],
+    handler: async (args) => {
+        const cgConfig = getArgsConfig(args);
+        if (!cgConfig.app_key || !cgConfig.secret)
+            throw new Error("Make sure both the Optimizely Graph App Key & Secret have been defined");
+        const sourceId = args.sourceId;
+        if (!sourceId) {
+            process.stderr.write(chalk.redBright(`${chalk.bold(figures.cross)} Missing source ID, invoke with --help for more details`) + "\n");
+            return process.exit(1);
+        }
+        const adminApi = createAdminApi(cgConfig);
+        try {
+            process.stdout.write(`${chalk.yellow(chalk.bold(figures.arrowRight))} Loading content source: ${chalk.yellow(sourceId)}\n`);
+            const contentSource = (await adminApi.definitionV3.getContentV3SourceHandler(sourceId))[0];
+            if (!(contentSource && contentSource.id == sourceId)) {
+                throw new Error("An incorrect content source was returned by Optimizely Graph");
+            }
+            process.stdout.write(`${chalk.yellow(chalk.bold(figures.arrowRight))} Removing all content from ${chalk.yellow(contentSource.label)} (Languages: ${chalk.yellow(contentSource.languages.join(', '))})\n`);
+            await adminApi.definitionV2.deleteContentV2DataHandler(sourceId, contentSource.languages);
+            process.stdout.write(`${chalk.yellow(chalk.bold(figures.arrowRight))} Removing source ${chalk.yellow(contentSource.label)}\n`);
+            await adminApi.definitionV3.deleteContentV3SourceHandler(sourceId);
+            process.stdout.write(chalk.green(chalk.bold(figures.tick + " Done")) + "\n");
+        }
+        catch (e) {
+            if (isApiError(e)) {
+                if (e.status == 404) {
+                    process.stderr.write(chalk.redBright(`${chalk.bold(figures.cross)} Optimizely Graph Source with ID ${sourceId} does not exist`) + "\n");
+                }
+                else {
+                    process.stderr.write(chalk.redBright(`${chalk.bold(figures.cross)} Optimizely Graph returned an error: HTTP ${e.status}: ${e.statusText}`) + "\n");
+                }
+                if (args.verbose)
+                    console.error(chalk.redBright(JSON.stringify(e.body, undefined, 4)));
+            }
+            else {
+                process.stderr.write(chalk.redBright(`${chalk.bold(figures.cross)} Optimizely Graph returned an unknown error`) + "\n");
+                if (args.verbose)
+                    console.error(chalk.redBright(e));
+            }
+            process.exitCode = 1;
+            return;
+        }
+    },
+    aliases: [],
+    builder: (args) => {
+        args.positional('sourceId', { type: "string", describe: "The source to clear", demandOption: true });
+        return args;
+    },
+    describe: "Remove all data for the specified source",
+};
+
+var SourceModules = /*#__PURE__*/Object.freeze({
+    __proto__: null,
+    GraphSourceClearCommand: GraphSourceClearCommand,
+    GraphSourceListCommand: GraphSourceListCommand,
+    GraphSourceRemoveCommand: GraphSourceRemoveCommand
+});
+
+const modules = [publishToVercelModule$2, publishToVercelModule$1, publishToVercelModule, createSiteConfigModule];
+for (const moduleName of Object.getOwnPropertyNames(SourceModules)) {
+    modules.push(SourceModules[moduleName]);
+}
 
 var APP;
 (function (APP) {
@@ -412,5 +562,5 @@ var APP;
     APP["Version"] = "1.0.3";
 })(APP || (APP = {}));
 const app = createCliApp(APP.Script, APP.Version);
-app.command(commands);
+app.command(modules);
 app.parse(process.argv.slice(2));

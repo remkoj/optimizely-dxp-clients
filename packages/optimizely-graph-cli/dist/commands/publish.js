@@ -4,7 +4,7 @@ import { readEnvironmentVariables as getEnvConfig } from "@remkoj/optimizely-gra
 import chalk from 'chalk';
 import figures from 'figures';
 export const publishToVercelModule = {
-    command: ['register [path] [verb]'],
+    command: ['webhook:create [path] [verb]', 'wc [path] [verb]', 'register [path] [verb]'],
     handler: async (args) => {
         const cgConfig = getArgsConfig(args);
         const frontendUrl = getFrontendURL(cgConfig);

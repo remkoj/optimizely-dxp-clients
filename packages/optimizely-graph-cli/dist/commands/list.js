@@ -4,7 +4,7 @@ import chalk from 'chalk';
 import figures from 'figures';
 import Table from 'cli-table3';
 export const publishToVercelModule = {
-    command: ['list'],
+    command: ['webhook:list', 'wl', 'list'],
     handler: async (args) => {
         const cgConfig = getArgsConfig(args);
         if (!cgConfig.app_key || !cgConfig.secret)

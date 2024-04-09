@@ -17,7 +17,7 @@ type PublishToVercelProps = { path: string, verb: string, publish_token: string 
  * exports.deprecated: a boolean (or string) to show deprecation notice.
  */
 export const publishToVercelModule : CliModule<PublishToVercelProps> = {
-    command: ['register [path] [verb]'],
+    command: ['webhook:create [path] [verb]','wc [path] [verb]','register [path] [verb]'],
     handler: async (args) => {
         // Read configuration
         const cgConfig = getArgsConfig(args)

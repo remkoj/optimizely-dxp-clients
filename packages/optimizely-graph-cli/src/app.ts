@@ -53,6 +53,6 @@ export type CliApp = ReturnType<typeof createCliApp>
 export type CliArgs = CliApp extends Argv<infer R> ? R : never
 type CliModuleBase<P> = CommandModule<CliArgs, CliArgs & Partial<P>>
 export type CliModule<P = {}> = Pick<Required<CliModuleBase<P>>, 'command' | 'describe'> & Omit<CliModuleBase<P>, 'command' | 'describe'>
-export type CliModuleList = CommandModule<CliArgs, any>[]
+export type CliModuleList = CliModuleBase<any>[]
 
 export default createCliApp
