@@ -1,3 +1,4 @@
+import type { ContentLink } from '../types.js';
 export type ChannelDomain = {
     name: string;
     isPrimary: boolean;
@@ -10,12 +11,8 @@ export type ChannelLocale = {
     graphLocale: string;
     isDefault: boolean;
 };
-export type ChannelContentId = {
-    id: number;
-    guidValue: string;
-};
 export type ChannelContent = {
-    startPage: ChannelContentId;
+    startPage: ContentLink;
 };
 export type ChannelDefinitionData = {
     id: string;
@@ -23,4 +20,11 @@ export type ChannelDefinitionData = {
     domains: ChannelDomain[];
     locales: ChannelLocale[];
     content: ChannelContent;
+};
+export type ReadonlyChannelDefinitionData = {
+    readonly id: string;
+    readonly name: string;
+    readonly domains: Array<Readonly<ChannelDomain>>;
+    readonly locales: Array<Readonly<ChannelLocale>>;
+    readonly content: Readonly<ChannelContent>;
 };

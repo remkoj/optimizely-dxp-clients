@@ -5,6 +5,24 @@ type DocumentsConfigNode = NonNullable<Types.Config['documents']>
 export const IContentDataProps = ["contentType","id","locale","path","__typename"]
 
 export const fragments = [
+`fragment IContentData on IContent
+{
+    _metadata {
+        key
+        locale
+        types
+        displayName
+        version
+    }
+    _type: __typename
+}`,
+`fragment BlockData on IContent {
+    ...IContentData
+}`,
+`fragment PageData on IContent {
+    ...IContentData
+}`
+  /*
     `fragment ContentLink on ContentModelReference {
       id: Id,
       workId: WorkId,
@@ -101,70 +119,43 @@ export const fragments = [
             }
         }
         displayOption:DisplayOption
-    }`
+    }`*/
 ]
-export const queries = [`query getContentById($id: Int, $workId: Int, $guidValue: String, $locale: [Locales!], $isCommonDraft: Boolean) {
-    Content(
-        where: {
-            ContentLink: { 
-                Id: { eq: $id }, 
-                WorkId: { eq: $workId }, 
-                GuidValue: { eq: $guidValue } 
-            }
-            IsCommonDraft: { eq: $isCommonDraft }
+export const queries = [
+`query getContentById($id: String!, $locale: [Locales]) {
+    content: Content(where: { _metadata: { key: { eq: $id } } }, locale: $locale) {
+        total
+        items {
+            ...IContentData
+            ...BlockData
+            ...PageData
         }
+    }
+}`,
+`query getContentByPath($path: String!, $domain: String, $locale: [Locales]) {
+    content: Content(
+        where: { _metadata: { url: { hierarchical: { eq: $path }, base: { eq: $domain } } } }
         locale: $locale
     ) {
         total
         items {
             ...IContentData
-            ...PageData
             ...BlockData
+            ...PageData
         }
     }
 }`,
-`query getContentByPath($path: String!, $locale: [Locales], $siteId: String)
-{
-  Content(
-    where: {
-      RelativePath: {
-        eq: $path
-      }
-      SiteId: {
-        eq: $siteId
-      }
-  	},
-    locale: $locale
-  ) {
-    items {
-      ...PageData
+`query getContentType($id: String!, $locale: [Locales]) {
+    content: Content(where: { _metadata: { key: { eq: $id } } }, locale: $locale) {
+        total
+        items {
+            _metadata {
+                types
+            }
+        }
     }
-  }
-}`,`query getContentType($id: Int, $workId: Int, $guidValue: String, $locale: [Locales])
-{
-  Content(
-    where: {
-      ContentLink: {
-        GuidValue: {
-          eq: $guidValue
-        }
-        Id: {
-          eq: $id
-        },
-        WorkId: {
-          eq: $workId
-        }
-      }
-    },
-    locale: $locale
-    limit: 1
-  ) {
-    items {
-    	ContentType
-    },
-    total
-  }
-}`]
+}`
+]
 
 export const DefaultFunctions = ['getContentType','getContentByPath','getContentById']
 export const documents = [ ...queries, ...fragments ]

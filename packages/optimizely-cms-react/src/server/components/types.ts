@@ -3,7 +3,7 @@ import type { ContentLinkWithLocale, ComponentFactory, ContentType } from "../..
 import type { ElementChildrenProps, ElementProps, ElementType, PropTypeIfPropExists, MayBeArray, TypeIfPropExists } from '../type-utils'
 import type { IOptiGraphClient } from "@remkoj/optimizely-graph-client"
 
-export type CmsContentProps = PropsWithChildren<{
+export type CmsContentProps<LocalesType = string> = PropsWithChildren<{
     /**
      * The content type to render
      */
@@ -12,7 +12,7 @@ export type CmsContentProps = PropsWithChildren<{
     /**
      * The content link to render
      */
-    contentLink: ContentLinkWithLocale
+    contentLink: ContentLinkWithLocale<LocalesType>
 
     /**
      * The initial, pre-loaded data. If set this will be used instead of having the

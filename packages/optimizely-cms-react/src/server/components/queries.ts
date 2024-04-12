@@ -1,7 +1,7 @@
 import { gql } from 'graphql-request'
 
 export const CmsContentFragments = {
-    IContentDataProps: ["contentType","id","locale","path","__typename"],
+    IContentDataProps: ["_metadata","_type","__typename"],
     ContentLink: gql`fragment ContentLink on ContentModelReference {
       id: Id,
       workId: WorkId,

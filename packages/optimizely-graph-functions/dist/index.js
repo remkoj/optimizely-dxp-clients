@@ -3,9 +3,10 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.plugin = exports.validate = exports.pickPluginOptions = void 0;
 const graphql_1 = require("graphql");
 const utils_1 = require("./utils");
+const documents_1 = require("./documents");
 function pickPluginOptions(options) {
     return {
-        functions: options.functions ?? ['getContentByPath', 'getContentById'],
+        functions: options.functions ?? documents_1.DefaultFunctions,
         prettyPrintQuery: options.prettyPrintQuery ?? false,
         clientPath: options.clientPath ?? "./graphql"
     };

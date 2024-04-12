@@ -5,10 +5,10 @@ import type { CmsContentProps } from './types'
 import getContentType from './get-content-type'
 import getServerContext from '../context'
 import createClient, { AuthMode } from '@remkoj/optimizely-graph-client'
+import { normalizeContentLink, contentLinkToString } from '@remkoj/optimizely-graph-client/utils'
 import { print } from 'graphql'
 import * as Utils from "../../utilities"
 import * as Queries from './queries'
-import React from 'react'
 
 type CmsComponentProps = ComponentProps<CmsComponent> & {
     [key: string]: any
@@ -23,32 +23,39 @@ export type { CmsContentProps } from './types'
  * @param     param0 
  * @returns   
  */
-export const CmsContent = async ({contentType, contentTypePrefix, contentLink, children, fragmentData} : CmsContentProps) : Promise<JSX.Element> => 
+export const CmsContent = async <LocalesType = string>({contentType, contentTypePrefix, contentLink: rawContentLink, children, fragmentData} : CmsContentProps<LocalesType>) : Promise<JSX.Element> => 
 {
     const context = getServerContext()
+    const contentLink = normalizeContentLink(rawContentLink)
+
+    if (!contentLink) {
+        if (context.isDebugOrDevelopment)
+            console.warn(`🟠 [CmsContent] Invalid content link provided, not rendering anything`, rawContentLink)
+        return <></>
+    }
+
     if (context.isDebugOrDevelopment && !context.client)
-        console.warn(`🟠 [CmsContent] No Content Graph client provided with ${ JSON.stringify(contentLink) }, this will cause problems with edit mode!`)
+        console.warn(`🟠 [CmsContent] No Content Graph client provided with ${ contentLinkToString(contentLink) }, this will cause problems with edit mode!`)
 
     // Parse & prepare props
     const inEditMode = context.inEditMode && context.isEditableContent(contentLink)
     const outputEditorWarning = context.forceEditorWarnings
     const factory = context.factory
     const client = context.client ?? createClient()
-    const isInlineBlock = Utils.isInlineContentLink(contentLink)
     if (context.isDebug && inEditMode)
-        console.log(`👔 [CmsContent] Edit mode active for content with id: ${ JSON.stringify(contentLink) }`)
+        console.log(`👔 [CmsContent] Edit mode active for content with id: ${ contentLinkToString(contentLink) }`)
     if (context.isDebug && inEditMode && client.currentAuthMode == AuthMode.Public)
         console.warn(`🟠 [CmsContent] Edit mode active without an authenticated client, this will cause problems`)
         
 
     // DEBUG Tracing
     if (context.isDebug)
-        console.log("⚪ [CmsContent] Rendering CMS Content for:", JSON.stringify(contentType), isInlineBlock ? "Inline content" : JSON.stringify({ id: contentLink.id, workId: contentLink.workId, guidValue: contentLink.guidValue, locale: contentLink.locale }), inEditMode ? "edit-mode" : "published")
+        console.log("⚪ [CmsContent] Rendering CMS Content for:", JSON.stringify(contentType), contentLinkToString(contentLink), inEditMode ? "edit-mode" : "published")
 
     // Ensure we have a content type to work with
-    if (!isInlineBlock && !contentType) {
+    if (!contentType) {
         if (context.isDebugOrDevelopment) 
-            console.warn(`🟠 [CmsContent] No content type provided for content ${ JSON.stringify({ id: contentLink.id, workId: contentLink.workId, guidValue: contentLink.guidValue, locale: contentLink.locale }) }, this causes an additional GraphQL query to resolve the ContentType`)
+            console.warn(`🟠 [CmsContent] No content type provided for content ${ contentLinkToString(contentLink) }, this causes an additional GraphQL query to resolve the ContentType`)
         contentType = await getContentType(contentLink, client)
     }
 
@@ -85,48 +92,41 @@ export const CmsContent = async ({contentType, contentTypePrefix, contentLink, c
             console.error("🔴 [CmsContent] Invalid fragment data received for ", Component.displayName ?? contentType?.join("/") ?? "[Undetermined component]")
             return <></>
         }
-        return <Component inEditMode={ inEditMode } contentLink={ contentLink } data={ fragmentData || {} } client={ client } />
+        return <Component contentLink={ contentLink } data={ fragmentData || {} } />
     }
-
-    // If we don't have previously loaded data we cannot load content for inline blocks
-    if (isInlineBlock)
-        return (context.isDebug || inEditMode || outputEditorWarning) ? <div className='opti-error'>Inline blocks cannot be loaded individually</div> : <></>
 
     // Render using included query 
     if (Utils.isCmsComponentWithDataQuery(Component)) {
         const gqlQuery = Component.getDataQuery()
-        const gqlVariables = Utils.contentLinkToRequestVariables(contentLink) as Omit<ContentLinkWithLocale, 'guidValue'> & { guidValue: string }
+        const gqlVariables = Utils.contentLinkToRequestVariables(contentLink)
         if (context.isDebug)
             console.log("⚪ [CmsContent] Component data fetching variables:", gqlVariables)
         const gqlResponse = await client.request<{}>(gqlQuery, gqlVariables)
         if (context.isDebug)
             console.log("⚪ [CmsContent] Component request the following data:", gqlResponse)
-        return <Component inEditMode={ inEditMode } contentLink={ contentLink } data={ gqlResponse } client={ client } />
+        return <Component contentLink={ contentLink } data={ gqlResponse } />
     } 
     
     // Render using included fragment
     if (Utils.isCmsComponentWithFragment(Component)) {
-        type FragmentQueryVariables = ContentLinkWithLocale & { isCommonDraft?: boolean | null, guidValue: string }
-        type FragmentQueryResponse = { contentById: { total: number, items: { contentType: string[], id: { id: number, workId: number, guidValue: string }, locale: { name: string }, [propertyName: string]: any }[] }}
+        type FragmentQueryResponse = { contentById: { total: number, items: Array<any> }}
         const [name, fragment]  = Component.getDataFragment()
-        const fragmentQuery = `query getContentFragmentById($id: Int!, $workId: Int, $guidValue: String, $locale: [Locales]!, $isCommonDraft: Boolean ) { contentById: Content( where: { ContentLink: { Id: { eq: $id }, WorkId: { eq: $workId }, GuidValue: { eq: $guidValue } },IsCommonDraft: {eq: $isCommonDraft} }, orderBy: { Status: ASC }, locale: $locale, limit: 1 ) { total items { contentType: ContentType id: ContentLink { id: Id, workId: WorkId, guidValue: GuidValue } locale: Language { name: Name } ...${ name } } } } ${ print(fragment) }`
-        const fragmentVariables : FragmentQueryVariables = Utils.contentLinkToRequestVariables(contentLink) as FragmentQueryVariables
-        if (!fragmentVariables?.workId && inEditMode) fragmentVariables.isCommonDraft = true
-        if (context.isDebug)
-            console.log(`⚪ [CmsContent] Component data fetching using fragment ${ name }, with variables: ${ JSON.stringify(fragmentVariables) }`)
-        const fragmentResponse = await client.request<FragmentQueryResponse, FragmentQueryVariables>(fragmentQuery, fragmentVariables)
+        if (context.isDebug) console.log(`⚪ [CmsContent] Component data fetching using fragment: ${ name }`)
+        const fragmentQuery = `query getContentFragmentById($key: String!, $version: String, $locale: [Locales!]) {contentById: Content(where: {_metadata: {key: { eq: $key }, version: { eq: $version }}} locale: $locale) { total, items { _type: __typename, _metadata { key, version, locale } ...${ name } }}} ${ print(fragment) }`
+        const fragmentVariables = Utils.contentLinkToRequestVariables(contentLink)
+        if (context.isDebug) console.log(`⚪ [CmsContent] Component data fetching using variables: ${ JSON.stringify(fragmentVariables) }`)
+        const fragmentResponse = await client.request<FragmentQueryResponse, any>(fragmentQuery, fragmentVariables)
         const totalItems = fragmentResponse.contentById.total || 0
         if (totalItems < 1)
             throw new Error(`CmsContent expected to load exactly one content item of type ${ name }, received ${ totalItems } from Optimizely Graph. Content Item: ${ JSON.stringify( fragmentVariables )}`)
-        if (totalItems > 1 && context.isDebug)
-            console.warn(`🟠 [CmsContent] Resolved ${ totalItems } content items, expected only 1. Picked the first one`)
-        return <Component inEditMode={ inEditMode } contentLink={ contentLink } data={ fragmentResponse.contentById.items[0] } client={ client } />
+        if (totalItems > 1 && context.isDebug) console.warn(`🟠 [CmsContent] Resolved ${ totalItems } content items, expected only 1. Picked the first one`)
+        return <Component contentLink={ contentLink } data={ fragmentResponse.contentById.items[0] } />
     }
     
     // Assume there's no server side prepared data needed for the component
     if (context.isDebug)
         console.log(`⚪ [CmsContent] Component of type "${ contentType?.join('/') ?? Component.displayName ?? '?'}" did not request pre-loading of data`)
-    return <Component inEditMode={ inEditMode } contentLink={ contentLink } data={ fragmentData || {} } client={ client } />
+    return <Component contentLink={ contentLink } data={ fragmentData || {} } />
 }
 
 export default CmsContent

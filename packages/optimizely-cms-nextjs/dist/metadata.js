@@ -1,6 +1,5 @@
 import createClient, { isContentGraphClient } from '@remkoj/optimizely-graph-client';
 import { isOptimizelyNextPageWithMetaData } from './page';
-const DEBUG = process.env.DXP_DEBUG == '1';
 export class MetaDataResolver {
     _cgClient;
     constructor(clientOrConfig) {
@@ -16,16 +15,16 @@ export class MetaDataResolver {
      * @returns             A Promise for the metadata of the given content type & instance
      */
     async resolve(factory, contentLink, contentType, locale) {
-        if (DEBUG)
+        if (this._cgClient.debug)
             console.log("[MetaDataResolver] Resolving metadata for:", contentLink, contentType, locale);
-        if (locale.includes("-"))
+        if (locale && locale.includes("-"))
             throw new Error("Invalid character detected within the locale");
         const Component = factory.resolve(contentType);
         if (!Component)
             return {};
         if (isOptimizelyNextPageWithMetaData(Component) && Component.getMetaData) {
             const meta = await Component.getMetaData(contentLink, locale, this._cgClient);
-            if (DEBUG)
+            if (this._cgClient.debug)
                 console.log("[MetaDataResolver] Resolved metadata to:", meta);
             return meta;
         }

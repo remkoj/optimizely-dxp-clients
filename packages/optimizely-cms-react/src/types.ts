@@ -1,33 +1,12 @@
-import type { PropsWithChildren, ComponentType as ReactComponentType } from "react"
+import type { PropsWithChildren, ComponentType as ReactComponentType, ExoticComponent as ReactExoticComponent } from "react"
 import type { DocumentNode } from "graphql"
 import type { TypedDocumentNode } from '@graphql-typed-document-node/core'
 import type { IOptiGraphClient } from "@remkoj/optimizely-graph-client"
+import type { ContentLinkWithLocale } from "@remkoj/optimizely-graph-client/router"
 
+// Export reused content types
 export type ContentType = string[]
-
-export type ContentLink = {
-    id: number, 
-    workId?: number | null, 
-    guidValue?: string | null
-} | {
-    id?: number | null, 
-    workId?: number | null, 
-    guidValue: string 
-}
-
-export type InlineContentLink = {
-    id : 0
-    workId ?: 0 | null
-    guidValue ?: null | ""
-} | {
-    id ?: 0 | null
-    workId ?: 0 | null
-    guidValue : ""
-}
-
-export type ContentLinkWithLocale = ContentLink & {
-    locale?: string
-}
+export type { ContentLink, ContentLinkWithLocale } from "@remkoj/optimizely-graph-client/router"
 
 export type CmsComponentProps<T> = PropsWithChildren<{
     /**
@@ -55,7 +34,9 @@ export type CmsComponentProps<T> = PropsWithChildren<{
     client?: IOptiGraphClient
 }>
 
-export type ContentQueryProps = ContentLinkWithLocale
+export type ContentQueryProps = ContentLinkWithLocale & {
+    isCommonDraft?: boolean
+}
 
 /**
  * Extract the data type from a GraphQL Query
@@ -101,8 +82,7 @@ export type CmsComponent<T = DocumentNode> =
 
 
 //Factory
-import type { createElement } from 'react'
-export type ComponentType = Parameters<typeof createElement>[0]
+export type ComponentType = (ReactComponentType<any>) | (ReactExoticComponent<any>) | (keyof JSX.IntrinsicElements)
 export type ComponentTypeHandle = string | string[]
 export type ComponentTypeDictionary = {type: ComponentTypeHandle, component: ComponentType}[]
 export interface ComponentFactory {

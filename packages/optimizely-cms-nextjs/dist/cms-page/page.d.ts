@@ -6,7 +6,6 @@ import { type ComponentFactory } from '@remkoj/optimizely-cms-react/rsc';
 import { type GetContentByPathMethod } from './data';
 export type Params = {
     path: string[] | undefined;
-    lang: string | undefined;
 };
 export type Props = {
     params: Params;
@@ -15,14 +14,19 @@ export type Props = {
 export type GenerateMetadataProps<TParams extends {} = {}, TSearch extends {} = {}> = {
     params: Params;
 };
-export type NextJsPage = {
+export type OptiCmsNextJsPage = {
     generateStaticParams: () => Promise<Params[]>;
     generateMetadata: (props: Props, resolving: ResolvingMetadata) => Promise<Metadata>;
     CmsPage: (props: Props) => Promise<JSX.Element>;
 };
-export type CreatePageOptions = {
-    defaultLocale: string;
-    getContentByPath: GetContentByPathMethod;
+export declare enum SystemLocales {
+    All = "ALL",
+    Neutral = "NEUTRAL"
+}
+export type CreatePageOptions<LocaleEnum = SystemLocales> = {
+    defaultLocale: string | null;
+    getContentByPath: GetContentByPathMethod<LocaleEnum>;
     client: ClientFactory;
+    channel?: ChannelDefinition;
 };
-export declare function createPage(factory: ComponentFactory, channel: ChannelDefinition, options?: Partial<CreatePageOptions>): NextJsPage;
+export declare function createPage<LocaleEnum = SystemLocales>(factory: ComponentFactory, options?: Partial<CreatePageOptions<LocaleEnum>>): OptiCmsNextJsPage;

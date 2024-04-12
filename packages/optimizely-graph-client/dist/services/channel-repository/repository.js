@@ -1,6 +1,7 @@
 import createClient, { isContentGraphClient } from '../../client/index.js';
 import ChannelDefinition from './definition.js';
 import * as Queries from './queries.js';
+import { localeToGraphLocale } from '../utils.js';
 export class ChannelRepository {
     constructor(clientOrConfig) {
         this.client = isContentGraphClient(clientOrConfig) ? clientOrConfig : createClient(clientOrConfig);
@@ -57,15 +58,14 @@ export class ChannelRepository {
                 const loc = {
                     code: c.code,
                     slug: c.slug,
-                    graphLocale: c.code.replaceAll("-", "_"),
+                    graphLocale: localeToGraphLocale(c.code),
                     isDefault: c.isDefault == true
                 };
                 return loc;
             }),
             content: {
                 startPage: {
-                    id: ch.content?.startPage?.id,
-                    guidValue: ch.content?.startPage?.guidValue
+                    key: ch.content?.startPage?.key,
                 }
             }
         }, this.getCmsDomain());

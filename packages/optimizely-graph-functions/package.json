@@ -49,9 +49,10 @@
     "clean": "tsc --clean",
     "prepare": "tsc --build",
     "recompile": "tsc --build --clean && tsc --build --force",
-    "watch": "tsc --watch"
+    "watch": "yarn tsc --watch"
   },
   "peerDependencies": {
+    "@graphql-typed-document-node/core": "*",
     "graphql": "*"
   },
   "optionalDependencies": {

@@ -4,6 +4,7 @@ import CmsContent from './cms-content';
 import * as Utils from '../../utilities';
 import * as Errors from '../../errors';
 import createClient from '@remkoj/optimizely-graph-client';
+import { normalizeContentLinkWithLocale, contentLinkToString } from '@remkoj/optimizely-graph-client/utils';
 import getServerContext from '../context';
 //#endregion
 /**
@@ -32,7 +33,7 @@ export const CmsContentArea = async ({ items, classMapper, className, fieldName,
     const actualItems = (items || []).filter(forValidContentAreaItems);
     const componentData = await Promise.all(actualItems.map(async (item, idx) => {
         // Prepare data from received content area format
-        const contentLink = Utils.normalizeContentLinkWithLocale({ ...item.item, locale: locale });
+        const contentLink = normalizeContentLinkWithLocale({ ...item.item, locale: locale });
         if (!contentLink)
             throw new Errors.InvalidContentLinkError({ ...item.item, locale: locale });
         const contentType = Utils.normalizeContentType(item.item?.data?.contentType);
@@ -40,10 +41,10 @@ export const CmsContentArea = async ({ items, classMapper, className, fieldName,
         // Read element wrapper configuration
         const { as: contentItemElement, className: contentItemBaseClassName, itemsProperty: contentItemTarget, ...contentItemElementProps } = itemWrapper ?? {};
         // Generate element wrapper properties
-        const contentAreaItemContainerKey = `ContentAreaItem-${idx}-${contentLink.guidValue}-${contentLink.id}-${contentLink.workId}`;
+        const contentAreaItemContainerKey = `ContentAreaItem-${idx}-${contentLinkToString(contentLink)}`;
         const contentAreaItemContainerProps = {
             className: `opti-content-area-item opti-content-area-item-${idx}${contentItemBaseClassName ? ' ' + contentItemBaseClassName : ''} ${classMapper ? classMapper(item.displayOption ?? 'default', contentType ?? null, idx) : ""}`,
-            "data-epi-block-id": inEditMode && fieldName ? contentLink?.id || undefined : undefined,
+            "data-epi-block-id": inEditMode && fieldName ? Utils.getContentEditId(contentLink) || undefined : undefined,
             "data-displayoption": item.displayOption || undefined,
             "data-tag": item.tag || undefined,
             ...contentItemElementProps
@@ -87,7 +88,7 @@ export async function processContentAreaItems(items, locale) {
     const actualItems = (items ?? []).filter(Utils.isNotNullOrUndefined);
     return Promise.all(actualItems.map(async (item, idx) => {
         // Prepare data from received content area format
-        const contentLink = Utils.normalizeContentLinkWithLocale({ ...item.item, locale: locale });
+        const contentLink = normalizeContentLinkWithLocale({ ...item.item, locale: locale });
         if (!contentLink)
             throw new Errors.InvalidContentLinkError({ ...item.item, locale: locale });
         const contentType = Utils.normalizeContentType(item.item?.data?.contentType);

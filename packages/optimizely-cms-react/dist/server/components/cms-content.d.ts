@@ -8,5 +8,5 @@ export type { CmsContentProps } from './types';
  * @param     param0
  * @returns
  */
-export declare const CmsContent: ({ contentType, contentTypePrefix, contentLink, children, fragmentData }: CmsContentProps) => Promise<JSX.Element>;
+export declare const CmsContent: <LocalesType = string>({ contentType, contentTypePrefix, contentLink: rawContentLink, children, fragmentData }: CmsContentProps<LocalesType>) => Promise<JSX.Element>;
 export default CmsContent;

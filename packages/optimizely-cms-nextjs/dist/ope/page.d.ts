@@ -1,6 +1,5 @@
 import 'server-only';
 import type { EditPageComponent, EditViewOptions } from './types';
-import { type Services } from '@remkoj/optimizely-graph-client';
 import { type ComponentFactory } from '@remkoj/optimizely-cms-react/rsc';
 /**
  * Create the EditPage component needed by Next.JS to render the "On Page
@@ -13,5 +12,5 @@ import { type ComponentFactory } from '@remkoj/optimizely-cms-react/rsc';
  * @param   options     The optional options to use to control the edit page
  * @returns The React Component that can be used by Next.JS to render the page
  */
-export declare function createEditPageComponent(channel: Readonly<Services.ChannelDefinition>, factory: ComponentFactory, options?: Partial<EditViewOptions>): EditPageComponent;
+export declare function createEditPageComponent(factory: ComponentFactory, options?: Partial<EditViewOptions>): EditPageComponent;
 export default createEditPageComponent;

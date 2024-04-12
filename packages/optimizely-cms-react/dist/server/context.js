@@ -2,6 +2,7 @@ import 'server-only';
 import React from 'react';
 import { isDevelopment, isDebug } from "./is-debug";
 import { getFactory } from '../factory';
+import { contentLinkIsEqual } from "@remkoj/optimizely-graph-client";
 class DefaultServerContext {
     _inEditMode = false;
     _forceEditorWarnings = false;
@@ -60,11 +61,7 @@ class DefaultServerContext {
     isEditableContent(id) {
         if (!this.inEditMode || !this._editableContent)
             return false; // We can on be editable in edit mode and with an id set
-        if (id.id != this._editableContent.id && id.guidValue != this._editableContent.guidValue)
-            return false; // Both ID and GUID don't match
-        if (this._editableContent.workId && this._editableContent.workId != id.workId)
-            return false; // We know the work ID and it doesn't match
-        return true;
+        return contentLinkIsEqual(this._editableContent, id);
     }
 }
 /**

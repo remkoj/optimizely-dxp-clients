@@ -1,5 +1,6 @@
 import { gql } from 'graphql-request';
 import * as Utils from "../../utilities";
+import { isContentLink } from "@remkoj/optimizely-graph-client/utils";
 const DEBUG = false;
 /**
  * Resolve the ContentType of an Optimizely CMS Component, identified by its content link
@@ -9,7 +10,7 @@ const DEBUG = false;
  * @returns     The ContentType, or undefined if it cannot be resolved
  */
 export async function getContentType(link, gqlClient) {
-    if ((!link.id || link.id < 1) && (!link.guidValue || link.guidValue == ""))
+    if (!isContentLink(link))
         throw new Error("Cannot dynamically determine the content type of an inline block");
     const gqlQueryVars = Utils.contentLinkToRequestVariables(link);
     const gqlResponse = await gqlClient.request(getContentTypeQuery, gqlQueryVars);

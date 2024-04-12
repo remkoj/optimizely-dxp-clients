@@ -3,6 +3,7 @@ import type { Metadata, ResolvingMetadata } from 'next'
 import deepmerge from 'deepmerge'
 import { notFound } from 'next/navigation'
 import { RouteResolver, type ClientFactory, type ChannelDefinition } from '@remkoj/optimizely-graph-client'
+import { normalizeContentLink, normalizeContentLinkWithLocale } from '@remkoj/optimizely-graph-client/utils'
 import { CmsContent, isDebug, getServerContext, type ComponentFactory } from '@remkoj/optimizely-cms-react/rsc'
 import { Utils } from '@remkoj/optimizely-cms-react'
 
@@ -12,8 +13,7 @@ import getContentByPathBase, { type GetContentByPathMethod } from './data'
 import { getServerClient } from '../client'
 
 export type Params = {
-    path: string[] | undefined,
-    lang: string | undefined
+    path: string[] | undefined
 }
 
 export type Props = {
@@ -25,52 +25,56 @@ export type GenerateMetadataProps<TParams extends {} = {}, TSearch extends {} = 
     params: Params
 }
 
-export type NextJsPage = {
+export type OptiCmsNextJsPage = {
     generateStaticParams: () => Promise<Params[]>
     generateMetadata: (props: Props, resolving: ResolvingMetadata) => Promise<Metadata>
     CmsPage: (props: Props) => Promise<JSX.Element>
 }
 
-export type CreatePageOptions = {
-    defaultLocale: string
-    getContentByPath: GetContentByPathMethod
-    client: ClientFactory
+export enum SystemLocales {
+    All = 'ALL',
+    Neutral = 'NEUTRAL'
 }
 
-const CreatePageOptionDefaults : CreatePageOptions = {
-    defaultLocale: "en",
+export type CreatePageOptions<LocaleEnum = SystemLocales> = {
+    defaultLocale: string | null
+    getContentByPath: GetContentByPathMethod<LocaleEnum>
+    client: ClientFactory
+    channel?: ChannelDefinition
+}
+
+const CreatePageOptionDefaults : CreatePageOptions<string> = {
+    defaultLocale: null,
     getContentByPath: getContentByPathBase,
     client: getServerClient
 }
 
-export function createPage(
+export function createPage<LocaleEnum = SystemLocales>(
     factory: ComponentFactory,
-    channel: ChannelDefinition,
-    options?: Partial<CreatePageOptions>
-) : NextJsPage {
-    const { defaultLocale, getContentByPath, client: clientFactory } = { 
+    options?: Partial<CreatePageOptions<LocaleEnum>>
+) : OptiCmsNextJsPage {
+    const { defaultLocale, getContentByPath, client: clientFactory, channel }= { 
         ...CreatePageOptionDefaults, 
-        ...{ defaultLocale: channel.defaultLocale }, 
+        ...{ defaultLocale: null }, 
         ...options 
-    }
+    } as CreatePageOptions<LocaleEnum>
 
-    const pageDefintion : NextJsPage = {
+    const pageDefintion : OptiCmsNextJsPage = {
         generateStaticParams : async () =>
         {
             const client = clientFactory()
             const resolver = new RouteResolver(client)
             return (await resolver.getRoutes()).map(r => { 
                 return {
-                    lang: channel.localeToSlug(r.language),
-                    path: urlToPath(r.url, r.language)
+                    path: urlToPath(r.url)
                 }
             })
         },
-        generateMetadata: async ( { params: { lang, path } }, resolving ) =>
+        generateMetadata: async ( { params: { path } }, resolving ) =>
         {
             // Read variables from request            
             const client = clientFactory()
-            const requestPath = buildRequestPath({ lang, path })
+            const requestPath = buildRequestPath({ path })
             const routeResolver = new RouteResolver(client)
             const metaResolver = new MetaDataResolver(client)
 
@@ -80,13 +84,13 @@ export function createPage(
                 return Promise.resolve({})
             
             // Set context
-            getServerContext().setLocale(localeToGraphLocale(channel, route.language))
+            getServerContext().setLocale(localeToGraphLocale(route.locale, channel))
             getServerContext().setOptimizelyGraphClient(client)
 
             // Prepare metadata fetching
             const contentLink = routeResolver.routeToContentLink(route)
             const contentType = route.contentType
-            const graphLocale = localeToGraphLocale(channel, route.language)
+            const graphLocale = channel ? localeToGraphLocale(route.locale, channel) : null
 
             // Fetch the metadata based upon the actual content type and resolve parent
             const [pageMetadata, baseMetadata] = await Promise.all([
@@ -109,11 +113,8 @@ export function createPage(
             }
             return pageMetadata
         },
-        CmsPage: async ({  params: { lang, path } }) =>
+        CmsPage: async ({  params: { path } }) =>
         {
-            if (!lang || lang.length == 0)
-                return notFound()
-
             // Prepare the context
             const context = getServerContext()
             const client = context.client ?? clientFactory()
@@ -122,11 +123,10 @@ export function createPage(
             context.setComponentFactory(factory)
 
             // Resolve the content based upon the route
-            const requestPath = buildRequestPath({ lang, path })
-            const graphLocale = channel.slugToGraphLocale(lang)
-            const response = await getContentByPath(client, { path: requestPath, locale: graphLocale, siteId: channel.id })
-            const info = (response.Content?.items ?? [])[0]
-            context.setLocale(graphLocale)
+            const requestPath = buildRequestPath({ path })
+            const response = await getContentByPath(client, { path: requestPath })
+            const info = (response?.content?.items ?? [])[0]
+            //context.setLocale(graphLocale)
 
             if (!info) {
                 if (isDebug()) {
@@ -136,8 +136,8 @@ export function createPage(
             }
 
             // Extract the type & link
-            const contentType = Utils.normalizeContentType(info.contentType)
-            const contentLink = Utils.normalizeContentLinkWithLocale({ ...info.id, locale: info.locale?.name })
+            const contentType = Utils.normalizeContentType(info._metadata?.types)
+            const contentLink = normalizeContentLinkWithLocale(info._metadata)
             if (!contentLink) {
                 console.error("🔴 [CmsPage] Unable to infer the contentLink from the retrieved content, this should not have happened!")
                 return notFound()
@@ -151,9 +151,11 @@ export function createPage(
     return pageDefintion
 }
 
-function buildRequestPath({ lang, path }: Params ) : string
+function buildRequestPath({ lang, path }: { lang?: string | null, path?: (string | null)[] | null } ) : string
 {
-    return (path?.length ?? 0) > 0 ?
-                `/${ lang ?? "" }/${ path?.join("/") ?? "" }` :
-                `/${ lang ?? "" }`
+    const slugs : string[] = []
+    if (path) slugs.push(...(path.filter(x=>x) as string[]))
+    if (lang) slugs.unshift(lang)
+    
+    return '/'+slugs.filter(x => x && x.length > 0).join('/')
 }

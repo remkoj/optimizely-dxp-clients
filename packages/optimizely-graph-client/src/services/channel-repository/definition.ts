@@ -1,4 +1,4 @@
-import type { ChannelDefinitionData, ChannelContent, ChannelDomain, ChannelLocale } from './types.js'
+import type { ReadonlyChannelDefinitionData, ChannelDefinitionData, ChannelContent, ChannelDomain, ChannelLocale } from './types.js'
 
 export class ChannelDefinition implements Readonly<ChannelDefinitionData> {
     public readonly id: string
@@ -153,6 +153,22 @@ export class ChannelDefinition implements Readonly<ChannelDefinitionData> {
     public localeToGraphLocale(code: string) : string | undefined
     {
         return this.locales.filter(locale => locale.code == code)[0]?.graphLocale
+    }
+
+    /**
+     * Extract the data needed to recreate this instance
+     * 
+     * @returns     An array, with as first element the data and as second element the CMS Domain
+     */
+    public asDataObject() : Readonly<[ReadonlyChannelDefinitionData, string]>
+    {
+        return [{
+            id: this.id,
+            name: this.name,
+            domains: this.domains,
+            locales: this.locales,
+            content: this.content
+        }, this.dxp_url]
     }
 }
 

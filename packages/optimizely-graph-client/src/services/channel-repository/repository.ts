@@ -3,6 +3,7 @@ import type { OptimizelyGraphConfig } from '../../types.js'
 import createClient, { isContentGraphClient, type IOptiGraphClient } from '../../client/index.js'
 import ChannelDefinition from './definition.js'
 import * as Queries from './queries.js'
+import { localeToGraphLocale } from '../utils.js'
 
 export class ChannelRepository
 {
@@ -83,15 +84,14 @@ export class ChannelRepository
                 const loc : ChannelLocale = {
                     code: c.code,
                     slug: c.slug,
-                    graphLocale: (c.code as string).replaceAll("-","_"),
+                    graphLocale: localeToGraphLocale(c.code as string),
                     isDefault: c.isDefault == true
                 }
                 return loc
             }),
             content: {
                 startPage: {
-                    id: ch.content?.startPage?.id,
-                    guidValue: ch.content?.startPage?.guidValue
+                    key: ch.content?.startPage?.key,
                 }
             }
         }, this.getCmsDomain())

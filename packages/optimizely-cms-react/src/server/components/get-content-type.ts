@@ -2,6 +2,7 @@ import type { IOptiGraphClient } from "@remkoj/optimizely-graph-client"
 import type { ContentType, ContentLinkWithLocale } from "../../types"
 import { gql } from 'graphql-request'
 import * as Utils from "../../utilities"
+import { isContentLink } from "@remkoj/optimizely-graph-client/utils"
 
 const DEBUG = false
 
@@ -14,7 +15,7 @@ const DEBUG = false
  */
 export async function getContentType(link: ContentLinkWithLocale, gqlClient: IOptiGraphClient) : Promise<ContentType | undefined>
 {
-    if ((!link.id || link.id < 1) && (!link.guidValue || link.guidValue == ""))
+    if (!isContentLink(link))
         throw new Error("Cannot dynamically determine the content type of an inline block")
     const gqlQueryVars = Utils.contentLinkToRequestVariables(link)
     const gqlResponse = await gqlClient.request<GetContentTypeResponse>(getContentTypeQuery, gqlQueryVars)

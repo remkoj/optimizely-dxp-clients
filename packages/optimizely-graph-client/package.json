@@ -19,7 +19,8 @@
     "./router": "./dist/services/routing/index.js",
     "./channels": "./dist/services/channel-repository/index.js",
     "./admin": "./dist/admin-api/index.js",
-    "./codegen": "./dist/codegen.js"
+    "./codegen": "./dist/codegen.js",
+    "./utils": "./dist/services/utils.js"
   },
   "typesVersions": {
     "*": {
@@ -43,6 +44,9 @@
       ],
       "codegen": [
         "dist/codegen.d.ts"
+      ],
+      "utils": [
+        "./dist/services/utils.d.ts"
       ]
     }
   },
@@ -66,7 +70,7 @@
     "clean": "tsc --build --clean",
     "compile-ts": "tsc --build",
     "prepare": "openapi --input https://cg.optimizely.com/app/swagger/swagger.json --output ./src/admin-api/client --name OptimizelyGraphAdminApi && node ./build/update-imports.cjs && tsc --build",
-    "watch": "tsc --watch",
+    "watch": "yarn tsc --watch",
     "recompile": "tsc --build --clean && tsc --build --force",
     "generate-admin": "openapi --input https://cg.optimizely.com/app/swagger/swagger.json --output ./src/admin-api/client --name OptimizelyGraphAdminApi && node ./build/update-imports.cjs"
   }

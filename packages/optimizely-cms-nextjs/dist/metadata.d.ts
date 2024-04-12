@@ -13,6 +13,6 @@ export declare class MetaDataResolver {
      * @param locale        The locale to be used, in a ContentGraph locale format
      * @returns             A Promise for the metadata of the given content type & instance
      */
-    resolve(factory: ComponentFactory, contentLink: ContentLink, contentType: string[], locale: string): Promise<Metadata>;
+    resolve(factory: ComponentFactory, contentLink: ContentLink, contentType: string[], locale?: string | null): Promise<Metadata>;
 }
 export default MetaDataResolver;

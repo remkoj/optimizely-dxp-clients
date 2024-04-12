@@ -3,8 +3,6 @@ import createClient, { isContentGraphClient, type OptimizelyGraphConfig, type IO
 import { Metadata } from 'next'
 import { isOptimizelyNextPageWithMetaData } from './page'
 
-const DEBUG = process.env.DXP_DEBUG == '1'
-
 export class MetaDataResolver
 {
     private _cgClient : IOptiGraphClient
@@ -23,12 +21,12 @@ export class MetaDataResolver
      * @param locale        The locale to be used, in a ContentGraph locale format
      * @returns             A Promise for the metadata of the given content type & instance
      */
-    public async resolve(factory: ComponentFactory, contentLink: ContentLink, contentType: string[], locale: string): Promise<Metadata>
+    public async resolve(factory: ComponentFactory, contentLink: ContentLink, contentType: string[], locale?: string | null): Promise<Metadata>
     {
-        if (DEBUG)
+        if (this._cgClient.debug)
             console.log("[MetaDataResolver] Resolving metadata for:", contentLink, contentType, locale)
 
-        if (locale.includes("-"))
+        if (locale && locale.includes("-"))
             throw new Error("Invalid character detected within the locale")
 
         const Component = factory.resolve(contentType)
@@ -37,7 +35,7 @@ export class MetaDataResolver
 
         if (isOptimizelyNextPageWithMetaData(Component) && Component.getMetaData) {
             const meta = await Component.getMetaData(contentLink, locale, this._cgClient)
-            if (DEBUG)
+            if (this._cgClient.debug)
                 console.log("[MetaDataResolver] Resolved metadata to:", meta)
             return meta
         }

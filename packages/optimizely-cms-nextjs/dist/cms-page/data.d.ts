@@ -1,24 +1,23 @@
 import { GraphQLClient } from "graphql-request";
-export type GetContentByPathVariables = {
+export type GetContentByPathVariables<LocaleType = string> = {
     path: string;
-    locale?: Array<string | null>[] | string | null;
+    locale?: Array<LocaleType | null> | LocaleType | null;
     siteId?: string | null;
 };
-export type GetContentByPathResponse = {
-    Content?: {
-        items?: {
-            contentType?: Array<string | null> | null;
-            id?: {
-                id?: number | null;
-                workId?: number | null;
-                guidValue?: string | null;
-            } | null;
-            locale?: {
-                name?: string | null;
-            } | null;
-            path?: string | null;
-        }[];
-    };
+type MayBe<T> = T extends Array<infer R> ? Array<R | null> | null : T | null;
+export type GetContentByPathResponse<LocaleType = string> = {
+    content?: MayBe<{
+        items?: MayBe<Array<{
+            _metadata?: MayBe<{
+                key?: MayBe<string>;
+                locale?: MayBe<LocaleType>;
+                types?: MayBe<Array<string>>;
+                displayName?: MayBe<string>;
+                version?: MayBe<string>;
+            }>;
+            _type?: MayBe<string>;
+        }>>;
+    }>;
 };
 export type GetMetaDataByPathResponse = {
     getGenericMetaData?: {
@@ -32,8 +31,8 @@ export type GetMetaDataByPathResponse = {
         } | null>;
     };
 };
-export type GetContentByPathMethod = (client: GraphQLClient, variables: GetContentByPathVariables) => Promise<GetContentByPathResponse>;
-export type GetMetaDataByPathMethod = (client: GraphQLClient, variables: GetContentByPathVariables) => Promise<GetMetaDataByPathResponse>;
+export type GetContentByPathMethod<LocaleType = string> = (client: GraphQLClient, variables: GetContentByPathVariables<LocaleType>) => Promise<GetContentByPathResponse<LocaleType>>;
+export type GetMetaDataByPathMethod<LocaleType = string> = (client: GraphQLClient, variables: GetContentByPathVariables<LocaleType>) => Promise<GetMetaDataByPathResponse>;
 export declare const getMetaDataByPath: GetMetaDataByPathMethod;
 export declare const getContentByPath: GetContentByPathMethod;
 export default getContentByPath;

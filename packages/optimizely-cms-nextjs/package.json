@@ -15,7 +15,8 @@
   "exports": {
     ".": "./dist/index.js",
     "./rsc": "./dist/client.js",
-    "./publish": "./dist/publish/index.js"
+    "./publish": "./dist/publish/index.js",
+    "./types": "./dist/types.js"
   },
   "typesVersions": {
     "*": {
@@ -24,6 +25,9 @@
       ],
       "publish": [
         "dist/publish/index.d.ts"
+      ],
+      "types": [
+        "dist/types.d.ts"
       ]
     }
   },
@@ -55,9 +59,9 @@
     "react": "*"
   },
   "scripts": {
-    "clean": "tsc --build --clean",
-    "prepare": "tsc --build",
-    "watch": "tsc --watch",
-    "recompile": "tsc --build --clean && tsc --build --force"
+    "clean": "yarn tsc --build --clean",
+    "prepare": "yarn tsc --build",
+    "watch": "yarn tsc --watch",
+    "recompile": "yarn tsc --build --clean && yarn tsc --build --force"
   }
 }

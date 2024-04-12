@@ -6,25 +6,24 @@ export const getContentByPath = (client, variables) => {
     return client.request(contentQuery, variables);
 };
 export default getContentByPath;
-const contentQuery = gql `query getContentByPathBase($path: String!, $locale: [Locales], $siteId: String) {
-    Content(
-        where: { RelativePath: { eq: $path }, SiteId: { eq: $siteId } }
+const contentQuery = gql `query getContentByPathBase($path: String!, $domain: String, $locale: [Locales]) {
+    content: Content(
+        where: { _metadata: { url: { hierarchical: { eq: $path }, base: { eq: $domain } } } }
         locale: $locale
     ) {
+        total
         items {
-            contentType: ContentType
-            id: ContentLink {
-                id: Id
-                workId: WorkId
-                guidValue: GuidValue
+            _metadata {
+                key
+                locale
+                types
+                displayName
+                version
             }
-            locale: Language {
-                name: Name
-            }
-            path: RelativePath
+            _type: __typename
         }
     }
-}`;
+  }`;
 const metadataQuery = gql `query getGenericMetaData($path: String!, $locale: [Locales], $siteId: String) {
     getGenericMetaData: Content (
         where: { RelativePath: { eq: $path }, SiteId: { eq: $siteId } }

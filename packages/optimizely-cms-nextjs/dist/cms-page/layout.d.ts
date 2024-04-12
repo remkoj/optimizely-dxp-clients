@@ -8,9 +8,10 @@ export type CmsPageLayout = {
     PageLayout: (props: PropsWithChildren<Omit<Props, 'searchParams'>>) => JSX.Element | ReactNode;
 };
 export type CreateLayoutOptions = {
-    defaultLocale: string;
+    defaultLocale: string | null;
     getMetaDataByPath: GetMetaDataByPathMethod;
     client: ClientFactory;
+    channel?: ChannelDefinition;
 };
-export declare function createLayout(channel: ChannelDefinition, options?: Partial<CreateLayoutOptions>): CmsPageLayout;
+export declare function createLayout(options?: Partial<CreateLayoutOptions>): CmsPageLayout;
 export default createLayout;

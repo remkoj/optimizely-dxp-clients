@@ -1,5 +1,5 @@
 import type { ComponentType, PropsWithChildren } from 'react'
-import type { ClientFactory } from '@remkoj/optimizely-graph-client'
+import type { ClientFactory, ChannelDefinition } from '@remkoj/optimizely-graph-client'
 import type { GraphQLClient } from 'graphql-request'
 
 type ServerPageProps = { params: Record<string,string | Array<string>>, searchParams: Record<string,string>}
@@ -44,7 +44,15 @@ export type EditViewOptions = {
      */
     loader: GetContentByIdMethod
 
+    /**
+     * The factory used to create a new Optimizely Graph Client
+     */
     clientFactory: ClientFactory
+
+    /**
+     * The channel to use when running the On-Page Edit pages
+     */
+    channel?: Readonly<ChannelDefinition>,
 }
 
 export type GetContentByIdVariables = {

@@ -120,6 +120,20 @@ export class ChannelDefinition {
     localeToGraphLocale(code) {
         return this.locales.filter(locale => locale.code == code)[0]?.graphLocale;
     }
+    /**
+     * Extract the data needed to recreate this instance
+     *
+     * @returns     An array, with as first element the data and as second element the CMS Domain
+     */
+    asDataObject() {
+        return [{
+                id: this.id,
+                name: this.name,
+                domains: this.domains,
+                locales: this.locales,
+                content: this.content
+            }, this.dxp_url];
+    }
 }
 export default ChannelDefinition;
 //# sourceMappingURL=definition.js.map

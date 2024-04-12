@@ -14,24 +14,24 @@ export type CmsPageLayout = {
 }
 
 export type CreateLayoutOptions = {
-    defaultLocale: string
+    defaultLocale: string | null
     getMetaDataByPath: GetMetaDataByPathMethod
     client: ClientFactory
+    channel?: ChannelDefinition
 }
 
 const defaultCreateLayoutOptions : CreateLayoutOptions = {
-    defaultLocale: "en",
+    defaultLocale: null,
     getMetaDataByPath: getMetaDataByPathBase,
     client: getServerClient
 }
 
 export function createLayout(
-    channel: ChannelDefinition,
     options?: Partial<CreateLayoutOptions>
 ) : CmsPageLayout {
-    const { defaultLocale, getMetaDataByPath, client: clientFactory } : CreateLayoutOptions = {
+    const { defaultLocale, getMetaDataByPath, client: clientFactory, channel } : CreateLayoutOptions = {
         ...defaultCreateLayoutOptions,
-        ...{ defaultLocale: channel.defaultLocale },
+        ...{ defaultLocale: null },
         ...options
     }
 
@@ -45,15 +45,13 @@ export function createLayout(
          * @returns     The metadata that must be merged into the defaults
          */
         generateMetadata: async ({ params }, resolving) => {
-            const locale = slugToLocale(channel, params?.lang ?? '', defaultLocale)
-            const relativePath = `/${ params.lang }${ params.path ? '/' + params.path.join('/') : '' }`
+            const relativePath = `/${ params.path ? '/' + params.path.join('/') : '' }`
             
             if (isDebug())
                 console.log(`⚪ [CmsPageLayout] Generating metadata for: ${ relativePath }`)
 
             const variables = {
-                path: relativePath,
-                locale: slugToGraphLocale(channel, params.lang ?? '', defaultLocale)
+                path: relativePath
             }
             const client = clientFactory()
             const response = await getMetaDataByPath(client, variables).catch(e => {
@@ -87,7 +85,7 @@ export function createLayout(
             }
             
             // Add alternative URLs
-            const alternates = (metadata?.alternatives || []).filter(Utils.isNotNullOrUndefined).filter(x => x.locale != locale) as {locale:string, href: string}[]
+            const alternates = (metadata?.alternatives || []).filter(Utils.isNotNullOrUndefined) as {locale:string, href: string}[]
             alternates.forEach(alt => {
                 if (pageMetadata.openGraph && Array.isArray(pageMetadata.openGraph.alternateLocale)) {
                     pageMetadata.openGraph.alternateLocale.push(alt.locale)
