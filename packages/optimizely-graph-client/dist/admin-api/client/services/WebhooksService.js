@@ -3,7 +3,7 @@ export class WebhooksService {
         this.httpRequest = httpRequest;
     }
     /**
-     * List all registered webhooks
+     * List webhooks
      * List all registered webhooks
      * @returns Webhook Ok
      * @throws ApiError
@@ -15,10 +15,12 @@ export class WebhooksService {
         });
     }
     /**
-     * Register a webhook
-     * Register a webhook and listen events respect to filter definition.
+     * Add webhook
+     * Register a webhook and listen events respect to filter definition
      *
-     * If no filter is provided then all events will be listened.
+     * ---
+     *
+     * _(empty filter): listen all events_
      * @param requestBody
      * @returns void
      * @throws ApiError
@@ -32,8 +34,8 @@ export class WebhooksService {
         });
     }
     /**
-     * Delete a registered webhook
-     * Delete a registered webhook respect to `id` parameter
+     * Delete webhook
+     * Delete a registered webhook with `id`
      * @param id
      * @returns void
      * @throws ApiError
@@ -48,8 +50,8 @@ export class WebhooksService {
         });
     }
     /**
-     * Update a registered webhook
-     * Update a registered webhook respect to `id` parameter
+     * Update webhook
+     * Update a registered webhook with `id`
      * @param id
      * @param requestBody
      * @returns void

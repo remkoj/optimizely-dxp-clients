@@ -57,17 +57,15 @@ export function validatesFragment<T extends ComponentType<any>>(toTest?: T) : to
     return false
 }
 
-export function contentLinkToRequestVariables(contentLink: Types.ContentLinkWithLocale, forEditMode: boolean = false) : Types.ContentQueryProps
+export function contentLinkToRequestVariables(contentLink: Types.ContentLinkWithLocale) : Types.ContentQueryProps
 {
     const variables : Types.ContentQueryProps = { 
         key: contentLink.key ?? '-no-content-selected-', 
-        locale: localeToGraphLocale(contentLink.locale),
+        locale: contentLink.locale ? localeToGraphLocale(contentLink.locale) : undefined,
         version: contentLink.version
     }
     if (variables.version == undefined || variables.version == '')
         variables.version = null
-    else if (forEditMode)
-        variables.isCommonDraft = true
     return variables
 }
 

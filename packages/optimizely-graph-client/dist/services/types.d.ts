@@ -3,5 +3,5 @@ export type ContentLink = {
     version?: string | null;
 };
 export type ContentLinkWithLocale<LocaleType = string> = ContentLink & {
-    locale?: LocaleType;
+    locale?: LocaleType | null;
 };

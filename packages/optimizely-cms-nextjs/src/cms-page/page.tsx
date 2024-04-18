@@ -151,11 +151,21 @@ export function createPage<LocaleEnum = SystemLocales>(
     return pageDefintion
 }
 
+/**
+ * 
+ * 
+ * @param   param0  The URL parameters
+ * @returns The request path as understood by Graph
+ */
 function buildRequestPath({ lang, path }: { lang?: string | null, path?: (string | null)[] | null } ) : string
 {
     const slugs : string[] = []
     if (path) slugs.push(...(path.filter(x=>x) as string[]))
     if (lang) slugs.unshift(lang)
+    if (slugs.length == 0) return '/'
     
-    return '/'+slugs.filter(x => x && x.length > 0).join('/')
+    const fullPath = '/'+slugs.filter(x => x && x.length > 0).join('/')
+    if (!slugs[slugs.length - 1].includes('.'))
+        return fullPath + '/'
+    return fullPath
 }

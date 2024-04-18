@@ -7,18 +7,37 @@ export class ResourcesService {
      * Stop words are the words in a stop list (or stop list or negative dictionary) which are filtered out (stopped) before or after processing of natural language data (text) because they are insignificant
      * @param requestBody
      * @param languageRouting
+     * @param sourceRouting
      * @returns void
      * @throws ApiError
      */
-    upsertStopwordHandler(requestBody, languageRouting) {
+    upsertStopwordHandler(requestBody, languageRouting, sourceRouting) {
         return this.httpRequest.request({
             method: 'PUT',
             url: '/resources/stopwords',
             query: {
                 'language_routing': languageRouting,
+                'source_routing': sourceRouting,
             },
             body: requestBody,
             mediaType: 'text/plain',
+        });
+    }
+    /**
+     * Delete stop words
+     * @param languageRouting
+     * @param sourceRouting
+     * @returns void
+     * @throws ApiError
+     */
+    deleteStopwordHandler(languageRouting, sourceRouting) {
+        return this.httpRequest.request({
+            method: 'DELETE',
+            url: '/resources/stopwords',
+            query: {
+                'language_routing': languageRouting,
+                'source_routing': sourceRouting,
+            },
         });
     }
     /**
@@ -29,20 +48,39 @@ export class ResourcesService {
      * This happens when you store synonyms in Optimizely Graph and enable them per field in your query. Otherwise, many relevant results may not be retrieved.
      * @param requestBody
      * @param languageRouting
+     * @param sourceRouting
      * @param synonymSlot
      * @returns void
      * @throws ApiError
      */
-    upsertSynonymHandler(requestBody, languageRouting, synonymSlot = 'one') {
+    upsertSynonymHandler(requestBody, languageRouting, sourceRouting, synonymSlot = 'one') {
         return this.httpRequest.request({
             method: 'PUT',
             url: '/resources/synonyms',
             query: {
                 'language_routing': languageRouting,
+                'source_routing': sourceRouting,
                 'synonym_slot': synonymSlot,
             },
             body: requestBody,
             mediaType: 'text/plain',
+        });
+    }
+    /**
+     * Delete synonyms
+     * @param languageRouting
+     * @param sourceRouting
+     * @returns void
+     * @throws ApiError
+     */
+    deleteSynonymHandler(languageRouting, sourceRouting) {
+        return this.httpRequest.request({
+            method: 'DELETE',
+            url: '/resources/synonyms',
+            query: {
+                'language_routing': languageRouting,
+                'source_routing': sourceRouting,
+            },
         });
     }
 }

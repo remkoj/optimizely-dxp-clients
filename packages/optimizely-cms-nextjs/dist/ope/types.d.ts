@@ -1,6 +1,8 @@
-import type { ComponentType, PropsWithChildren } from 'react';
-import type { ClientFactory, ChannelDefinition } from '@remkoj/optimizely-graph-client';
-import type { GraphQLClient } from 'graphql-request';
+import { type ComponentType, type PropsWithChildren } from 'react';
+import { type ClientFactory } from '@remkoj/optimizely-graph-client';
+import { type GraphQLClient } from 'graphql-request';
+import { type ContentQueryProps } from '@remkoj/optimizely-cms-react';
+export { type ContentQueryProps } from '@remkoj/optimizely-cms-react';
 type ServerPageProps = {
     params: Record<string, string | Array<string>>;
     searchParams: Record<string, string>;
@@ -48,33 +50,26 @@ export type EditViewOptions = {
      * The factory used to create a new Optimizely Graph Client
      */
     clientFactory: ClientFactory;
-    /**
-     * The channel to use when running the On-Page Edit pages
-     */
-    channel?: Readonly<ChannelDefinition>;
 };
-export type GetContentByIdVariables = {
-    id?: number;
-    workId?: number | null;
-    guidValue?: string | null;
-    locale?: string | Array<string>;
-    isCommonDraft?: boolean | null;
-};
-export type GetContentByIdData = {
-    Content: {
-        items: {
-            contentType?: Array<string | null> | null;
-            id: {
-                id?: number | null;
-                workId?: number | null;
-                guidValue?: string | null;
+export type GetContentByIdData<LocaleType = string> = {
+    content: {
+        total: number;
+        items: Array<{
+            _metadata: {
+                key: string;
+                locale: LocaleType;
+                types: Array<string>;
+                displayName: string;
+                version?: string | null;
+                url?: {
+                    base?: string | null;
+                    hierarchical?: string | null;
+                    default?: string | null;
+                } | null;
             };
-            locale?: {
-                name?: string | null;
-            } | null;
-            path?: string | null;
-        }[];
+            _type: string;
+            [fieldName: string]: any;
+        }>;
     };
 };
-export type GetContentByIdMethod = (client: GraphQLClient, variables: GetContentByIdVariables) => Promise<GetContentByIdData>;
-export {};
+export type GetContentByIdMethod = <LocaleType = string>(client: GraphQLClient, variables: ContentQueryProps<LocaleType>) => Promise<GetContentByIdData<LocaleType>>;

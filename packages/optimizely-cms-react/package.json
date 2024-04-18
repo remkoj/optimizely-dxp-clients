@@ -38,16 +38,16 @@
   "devDependencies": {
     "@remkoj/optimizely-graph-client": "workspace:1.0.4",
     "@types/crypto-js": "^4.2.2",
-    "@types/node": "^20.12.6",
-    "@types/react": "^18.2.75",
-    "@types/react-dom": "18.2.24",
+    "@types/node": "^20.12.7",
+    "@types/react": "^18.2.79",
+    "@types/react-dom": "18.2.25",
     "graphql": "^16.8.1",
     "graphql-request": "^6.1.0",
     "prop-types": "^15.8.1",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "scheduler": "^0.23.0",
-    "typescript": "^5.4.4"
+    "typescript": "^5.4.5"
   },
   "dependencies": {
     "@graphql-typed-document-node/core": "^3.2.0",

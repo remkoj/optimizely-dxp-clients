@@ -1,4 +1,3 @@
-import type { OpenAPIConfig } from '../client/core/OpenAPI.js';
 import type { ApiRequestOptions } from '../client/core/ApiRequestOptions.js';
 import { CancelablePromise, type OnCancel } from '../client/core/CancelablePromise.js';
 import type { FetchAPI } from '../../hmac-fetch.js';

@@ -31,7 +31,7 @@ export const transform : Types.DocumentTransformFunction<TransformOptions> = asy
         visit(file.document, {
             FragmentDefinition: {
                 enter(node) {
-                    console.log("[ DEBUG ] Visiting fragment:", node.name.value, node.typeCondition.name.value)
+                    //console.log("[ DEBUG ] Visiting fragment:", node.name.value, node.typeCondition.name.value)
                     const matchingInjections = applicableInjections.filter(injection => !injection.nameRegex || (new RegExp(injection.nameRegex)).test(node.name.value))
                     if (!matchingInjections || matchingInjections.length == 0)
                         return false
@@ -53,7 +53,7 @@ export const transform : Types.DocumentTransformFunction<TransformOptions> = asy
     const componentSpreads : { [ into: string ]: InlineFragmentNode[] } = {}
     if (intoNames.length > 0) {
         // Process the fragments, add matching spreads if need be
-        const recursiveFragments : string[] = [ "BlockContentAreaItemSearchData" , "BlockContentAreaItemData" ]
+        const recursiveFragments : string[] = [ "IContentListItem" ]
         
         intoNames.forEach(intoName => {
             //console.log(`[ DEBUG ] Preparing mutations for ${ intoName }`)
@@ -78,6 +78,15 @@ export const transform : Types.DocumentTransformFunction<TransformOptions> = asy
                                             kind: Kind.FIELD,
                                             name: (fields[0] as FieldNode).name,
                                             alias: (fields[0] as FieldNode).alias,
+                                            directives: [{
+                                                kind: Kind.DIRECTIVE,
+                                                name: { kind: Kind.NAME, value: "recursive" },
+                                                arguments: [{
+                                                    kind: Kind.ARGUMENT,
+                                                    name: { kind: Kind.NAME, value: "depth" },
+                                                    value: { kind: Kind.INT, value: "5" }
+                                                }]
+                                            }],
                                             selectionSet: {
                                                 kind: Kind.SELECTION_SET,
                                                 selections: recursiveSelections
@@ -152,10 +161,6 @@ export const transform : Types.DocumentTransformFunction<TransformOptions> = asy
 export default { transform }
 
 // The recursive sections to add
-const recursiveSelections = (parse(`fragment BlockContentAreaItemData on ContentAreaItemModel {
-    item: ContentLink {
-        data: Expanded @recursive(depth: 3) {
-            __typename
-        }
-    }
+const recursiveSelections = (parse(`fragment IContentListItem on IContent {
+    ...IContentData
 }`).definitions[0] as FragmentDefinitionNode)?.selectionSet.selections || [];

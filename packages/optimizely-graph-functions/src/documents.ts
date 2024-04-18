@@ -8,18 +8,62 @@ export const fragments = [
 `fragment IContentData on IContent
 {
     _metadata {
-        key
-        locale
-        types
-        displayName
-        version
+        ...IContentInfo
     }
     _type: __typename
+}`,
+`fragment CompositionData on ICompositionNode {
+    name
+    type
+    ... on ICompositionStructureNode {
+        nodes @recursive(depth: 5) {
+            name
+        }
+    }
+    ... on ICompositionElementNode {
+        element {
+            ...ElementData
+        }
+    }
+}`,
+`fragment IElementData on IElement {
+    _metadata {
+        ...IContentInfo
+    }
+    _type: __typename
+}`,
+`fragment ElementData on IElement {
+    ...IElementData
 }`,
 `fragment BlockData on IContent {
     ...IContentData
 }`,
 `fragment PageData on IContent {
+    ...IContentData
+}`,
+`fragment LinkData on ContentUrl {
+    base
+    hierarchical
+    default
+}`,
+`fragment ReferenceData on ContentReference {
+    key
+    locale
+    url {
+        ...LinkData
+    }
+}`,
+`fragment IContentInfo on IContentMetadata {
+    key
+    locale
+    types
+    displayName
+    version
+    url {
+        ...LinkData
+    }
+}`,
+`fragment IContentListItem on IContent {
     ...IContentData
 }`
   /*
@@ -122,19 +166,14 @@ export const fragments = [
     }`*/
 ]
 export const queries = [
-`query getContentById($id: String!, $locale: [Locales]) {
-    content: Content(where: { _metadata: { key: { eq: $id } } }, locale: $locale) {
-        total
-        items {
-            ...IContentData
-            ...BlockData
-            ...PageData
-        }
-    }
-}`,
-`query getContentByPath($path: String!, $domain: String, $locale: [Locales]) {
+`query getContentById($key: String!, $version: String, $locale: [Locales!], $path: String, $domain: String) {
     content: Content(
-        where: { _metadata: { url: { hierarchical: { eq: $path }, base: { eq: $domain } } } }
+        where: {
+            _or: [
+                { _metadata: { key: { eq: $key }, version: { eq: $version } } }
+                { _metadata: { url: { hierarchical: { eq: $path }, base: { eq: $domain } }, version: { eq: $version } } }
+            ]
+        }
         locale: $locale
     ) {
         total
@@ -145,8 +184,34 @@ export const queries = [
         }
     }
 }`,
-`query getContentType($id: String!, $locale: [Locales]) {
-    content: Content(where: { _metadata: { key: { eq: $id } } }, locale: $locale) {
+`query getContentByPath($key: String, $version: String, $locale: [Locales!], $path: String!, $domain: String) {
+    content: Content(
+        where: {
+            _or: [
+                { _metadata: { key: { eq: $key }, version: { eq: $version } } }
+                { _metadata: { url: { hierarchical: { eq: $path }, base: { eq: $domain } }, version: { eq: $version } } }
+            ]
+        }
+        locale: $locale
+    ) {
+        total
+        items {
+            ...IContentData
+            ...BlockData
+            ...PageData
+        }
+    }
+}`,
+`query getContentType($key: String!, $version: String, $locale: [Locales!], $path: String, $domain: String) {
+    content: Content(
+        where: {
+            _or: [
+                { _metadata: { key: { eq: $key }, version: { eq: $version } } }
+                { _metadata: { url: { hierarchical: { eq: $path }, base: { eq: $domain } }, version: { eq: $version } } }
+            ]
+        }
+        locale: $locale
+    ) {
         total
         items {
             _metadata {

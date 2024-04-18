@@ -22,8 +22,27 @@ export type OptiGraphSiteInfo = {
 }
 
 export type IOptiGraphClientFlags = {
+    /**
+     * Control support for caching the execution plan for a query, this ensures
+     * that the execution plan does not need to be rebuild after publishing content.
+     * 
+     * The following features do not work with query caching enabled:
+     * - @recursive
+     * - cursors
+     */
     queryCache: boolean
+
+    /**
+     * Control support for the recursive directive within Optimizely Graph
+     * 
+     * @see https://docs.developers.optimizely.com/platform-optimizely/v1.4.0-optimizely-graph/docs/recursive-directive-usage
+     */
     recursive: boolean
+
+    /**
+     * Cache the output of a query on the CDN edge, so subsequent requests for the
+     * same data will be handled completely at the CDN edge.
+     */
     cache: boolean
 }
 

@@ -2,7 +2,6 @@ import type { ApiRequestOptions } from './ApiRequestOptions.js';
 import type { ApiResult } from './ApiResult.js';
 import { CancelablePromise } from './CancelablePromise.js';
 import type { OnCancel } from './CancelablePromise.js';
-import type { OpenAPIConfig } from './OpenAPI.js';
 export declare const isDefined: <T>(value: T | null | undefined) => value is Exclude<T, null | undefined>;
 export declare const isString: (value: any) => value is string;
 export declare const isStringWithValue: (value: any) => value is string;

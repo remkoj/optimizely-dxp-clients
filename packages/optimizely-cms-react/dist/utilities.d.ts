@@ -8,7 +8,7 @@ export declare function normalizeContentType(toNormalize: (string | null)[] | nu
 export declare function isCmsComponentWithDataQuery<T = DocumentNode>(toTest?: Types.BaseCmsComponent<T>): toTest is Types.CmsComponentWithQuery<T>;
 export declare function isCmsComponentWithFragment<T = DocumentNode>(toTest?: Types.BaseCmsComponent<T>): toTest is Types.CmsComponentWithFragment<T>;
 export declare function validatesFragment<T extends ComponentType<any>>(toTest?: T): toTest is T & Pick<Required<Types.WithGqlFragment<T, any>>, "validateFragment">;
-export declare function contentLinkToRequestVariables(contentLink: Types.ContentLinkWithLocale, forEditMode?: boolean): Types.ContentQueryProps;
+export declare function contentLinkToRequestVariables(contentLink: Types.ContentLinkWithLocale): Types.ContentQueryProps;
 export declare function toUniqueValues<R extends any>(value: R, index: number, array: Array<R>): value is R;
 export declare function trim<T extends string | null | undefined>(valueToTrim: T): T;
 export declare function getContentEditId(contentLink: Types.ContentLink): string;

@@ -1,7 +1,7 @@
 import { jsx as _jsx, jsxs as _jsxs, Fragment as _Fragment } from "react/jsx-runtime";
 import 'server-only';
 import { AuthMode } from '@remkoj/optimizely-graph-client';
-import { normalizeContentLinkWithLocale, contentLinkToString } from '@remkoj/optimizely-graph-client/utils';
+import { contentLinkToString } from '@remkoj/optimizely-graph-client/utils';
 import { Utils } from '@remkoj/optimizely-cms-react';
 import { CmsContent, getServerContext } from '@remkoj/optimizely-cms-react/rsc';
 import { notFound } from 'next/navigation';
@@ -10,7 +10,6 @@ import { getAuthorizedServerClient } from '../client';
 import React from 'react';
 import Script from 'next/script';
 import { getContentById } from './data';
-import { localeToGraphLocale } from '@remkoj/optimizely-graph-client/utils';
 const defaultOptions = {
     refreshDelay: 2000,
     refreshNotice: () => _jsx("div", { className: 'optly-refresh-notice', children: "Updating preview, please wait...." }),
@@ -19,20 +18,39 @@ const defaultOptions = {
     loader: getContentById,
     clientFactory: (token) => getAuthorizedServerClient(token)
 };
+// Helper function to read the ContentID & WorkID
+function getContentRequest(path = "", searchParams) {
+    try {
+        const fullPath = Array.isArray(path) ? path.map(p => decodeURIComponent(p)).join('/') : decodeURI(path);
+        const [cmsPath, contentString] = fullPath.split(',,', 3);
+        const [contentKey, contentVersion] = (contentString ?? '').split('_', 3);
+        const contentPath = (cmsPath.startsWith('/') ? cmsPath.substring(1) : cmsPath).replace(/^(ui\/){0,1}(CMS\/){0,1}(Content\/){0,1}/gi, "");
+        const firstSlug = contentPath.split('/')[0];
+        const contentLocale = firstSlug?.length == 2 || firstSlug?.length == 5 ? firstSlug : undefined;
+        return {
+            key: contentKey,
+            version: contentVersion,
+            locale: contentLocale,
+            path: '/' + contentPath
+        };
+    }
+    catch {
+        return undefined;
+    }
+}
 /**
  * Create the EditPage component needed by Next.JS to render the "On Page
  * Editing" variant of the content item selected by the editor.
  *
  * @param   dxpUrl      The domain of the CMS instance
  * @param   client      The Apollo GraphQL client to use
- * @param   channel     The static site definition to use
  * @param   factory     The component factory to be used
  * @param   options     The optional options to use to control the edit page
  * @returns The React Component that can be used by Next.JS to render the page
  */
 export function createEditPageComponent(factory, options) {
-    const { layout: PageLayout, refreshNotice: RefreshNotice, refreshDelay, errorNotice: ErrorNotice, loader: getContentById, clientFactory, channel } = { ...defaultOptions, ...options };
-    async function EditPage({ params, searchParams }) {
+    const { layout: PageLayout, refreshNotice: RefreshNotice, refreshDelay, errorNotice: ErrorNotice, loader: getContentById, clientFactory } = { ...defaultOptions, ...options };
+    async function EditPage({ params: { path }, searchParams }) {
         // Create context
         const context = getServerContext();
         // Validate the search parameters
@@ -50,76 +68,56 @@ export function createEditPageComponent(factory, options) {
         }
         if (context.isDebug)
             console.log(`[OnPageEdit] Valid edit mode request: EpiEditMode=${searchParams.epieditmode}`);
-        // Helper function to read the ContentID & WorkID
-        function getContentIds() {
-            try {
-                // When using HMAC authentication, fall back to information in the URL
-                if (validDev) {
-                    const contentString = slugs.join('/').split(',,').pop() ?? '';
-                    const [contentId, workId] = contentString.split('_', 3);
-                    return [contentId, workId];
-                }
-                // Normally take the information from the token
-                const jwt = JSON.parse(Buffer.from((token || '..').split('.', 3)[1], 'base64').toString());
-                const contentId = jwt?.c_id || '';
-                const workId = jwt?.c_ver || null;
-                if ((jwt.exp * 1000) < Date.now())
-                    console.warn("[OnPageEdit] Token has expired, it is unlikely that you are able to fetch content with it");
-                return [contentId, workId];
-            }
-            catch {
-                return ["", null];
-            }
-        }
         // Build context
         const client = clientFactory(token);
         context.setOptimizelyGraphClient(client);
         context.setComponentFactory(factory);
         context.setInEditMode(epiEditMode == 'true');
         // Get information from the Request URI
-        const requestPath = ('/' + params.path.map(decodeURIComponent).join('/')).replace(/^(\/ui){0,1}(\/cms){0,1}(\/content){0,1}\//i, '');
-        const slugs = requestPath.split('/');
-        const locale = channel ? channel.locales.some(x => x.slug == slugs[0]) ? slugs[0] : channel.defaultLocale : slugs[0];
-        if (context.isDebug)
-            console.log(`[OnPageEdit] Inferred content locale from path: ${locale}`);
-        const [contentId, workId] = getContentIds();
-        context.setLocale(channel ? channel.localeToGraphLocale(locale) : localeToGraphLocale(locale));
-        const contentLink = { key: contentId, version: workId, locale: locale };
-        const variables = Utils.contentLinkToRequestVariables(contentLink, true);
+        const contentRequest = getContentRequest(path, searchParams);
+        if (!contentRequest) {
+            console.error("[OnPageEdit] Unable to resolve requested content");
+            return notFound();
+        }
         if (context.isDebug) {
-            console.log("[OnPageEdit] Requested content:", JSON.stringify(variables));
+            console.log("[OnPageEdit] Requested content:", JSON.stringify(contentRequest));
             console.log("[OnPageEdit] Creating GraphQL Client:", token);
         }
         try {
-            const contentInfo = await getContentById(client, variables);
-            const contentItem = (contentInfo?.Content?.items ?? [])[0];
-            const contentType = Utils.normalizeContentType(contentItem?.contentType);
+            const contentInfo = await getContentById(client, contentRequest);
+            if ((contentInfo?.content?.total ?? 0) > 1) {
+                console.warn("[OnPageEdit] Content request " + JSON.stringify(contentRequest) + " yielded more then one item, picking first matching");
+            }
+            const contentItem = (contentInfo?.content?.items ?? [])[0];
+            const contentType = Utils.normalizeContentType(contentItem?._metadata.types);
             // Return a 404 if the content item or type could not be resolved
             if (!contentItem) {
-                console.warn(`[OnPageEdit] The content item for ${JSON.stringify(variables)} could not be loaded from Optimizely Graph`);
+                console.warn(`[OnPageEdit] The content item for ${JSON.stringify(contentRequest)} could not be loaded from Optimizely Graph`);
                 return notFound();
             }
             if (!contentType) {
-                console.warn(`[OnPageEdit] The content item for ${JSON.stringify(variables)} did not contain content type information`);
+                console.warn(`[OnPageEdit] The content item for ${JSON.stringify(contentRequest)} did not contain content type information`);
                 return notFound();
             }
+            const contentLink = {
+                key: contentItem._metadata.key,
+                locale: contentItem._metadata.locale,
+                version: contentItem._metadata.version
+            };
             if (context.isDebug) {
-                const contentItemId = contentItem?.id;
                 console.log("[OnPageEdit] Resolved content:", JSON.stringify({
-                    id: contentItemId?.id,
-                    workId: contentItemId?.workId,
-                    guidValue: contentItemId?.guidValue,
-                    locale: contentItem.locale?.name,
-                    type: (contentItem.contentType ?? []).slice(0, -1).join('/')
+                    ...contentLink,
+                    type: (contentItem.contentType ?? []).join('/')
                 }));
             }
             // Store the editable content so it can be tested
             context.setEditableContentId(contentLink);
+            if (contentLink.locale)
+                context.setLocale(contentLink.locale);
             // Render the content, with edit mode context
-            const isPage = contentItem.contentType?.some(x => x?.toLowerCase() == "page") ?? false;
-            const loadedContentId = normalizeContentLinkWithLocale({ ...contentItem?.id, locale: contentItem?.locale?.name });
+            const isPage = contentType.some(x => x?.toLowerCase() == "page") ?? false;
             const Layout = isPage ? PageLayout : React.Fragment;
-            const output = _jsxs(_Fragment, { children: [context.inEditMode && _jsx(Script, { src: new URL('/ui/CMS/latest/clientresources/communicationinjector.js', client.siteInfo.cmsURL).href, strategy: 'afterInteractive' }), _jsxs(Layout, { locale: locale, children: [_jsx(OnPageEdit, { timeout: refreshDelay, mode: context.inEditMode ? 'edit' : 'preview', className: 'bg-slate-900 absolute top-0 left-0 w-screen h-screen opacity-60 z-50', children: _jsx(RefreshNotice, {}) }), _jsx(CmsContent, { contentType: contentType, contentLink: contentLink, fragmentData: contentItem })] }), _jsxs("div", { className: 'optly-contentLink', children: ["ContentItem: ", loadedContentId ? contentLinkToString(loadedContentId) : "Invalid content link returned from Optimizely Graph"] })] });
+            const output = _jsxs(_Fragment, { children: [context.inEditMode && _jsx(Script, { src: new URL('/ui/CMS/latest/clientresources/communicationinjector.js', client.siteInfo.cmsURL).href, strategy: 'afterInteractive' }), _jsxs(Layout, { locale: contentItem.locale?.name ?? '', children: [_jsx(OnPageEdit, { timeout: refreshDelay, mode: context.inEditMode ? 'edit' : 'preview', className: 'bg-slate-900 absolute top-0 left-0 w-screen h-screen opacity-60 z-50', children: _jsx(RefreshNotice, {}) }), _jsx(CmsContent, { contentType: contentType, contentLink: contentLink, fragmentData: contentItem })] }), _jsxs("div", { className: 'optly-contentLink', children: ["ContentItem: ", contentLink ? contentLinkToString(contentLink) : "Invalid content link returned from Optimizely Graph"] })] });
             return output;
         }
         catch (e) {

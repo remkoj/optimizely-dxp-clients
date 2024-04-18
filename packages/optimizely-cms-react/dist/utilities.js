@@ -35,16 +35,14 @@ export function validatesFragment(toTest) {
         return toTest.validateFragment && typeof (toTest.validateFragment) == 'function' ? true : false;
     return false;
 }
-export function contentLinkToRequestVariables(contentLink, forEditMode = false) {
+export function contentLinkToRequestVariables(contentLink) {
     const variables = {
         key: contentLink.key ?? '-no-content-selected-',
-        locale: localeToGraphLocale(contentLink.locale),
+        locale: contentLink.locale ? localeToGraphLocale(contentLink.locale) : undefined,
         version: contentLink.version
     };
     if (variables.version == undefined || variables.version == '')
         variables.version = null;
-    else if (forEditMode)
-        variables.isCommonDraft = true;
     return variables;
 }
 export function toUniqueValues(value, index, array) {

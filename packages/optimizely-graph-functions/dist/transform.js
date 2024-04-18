@@ -27,7 +27,7 @@ const transform = async ({ documents: files, config, schema }) => {
         (0, graphql_1.visit)(file.document, {
             FragmentDefinition: {
                 enter(node) {
-                    console.log("[ DEBUG ] Visiting fragment:", node.name.value, node.typeCondition.name.value);
+                    //console.log("[ DEBUG ] Visiting fragment:", node.name.value, node.typeCondition.name.value)
                     const matchingInjections = applicableInjections.filter(injection => !injection.nameRegex || (new RegExp(injection.nameRegex)).test(node.name.value));
                     if (!matchingInjections || matchingInjections.length == 0)
                         return false;
@@ -48,7 +48,7 @@ const transform = async ({ documents: files, config, schema }) => {
     const componentSpreads = {};
     if (intoNames.length > 0) {
         // Process the fragments, add matching spreads if need be
-        const recursiveFragments = ["BlockContentAreaItemSearchData", "BlockContentAreaItemData"];
+        const recursiveFragments = ["IContentListItem"];
         intoNames.forEach(intoName => {
             //console.log(`[ DEBUG ] Preparing mutations for ${ intoName }`)
             componentFragments[intoName].forEach(fragment => {
@@ -72,6 +72,15 @@ const transform = async ({ documents: files, config, schema }) => {
                                                 kind: graphql_1.Kind.FIELD,
                                                 name: fields[0].name,
                                                 alias: fields[0].alias,
+                                                directives: [{
+                                                        kind: graphql_1.Kind.DIRECTIVE,
+                                                        name: { kind: graphql_1.Kind.NAME, value: "recursive" },
+                                                        arguments: [{
+                                                                kind: graphql_1.Kind.ARGUMENT,
+                                                                name: { kind: graphql_1.Kind.NAME, value: "depth" },
+                                                                value: { kind: graphql_1.Kind.INT, value: "5" }
+                                                            }]
+                                                    }],
                                                 selectionSet: {
                                                     kind: graphql_1.Kind.SELECTION_SET,
                                                     selections: recursiveSelections
@@ -145,11 +154,7 @@ const transform = async ({ documents: files, config, schema }) => {
 exports.transform = transform;
 exports.default = { transform: exports.transform };
 // The recursive sections to add
-const recursiveSelections = (0, graphql_1.parse)(`fragment BlockContentAreaItemData on ContentAreaItemModel {
-    item: ContentLink {
-        data: Expanded @recursive(depth: 3) {
-            __typename
-        }
-    }
+const recursiveSelections = (0, graphql_1.parse)(`fragment IContentListItem on IContent {
+    ...IContentData
 }`).definitions[0]?.selectionSet.selections || [];
 //# sourceMappingURL=transform.js.map

@@ -7,7 +7,6 @@ import { type ComponentFactory } from '@remkoj/optimizely-cms-react/rsc';
  *
  * @param   dxpUrl      The domain of the CMS instance
  * @param   client      The Apollo GraphQL client to use
- * @param   channel     The static site definition to use
  * @param   factory     The component factory to be used
  * @param   options     The optional options to use to control the edit page
  * @returns The React Component that can be used by Next.JS to render the page

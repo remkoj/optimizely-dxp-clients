@@ -2,7 +2,7 @@ import type { PropsWithChildren, ComponentType as ReactComponentType, ExoticComp
 import type { DocumentNode } from "graphql";
 import type { TypedDocumentNode } from '@graphql-typed-document-node/core';
 import type { IOptiGraphClient } from "@remkoj/optimizely-graph-client";
-import type { ContentLinkWithLocale } from "@remkoj/optimizely-graph-client/router";
+import type { ContentLink, ContentLinkWithLocale } from "@remkoj/optimizely-graph-client/router";
 export type ContentType = string[];
 export type { ContentLink, ContentLinkWithLocale } from "@remkoj/optimizely-graph-client/router";
 export type CmsComponentProps<T> = PropsWithChildren<{
@@ -27,8 +27,10 @@ export type CmsComponentProps<T> = PropsWithChildren<{
      */
     client?: IOptiGraphClient;
 }>;
-export type ContentQueryProps = ContentLinkWithLocale & {
-    isCommonDraft?: boolean;
+export type ContentQueryProps<LocaleType = string> = ContentLink & {
+    locale?: Array<LocaleType> | LocaleType | null;
+    path?: string | null;
+    domain?: string | null;
 };
 /**
  * Extract the data type from a GraphQL Query
