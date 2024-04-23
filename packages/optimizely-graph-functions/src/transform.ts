@@ -1,4 +1,4 @@
-import type { Types } from '@graphql-codegen/plugin-helpers'
+import {type Types } from '@graphql-codegen/plugin-helpers'
 import type { Injection } from './types'
 import type { FragmentDefinitionNode, SelectionNode, FieldNode, SelectionSetNode, InlineFragmentNode } from 'graphql'
 import { Kind, parse, visit } from 'graphql'
@@ -6,20 +6,21 @@ import fs from 'node:fs'
 
 export type TransformOptions = {
     injections?: Injection[],
+    verbose?: boolean
 }
 
 export function pickTransformOptions(options: Record<string,any>) : TransformOptions
 {
     return {
-        injections: options.injections ?? []
+        injections: options.injections ?? [],
+        verbose: options.verbose ?? false
     }
 }
 
 function isArray<T>(toTest : T | readonly T[]) : toTest is readonly T[] { return Array.isArray(toTest) }
 
-export const transform : Types.DocumentTransformFunction<TransformOptions> = async ({documents: files, config, schema }) =>
+export const transform : Types.DocumentTransformFunction<TransformOptions> = ({documents: files, config, schema, pluginContext }) =>
 {
-    //console.log("[STARTED] Optimizely document transformation")
     const injections = config.injections ?? []
 
     // Retrieve component fragments
@@ -31,12 +32,11 @@ export const transform : Types.DocumentTransformFunction<TransformOptions> = asy
         visit(file.document, {
             FragmentDefinition: {
                 enter(node) {
-                    //console.log("[ DEBUG ] Visiting fragment:", node.name.value, node.typeCondition.name.value)
                     const matchingInjections = applicableInjections.filter(injection => !injection.nameRegex || (new RegExp(injection.nameRegex)).test(node.name.value))
                     if (!matchingInjections || matchingInjections.length == 0)
                         return false
                     matchingInjections.forEach(injection => {
-                        //console.log(`[ DEBUG ] Matched ${ node.name.value } for ${ injection.into } in file ${ node.loc?.source?.name }`)
+                        if (config.verbose) console.debug(`[ OPTIMIZELY ] Found ${ node.name.value } for ${ injection.into } in file ${ node.loc?.source?.name }`)
                         if (!componentFragments[injection.into])
                             componentFragments[injection.into] = []
                         if (!componentFragments[injection.into].some(f => f.name.value == node.name.value))
@@ -56,14 +56,12 @@ export const transform : Types.DocumentTransformFunction<TransformOptions> = asy
         const recursiveFragments : string[] = [ "IContentListItem" ]
         
         intoNames.forEach(intoName => {
-            //console.log(`[ DEBUG ] Preparing mutations for ${ intoName }`)
             componentFragments[intoName].forEach(fragment => {
-                //console.log(`[ DEBUG ] Preparing mutations for fragment ${ fragment.name.value } within ${ intoName }`)
                 visit(fragment, {
                     FragmentSpread: {
                         leave(node, key, parent, path, ancestors) {
                             if (recursiveFragments.includes(node.name.value) && !isArray(ancestors[0]) && ancestors[0].kind == Kind.FRAGMENT_DEFINITION) {
-                                //console.log(`[ DEBUG ] Leaving ${ node.name.value } within  ${ fragment.name.value } for ${ intoName}, creating recursive fragment`)
+                                if (config.verbose) console.debug(`[ OPTIMIZELY ] Found ${ node.name.value } within ${ fragment.name.value } for ${ intoName }, creating recursive fragment`)
                                 const fields = ancestors.filter(a => !isArray(a) && a.kind != Kind.FRAGMENT_DEFINITION && a.kind != Kind.SELECTION_SET)
                                 if (fields.length < 1)
                                     return undefined
@@ -104,26 +102,27 @@ export const transform : Types.DocumentTransformFunction<TransformOptions> = asy
         })
     }
 
-    //console.log(`[ DEBUG ] Start building transformed files`)
-    const newFiles = files.map(file => {
-        //console.log(`[ DEBUG ] Entering file ${ file.location } }`)
+    return files.map(file => {
         const document = file.document ? visit(file.document, {
+            // Remove fragments from the preset, for which the target type does not exist
             FragmentDefinition: {
                 enter(node) {
                     if (file.location && !fs.existsSync(file.location)) {
                         const typePresent = schema.definitions.some(definition => (definition.kind == Kind.OBJECT_TYPE_DEFINITION || definition.kind == Kind.INTERFACE_TYPE_DEFINITION) && definition.name.value == node.typeCondition.name.value)
-                        //console.log(`[ DEBUG ] Entering fragment ${ node.name.value } on ${ node.typeCondition.name.value }; ${ node.typeCondition.name.value } present in schema: ${ typePresent ? 'yes' : 'no'}`)
                         if (!typePresent) {
-                            //console.log(`[OPTIMIZELY] Type ${ node.typeCondition.name.value } not found, dropping fragment ${ node.name.value }`)
+                            if (config.verbose) console.debug(`[OPTIMIZELY] Type ${ node.typeCondition.name.value } not found, dropping fragment ${ node.name.value }`)
                             return null
                         }
                     }
                 }
             },
+
+            // Add items to the selection sets
             SelectionSet: {
                 enter(node, key, parent) {
                     if (!isArray(parent) && parent?.kind == Kind.FRAGMENT_DEFINITION && intoNames.includes(parent.name.value)) {
                         const addedSelections : SelectionNode[] = componentFragments[parent.name.value].map(fragment => {
+                            if (config.verbose) console.debug(`[ OPTIMIZELY ] Adding fragment ${ fragment.name.value } to ${ parent.name.value }`)
                             return {
                                 kind: Kind.FRAGMENT_SPREAD,
                                 directives: [],
@@ -134,7 +133,7 @@ export const transform : Types.DocumentTransformFunction<TransformOptions> = asy
                             }
                         })
                         componentSpreads[parent.name.value]?.forEach(spread => {
-                            //console.log("[ DEBUG ] Pushing inline fragment for", parent.name.value)
+                            if (config.verbose) console.debug(`[ OPTIMIZELY ] Adding inline fragment for ${ spread.typeCondition?.name.value ?? "Untyped" } to ${ parent.name.value}`)
                             addedSelections.push(spread)
                         })
                         return {
@@ -149,13 +148,12 @@ export const transform : Types.DocumentTransformFunction<TransformOptions> = asy
                 }
             }
         }) : undefined
+        
         return {
             ...file,
             document: document,
         }
     })
-    //console.log("[SUCCESS] Optimizely document transformation")
-    return newFiles
 }
 
 export default { transform }

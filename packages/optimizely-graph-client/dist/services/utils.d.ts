@@ -1,4 +1,4 @@
-import type { ContentLink, ContentLinkWithLocale } from "./types.js";
+import type { ContentLink, ContentLinkWithLocale, InlineContentLink, InlineContentLinkWithLocale } from "./types.js";
 /**
  * Transform a locale code (e.g. en-US) to a Optimizely Graph compatible locale
  * (e.g. en_US).
@@ -31,7 +31,7 @@ export declare function contentLinkIsEqual(link1: ContentLink | ContentLinkWithL
  * @param       link2       The second compared link
  * @returns     True if they links point to the same content item, False otherwise
  */
-export declare function _contentLinkIsEqualIgnoreVersion(link1: ContentLink | ContentLinkWithLocale, link2: ContentLink | ContentLinkWithLocale): boolean;
+export declare function contentLinkIsEqualIgnoreVersion(link1: ContentLink | ContentLinkWithLocale, link2: ContentLink | ContentLinkWithLocale): boolean;
 /**
  * Test if the provided value can be understood as a ContentLink
  *
@@ -39,7 +39,14 @@ export declare function _contentLinkIsEqualIgnoreVersion(link1: ContentLink | Co
  * @returns     True if the object can be understood as a ContentLink, False otherwise
  */
 export declare function isContentLink(toTest: any): toTest is ContentLink;
-export declare function _isContentLinkWithLocale(toTest: any): toTest is ContentLinkWithLocale;
+export declare function isContentLinkWithLocale(toTest: any): toTest is ContentLinkWithLocale;
+/**
+ * Test if the variable is an
+ *
+ * @param toTest
+ * @returns
+ */
+export declare function isInlineContentLink(toTest: any): toTest is InlineContentLinkWithLocale;
 type Nullable<T> = {
     [K in keyof T]?: T[K] | null;
 } | null | undefined;
@@ -49,7 +56,7 @@ type Nullable<T> = {
  * @param toNormalize
  * @returns
  */
-export declare function normalizeContentLink(toNormalize: Nullable<ContentLink>): ContentLink | undefined;
+export declare function normalizeContentLink(toNormalize: Nullable<ContentLink | InlineContentLink>): ContentLink | InlineContentLink | undefined;
 export declare function normalizeContentLinkWithLocale<LT = string>(toNormalize: Nullable<ContentLinkWithLocale<LT>>): ContentLinkWithLocale<LT> | undefined;
-export declare function contentLinkToString(contentLink: ContentLink): string;
+export declare function contentLinkToString(contentLink: ContentLink | InlineContentLink): string;
 export {};

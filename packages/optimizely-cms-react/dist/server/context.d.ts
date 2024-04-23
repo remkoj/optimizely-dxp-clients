@@ -1,15 +1,8 @@
 import 'server-only';
-import type { ComponentFactory } from '../types';
+import type { ComponentFactory, GenericContext } from '../types';
 import { type IOptiGraphClient, type ContentLink } from "@remkoj/optimizely-graph-client";
-export interface ServerContext {
-    readonly inEditMode: Readonly<boolean>;
-    readonly isDevelopment: boolean;
-    readonly isDebug: boolean;
-    readonly isDebugOrDevelopment: boolean;
-    readonly client?: IOptiGraphClient;
-    readonly factory: ComponentFactory;
+export interface ServerContext extends GenericContext {
     readonly forceEditorWarnings: boolean;
-    readonly locale?: string;
     setInEditMode(newValue: boolean): ServerContext;
     setOptimizelyGraphClient(newValue: IOptiGraphClient): ServerContext;
     setComponentFactory(newValue: ComponentFactory): ServerContext;
@@ -17,6 +10,9 @@ export interface ServerContext {
     setLocale(newValue: string | undefined): ServerContext;
     setEditableContentId(newId: ContentLink): ServerContext;
     isEditableContent(id: ContentLink): boolean;
+    setLocale(newValue: string | undefined): ServerContext;
+    setOptimizelyGraphClient(newValue: IOptiGraphClient): ServerContext;
+    setComponentFactory(newValue: ComponentFactory): ServerContext;
 }
 /**
  * Retrieve the working instance of the component factory, which is memoized through the React.cache()

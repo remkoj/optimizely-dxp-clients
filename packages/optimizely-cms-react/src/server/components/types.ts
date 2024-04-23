@@ -1,7 +1,7 @@
 import type { SuspenseProps, PropsWithChildren } from "react"
-import type { ContentLinkWithLocale, ComponentFactory, ContentType } from "../../types"
+import type { ComponentFactory, ContentType } from "../../types"
 import type { ElementChildrenProps, ElementProps, ElementType, PropTypeIfPropExists, MayBeArray, TypeIfPropExists } from '../type-utils'
-import type { IOptiGraphClient } from "@remkoj/optimizely-graph-client"
+import type { IOptiGraphClient, ContentLinkWithLocale, InlineContentLinkWithLocale } from "@remkoj/optimizely-graph-client"
 
 export type CmsContentProps<LocalesType = string> = PropsWithChildren<{
     /**
@@ -12,7 +12,7 @@ export type CmsContentProps<LocalesType = string> = PropsWithChildren<{
     /**
      * The content link to render
      */
-    contentLink: ContentLinkWithLocale<LocalesType>
+    contentLink: ContentLinkWithLocale<LocalesType> | InlineContentLinkWithLocale<LocalesType>
 
     /**
      * The initial, pre-loaded data. If set this will be used instead of having the

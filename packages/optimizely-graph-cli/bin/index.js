@@ -58,7 +58,7 @@ function createCliApp(scriptName, version, epilogue) {
         .option('verbose', { description: "Enable query logging", boolean: true, type: 'boolean', demandOption: false, default: config.query_log })
         .demandCommand(1, 1)
         .showHelpOnFail(true)
-        .epilogue(epilogue ?? `Copyright Remko Jantzen - 2023-${(new Date(Date.now())).getFullYear()}`)
+        .epilogue(`Copyright Remko Jantzen - 2023-${(new Date(Date.now())).getFullYear()}`)
         .help();
 }
 function getArgsConfig(args) {

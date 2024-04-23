@@ -1,7 +1,3 @@
-import type { Types } from '@graphql-codegen/plugin-helpers'
-
-type DocumentsConfigNode = NonNullable<Types.Config['documents']>
-
 export const IContentDataProps = ["contentType","id","locale","path","__typename"]
 
 export const fragments = [
@@ -184,13 +180,10 @@ export const queries = [
         }
     }
 }`,
-`query getContentByPath($key: String, $version: String, $locale: [Locales!], $path: String!, $domain: String) {
+`query getContentByPath($path: String!, $version: String, $locale: [Locales!], $domain: String) {
     content: Content(
         where: {
-            _or: [
-                { _metadata: { key: { eq: $key }, version: { eq: $version } } }
-                { _metadata: { url: { hierarchical: { eq: $path }, base: { eq: $domain } }, version: { eq: $version } } }
-            ]
+            _metadata: { url: { hierarchical: { eq: $path }, base: { eq: $domain } } version: { eq: $version }}
         }
         locale: $locale
     ) {
@@ -223,9 +216,3 @@ export const queries = [
 ]
 
 export const DefaultFunctions = ['getContentType','getContentByPath','getContentById']
-export const documents = [ ...queries, ...fragments ]
-export const injectFragments : (base: DocumentsConfigNode) => DocumentsConfigNode = (base) =>
-{
-    const baseIsArray = Array.isArray(base)
-    return baseIsArray ? [ ...fragments, ...base ] : [ ...fragments, base ]
-}

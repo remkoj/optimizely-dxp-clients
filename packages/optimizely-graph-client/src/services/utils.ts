@@ -1,4 +1,4 @@
-import type { ContentLink, ContentLinkWithLocale } from "./types.js"
+import type { ContentLink, ContentLinkWithLocale, InlineContentLink, InlineContentLinkWithLocale } from "./types.js"
 
 /**
  * Transform a locale code (e.g. en-US) to a Optimizely Graph compatible locale
@@ -54,7 +54,7 @@ export function contentLinkIsEqual(link1: ContentLink | ContentLinkWithLocale, l
  * @param       link2       The second compared link
  * @returns     True if they links point to the same content item, False otherwise
  */
-export function _contentLinkIsEqualIgnoreVersion(link1: ContentLink | ContentLinkWithLocale, link2: ContentLink | ContentLinkWithLocale) : boolean
+export function contentLinkIsEqualIgnoreVersion(link1: ContentLink | ContentLinkWithLocale, link2: ContentLink | ContentLinkWithLocale) : boolean
 {
     if (link1.key != link2.key)
         return false
@@ -79,13 +79,29 @@ export function isContentLink(toTest: any) : toTest is ContentLink
     return typeof((toTest as ContentLink).key) == 'string' && ((toTest as ContentLink).key as string).length > 0
 }
 
-export function _isContentLinkWithLocale(toTest: any) : toTest is ContentLinkWithLocale
+export function isContentLinkWithLocale(toTest: any) : toTest is ContentLinkWithLocale
 {
     if (!isContentLink(toTest))
         return false
 
     const locale = (toTest as ContentLinkWithLocale).locale
-    return locale == undefined || (typeof(locale) == 'string' && locale.length >= 2 && locale.length <= 5)
+    return locale == undefined || locale == null || (typeof(locale) == 'string' && locale.length >= 2 && locale.length <= 5)
+}
+
+/**
+ * Test if the variable is an 
+ * 
+ * @param toTest 
+ * @returns 
+ */
+export function isInlineContentLink(toTest: any) : toTest is InlineContentLinkWithLocale
+{
+    if (typeof toTest != 'object' || toTest == null)
+        return false
+
+    return (toTest as InlineContentLinkWithLocale).key == null &&
+        ((toTest as InlineContentLinkWithLocale).version == null || (toTest as InlineContentLinkWithLocale).version == undefined) &&
+        (typeof (toTest as InlineContentLinkWithLocale).locale == 'string' || (toTest as InlineContentLinkWithLocale).locale == null || (toTest as InlineContentLinkWithLocale).locale == undefined)
 }
 
 type Nullable<T> = {
@@ -98,12 +114,12 @@ type Nullable<T> = {
  * @param toNormalize 
  * @returns 
  */
-export function normalizeContentLink(toNormalize: Nullable<ContentLink>) : ContentLink | undefined
+export function normalizeContentLink(toNormalize: Nullable<ContentLink | InlineContentLink>) : ContentLink | InlineContentLink | undefined
 {
-    if (!isContentLink(toNormalize))
+    if (!(isContentLink(toNormalize) || isInlineContentLink(toNormalize)))
         return undefined
 
-    const newLink : ContentLink = {
+    const newLink : ContentLink | InlineContentLink = {
         key: toNormalize.key
     }
     if (toNormalize.version)
@@ -120,10 +136,10 @@ export function normalizeContentLinkWithLocale<LT = string>(toNormalize: Nullabl
     return normalized
 }
 
-export function contentLinkToString(contentLink: ContentLink) : string 
+export function contentLinkToString(contentLink: ContentLink | InlineContentLink) : string 
 {
     return [
-        contentLink.key,
+        contentLink.key == null ? "inline-content" : contentLink.key,
         contentLink.version,
         (contentLink as ContentLinkWithLocale).locale
     ].filter(x => x).join('::')

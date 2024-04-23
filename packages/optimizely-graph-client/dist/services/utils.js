@@ -46,7 +46,7 @@ export function contentLinkIsEqual(link1, link2) {
  * @param       link2       The second compared link
  * @returns     True if they links point to the same content item, False otherwise
  */
-export function _contentLinkIsEqualIgnoreVersion(link1, link2) {
+export function contentLinkIsEqualIgnoreVersion(link1, link2) {
     if (link1.key != link2.key)
         return false;
     if ((link1.locale || link2.locale) && link1.locale != link2.locale)
@@ -66,11 +66,24 @@ export function isContentLink(toTest) {
     // The object must have a key, string, miniumum length 1 char
     return typeof (toTest.key) == 'string' && toTest.key.length > 0;
 }
-export function _isContentLinkWithLocale(toTest) {
+export function isContentLinkWithLocale(toTest) {
     if (!isContentLink(toTest))
         return false;
     const locale = toTest.locale;
-    return locale == undefined || (typeof (locale) == 'string' && locale.length >= 2 && locale.length <= 5);
+    return locale == undefined || locale == null || (typeof (locale) == 'string' && locale.length >= 2 && locale.length <= 5);
+}
+/**
+ * Test if the variable is an
+ *
+ * @param toTest
+ * @returns
+ */
+export function isInlineContentLink(toTest) {
+    if (typeof toTest != 'object' || toTest == null)
+        return false;
+    return toTest.key == null &&
+        (toTest.version == null || toTest.version == undefined) &&
+        (typeof toTest.locale == 'string' || toTest.locale == null || toTest.locale == undefined);
 }
 /**
  * Take the normalizable value
@@ -79,7 +92,7 @@ export function _isContentLinkWithLocale(toTest) {
  * @returns
  */
 export function normalizeContentLink(toNormalize) {
-    if (!isContentLink(toNormalize))
+    if (!(isContentLink(toNormalize) || isInlineContentLink(toNormalize)))
         return undefined;
     const newLink = {
         key: toNormalize.key
@@ -96,7 +109,7 @@ export function normalizeContentLinkWithLocale(toNormalize) {
 }
 export function contentLinkToString(contentLink) {
     return [
-        contentLink.key,
+        contentLink.key == null ? "inline-content" : contentLink.key,
         contentLink.version,
         contentLink.locale
     ].filter(x => x).join('::');

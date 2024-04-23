@@ -1,4 +1,4 @@
-import type { Types } from '@graphql-codegen/plugin-helpers';
+import { type Types } from '@graphql-codegen/plugin-helpers';
 import { type ClientPresetConfig as ClientPresetOptions } from '@graphql-codegen/client-preset';
 import { type PluginOptions } from './index';
 import { type TransformOptions } from './transform';

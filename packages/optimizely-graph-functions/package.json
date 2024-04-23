@@ -35,14 +35,19 @@
     }
   },
   "devDependencies": {
-    "@graphql-codegen/plugin-helpers": "^5.0.3",
     "@types/node": "^20.12.7",
     "graphql": "^16.8.1",
+    "graphql-request": "^6.1.0",
+    "graphql-tag": "^2.12.6",
     "typescript": "^5.4.5"
   },
   "dependencies": {
     "@graphql-codegen/add": "^5.0.2",
     "@graphql-codegen/client-preset": "^4.2.5",
+    "@graphql-codegen/plugin-helpers": "^5.0.3",
+    "@graphql-codegen/typescript": "^4.0.6",
+    "@graphql-codegen/typescript-graphql-request": "^6.2.0",
+    "@graphql-codegen/typescript-operations": "^4.2.0",
     "tslib": "^2.6.2"
   },
   "scripts": {
@@ -53,7 +58,9 @@
   },
   "peerDependencies": {
     "@graphql-typed-document-node/core": "*",
-    "graphql": "*"
+    "graphql": "*",
+    "graphql-request": "*",
+    "graphql-tag": "*"
   },
   "optionalDependencies": {
     "@remkoj/optimizely-graph-client": "1.0.4"

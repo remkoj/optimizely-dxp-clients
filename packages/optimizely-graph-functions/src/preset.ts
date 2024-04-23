@@ -1,8 +1,10 @@
-import type { Types } from '@graphql-codegen/plugin-helpers'
+import { type Types, normalizeConfig } from '@graphql-codegen/plugin-helpers'
 import { fragments, queries } from './documents'
 
 // Import base preset
 import { preset as clientPreset, type ClientPresetConfig as ClientPresetOptions } from '@graphql-codegen/client-preset'
+import * as GraphQLRequestPlugin from '@graphql-codegen/typescript-graphql-request'
+import * as AddPlugin from '@graphql-codegen/add'
 
 // Import injected parts
 import plugin, { pickPluginOptions, type PluginOptions } from './index'
@@ -13,19 +15,31 @@ export type PresetOptions = ClientPresetOptions & PluginOptions & TransformOptio
 
 export const preset : Types.OutputPreset<PresetOptions> =
 {
-    prepareDocuments: async (outputFilePath, outputSpecificDocuments) => {
+    /**
+     * Prepare the documents to be parsed by this preset, without modifying the original array
+     * 
+     * @param       outputFilePath              The path where the output of this preset will be stored
+     * @param       outputSpecificDocuments     The currently selected documents
+     * @returns     An awaitable with the modified list of documents.
+     */
+    prepareDocuments: async (outputFilePath: Readonly<string>, outputSpecificDocuments: ReadonlyArray<Types.OperationDocument>) => {
         // Get the base documents
-        const documents = clientPreset.prepareDocuments ? await clientPreset.prepareDocuments(outputFilePath, outputSpecificDocuments) : [...outputSpecificDocuments, `!${outputFilePath}`]
+        const documents = clientPreset.prepareDocuments ? 
+            await clientPreset.prepareDocuments(outputFilePath, outputSpecificDocuments as Array<Types.OperationDocument>) : 
+            [...outputSpecificDocuments, `!${outputFilePath}`]
 
-        // Then add the implicit documents to it
-        documents.push([...fragments, ...queries].join("\n"))
-
-        // Finally return the extended array
-        return documents
+        // Create a new, extended, array
+        return [...documents, ...fragments, ...queries]
     },
 
     buildGeneratesSection: async (options)  => {
+        // Extend the document transforms
+        options.config = {
+            ...options.config,
+            namingConvention: "keep", // Keep casing "as-is" from Optimizely Graph
+        }
         options.documentTransforms = [
+            ...(options.documentTransforms || []),
             {
                 name: 'optly-transform',
                 transformObject: transform,
@@ -33,8 +47,39 @@ export const preset : Types.OutputPreset<PresetOptions> =
             }
         ]
 
+        // Build the preset files
         const section = await clientPreset.buildGeneratesSection(options)
         
+        // Add GraphQL Request Client
+        section.push({
+            filename: `${ options.baseOutputDir}client.ts`,
+            pluginMap: {
+                "add": AddPlugin,
+                "typescript-graphql-request": GraphQLRequestPlugin
+            },
+            plugins: [
+                {
+                    add: {
+                        content: ["import type * as Schema from \"./graphql\";"]
+                    },
+                },
+                {
+                    'typescript-graphql-request': {
+                        pureMagicComment: true,
+                        useTypeImports: true,
+                        dedupeFragments: true,
+                        importOperationTypesFrom: "Schema"
+                    }
+                }
+            ],
+            schema: options.schema,
+            schemaAst: options.schemaAst,
+            config: options.config,
+            profiler: options.profiler,
+            documents: options.documents,
+            documentTransforms: options.documentTransforms
+        })
+
         // Add the functions file
         section.push({
             filename: `${ options.baseOutputDir }functions.ts`,
@@ -47,6 +92,8 @@ export const preset : Types.OutputPreset<PresetOptions> =
                 }
             ],
             schema: options.schema,
+            schemaAst: options.schemaAst,
+            profiler: options.profiler,
             config: pickPluginOptions(options.presetConfig),
             documents: options.documents,
             documentTransforms: options.documentTransforms
@@ -55,9 +102,11 @@ export const preset : Types.OutputPreset<PresetOptions> =
         // Add functions to index plugin
         section.forEach((fileConfig, idx) => {
             if (fileConfig.filename.endsWith("index.ts")) {
-                const currentContent = section[idx].plugins[0]?.add?.content
-                if (currentContent)
-                    section[idx].plugins[0].add.content = `export * as Schema from "./graphql";\n${currentContent}\nexport * from "./functions";`
+                section[idx].plugins.unshift({
+                    add: {
+                        content: ['export * as Schema from "./graphql";','export * from "./functions";','export { getSdk, type Sdk } from "./client";']
+                    }
+                })
             }
         })
 

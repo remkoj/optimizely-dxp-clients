@@ -1,7 +1,8 @@
-import type { Types } from '@graphql-codegen/plugin-helpers';
+import { type Types } from '@graphql-codegen/plugin-helpers';
 import type { Injection } from './types';
 export type TransformOptions = {
     injections?: Injection[];
+    verbose?: boolean;
 };
 export declare function pickTransformOptions(options: Record<string, any>): TransformOptions;
 export declare const transform: Types.DocumentTransformFunction<TransformOptions>;

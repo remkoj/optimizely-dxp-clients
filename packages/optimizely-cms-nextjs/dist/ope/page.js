@@ -31,7 +31,7 @@ function getContentRequest(path = "", searchParams) {
             key: contentKey,
             version: contentVersion,
             locale: contentLocale,
-            path: '/' + contentPath
+            path: '/' + contentPath + (contentPath.endsWith('/') ? '' : '/')
         };
     }
     catch {

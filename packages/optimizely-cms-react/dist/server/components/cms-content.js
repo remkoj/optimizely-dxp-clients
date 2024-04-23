@@ -2,8 +2,7 @@ import { Fragment as _Fragment, jsx as _jsx, jsxs as _jsxs } from "react/jsx-run
 import 'server-only';
 import getContentType from './get-content-type';
 import getServerContext from '../context';
-import createClient, { AuthMode } from '@remkoj/optimizely-graph-client';
-import { normalizeContentLink, contentLinkToString } from '@remkoj/optimizely-graph-client/utils';
+import createClient, { AuthMode, normalizeContentLink, contentLinkToString, isInlineContentLink } from '@remkoj/optimizely-graph-client';
 import { print } from 'graphql';
 import * as Utils from "../../utilities";
 import * as Queries from './queries';
@@ -24,19 +23,27 @@ export const CmsContent = async ({ contentType, contentTypePrefix, contentLink: 
     if (context.isDebugOrDevelopment && !context.client)
         console.warn(`🟠 [CmsContent] No Content Graph client provided with ${contentLinkToString(contentLink)}, this will cause problems with edit mode!`);
     // Parse & prepare props
-    const inEditMode = context.inEditMode && context.isEditableContent(contentLink);
+    const isInline = isInlineContentLink(contentLink);
     const outputEditorWarning = context.forceEditorWarnings;
     const factory = context.factory;
+    if (!factory) {
+        console.error(`🔴 [CmsContent] No content type factory registered in the context`);
+        throw new Error("Empty factory on the context");
+    }
     const client = context.client ?? createClient();
-    if (context.isDebug && inEditMode)
+    if (context.isDebug && context.inEditMode)
         console.log(`👔 [CmsContent] Edit mode active for content with id: ${contentLinkToString(contentLink)}`);
-    if (context.isDebug && inEditMode && client.currentAuthMode == AuthMode.Public)
+    if (context.isDebug && context.inEditMode && client.currentAuthMode == AuthMode.Public)
         console.warn(`🟠 [CmsContent] Edit mode active without an authenticated client, this will cause problems`);
     // DEBUG Tracing
     if (context.isDebug)
-        console.log("⚪ [CmsContent] Rendering CMS Content for:", JSON.stringify(contentType), contentLinkToString(contentLink), inEditMode ? "edit-mode" : "published");
+        console.log("⚪ [CmsContent] Rendering CMS Content for:", JSON.stringify(contentType), contentLinkToString(contentLink), context.inEditMode ? "edit-mode" : "published");
     // Ensure we have a content type to work with
     if (!contentType) {
+        if (isInline) {
+            console.error(`🔴 [CmsContent] No content type provided for content ${contentLinkToString(contentLink)}, content types cannot be resolved for inline content`);
+            throw new Error("Unable to render Inline CMS Content without Content Type information");
+        }
         if (context.isDebugOrDevelopment)
             console.warn(`🟠 [CmsContent] No content type provided for content ${contentLinkToString(contentLink)}, this causes an additional GraphQL query to resolve the ContentType`);
         contentType = await getContentType(contentLink, client);
@@ -53,7 +60,7 @@ export const CmsContent = async ({ contentType, contentTypePrefix, contentLink: 
         if (context.isDebugOrDevelopment) {
             console.warn(`🟠 [CmsContent] Component of type "${contentType?.join('/') ?? ""}" not resolved by factory`);
         }
-        if (context.isDebug || inEditMode || outputEditorWarning) {
+        if (context.isDebug || context.inEditMode || outputEditorWarning) {
             const errorMsg = _jsxs("div", { className: 'opti-error', children: ["Component of type \"", contentType?.join('/') ?? "", "\" not resolved by factory"] });
             return children ? _jsxs(_Fragment, { children: [errorMsg, children] }) : errorMsg;
         }
@@ -71,6 +78,10 @@ export const CmsContent = async ({ contentType, contentTypePrefix, contentLink: 
             return _jsx(_Fragment, {});
         }
         return _jsx(Component, { contentLink: contentLink, data: fragmentData || {} });
+    }
+    if (isInline) {
+        console.error(`🔴 [CmsContent] No data for content ${contentLinkToString(contentLink)}, data cannot be resolved for inline content`);
+        throw new Error(`Unable to render Inline CMS Content without data. (Content Type: ${Component?.displayName ?? contentType?.join('/') ?? "Unknown"}; Content Link: ${contentLinkToString(contentLink)}; Data keys: ${Object.getOwnPropertyNames(fragmentData ?? {}).join(", ")})`);
     }
     // Render using included query 
     if (Utils.isCmsComponentWithDataQuery(Component)) {

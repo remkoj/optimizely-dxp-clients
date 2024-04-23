@@ -40,7 +40,7 @@ function getContentRequest(path: string | string[] = "", searchParams: Record<st
             key: contentKey,
             version: contentVersion,
             locale: contentLocale,
-            path: '/'+contentPath
+            path: '/' + contentPath + (contentPath.endsWith('/') ? '' : '/')
         }
     } catch {
         return undefined

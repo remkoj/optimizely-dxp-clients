@@ -1,6 +1,6 @@
 import type { CodegenPlugin, PluginFunction, PluginValidateFn } from '@graphql-codegen/plugin-helpers'
-import { concatAST, getOperationAST, visit, print, Kind, OperationTypeNode, type DefinitionNode, type DocumentNode, type FragmentDefinitionNode } from 'graphql'
-import { isNotNullOrUndefined, isFragmentDefinitionNode } from './utils'
+import { concatAST, getOperationAST, visit, print, OperationTypeNode, type DefinitionNode, type DocumentNode, type FragmentDefinitionNode } from 'graphql'
+import { isNotNullOrUndefined } from './utils'
 import { DefaultFunctions } from './documents'
 
 export type PluginOptions = {
@@ -65,7 +65,7 @@ export const plugin: PluginFunction<PluginOptions> =  async (schema, documents, 
 
             const fragments = resolveSpreads(queryNode, docs)
 
-            const fnTypeName = fn.charAt(0).toUpperCase() + fn.slice(1)
+            const fnTypeName = fn //.charAt(0).toUpperCase() + fn.slice(1)
             const varsType = `Types.${ fnTypeName }QueryVariables`
             const returnType = `Types.${ fnTypeName }Query`
             
@@ -88,12 +88,10 @@ export const plugin: PluginFunction<PluginOptions> =  async (schema, documents, 
     const append : string[] = []
     
     prepend.push('import { gql, type GraphQLClient } from \'graphql-request\'')
-    prepend.push('import { ContentGraphClient as BaseGraphClient } from \'@remkoj/optimizely-graph-client\'')
     prepend.push(`import type * as Types from './graphql'`)
     prepend.push("\n")
 
-    append.push("\n\n")
-    append.push(generateClientClass(functions))
+    append.push("\n")
 
     return { prepend, content: output.join("\n"), append }
 }
@@ -134,29 +132,6 @@ function resolveSpreads(definition: DefinitionNode, document: DocumentNode, avai
         dependencies.push(...fragmentDependencies)
     })
     return [ ...fragments, ...dependencies]
-}
-
-function generateClientClass(functions: string[]) : string
-{
-    return `/**
- * Function client for Optimizely Graph, exposing both the raw request method,
- * as well as the high level convenience methods to read content from 
- * Optimizely Graph. The actual format for each of the Content Items returned
- * by these convenience methods is defined by the GraphQL Fragments within the
- * application codebase.
- */
-export class OptimizelyGraphClient extends BaseGraphClient {
-   
-${ functions.map(fn => {
-    const fnTypeName = fn.charAt(0).toUpperCase() + fn.slice(1)
-    const fnNamespace = "Types"
-    const varsType = `${ fnNamespace }.${ fnTypeName }QueryVariables`
-    const returnType = `${ fnNamespace }.${ fnTypeName }Query`
-    return `    public ${ fn }(variables: ${ varsType}) : Promise<${ returnType }>
-    {
-        return ${ fn }(this, variables)
-    }`}).join('\n\n')}
-}`
 }
 
 export default { validate, plugin } as CodegenPlugin<PluginOptions>

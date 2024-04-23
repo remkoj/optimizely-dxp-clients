@@ -53,7 +53,7 @@ const plugin = async (schema, documents, config, info) => {
             if (!(queryNode && queryNode.operation == graphql_1.OperationTypeNode.QUERY))
                 return [`export async function ${fn}() { throw new Error('No query named ${fn} defined')}`];
             const fragments = resolveSpreads(queryNode, docs);
-            const fnTypeName = fn.charAt(0).toUpperCase() + fn.slice(1);
+            const fnTypeName = fn; //.charAt(0).toUpperCase() + fn.slice(1)
             const varsType = `Types.${fnTypeName}QueryVariables`;
             const returnType = `Types.${fnTypeName}Query`;
             const query = [queryNode, ...fragments].map(node => (0, graphql_1.print)(node)).join("\n\n");
@@ -72,11 +72,9 @@ const plugin = async (schema, documents, config, info) => {
     const prepend = [];
     const append = [];
     prepend.push('import { gql, type GraphQLClient } from \'graphql-request\'');
-    prepend.push('import { ContentGraphClient as BaseGraphClient } from \'@remkoj/optimizely-graph-client\'');
     prepend.push(`import type * as Types from './graphql'`);
     prepend.push("\n");
-    append.push("\n\n");
-    append.push(generateClientClass(functions));
+    append.push("\n");
     return { prepend, content: output.join("\n"), append };
 };
 exports.plugin = plugin;
@@ -112,28 +110,6 @@ function resolveSpreads(definition, document, availableFragments = []) {
         dependencies.push(...fragmentDependencies);
     });
     return [...fragments, ...dependencies];
-}
-function generateClientClass(functions) {
-    return `/**
- * Function client for Optimizely Graph, exposing both the raw request method,
- * as well as the high level convenience methods to read content from 
- * Optimizely Graph. The actual format for each of the Content Items returned
- * by these convenience methods is defined by the GraphQL Fragments within the
- * application codebase.
- */
-export class OptimizelyGraphClient extends BaseGraphClient {
-   
-${functions.map(fn => {
-        const fnTypeName = fn.charAt(0).toUpperCase() + fn.slice(1);
-        const fnNamespace = "Types";
-        const varsType = `${fnNamespace}.${fnTypeName}QueryVariables`;
-        const returnType = `${fnNamespace}.${fnTypeName}Query`;
-        return `    public ${fn}(variables: ${varsType}) : Promise<${returnType}>
-    {
-        return ${fn}(this, variables)
-    }`;
-    }).join('\n\n')}
-}`;
 }
 exports.default = { validate: exports.validate, plugin: exports.plugin };
 //# sourceMappingURL=index.js.map

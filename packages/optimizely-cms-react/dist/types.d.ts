@@ -2,14 +2,14 @@ import type { PropsWithChildren, ComponentType as ReactComponentType, ExoticComp
 import type { DocumentNode } from "graphql";
 import type { TypedDocumentNode } from '@graphql-typed-document-node/core';
 import type { IOptiGraphClient } from "@remkoj/optimizely-graph-client";
-import type { ContentLink, ContentLinkWithLocale } from "@remkoj/optimizely-graph-client/router";
+import type { ContentLink, ContentLinkWithLocale, InlineContentLinkWithLocale } from "@remkoj/optimizely-graph-client";
 export type ContentType = string[];
-export type { ContentLink, ContentLinkWithLocale } from "@remkoj/optimizely-graph-client/router";
+export type { ContentLink, ContentLinkWithLocale } from "@remkoj/optimizely-graph-client";
 export type CmsComponentProps<T> = PropsWithChildren<{
     /**
      * The identifier of the content item
      */
-    contentLink: ContentLinkWithLocale;
+    contentLink: ContentLinkWithLocale | InlineContentLinkWithLocale;
     /**
      * The data already pre-fetched for the this component
      */
@@ -81,4 +81,13 @@ export interface ComponentFactory {
     register(type: ComponentTypeHandle, componentType: ComponentType): void;
     registerAll(components: ComponentTypeDictionary): void;
     resolve(type: ComponentTypeHandle): ComponentType | undefined;
+}
+export interface GenericContext {
+    readonly client?: IOptiGraphClient;
+    readonly factory?: ComponentFactory;
+    readonly locale?: string;
+    readonly inEditMode: Readonly<boolean>;
+    readonly isDevelopment: boolean;
+    readonly isDebug: boolean;
+    readonly isDebugOrDevelopment: boolean;
 }
