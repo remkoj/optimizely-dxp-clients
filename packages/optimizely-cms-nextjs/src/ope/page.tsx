@@ -31,17 +31,28 @@ const defaultOptions : EditViewOptions = {
 function getContentRequest(path: string | string[] = "", searchParams: Record<string, string>) : (ContentQueryProps<string> & { path: string }) | undefined
 {
     try {
-        const fullPath = Array.isArray(path) ? path.map(p => decodeURIComponent(p)).join('/') : decodeURI(path);
-        const [ cmsPath, contentString ] = fullPath.split(',,',3);
-        const [ contentKey, contentVersion ] = (contentString ?? '').split('_',3);
-        const contentPath = (cmsPath.startsWith('/') ? cmsPath.substring(1) : cmsPath).replace(/^(ui\/){0,1}(CMS\/){0,1}(Content\/){0,1}/gi, "")
-        const firstSlug : string | undefined = contentPath.split('/')[0]
-        const contentLocale = firstSlug?.length == 2 || firstSlug?.length == 5 ? firstSlug : undefined
-        return {
-            key: contentKey,
-            version: contentVersion,
-            locale: contentLocale,
-            path: '/' + contentPath + (contentPath.endsWith('/') ? '' : '/')
+        if (searchParams.preview_token == AuthMode.HMAC || searchParams.preview_token == AuthMode.Basic) {
+            console.error("[OnPageEdit] 🦺 Edit mode requested with developer tokens, falling back to URL parsing to determine content")
+            const fullPath = Array.isArray(path) ? path.map(p => decodeURIComponent(p)).join('/') : decodeURI(path);
+            const [ cmsPath, contentString ] = fullPath.split(',,',3);
+            const [ contentKey, contentVersion ] = (contentString ?? '').split('_',3);
+            const contentPath = (cmsPath.startsWith('/') ? cmsPath.substring(1) : cmsPath).replace(/^(ui\/){0,1}(CMS\/){0,1}(Content\/){0,1}/gi, "")
+            const firstSlug : string | undefined = contentPath.split('/')[0]
+            const contentLocale = firstSlug?.length == 2 || firstSlug?.length == 5 ? firstSlug : undefined
+            return {
+                key: contentKey,
+                version: contentVersion,
+                locale: contentLocale,
+                path: '/' + contentPath + (contentPath.endsWith('/') ? '' : '/')
+            }
+        } else {
+            const tokenInfo = JSON.parse(atob(searchParams.preview_token.split('.')[1]))
+            return {
+                key: tokenInfo.key,
+                version: tokenInfo.ver,
+                locale: tokenInfo.loc,
+                path: ''
+            }
         }
     } catch {
         return undefined
@@ -153,7 +164,7 @@ export function createEditPageComponent(
             const output =  <>
                 <Script src={new URL(communicationInjectorPath, client.siteInfo.cmsURL).href} strategy='afterInteractive' />
                 <Layout locale={ contentItem.locale?.name ?? '' }>
-                    <OnPageEdit timeout={ refreshDelay } mode={ context.inEditMode ? 'edit' : 'preview' } className='bg-slate-900 absolute top-0 left-0 w-screen h-screen opacity-60 z-50'>
+                    <OnPageEdit timeout={ refreshDelay } mode={ context.inEditMode ? 'edit' : 'preview' }>
                         <RefreshNotice />
                     </OnPageEdit>
                     <CmsContent contentType={ contentType } contentLink={ contentLink } fragmentData={ contentItem } />

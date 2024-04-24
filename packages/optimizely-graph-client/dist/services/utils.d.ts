@@ -58,5 +58,12 @@ type Nullable<T> = {
  */
 export declare function normalizeContentLink(toNormalize: Nullable<ContentLink | InlineContentLink>): ContentLink | InlineContentLink | undefined;
 export declare function normalizeContentLinkWithLocale<LT = string>(toNormalize: Nullable<ContentLinkWithLocale<LT>>): ContentLinkWithLocale<LT> | undefined;
-export declare function contentLinkToString(contentLink: ContentLink | InlineContentLink): string;
+/**
+ * Create a textual representation of a content link
+ *
+ * @param       contentLink     The (inline) content link to transform to a string
+ * @param       unique          Set to true to ensure that this method returns a string that can be used as key
+ * @returns     The textual representation of the ContentLink
+ */
+export declare function contentLinkToString(contentLink: ContentLink | InlineContentLink | null | undefined, unique?: boolean): string;
 export {};

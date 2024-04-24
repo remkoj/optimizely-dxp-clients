@@ -1,5 +1,4 @@
 'use client';
-import { jsx as _jsx, Fragment as _Fragment } from "react/jsx-runtime";
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 export const OnPageEdit = ({ mode, children, className, timeout }) => {
@@ -36,62 +35,52 @@ export const OnPageEdit = ({ mode, children, className, timeout }) => {
         // Define event handler
         let maskTimer = false;
         function onContentSaved(eventData) {
+            // If the effect has been undone, disable this handler
+            if (!handlerEnabled)
+                return;
             setShowMask(true);
-            if (maskTimer != false) {
-                console.log("Preview refresh pending, restarting wait for refresh");
+            if (maskTimer != false)
                 clearTimeout(maskTimer);
-            }
             console.log(`Delaying refresh with ${timeout}ms to allow Optimizely Graph to update`, eventData);
             maskTimer = setTimeout(() => {
                 const contentId = window.location.pathname.split(',,')[1];
                 const newContentId = eventData?.contentLink;
-                if (!eventData.previewUrl && newContentId) {
-                    console.log(`Refreshing preview: ${contentId} => ${newContentId} - no updated preview URL received`);
-                    if (contentId != newContentId) {
-                        const newUrl = new URL(window.location.href);
-                        const pathParts = newUrl.pathname.split(',,');
-                        pathParts[1] = newContentId;
-                        newUrl.pathname = pathParts.join(',,');
-                        console.log(`Refreshing preview: Navigating to new preview URL: ${newUrl.href}`);
-                        router.push(newUrl.pathname + newUrl.search);
-                    }
-                    else {
-                        try {
-                            location.reload();
-                        }
-                        catch (e) {
-                            router.refresh();
-                        }
-                    }
+                // First: Use the updated preview URL if we have it
+                if (eventData?.previewUrl && previewUrl != eventData.previewUrl) {
+                    const newUrl = new URL(eventData.previewUrl);
+                    console.log(`Navigating to provided preview path: ${newUrl.pathname}${newUrl.search}`);
+                    router.push(newUrl.pathname + newUrl.search);
+                    // Second: Use the provided Content ID to navigate to the new URL 
                 }
-                else if (previewUrl == eventData.previewUrl) {
-                    console.log(`Refreshing preview: ${contentId} => ${newContentId}`);
-                    router.refresh();
-                    //setShowMask(false)
+                else if (newContentId && contentId != newContentId) {
+                    const newUrl = new URL(window.location.href);
+                    const pathParts = newUrl.pathname.split(',,');
+                    pathParts[1] = newContentId;
+                    newUrl.pathname = pathParts.join(',,');
+                    console.log(`Navigating to newly constructed URL to reflect ContentID change: ${newUrl.href}`);
+                    router.push(newUrl.pathname + newUrl.search);
+                    // Third: Refresh the page
                 }
                 else {
-                    const newUrl = new URL(eventData.previewUrl);
-                    console.log(`Navigating to new preview: ${contentId} => ${newContentId}`);
-                    router.push(newUrl.pathname + newUrl.search);
-                    setShowMask(false);
+                    console.log(`Refreshing preview: ${contentId}`);
+                    router.refresh();
                 }
+                setShowMask(false);
             }, timeout);
         }
         // Subscribe to event
         console.log(`Subscribing to ContentSaved Event`);
         const opti = tryGetCms();
-        opti?.subscribe('contentSaved', (eventData) => {
-            if (!handlerEnabled)
-                return;
-            onContentSaved(eventData);
-        });
+        opti?.subscribe('contentSaved', onContentSaved);
         // Unsubscribe when needed
         return () => {
             console.log(`Navigating away, disabling ContentSaved event handler`);
+            if (maskTimer != false)
+                clearTimeout(maskTimer);
             handlerEnabled = false;
         };
     }, [optiCmsReady, router, timeout]);
-    return _jsx(_Fragment, { children: showMask && _jsx("div", { className: `loading-mask ${className}`.trimEnd(), children: children }) });
+    return showMask ? children : null;
 };
 function tryGetCms() {
     try {

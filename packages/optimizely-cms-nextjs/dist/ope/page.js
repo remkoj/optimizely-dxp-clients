@@ -22,18 +22,30 @@ const defaultOptions = {
 // Helper function to read the ContentID & WorkID
 function getContentRequest(path = "", searchParams) {
     try {
-        const fullPath = Array.isArray(path) ? path.map(p => decodeURIComponent(p)).join('/') : decodeURI(path);
-        const [cmsPath, contentString] = fullPath.split(',,', 3);
-        const [contentKey, contentVersion] = (contentString ?? '').split('_', 3);
-        const contentPath = (cmsPath.startsWith('/') ? cmsPath.substring(1) : cmsPath).replace(/^(ui\/){0,1}(CMS\/){0,1}(Content\/){0,1}/gi, "");
-        const firstSlug = contentPath.split('/')[0];
-        const contentLocale = firstSlug?.length == 2 || firstSlug?.length == 5 ? firstSlug : undefined;
-        return {
-            key: contentKey,
-            version: contentVersion,
-            locale: contentLocale,
-            path: '/' + contentPath + (contentPath.endsWith('/') ? '' : '/')
-        };
+        if (searchParams.preview_token == AuthMode.HMAC || searchParams.preview_token == AuthMode.Basic) {
+            console.error("[OnPageEdit] 🦺 Edit mode requested with developer tokens, falling back to URL parsing to determine content");
+            const fullPath = Array.isArray(path) ? path.map(p => decodeURIComponent(p)).join('/') : decodeURI(path);
+            const [cmsPath, contentString] = fullPath.split(',,', 3);
+            const [contentKey, contentVersion] = (contentString ?? '').split('_', 3);
+            const contentPath = (cmsPath.startsWith('/') ? cmsPath.substring(1) : cmsPath).replace(/^(ui\/){0,1}(CMS\/){0,1}(Content\/){0,1}/gi, "");
+            const firstSlug = contentPath.split('/')[0];
+            const contentLocale = firstSlug?.length == 2 || firstSlug?.length == 5 ? firstSlug : undefined;
+            return {
+                key: contentKey,
+                version: contentVersion,
+                locale: contentLocale,
+                path: '/' + contentPath + (contentPath.endsWith('/') ? '' : '/')
+            };
+        }
+        else {
+            const tokenInfo = JSON.parse(atob(searchParams.preview_token.split('.')[1]));
+            return {
+                key: tokenInfo.key,
+                version: tokenInfo.ver,
+                locale: tokenInfo.loc,
+                path: ''
+            };
+        }
     }
     catch {
         return undefined;
@@ -118,7 +130,7 @@ export function createEditPageComponent(factory, options) {
             // Render the content, with edit mode context
             const isPage = contentType.some(x => x?.toLowerCase() == "page") ?? false;
             const Layout = isPage ? PageLayout : React.Fragment;
-            const output = _jsxs(_Fragment, { children: [_jsx(Script, { src: new URL(communicationInjectorPath, client.siteInfo.cmsURL).href, strategy: 'afterInteractive' }), _jsxs(Layout, { locale: contentItem.locale?.name ?? '', children: [_jsx(OnPageEdit, { timeout: refreshDelay, mode: context.inEditMode ? 'edit' : 'preview', className: 'bg-slate-900 absolute top-0 left-0 w-screen h-screen opacity-60 z-50', children: _jsx(RefreshNotice, {}) }), _jsx(CmsContent, { contentType: contentType, contentLink: contentLink, fragmentData: contentItem })] }), _jsxs("div", { className: 'optly-contentLink', children: ["ContentItem: ", contentLink ? contentLinkToString(contentLink) : "Invalid content link returned from Optimizely Graph"] })] });
+            const output = _jsxs(_Fragment, { children: [_jsx(Script, { src: new URL(communicationInjectorPath, client.siteInfo.cmsURL).href, strategy: 'afterInteractive' }), _jsxs(Layout, { locale: contentItem.locale?.name ?? '', children: [_jsx(OnPageEdit, { timeout: refreshDelay, mode: context.inEditMode ? 'edit' : 'preview', children: _jsx(RefreshNotice, {}) }), _jsx(CmsContent, { contentType: contentType, contentLink: contentLink, fragmentData: contentItem })] }), _jsxs("div", { className: 'optly-contentLink', children: ["ContentItem: ", contentLink ? contentLinkToString(contentLink) : "Invalid content link returned from Optimizely Graph"] })] });
             return output;
         }
         catch (e) {

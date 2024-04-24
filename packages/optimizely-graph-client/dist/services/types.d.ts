@@ -3,7 +3,7 @@ export type ContentLink = {
     version?: string | null;
 };
 export type InlineContentLink = {
-    key: null;
+    key?: null | undefined;
     version?: null;
 };
 export type ContentLinkWithLocale<LocaleType = string> = ContentLink & {

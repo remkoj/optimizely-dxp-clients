@@ -4,7 +4,7 @@ export type ContentLink = {
 }
 
 export type InlineContentLink = {
-    key: null
+    key?: null | undefined
     version?: null
 }
 

@@ -136,10 +136,29 @@ export function normalizeContentLinkWithLocale<LT = string>(toNormalize: Nullabl
     return normalized
 }
 
-export function contentLinkToString(contentLink: ContentLink | InlineContentLink) : string 
+function generateUniqueKey(prefix: string = "inline::")
 {
+    try {
+        return prefix + crypto.randomUUID().replaceAll('-','')
+    } catch (e) {
+        console.warn("💥 Crypto library unavailable, expect key collisions")
+        return prefix + 'default'
+    }
+}
+
+/**
+ * Create a textual representation of a content link
+ * 
+ * @param       contentLink     The (inline) content link to transform to a string
+ * @param       unique          Set to true to ensure that this method returns a string that can be used as key
+ * @returns     The textual representation of the ContentLink
+ */
+export function contentLinkToString(contentLink: ContentLink | InlineContentLink | null | undefined, unique: boolean = false) : string 
+{
+    if (!contentLink)
+        return unique ? generateUniqueKey('no-content::') : '[no content]'
     return [
-        contentLink.key == null ? "inline-content" : contentLink.key,
+        contentLink.key == null ? (unique ? generateUniqueKey() : "[inline content]") : contentLink.key,
         contentLink.version,
         (contentLink as ContentLinkWithLocale).locale
     ].filter(x => x).join('::')
