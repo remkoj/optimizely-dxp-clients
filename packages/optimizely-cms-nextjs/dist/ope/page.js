@@ -16,7 +16,8 @@ const defaultOptions = {
     errorNotice: props => _jsxs("div", { className: 'optly-error-notice', children: [_jsx("div", { className: 'optly-error-title', children: props.title }), _jsx("div", { className: 'optly-error-message', children: props.message })] }),
     layout: props => _jsx("div", { className: 'optly-edit-page', "data-locale": props.locale, children: props.children }),
     loader: getContentById,
-    clientFactory: (token) => getAuthorizedServerClient(token)
+    clientFactory: (token) => getAuthorizedServerClient(token),
+    communicationInjectorPath: '/util/javascript/communicationinjector.js'
 };
 // Helper function to read the ContentID & WorkID
 function getContentRequest(path = "", searchParams) {
@@ -49,7 +50,7 @@ function getContentRequest(path = "", searchParams) {
  * @returns The React Component that can be used by Next.JS to render the page
  */
 export function createEditPageComponent(factory, options) {
-    const { layout: PageLayout, refreshNotice: RefreshNotice, refreshDelay, errorNotice: ErrorNotice, loader: getContentById, clientFactory } = { ...defaultOptions, ...options };
+    const { layout: PageLayout, refreshNotice: RefreshNotice, refreshDelay, errorNotice: ErrorNotice, loader: getContentById, clientFactory, communicationInjectorPath } = { ...defaultOptions, ...options };
     async function EditPage({ params: { path }, searchParams }) {
         // Create context
         const context = getServerContext();
@@ -117,7 +118,7 @@ export function createEditPageComponent(factory, options) {
             // Render the content, with edit mode context
             const isPage = contentType.some(x => x?.toLowerCase() == "page") ?? false;
             const Layout = isPage ? PageLayout : React.Fragment;
-            const output = _jsxs(_Fragment, { children: [context.inEditMode && _jsx(Script, { src: new URL('/ui/CMS/latest/clientresources/communicationinjector.js', client.siteInfo.cmsURL).href, strategy: 'afterInteractive' }), _jsxs(Layout, { locale: contentItem.locale?.name ?? '', children: [_jsx(OnPageEdit, { timeout: refreshDelay, mode: context.inEditMode ? 'edit' : 'preview', className: 'bg-slate-900 absolute top-0 left-0 w-screen h-screen opacity-60 z-50', children: _jsx(RefreshNotice, {}) }), _jsx(CmsContent, { contentType: contentType, contentLink: contentLink, fragmentData: contentItem })] }), _jsxs("div", { className: 'optly-contentLink', children: ["ContentItem: ", contentLink ? contentLinkToString(contentLink) : "Invalid content link returned from Optimizely Graph"] })] });
+            const output = _jsxs(_Fragment, { children: [_jsx(Script, { src: new URL(communicationInjectorPath, client.siteInfo.cmsURL).href, strategy: 'afterInteractive' }), _jsxs(Layout, { locale: contentItem.locale?.name ?? '', children: [_jsx(OnPageEdit, { timeout: refreshDelay, mode: context.inEditMode ? 'edit' : 'preview', className: 'bg-slate-900 absolute top-0 left-0 w-screen h-screen opacity-60 z-50', children: _jsx(RefreshNotice, {}) }), _jsx(CmsContent, { contentType: contentType, contentLink: contentLink, fragmentData: contentItem })] }), _jsxs("div", { className: 'optly-contentLink', children: ["ContentItem: ", contentLink ? contentLinkToString(contentLink) : "Invalid content link returned from Optimizely Graph"] })] });
             return output;
         }
         catch (e) {

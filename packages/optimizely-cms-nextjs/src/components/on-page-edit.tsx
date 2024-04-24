@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useEffect, type FunctionComponent, type PropsWithChildren } from 'react'
+import { useState, useEffect, type FunctionComponent, type PropsWithChildren } from 'react'
 import { useRouter } from 'next/navigation'
 
 export type OnPageEditProps = PropsWithChildren<{
@@ -27,8 +27,6 @@ declare global {
         epi?: OptimizelyCmsContext
     }
 }
-
-const DEV = process.env.NODE_ENV == 'development'
 
 export const OnPageEdit : FunctionComponent<OnPageEditProps> = ({ mode, children, className, timeout }) => 
 {
@@ -71,12 +69,31 @@ export const OnPageEdit : FunctionComponent<OnPageEditProps> = ({ mode, children
         function onContentSaved(eventData: OptimizelyCmsContentSavedEvent)
         {
             setShowMask(true)
-            if (maskTimer != false) clearTimeout(maskTimer)
-            console.log(`Delaying refresh with ${ timeout }ms to allow Optimizely Graph to update`)
+            if (maskTimer != false) {
+                console.log("Preview refresh pending, restarting wait for refresh")
+                clearTimeout(maskTimer)
+            }
+            console.log(`Delaying refresh with ${ timeout }ms to allow Optimizely Graph to update`, eventData)
             maskTimer = setTimeout(() => {
                 const contentId = window.location.pathname.split(',,')[1]
-                const newContentId = eventData.contentLink
-                if (previewUrl == eventData.previewUrl) {
+                const newContentId = eventData?.contentLink
+                if (!eventData.previewUrl && newContentId) {
+                    console.log(`Refreshing preview: ${ contentId } => ${ newContentId } - no updated preview URL received`)
+                    if (contentId != newContentId) {
+                        const newUrl = new URL(window.location.href)
+                        const pathParts = newUrl.pathname.split(',,')
+                        pathParts[1] = newContentId
+                        newUrl.pathname = pathParts.join(',,')
+                        console.log(`Refreshing preview: Navigating to new preview URL: ${ newUrl.href }`)
+                        router.push(newUrl.pathname + newUrl.search)
+                    } else {
+                        try {
+                            location.reload()
+                        } catch (e) {
+                            router.refresh()
+                        }
+                    }
+                } else if (previewUrl == eventData.previewUrl) {
                     console.log(`Refreshing preview: ${ contentId } => ${ newContentId }`)
                     router.refresh()
                     //setShowMask(false)

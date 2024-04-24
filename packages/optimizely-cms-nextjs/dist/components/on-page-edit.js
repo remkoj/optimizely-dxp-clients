@@ -2,7 +2,6 @@
 import { jsx as _jsx, Fragment as _Fragment } from "react/jsx-runtime";
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-const DEV = process.env.NODE_ENV == 'development';
 export const OnPageEdit = ({ mode, children, className, timeout }) => {
     const router = useRouter();
     const [optiCmsReady, setOptiCmsReady] = useState(false);
@@ -38,13 +37,34 @@ export const OnPageEdit = ({ mode, children, className, timeout }) => {
         let maskTimer = false;
         function onContentSaved(eventData) {
             setShowMask(true);
-            if (maskTimer != false)
+            if (maskTimer != false) {
+                console.log("Preview refresh pending, restarting wait for refresh");
                 clearTimeout(maskTimer);
-            console.log(`Delaying refresh with ${timeout}ms to allow Optimizely Graph to update`);
+            }
+            console.log(`Delaying refresh with ${timeout}ms to allow Optimizely Graph to update`, eventData);
             maskTimer = setTimeout(() => {
                 const contentId = window.location.pathname.split(',,')[1];
-                const newContentId = eventData.contentLink;
-                if (previewUrl == eventData.previewUrl) {
+                const newContentId = eventData?.contentLink;
+                if (!eventData.previewUrl && newContentId) {
+                    console.log(`Refreshing preview: ${contentId} => ${newContentId} - no updated preview URL received`);
+                    if (contentId != newContentId) {
+                        const newUrl = new URL(window.location.href);
+                        const pathParts = newUrl.pathname.split(',,');
+                        pathParts[1] = newContentId;
+                        newUrl.pathname = pathParts.join(',,');
+                        console.log(`Refreshing preview: Navigating to new preview URL: ${newUrl.href}`);
+                        router.push(newUrl.pathname + newUrl.search);
+                    }
+                    else {
+                        try {
+                            location.reload();
+                        }
+                        catch (e) {
+                            router.refresh();
+                        }
+                    }
+                }
+                else if (previewUrl == eventData.previewUrl) {
                     console.log(`Refreshing preview: ${contentId} => ${newContentId}`);
                     router.refresh();
                     //setShowMask(false)

@@ -50,6 +50,11 @@ export type EditViewOptions = {
      * The factory used to create a new Optimizely Graph Client
      */
     clientFactory: ClientFactory;
+    /**
+     * If provided, this allows to override the CommunicationInjector
+     * path.
+     */
+    communicationInjectorPath: string;
 };
 export type GetContentByIdData<LocaleType = string> = {
     content: {

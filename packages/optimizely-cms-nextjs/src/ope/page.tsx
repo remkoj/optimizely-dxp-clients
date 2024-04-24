@@ -23,7 +23,8 @@ const defaultOptions : EditViewOptions = {
         { props.children }
     </div>,
     loader: getContentById,
-    clientFactory: (token?: string) => getAuthorizedServerClient(token)
+    clientFactory: (token?: string) => getAuthorizedServerClient(token),
+    communicationInjectorPath: '/util/javascript/communicationinjector.js'
 }
 
 // Helper function to read the ContentID & WorkID
@@ -68,7 +69,8 @@ export function createEditPageComponent(
         refreshDelay, 
         errorNotice: ErrorNotice, 
         loader: getContentById,
-        clientFactory
+        clientFactory,
+        communicationInjectorPath
     } = { ...defaultOptions, ...options }
 
     async function EditPage({ params: { path }, searchParams }: EditPageProps) : Promise<JSX.Element>
@@ -149,7 +151,7 @@ export function createEditPageComponent(
             const isPage = contentType.some(x => x?.toLowerCase() == "page") ?? false
             const Layout = isPage ? PageLayout : React.Fragment
             const output =  <>
-                { context.inEditMode && <Script src={new URL('/ui/CMS/latest/clientresources/communicationinjector.js', client.siteInfo.cmsURL).href} strategy='afterInteractive' /> }
+                <Script src={new URL(communicationInjectorPath, client.siteInfo.cmsURL).href} strategy='afterInteractive' />
                 <Layout locale={ contentItem.locale?.name ?? '' }>
                     <OnPageEdit timeout={ refreshDelay } mode={ context.inEditMode ? 'edit' : 'preview' } className='bg-slate-900 absolute top-0 left-0 w-screen h-screen opacity-60 z-50'>
                         <RefreshNotice />

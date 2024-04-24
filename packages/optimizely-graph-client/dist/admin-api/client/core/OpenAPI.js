@@ -1,6 +1,6 @@
 export const OpenAPI = {
     BASE: 'https://prod.cg.optimizely.com',
-    VERSION: '3.7.0',
+    VERSION: '3.7.1',
     WITH_CREDENTIALS: false,
     CREDENTIALS: 'include',
     TOKEN: undefined,
