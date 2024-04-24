@@ -1,11 +1,14 @@
-import { NextResponse } from 'next/server';
+import { NextResponse } from "next/server";
+import { revalidatePath, revalidateTag } from "next/cache";
+import { isContentGraphClient, ContentGraphClient } from "@remkoj/optimizely-graph-client";
 import { getServerClient } from '../client';
-import { revalidatePath } from 'next/cache';
-const editPaths = ['/ui/[[...path]]'];
-const publishedPaths = ['/[lang]', '/[lang]/[[...path]]', '/sitemap', '/sitemap.xml'];
-const paths = [...editPaths, ...publishedPaths];
-export function createPublishApi(client) {
-    const graphClient = client ?? getServerClient();
+export function createPublishApi(options) {
+    const defaultOptions = {
+        paths: [],
+        client: getServerClient,
+        scopes: ['page', 'layout'],
+        tags: []
+    };
     function tryJsonParse(data) {
         if (typeof (data) != 'string')
             return null;
@@ -16,14 +19,19 @@ export function createPublishApi(client) {
             return null;
         }
     }
-    const publishHandler = async (req) => {
-        // Validate access
-        const xAuthToken = req.headers.get("X-OPTLY-PUBLISH") ??
-            req.nextUrl.searchParams.get("token") ??
+    const { client: clientFactory, paths, scopes, tags } = {
+        ...defaultOptions,
+        ...options
+    };
+    const client = typeof clientFactory == 'function' ? clientFactory() : (isContentGraphClient(clientFactory) ? clientFactory : new ContentGraphClient(clientFactory));
+    return async function (request) {
+        // Authorize the request
+        const xAuthToken = request.headers.get("X-OPTLY-PUBLISH") ??
+            request.nextUrl.searchParams.get("token") ??
             undefined;
-        const serverToken = graphClient.siteInfo.publishToken;
+        const serverToken = client.siteInfo.publishToken;
         if (!serverToken || serverToken == "") {
-            console.error("No authentication configured, publishing has been disabled");
+            console.error("[Publish-API] No authentication configured, publishing has been disabled");
             return NextResponse.json({ error: "Not authorized" }, { status: 401 });
         }
         if (serverToken != xAuthToken) {
@@ -31,24 +39,24 @@ export function createPublishApi(client) {
             return NextResponse.json({ error: "Not authorized" }, { status: 401 });
         }
         // Get request data
-        const requestBody = tryJsonParse(await req.text());
-        // Don't publish if we're in selective mode and there's no data
-        if (!requestBody) {
-            console.log("Not flushing due to missing request body");
-            return NextResponse.json({ status: "no-publish" });
-        }
-        const action = requestBody.type?.action;
-        const subject = requestBody.type?.subject;
-        // Only publish on updated documents
-        if (subject != "doc" || action != "updated") {
-            console.log("Not flushing due to incorrect subject or type", JSON.stringify(requestBody));
-            return NextResponse.json({ status: "no-publish" });
-        }
-        paths.forEach(p => revalidatePath(p, 'page'));
-        console.log("Publishing => Revalidated (paths)", paths);
-        return NextResponse.json({ status: "success", paths });
+        const requestBody = tryJsonParse(await request.text());
+        console.log("[Publish-API] Graph Event: " + JSON.stringify(requestBody, undefined, 4));
+        // Keep track of what has been revalidated
+        const revalidated = [];
+        // Flush all
+        scopes.forEach(scope => {
+            paths.forEach(path => {
+                revalidatePath(path, scope);
+                revalidated.push({ path, scope });
+            });
+        });
+        tags.forEach(tag => {
+            revalidateTag(tag);
+            revalidated.push({ tag });
+        });
+        // Return result
+        return NextResponse.json({ success: true, revalidated });
     };
-    return publishHandler;
 }
 export default createPublishApi;
 //# sourceMappingURL=index.js.map

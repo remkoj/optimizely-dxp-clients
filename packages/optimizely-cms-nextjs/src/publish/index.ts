@@ -1,20 +1,42 @@
-import { type NextRequest, NextResponse } from 'next/server'
-import { type IOptiGraphClient } from "@remkoj/optimizely-graph-client"
+import { type NextRequest, NextResponse } from "next/server"
+import { revalidatePath, revalidateTag } from "next/cache"
+import { type IOptiGraphClient, type OptimizelyGraphConfig, isContentGraphClient, type ClientFactory, ContentGraphClient } from "@remkoj/optimizely-graph-client"
 import { getServerClient } from '../client'
-import { revalidatePath } from 'next/cache'
 
-export type PublishApiResponse = {
-    status: "success" | "no-publish",
-    paths?: string[]
-} | { error: string }
+type PublishScopes = NonNullable<Parameters<typeof revalidatePath>[1]>
+type OptiGraphClientFactory = IOptiGraphClient | OptimizelyGraphConfig | ClientFactory
+type PublishApiOptions = {
+    /**
+     * The list of paths that your implementation uses with Optimizely CMS managed
+     * content
+     */
+    paths: Array<string>
 
-const editPaths = [ '/ui/[[...path]]' ]
-const publishedPaths = [ '/[lang]', '/[lang]/[[...path]]', '/sitemap', '/sitemap.xml' ]
-const paths = [ ...editPaths, ...publishedPaths ]
+    /**
+     * The scopes for which to revalidate the cache
+     */
+    scopes?: Array<PublishScopes>
 
-export function createPublishApi(client?: IOptiGraphClient)
+    /**
+     * The tags to revalidate the cache for
+     */
+    tags?: Array<string>
+
+    /**
+     * The Optimizely Graph client to use for Graph Operations needed to publish 
+     * content
+     */
+    client?: OptiGraphClientFactory
+}
+
+export function createPublishApi(options: PublishApiOptions)
 {
-    const graphClient = client ?? getServerClient()
+    const defaultOptions : Required<PublishApiOptions> = {
+        paths: [],
+        client: getServerClient,
+        scopes: ['page','layout'],
+        tags: []
+    }
 
     function tryJsonParse<T = { [key: string]: any }>(data?: string | null) : T | null
     {
@@ -27,15 +49,21 @@ export function createPublishApi(client?: IOptiGraphClient)
         }
     }
 
-    const publishHandler : (req: NextRequest) => Promise<NextResponse<PublishApiResponse>> = async req =>
+    const { client: clientFactory, paths, scopes, tags } = { 
+        ...defaultOptions, 
+        ...options 
+    } as Required<PublishApiOptions>
+    const client = typeof clientFactory == 'function' ? clientFactory() : (isContentGraphClient(clientFactory) ? clientFactory : new ContentGraphClient(clientFactory))
+
+    return async function(request: NextRequest) : Promise<NextResponse>
     {
-        // Validate access
-        const xAuthToken = req.headers.get("X-OPTLY-PUBLISH") ?? 
-            req.nextUrl.searchParams.get("token") ?? 
+        // Authorize the request
+        const xAuthToken = request.headers.get("X-OPTLY-PUBLISH") ?? 
+            request.nextUrl.searchParams.get("token") ?? 
             undefined
-        const serverToken = graphClient.siteInfo.publishToken
+        const serverToken = client.siteInfo.publishToken
         if (!serverToken || serverToken == "") {
-            console.error("No authentication configured, publishing has been disabled")
+            console.error("[Publish-API] No authentication configured, publishing has been disabled")
             return NextResponse.json({ error: "Not authorized"}, { status: 401 })
         }
         if (serverToken != xAuthToken) {
@@ -44,29 +72,27 @@ export function createPublishApi(client?: IOptiGraphClient)
         }
 
         // Get request data
-        const requestBody = tryJsonParse(await req.text())
+        const requestBody = tryJsonParse(await request.text())
+        console.log("[Publish-API] Graph Event: " + JSON.stringify(requestBody, undefined, 4))
 
-        // Don't publish if we're in selective mode and there's no data
-        if (!requestBody) {
-            console.log("Not flushing due to missing request body")
-            return NextResponse.json({ status: "no-publish" })
-        }
-    
-        const action = requestBody.type?.action
-        const subject = requestBody.type?.subject    
+        // Keep track of what has been revalidated
+        const revalidated : Array<{ tag: string } | { path: string, scope: PublishScopes }> = []
 
-        // Only publish on updated documents
-        if (subject != "doc" || action != "updated") {
-            console.log("Not flushing due to incorrect subject or type", JSON.stringify(requestBody))
-            return NextResponse.json({ status: "no-publish" })
-        }
+        // Flush all
+        scopes.forEach(scope => {
+            paths.forEach(path => {
+                revalidatePath(path, scope)
+                revalidated.push({ path, scope })
+            })
+        })
+        tags.forEach(tag => {
+            revalidateTag(tag)
+            revalidated.push({ tag })
+        })
 
-        paths.forEach(p => revalidatePath(p, 'page'))
-        console.log("Publishing => Revalidated (paths)", paths)
-        return NextResponse.json({ status: "success", paths })
+        // Return result
+        return NextResponse.json({ success: true, revalidated })
     }
-
-    return publishHandler
 }
 
 export default createPublishApi
