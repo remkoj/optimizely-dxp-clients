@@ -44,6 +44,11 @@ export type IOptiGraphClientFlags = {
      * same data will be handled completely at the CDN edge.
      */
     cache: boolean
+
+    /**
+     * When set to true, empty object will be omitted from the result
+     */
+    omitEmpty: boolean
 }
 
 export interface IOptiGraphClient extends ClientInstanceType

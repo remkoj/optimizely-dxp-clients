@@ -12,6 +12,28 @@ import React from 'react'
 import Script from 'next/script'
 import { getContentById } from './data'
 
+function readValue<T extends string | undefined>(variableName: string, defaultValue?: T) : T extends string ? string : string | undefined
+{
+    try {
+        const stringValue = process?.env ? process.env[variableName] : undefined
+        return stringValue || defaultValue as T extends string ? string : undefined
+    } catch {
+        return defaultValue as T extends string ? string : undefined
+    }
+}
+
+function readValueAsInt<T extends number | undefined>(variableName: string, defaultValue?: T) : T extends number ? number : number | undefined
+{
+    const stringValue = readValue(variableName)
+    if (!stringValue)
+        return defaultValue as T extends number ? number : undefined
+    try {
+        return parseInt(stringValue)
+    } catch {
+        return defaultValue as T extends number ? number : undefined
+    }
+}
+
 const defaultOptions : EditViewOptions = {
     refreshDelay: 2000,
     refreshNotice: () => <div className='optly-refresh-notice'>Updating preview, please wait....</div>,
@@ -74,6 +96,7 @@ export function createEditPageComponent(
     options?: Partial<EditViewOptions>
 ) : EditPageComponent
 {
+    const envRefreshDelay = readValueAsInt("OPTIMIZELY_CONTENTGRAPH_UPDATE_DELAY", defaultOptions.refreshDelay );
     const { 
         layout: PageLayout, 
         refreshNotice: RefreshNotice, 
@@ -82,7 +105,7 @@ export function createEditPageComponent(
         loader: getContentById,
         clientFactory,
         communicationInjectorPath
-    } = { ...defaultOptions, ...options }
+    } = { ...defaultOptions, refreshDelay: envRefreshDelay, ...options }
 
     async function EditPage({ params: { path }, searchParams }: EditPageProps) : Promise<JSX.Element>
     {

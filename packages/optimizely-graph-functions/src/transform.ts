@@ -7,13 +7,15 @@ import fs from 'node:fs'
 export type TransformOptions = {
     injections?: Injection[],
     verbose?: boolean
+    recursion?: boolean
 }
 
 export function pickTransformOptions(options: Record<string,any>) : TransformOptions
 {
     return {
         injections: options.injections ?? [],
-        verbose: options.verbose ?? false
+        verbose: options.verbose ?? false,
+        recursion: options.recursion ?? true
     }
 }
 
@@ -50,8 +52,10 @@ export const transform : Types.DocumentTransformFunction<TransformOptions> = ({d
 
     // Get the names we actually need to inject into, and return when none are present
     const intoNames = Object.getOwnPropertyNames(componentFragments)
+
+    // Process recursion
     const componentSpreads : { [ into: string ]: InlineFragmentNode[] } = {}
-    if (intoNames.length > 0) {
+    if (config.recursion && intoNames.length > 0) {
         // Process the fragments, add matching spreads if need be
         const recursiveFragments : string[] = [ "IContentListItem" ]
         
@@ -102,6 +106,7 @@ export const transform : Types.DocumentTransformFunction<TransformOptions> = ({d
         })
     }
 
+    // Update the documents
     return files.map(file => {
         const document = file.document ? visit(file.document, {
             // Remove fragments from the preset, for which the target type does not exist

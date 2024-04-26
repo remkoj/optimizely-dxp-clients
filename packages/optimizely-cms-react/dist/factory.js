@@ -1,13 +1,18 @@
 const MERGE_SYMBOL = '/';
-const DBG = process.env.DXP_DEBUG == '1';
 export const EmptyComponentHandle = '$$fragment$$';
 /**
  * The default implementation of the ComponentFactory iterface
  */
 export class DefaultComponentFactory {
     registry = {};
+    dbg;
+    constructor() {
+        this.dbg = process.env.OPTIMIZELY_DEBUG == '1';
+    }
     register(type, component) {
         type = processComponentTypeHandle(type);
+        if (this.dbg)
+            console.log(`➕ [DefaultComponentFactory] Adding ${type}`);
         this.registry[type] = component;
     }
     registerAll(components) {
@@ -15,10 +20,14 @@ export class DefaultComponentFactory {
     }
     has(type) {
         type = processComponentTypeHandle(type);
+        if (this.dbg)
+            console.log(`🔎 [DefaultComponentFactory] Checking for ${type}`);
         return Object.getOwnPropertyNames(this.registry).includes(type);
     }
     resolve(type) {
         type = processComponentTypeHandle(type);
+        if (this.dbg)
+            console.log(`⚡ [DefaultComponentFactory] Resolving ${type}`);
         if (Object.getOwnPropertyNames(this.registry).includes(type))
             return this.registry[type];
         return undefined;
@@ -40,6 +49,7 @@ const _static = {};
  * @returns The ComponentFactory
  */
 export const getFactory = () => {
+    const DBG = process.env.OPTIMIZELY_DEBUG == '1';
     if (!_static.factory) {
         if (DBG)
             console.log("⚪ [ComponentFactory] Creating new Component Factory");

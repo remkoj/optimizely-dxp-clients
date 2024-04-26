@@ -2,8 +2,8 @@ import 'server-only'
 import type { Metadata, ResolvingMetadata } from 'next'
 import deepmerge from 'deepmerge'
 import { notFound } from 'next/navigation'
-import { RouteResolver, type ClientFactory, type ChannelDefinition } from '@remkoj/optimizely-graph-client'
-import { normalizeContentLink, normalizeContentLinkWithLocale } from '@remkoj/optimizely-graph-client/utils'
+import { RouteResolver, type Route, type ClientFactory, type ChannelDefinition } from '@remkoj/optimizely-graph-client'
+import { normalizeContentLinkWithLocale } from '@remkoj/optimizely-graph-client/utils'
 import { CmsContent, isDebug, getServerContext, type ComponentFactory } from '@remkoj/optimizely-cms-react/rsc'
 import { Utils } from '@remkoj/optimizely-cms-react'
 
@@ -12,23 +12,27 @@ import { urlToPath, localeToGraphLocale } from './utils'
 import getContentByPathBase, { type GetContentByPathMethod } from './data'
 import { getServerClient } from '../client'
 
-export type Params = {
-    path: string[] | undefined
+export type DefaultCmsPageParams = {
+    path?: string[]
+    lang?: string
+}
+export type DefaultCmsPageSearchParams = {}
+
+export type DefaultCmsPageProps<
+    TParams extends Record<string, string | Array<string> | undefined> = DefaultCmsPageParams,
+    TSearchParams extends Record<string, string | Array<string> | undefined> = DefaultCmsPageSearchParams
+> = {
+    params: TParams
+    searchParams: TSearchParams
 }
 
-export type Props = {
-    params: Params
-    searchParams: {}
-}
-
-export type GenerateMetadataProps<TParams extends {} = {}, TSearch extends {} = {}> = {
-    params: Params
-}
-
-export type OptiCmsNextJsPage = {
-    generateStaticParams: () => Promise<Params[]>
-    generateMetadata: (props: Props, resolving: ResolvingMetadata) => Promise<Metadata>
-    CmsPage: (props: Props) => Promise<JSX.Element>
+export type OptiCmsNextJsPage<
+    TParams extends Record<string, string | Array<string> | undefined> = DefaultCmsPageParams,
+    TSearchParams extends Record<string, string | Array<string> | undefined> = DefaultCmsPageSearchParams
+> = {
+    generateStaticParams: () => Promise<TParams[]>
+    generateMetadata: (props: DefaultCmsPageProps<TParams, TSearchParams>, resolving: ResolvingMetadata) => Promise<Metadata>
+    CmsPage: (props: DefaultCmsPageProps<TParams, TSearchParams>) => Promise<JSX.Element>
 }
 
 export enum SystemLocales {
@@ -36,26 +40,48 @@ export enum SystemLocales {
     Neutral = 'NEUTRAL'
 }
 
-export type CreatePageOptions<LocaleEnum = SystemLocales> = {
-    defaultLocale: string | null
+export type CreatePageOptions<
+    LocaleEnum = SystemLocales, 
+    TParams extends Record<string, string | Array<string> | undefined> = DefaultCmsPageParams,
+    TSearchParams extends Record<string, string | Array<string> | undefined> = DefaultCmsPageSearchParams
+> = {
+    defaultLocale: LocaleEnum | null
     getContentByPath: GetContentByPathMethod<LocaleEnum>
     client: ClientFactory
     channel?: ChannelDefinition
+    propsToCmsPath: (props: DefaultCmsPageProps<TParams, TSearchParams>) => string | null
+    propsToCmsLocale: (props: DefaultCmsPageProps<TParams, TSearchParams>, locale: LocaleEnum | null) => LocaleEnum | null
+    routeToParams: (route: Route) => TParams
 }
 
 const CreatePageOptionDefaults : CreatePageOptions<string> = {
     defaultLocale: null,
     getContentByPath: getContentByPathBase,
-    client: getServerClient
+    client: getServerClient,
+    propsToCmsPath: ({ params }) => buildRequestPath(params),
+    propsToCmsLocale: ({ params }, defaultLocale) => params?.lang ?? defaultLocale ?? null,
+    routeToParams: (route) => { return { path: urlToPath(route.url, route.locale), lang: route.locale }}
 }
 
-export function createPage<LocaleEnum = SystemLocales>(
+/**
+ * Generate the React Server Side component and Next.JS functions needed to render an 
+ * Optimizely CMS page. This component assumes that the routes are either defined as
+ * /[lang]/[[...path]] or /[[...path]]
+ * 
+ * @param       factory         The component factory to use for this page
+ * @param       options         The page component generation options
+ * @returns     The Optimizely CMS Page
+ */
+export function createPage<
+    LocaleEnum = SystemLocales, 
+    TParams extends Record<string, string | Array<string> | undefined> = DefaultCmsPageParams,
+    TSearchParams extends Record<string, string | Array<string> | undefined> = DefaultCmsPageSearchParams
+> (
     factory: ComponentFactory,
-    options?: Partial<CreatePageOptions<LocaleEnum>>
+    options?: Partial<CreatePageOptions<LocaleEnum, TParams, TSearchParams>>
 ) : OptiCmsNextJsPage {
-    const { defaultLocale, getContentByPath, client: clientFactory, channel }= { 
-        ...CreatePageOptionDefaults, 
-        ...{ defaultLocale: null }, 
+    const { defaultLocale, getContentByPath, client: clientFactory, channel, propsToCmsLocale, propsToCmsPath, routeToParams }= { 
+        ...CreatePageOptionDefaults,
         ...options 
     } as CreatePageOptions<LocaleEnum>
 
@@ -64,17 +90,15 @@ export function createPage<LocaleEnum = SystemLocales>(
         {
             const client = clientFactory()
             const resolver = new RouteResolver(client)
-            return (await resolver.getRoutes()).map(r => { 
-                return {
-                    path: urlToPath(r.url)
-                }
-            })
+            return (await resolver.getRoutes()).map(r => routeToParams(r))
         },
-        generateMetadata: async ( { params: { path } }, resolving ) =>
+        generateMetadata: async ( props, resolving ) =>
         {
             // Read variables from request            
             const client = clientFactory()
-            const requestPath = buildRequestPath({ path })
+            const requestPath = propsToCmsPath(props)
+            if (!requestPath)
+                return Promise.resolve({})
             const routeResolver = new RouteResolver(client)
             const metaResolver = new MetaDataResolver(client)
 
@@ -113,7 +137,7 @@ export function createPage<LocaleEnum = SystemLocales>(
             }
             return pageMetadata
         },
-        CmsPage: async ({  params: { path } }) =>
+        CmsPage: async (props) =>
         {
             // Prepare the context
             const context = getServerContext()
@@ -122,11 +146,18 @@ export function createPage<LocaleEnum = SystemLocales>(
                 context.setOptimizelyGraphClient(client)
             context.setComponentFactory(factory)
 
+            // Analyze the locale
+            const currentLocale = propsToCmsLocale(props, defaultLocale)
+            const graphLocale = (currentLocale ? localeToGraphLocale(currentLocale as string, channel) : undefined) as LocaleEnum
+            if (currentLocale)
+                context.setLocale(currentLocale as string)
+
             // Resolve the content based upon the route
-            const requestPath = buildRequestPath({ path })
-            const response = await getContentByPath(client, { path: requestPath })
+            const requestPath = propsToCmsPath(props)
+            if (!requestPath)
+                return notFound()
+            const response = await getContentByPath(client, { path: requestPath, locale: graphLocale })
             const info = (response?.content?.items ?? [])[0]
-            //context.setLocale(graphLocale)
 
             if (!info) {
                 if (isDebug()) {
@@ -138,6 +169,8 @@ export function createPage<LocaleEnum = SystemLocales>(
             // Extract the type & link
             const contentType = Utils.normalizeContentType(info._metadata?.types)
             const contentLink = normalizeContentLinkWithLocale(info._metadata)
+            if (contentLink?.locale)
+                context.setLocale(contentLink?.locale as string)
             if (!contentLink) {
                 console.error("🔴 [CmsPage] Unable to infer the contentLink from the retrieved content, this should not have happened!")
                 return notFound()

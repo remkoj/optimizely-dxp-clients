@@ -60,27 +60,38 @@ export type CmsContentProps<LocalesType = string> = PropsWithChildren<{
      */
     contentTypePrefix?: string;
 }>;
-type RawContentLink = {
-    id?: number | null;
-    workId?: number | null;
-    guidValue?: string | null;
-};
-type RawLocale = {
-    name?: string | null;
-};
 export type ContentAreaItemDefinition = {
-    __typename?: "ContentAreaItemModelSearch" | "ContentAreaItemModel";
-    item?: (RawContentLink & {
-        data?: {
-            contentType?: (string | null)[] | null;
-            id?: RawContentLink | null;
-            locale?: RawLocale | null;
-            [property: string]: any;
+    __typename?: string | null;
+    _type?: string | null;
+    _metadata?: {
+        key?: string | null;
+        locale?: string | null;
+        types?: Array<string | null> | null;
+        displayName?: string | null;
+        version?: string | null;
+        url?: {
+            base?: string | null;
+            hierarchical?: string | null;
+            default?: string | null;
         } | null;
-    }) | null;
-    displayOption?: string | null;
-    tag?: string | null;
-};
+    } | null;
+} & Record<string, any>;
+export type ValidContentAreaItemDefinition = {
+    __typename?: string | null;
+    _type?: string | null;
+    _metadata: {
+        key?: string | null;
+        locale?: string | null;
+        types?: Array<string | null> | null;
+        displayName?: string | null;
+        version?: string | null;
+        url?: {
+            base?: string | null;
+            hierarchical?: string | null;
+            default?: string | null;
+        } | null;
+    };
+} & Record<string, any>;
 export type CmsContentAreaProps<T extends ElementType, CT extends ElementType> = {
     /**
      * The content area items to be rendered
@@ -173,4 +184,3 @@ export type CmsContentAreaProps<T extends ElementType, CT extends ElementType> =
     itemsProperty: ElementChildrenProps<T>;
 });
 export type CmsContentAreaClassMapper = (displayOption: string, contentType: ContentType | null, index: number) => string;
-export {};

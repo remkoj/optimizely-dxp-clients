@@ -9,7 +9,8 @@ const node_fs_1 = __importDefault(require("node:fs"));
 function pickTransformOptions(options) {
     return {
         injections: options.injections ?? [],
-        verbose: options.verbose ?? false
+        verbose: options.verbose ?? false,
+        recursion: options.recursion ?? true
     };
 }
 exports.pickTransformOptions = pickTransformOptions;
@@ -45,8 +46,9 @@ const transform = ({ documents: files, config, schema, pluginContext }) => {
     });
     // Get the names we actually need to inject into, and return when none are present
     const intoNames = Object.getOwnPropertyNames(componentFragments);
+    // Process recursion
     const componentSpreads = {};
-    if (intoNames.length > 0) {
+    if (config.recursion && intoNames.length > 0) {
         // Process the fragments, add matching spreads if need be
         const recursiveFragments = ["IContentListItem"];
         intoNames.forEach(intoName => {
@@ -97,6 +99,7 @@ const transform = ({ documents: files, config, schema, pluginContext }) => {
             });
         });
     }
+    // Update the documents
     return files.map(file => {
         const document = file.document ? (0, graphql_1.visit)(file.document, {
             // Remove fragments from the preset, for which the target type does not exist

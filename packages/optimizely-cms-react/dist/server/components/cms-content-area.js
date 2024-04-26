@@ -33,11 +33,11 @@ export const CmsContentArea = async ({ items, classMapper, className, fieldName,
     const actualItems = (items || []).filter(forValidContentAreaItems);
     const componentData = await Promise.all(actualItems.map(async (item, idx) => {
         // Prepare data from received content area format
-        const contentLink = normalizeContentLinkWithLocale({ ...item.item, locale: locale });
+        const contentLink = normalizeContentLinkWithLocale(item._metadata);
         if (!contentLink)
-            throw new Errors.InvalidContentLinkError({ ...item.item, locale: locale });
-        const contentType = Utils.normalizeContentType(item.item?.data?.contentType);
-        const fragmentData = item.item?.data || undefined;
+            throw new Errors.InvalidContentLinkError(item._metadata);
+        const contentType = Utils.normalizeContentType(item._metadata.types);
+        const fragmentData = item;
         // Read element wrapper configuration
         const { as: contentItemElement, className: contentItemBaseClassName, itemsProperty: contentItemTarget, ...contentItemElementProps } = itemWrapper ?? {};
         // Generate element wrapper properties
@@ -49,7 +49,7 @@ export const CmsContentArea = async ({ items, classMapper, className, fieldName,
             "data-tag": item.tag || undefined,
             ...contentItemElementProps
         };
-        const contentAraeItemContent = await CmsContent({ contentLink, contentType, fragmentData, client: gqlClient, factory, outputEditorWarning: inEditMode, contentTypePrefix: "Block" });
+        const contentAraeItemContent = await CmsContent({ contentLink, contentType, fragmentData, client: gqlClient, factory, outputEditorWarning: inEditMode, contentTypePrefix: "Component" });
         // Inject the element into the wrapper
         const childrenTarget = contentItemTarget || "children";
         let contentAreaItemContainerChildren = undefined;
@@ -76,13 +76,7 @@ export const CmsContentArea = async ({ items, classMapper, className, fieldName,
     return _jsx(ContentAreaContainer, { ...contentAreaContainerProps, children: contentAreaContainerChildren });
 };
 function forValidContentAreaItems(itm) {
-    if (itm == undefined || itm == null)
-        return false;
-    if (itm.item == undefined || itm.item == null)
-        return false;
-    if (itm.item.data == undefined || itm.item.data == null)
-        return typeof (itm.item.guidValue) == 'string' && itm.item.guidValue.length > 0;
-    return itm.item.guidValue == itm.item.data.id?.guidValue;
+    return typeof (itm) == 'object' && itm != null && typeof (itm._metadata) == 'object' && itm._metadata != null;
 }
 export async function processContentAreaItems(items, locale) {
     const actualItems = (items ?? []).filter(Utils.isNotNullOrUndefined);

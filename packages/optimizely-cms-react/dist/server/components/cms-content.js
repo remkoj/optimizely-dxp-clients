@@ -48,6 +48,9 @@ export const CmsContent = async ({ contentType, contentTypePrefix, contentLink: 
             console.warn(`🟠 [CmsContent] No content type provided for content ${contentLinkToString(contentLink)}, this causes an additional GraphQL query to resolve the ContentType`);
         contentType = await getContentType(contentLink, client);
     }
+    // Optimizely Graph stores the type in Most Significant first order, we need least significant first, also we're stripping out the common "Content" item from it
+    if (Array.isArray(contentType))
+        contentType = contentType.filter(x => x.toLowerCase() != "content").reverse();
     // Apply the content-type prefix if needed
     if (Array.isArray(contentType) && Utils.isNonEmptyString(contentTypePrefix) && contentType.length > 0 && contentType[0] != contentTypePrefix) {
         if (context.isDebug)

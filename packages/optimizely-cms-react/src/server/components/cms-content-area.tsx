@@ -7,7 +7,7 @@ import * as Errors from '../../errors'
 import createClient from '@remkoj/optimizely-graph-client'
 import { normalizeContentLinkWithLocale, contentLinkToString } from '@remkoj/optimizely-graph-client/utils'
 import getServerContext from '../context'
-import type { CmsContentAreaProps, ContentAreaItemDefinition } from './types'
+import type { CmsContentAreaProps, ContentAreaItemDefinition, ValidContentAreaItemDefinition } from './types'
 
 //#region Export Type definitions
 export type { CmsContentAreaClassMapper, CmsContentAreaProps, ContentAreaItemDefinition } from './types'
@@ -43,11 +43,11 @@ export const CmsContentArea = async <T extends ElementType = "div", I extends El
     const actualItems = (items || []).filter(forValidContentAreaItems)
     const componentData = await Promise.all(actualItems.map(async (item, idx) : Promise<React.JSX.Element> => {
         // Prepare data from received content area format
-        const contentLink = normalizeContentLinkWithLocale({ ...item.item, locale: locale })
+        const contentLink = normalizeContentLinkWithLocale(item._metadata)
         if (!contentLink)
-            throw new Errors.InvalidContentLinkError({ ...item.item, locale: locale })
-        const contentType = Utils.normalizeContentType(item.item?.data?.contentType)
-        const fragmentData = item.item?.data || undefined
+            throw new Errors.InvalidContentLinkError(item._metadata)
+        const contentType = Utils.normalizeContentType(item._metadata.types)
+        const fragmentData = item
 
         // Read element wrapper configuration
         const { 
@@ -66,7 +66,7 @@ export const CmsContentArea = async <T extends ElementType = "div", I extends El
             "data-tag": item.tag || undefined,
             ...contentItemElementProps
         }
-        const contentAraeItemContent = await CmsContent({ contentLink, contentType, fragmentData, client: gqlClient, factory, outputEditorWarning: inEditMode, contentTypePrefix: "Block" })
+        const contentAraeItemContent = await CmsContent({ contentLink, contentType, fragmentData, client: gqlClient, factory, outputEditorWarning: inEditMode, contentTypePrefix: "Component" })
 
         // Inject the element into the wrapper
         const childrenTarget = contentItemTarget || "children"
@@ -97,18 +97,9 @@ export const CmsContentArea = async <T extends ElementType = "div", I extends El
     return <ContentAreaContainer { ...contentAreaContainerProps }>{ contentAreaContainerChildren }</ContentAreaContainer>
 }
 
-function forValidContentAreaItems(itm?: ContentAreaItemDefinition | null) : itm is ContentAreaItemDefinition
+function forValidContentAreaItems(itm?: ContentAreaItemDefinition | null) : itm is ValidContentAreaItemDefinition
 {
-    if (itm == undefined || itm == null)
-        return false
-
-    if (itm.item == undefined || itm.item == null)
-        return false
-
-    if (itm.item.data == undefined || itm.item.data == null)
-        return typeof(itm.item.guidValue) == 'string' && itm.item.guidValue.length > 0
-
-    return itm.item.guidValue == itm.item.data.id?.guidValue
+    return typeof(itm) == 'object' && itm != null && typeof (itm._metadata) == 'object' && itm._metadata != null
 }
 
 export async function processContentAreaItems( items?: (ContentAreaItemDefinition | null)[] | null, locale?: string) : Promise<JSX.Element[]>

@@ -10,6 +10,26 @@ import { getAuthorizedServerClient } from '../client';
 import React from 'react';
 import Script from 'next/script';
 import { getContentById } from './data';
+function readValue(variableName, defaultValue) {
+    try {
+        const stringValue = process?.env ? process.env[variableName] : undefined;
+        return stringValue || defaultValue;
+    }
+    catch {
+        return defaultValue;
+    }
+}
+function readValueAsInt(variableName, defaultValue) {
+    const stringValue = readValue(variableName);
+    if (!stringValue)
+        return defaultValue;
+    try {
+        return parseInt(stringValue);
+    }
+    catch {
+        return defaultValue;
+    }
+}
 const defaultOptions = {
     refreshDelay: 2000,
     refreshNotice: () => _jsx("div", { className: 'optly-refresh-notice', children: "Updating preview, please wait...." }),
@@ -62,7 +82,8 @@ function getContentRequest(path = "", searchParams) {
  * @returns The React Component that can be used by Next.JS to render the page
  */
 export function createEditPageComponent(factory, options) {
-    const { layout: PageLayout, refreshNotice: RefreshNotice, refreshDelay, errorNotice: ErrorNotice, loader: getContentById, clientFactory, communicationInjectorPath } = { ...defaultOptions, ...options };
+    const envRefreshDelay = readValueAsInt("OPTIMIZELY_CONTENTGRAPH_UPDATE_DELAY", defaultOptions.refreshDelay);
+    const { layout: PageLayout, refreshNotice: RefreshNotice, refreshDelay, errorNotice: ErrorNotice, loader: getContentById, clientFactory, communicationInjectorPath } = { ...defaultOptions, refreshDelay: envRefreshDelay, ...options };
     async function EditPage({ params: { path }, searchParams }) {
         // Create context
         const context = getServerContext();

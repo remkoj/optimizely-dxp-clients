@@ -1,6 +1,5 @@
 import type { ComponentFactory, ComponentType, ComponentTypeHandle, ComponentTypeDictionary } from './types'
 const MERGE_SYMBOL = '/'
-const DBG = process.env.DXP_DEBUG == '1'
 
 export const EmptyComponentHandle =  '$$fragment$$'
 
@@ -9,10 +8,17 @@ export const EmptyComponentHandle =  '$$fragment$$'
  */
 export class DefaultComponentFactory implements ComponentFactory {
     private registry : { [typeName: string]: ComponentType } = {}
+    private dbg : boolean
+
+    public constructor() 
+    {
+        this.dbg = process.env.OPTIMIZELY_DEBUG == '1'
+    }
 
     register(type: ComponentTypeHandle, component: ComponentType) : void
     {
         type = processComponentTypeHandle(type)
+        if (this.dbg) console.log(`➕ [DefaultComponentFactory] Adding ${ type }`)
         this.registry[type] = component
     }
 
@@ -24,12 +30,14 @@ export class DefaultComponentFactory implements ComponentFactory {
     has(type: ComponentTypeHandle) : boolean
     {
         type = processComponentTypeHandle(type)
+        if (this.dbg) console.log(`🔎 [DefaultComponentFactory] Checking for ${ type }`)
         return Object.getOwnPropertyNames(this.registry).includes(type)
     }
 
     resolve(type: ComponentTypeHandle) : undefined | ComponentType 
     {
         type = processComponentTypeHandle(type)
+        if (this.dbg) console.log(`⚡ [DefaultComponentFactory] Resolving ${ type }`)
         if (Object.getOwnPropertyNames(this.registry).includes(type))
             return this.registry[type]
         return undefined
@@ -55,6 +63,7 @@ const _static : { factory ?: ComponentFactory } = {}
  * @returns The ComponentFactory
  */
 export const getFactory : () => ComponentFactory = () => {
+    const DBG = process.env.OPTIMIZELY_DEBUG == '1'
     if (!_static.factory) {
         if (DBG) console.log("⚪ [ComponentFactory] Creating new Component Factory")
         _static.factory = new DefaultComponentFactory()

@@ -7,7 +7,8 @@ import { base64encode, isError, validateToken, getAuthMode } from "./utils.js"
 const defaultFlags : IOptiGraphClientFlags = {
     queryCache: true,
     cache: true,
-    recursive: false
+    recursive: false,
+    omitEmpty: false
 }
 
 export class ContentGraphClient extends GraphQLClient implements IOptiGraphClient
@@ -232,6 +233,7 @@ export class ContentGraphClient extends GraphQLClient implements IOptiGraphClien
         const serviceUrl = new URL("/content/v2", this._config.gateway)
         serviceUrl.searchParams.set('stored', this._flags.queryCache ? 'true' : 'false')
         serviceUrl.searchParams.set('cache', this._flags.cache ? 'true' : 'false')
+        serviceUrl.searchParams.set('omit_empty', this._flags.omitEmpty ? 'true' : 'false')
         if (this.debug)
             console.log(`🔗 [Optimizely Graph] Setting service endpoint to: ${ serviceUrl.href }`)
         this.setEndpoint(serviceUrl.href)

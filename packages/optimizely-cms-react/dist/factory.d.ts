@@ -5,6 +5,8 @@ export declare const EmptyComponentHandle = "$$fragment$$";
  */
 export declare class DefaultComponentFactory implements ComponentFactory {
     private registry;
+    private dbg;
+    constructor();
     register(type: ComponentTypeHandle, component: ComponentType): void;
     registerAll(components: ComponentTypeDictionary): void;
     has(type: ComponentTypeHandle): boolean;

@@ -18,28 +18,37 @@ export var SystemLocales;
 const CreatePageOptionDefaults = {
     defaultLocale: null,
     getContentByPath: getContentByPathBase,
-    client: getServerClient
+    client: getServerClient,
+    propsToCmsPath: ({ params }) => buildRequestPath(params),
+    propsToCmsLocale: ({ params }, defaultLocale) => params?.lang ?? defaultLocale ?? null,
+    routeToParams: (route) => { return { path: urlToPath(route.url, route.locale), lang: route.locale }; }
 };
+/**
+ * Generate the React Server Side component and Next.JS functions needed to render an
+ * Optimizely CMS page. This component assumes that the routes are either defined as
+ * /[lang]/[[...path]] or /[[...path]]
+ *
+ * @param       factory         The component factory to use for this page
+ * @param       options         The page component generation options
+ * @returns     The Optimizely CMS Page
+ */
 export function createPage(factory, options) {
-    const { defaultLocale, getContentByPath, client: clientFactory, channel } = {
+    const { defaultLocale, getContentByPath, client: clientFactory, channel, propsToCmsLocale, propsToCmsPath, routeToParams } = {
         ...CreatePageOptionDefaults,
-        ...{ defaultLocale: null },
         ...options
     };
     const pageDefintion = {
         generateStaticParams: async () => {
             const client = clientFactory();
             const resolver = new RouteResolver(client);
-            return (await resolver.getRoutes()).map(r => {
-                return {
-                    path: urlToPath(r.url)
-                };
-            });
+            return (await resolver.getRoutes()).map(r => routeToParams(r));
         },
-        generateMetadata: async ({ params: { path } }, resolving) => {
+        generateMetadata: async (props, resolving) => {
             // Read variables from request            
             const client = clientFactory();
-            const requestPath = buildRequestPath({ path });
+            const requestPath = propsToCmsPath(props);
+            if (!requestPath)
+                return Promise.resolve({});
             const routeResolver = new RouteResolver(client);
             const metaResolver = new MetaDataResolver(client);
             // Resolve the route to a content link
@@ -71,18 +80,24 @@ export function createPage(factory, options) {
             }
             return pageMetadata;
         },
-        CmsPage: async ({ params: { path } }) => {
+        CmsPage: async (props) => {
             // Prepare the context
             const context = getServerContext();
             const client = context.client ?? clientFactory();
             if (!context.client)
                 context.setOptimizelyGraphClient(client);
             context.setComponentFactory(factory);
+            // Analyze the locale
+            const currentLocale = propsToCmsLocale(props, defaultLocale);
+            const graphLocale = (currentLocale ? localeToGraphLocale(currentLocale, channel) : undefined);
+            if (currentLocale)
+                context.setLocale(currentLocale);
             // Resolve the content based upon the route
-            const requestPath = buildRequestPath({ path });
-            const response = await getContentByPath(client, { path: requestPath });
+            const requestPath = propsToCmsPath(props);
+            if (!requestPath)
+                return notFound();
+            const response = await getContentByPath(client, { path: requestPath, locale: graphLocale });
             const info = (response?.content?.items ?? [])[0];
-            //context.setLocale(graphLocale)
             if (!info) {
                 if (isDebug()) {
                     console.error(`🔴 [CmsPage] Unable to load content for ${requestPath}, data received: `, response);
@@ -92,6 +107,8 @@ export function createPage(factory, options) {
             // Extract the type & link
             const contentType = Utils.normalizeContentType(info._metadata?.types);
             const contentLink = normalizeContentLinkWithLocale(info._metadata);
+            if (contentLink?.locale)
+                context.setLocale(contentLink?.locale);
             if (!contentLink) {
                 console.error("🔴 [CmsPage] Unable to infer the contentLink from the retrieved content, this should not have happened!");
                 return notFound();

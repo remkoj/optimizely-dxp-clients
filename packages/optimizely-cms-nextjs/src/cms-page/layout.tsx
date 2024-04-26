@@ -2,15 +2,15 @@ import { type PropsWithChildren, type ReactNode } from "react"
 import { type Metadata, type ResolvingMetadata } from "next"
 import type { ChannelDefinition, ClientFactory } from "@remkoj/optimizely-graph-client"
 import { Utils } from "@remkoj/optimizely-cms-react"
-import type { Props } from './page'
+import type { DefaultCmsPageProps } from './page'
 import { getMetaDataByPath as getMetaDataByPathBase, type GetMetaDataByPathMethod } from './data'
-import { slugToLocale, slugToGraphLocale } from "./utils"
+
 import { getServerClient } from "../client"
 import { isDebug } from '@remkoj/optimizely-cms-react/rsc'
 
 export type CmsPageLayout = {
-    generateMetadata: (props: Omit<Props, 'searchParams'>, resolving: ResolvingMetadata) => Promise<Metadata>
-    PageLayout: (props: PropsWithChildren<Omit<Props, 'searchParams'>>) => JSX.Element | ReactNode
+    generateMetadata: (props: Omit<DefaultCmsPageProps, 'searchParams'>, resolving: ResolvingMetadata) => Promise<Metadata>
+    PageLayout: (props: PropsWithChildren<Omit<DefaultCmsPageProps, 'searchParams'>>) => JSX.Element | ReactNode
 }
 
 export type CreateLayoutOptions = {
