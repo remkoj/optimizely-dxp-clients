@@ -1,8 +1,0 @@
-releases:
-  "@remkoj/optimizely-cms-nextjs": 2.0.0-pre1
-  "@remkoj/optimizely-cms-react": 2.0.0-pre1
-  "@remkoj/optimizely-graph-cli": 2.0.0-pre1
-  "@remkoj/optimizely-graph-client": 2.0.0-pre1
-  "@remkoj/optimizely-graph-functions": 2.0.0-pre1
-  "@remkoj/optimizely-one-nextjs": 2.0.0-pre1
-  optimizely-dxp-clients: 2.0.0-pre1

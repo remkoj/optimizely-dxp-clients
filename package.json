@@ -1,6 +1,6 @@
 {
   "name": "optimizely-dxp-clients",
-  "version": "1.0.4",
+  "version": "2.0.0-pre1",
   "description": "Javascript client for Optimizely Products",
   "repository": "https://github.com/remkoj/optimizely-dxp-clients.git",
   "author": "Remko Jantzen <693172+remkoj@users.noreply.github.com>",
@@ -32,5 +32,6 @@
     "update-deps": "yarn upgrade-interactive && yarn dedupe && yarn sdks vscode",
     "update-yarn": "yarn set version stable && yarn install && yarn dedupe && yarn sdks vscode",
     "update-all": "yarn run update-yarn && yarn run update-deps"
-  }
+  },
+  "stableVersion": "1.0.4"
 }

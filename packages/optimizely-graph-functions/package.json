@@ -1,7 +1,7 @@
 {
   "name": "@remkoj/optimizely-graph-functions",
   "license": "Apache-2.0",
-  "version": "1.0.4",
+  "version": "2.0.0-pre1",
   "packageManager": "yarn@4.1.1",
   "repository": "https://github.com/remkoj/optimizely-dxp-clients.git",
   "author": "Remko Jantzen <693172+remkoj@users.noreply.github.com>",
@@ -63,6 +63,7 @@
     "graphql-tag": "*"
   },
   "optionalDependencies": {
-    "@remkoj/optimizely-graph-client": "1.0.4"
-  }
+    "@remkoj/optimizely-graph-client": "2.0.0-pre1"
+  },
+  "stableVersion": "1.0.4"
 }
