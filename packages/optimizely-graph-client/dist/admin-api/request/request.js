@@ -49,7 +49,6 @@ export const sendRequest = async (config, options, url, body, formData, headers,
         request.credentials = config.CREDENTIALS;
     }
     onCancel(() => controller.abort());
-    console.log("AdminAPI URL:", url);
     return await (customFetch ? customFetch(url, request) : fetch(url, request));
 };
 const getUrl = (config, options) => {
