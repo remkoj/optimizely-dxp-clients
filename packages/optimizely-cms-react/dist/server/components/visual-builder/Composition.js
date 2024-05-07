@@ -11,7 +11,7 @@ const defaultPropsFactory = (node) => {
     if (!isContentType(contentType))
         throw new Error("Invalid content type: " + JSON.stringify(contentType));
     const contentLink = {
-        key: node.element?._metadata?.key,
+        key: node.element?._metadata?.key || node.key || undefined,
         version: node.element?._metadata?.version,
         locale: node.element?._metadata?.locale
     };
@@ -25,7 +25,7 @@ export async function OptimizelyComposition({ node, elementFactory, propsFactory
         return CmsContent({ contentLink, contentType, fragmentData });
     }
     const children = await Promise.all((node.nodes ?? []).map((child, idx) => OptimizelyComposition({
-        key: `${node.name}::${idx}::${child.name}::${Math.round(Math.random() * 100000)}`,
+        key: `${node.name}::${node.key}::${idx}::${child.name}::${Math.round(Math.random() * 100000)}`,
         node: child,
         elementFactory,
         propsFactory

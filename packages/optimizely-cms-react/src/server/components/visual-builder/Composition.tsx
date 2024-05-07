@@ -16,7 +16,7 @@ const defaultPropsFactory : CmsComponentPropsFactory = <ET extends Record<string
         throw new Error("Invalid content type: "+JSON.stringify(contentType))
 
     const contentLink : Partial<ContentLinkWithLocale<LT>> = {
-        key: node.element?._metadata?.key,
+        key: node.element?._metadata?.key || node.key || undefined,
         version: node.element?._metadata?.version,
         locale: node.element?._metadata?.locale
     }
@@ -33,7 +33,7 @@ export async function OptimizelyComposition({ node, elementFactory, propsFactory
     }
 
     const children = await Promise.all((node.nodes ?? []).map((child, idx) => OptimizelyComposition({
-        key:`${ node.name }::${ idx }::${ child.name }::${ Math.round(Math.random()*100000) }`,
+        key:`${ node.name }::${ node.key }::${ idx }::${ child.name }::${ Math.round(Math.random()*100000) }`,
         node: child,
         elementFactory,
         propsFactory

@@ -62,6 +62,20 @@ export const fragments = [
 }`,
 `fragment IContentListItem on IContent {
     ...IContentData
+}`,
+`fragment ExperienceData on IExperience {
+    experience: _metadata {
+        ... on CompositionMetadata {
+            composition {
+                key
+                layoutType
+                type
+                nodes {
+                    ...CompositionData
+                }
+            }
+        }
+    }
 }`
 ]
 export const queries = [
