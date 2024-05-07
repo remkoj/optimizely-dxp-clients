@@ -43,7 +43,7 @@ const defaultOptions = {
 function getContentRequest(path = "", searchParams) {
     try {
         if (searchParams.preview_token == AuthMode.HMAC || searchParams.preview_token == AuthMode.Basic) {
-            console.error("[OnPageEdit] 🦺 Edit mode requested with developer tokens, falling back to URL parsing to determine content");
+            console.error("🦺 [OnPageEdit] Edit mode requested with developer tokens, falling back to URL parsing to determine content");
             const fullPath = Array.isArray(path) ? path.map(p => decodeURIComponent(p)).join('/') : decodeURI(path);
             const [cmsPath, contentString] = fullPath.split(',,', 3);
             const [contentKey, contentVersion] = (contentString ?? '').split('_', 3);
@@ -54,7 +54,7 @@ function getContentRequest(path = "", searchParams) {
                 key: contentKey,
                 version: contentVersion,
                 locale: contentLocale,
-                path: '/' + contentPath + (contentPath.endsWith('/') ? '' : '/')
+                path: '/' + contentPath + (contentPath.endsWith('/') || contentPath == '' ? '' : '/')
             };
         }
         else {
@@ -82,7 +82,7 @@ function getContentRequest(path = "", searchParams) {
  * @returns The React Component that can be used by Next.JS to render the page
  */
 export function createEditPageComponent(factory, options) {
-    const envRefreshDelay = readValueAsInt("OPTIMIZELY_CONTENTGRAPH_UPDATE_DELAY", defaultOptions.refreshDelay);
+    const envRefreshDelay = readValueAsInt("OPTIMIZELY_GRAPH_UPDATE_DELAY", defaultOptions.refreshDelay);
     const { layout: PageLayout, refreshNotice: RefreshNotice, refreshDelay, errorNotice: ErrorNotice, loader: getContentById, clientFactory, communicationInjectorPath } = { ...defaultOptions, refreshDelay: envRefreshDelay, ...options };
     async function EditPage({ params: { path }, searchParams }) {
         // Create context
@@ -90,18 +90,18 @@ export function createEditPageComponent(factory, options) {
         // Validate the search parameters
         const epiEditMode = searchParams?.epieditmode?.toLowerCase();
         if (epiEditMode != 'true' && epiEditMode != 'false') {
-            console.error("[OnPageEdit] Edit mode requested without valid EpiEditMode, refused to render the page. Mode set:", searchParams.epieditmode);
+            console.error("🔴 [OnPageEdit] Edit mode requested without valid EpiEditMode, refused to render the page. Mode set:", searchParams.epieditmode);
             return notFound();
         }
         // Allow use-hmac as magic token to be used only on a development environment, otherwise require a minimal length string as token
         const token = searchParams.preview_token;
         const validDev = context.isDevelopment && (searchParams.preview_token == AuthMode.HMAC || searchParams.preview_token == AuthMode.Basic);
         if (!token || (token.length < 20 && !validDev)) {
-            console.error("[OnPageEdit] Edit mode requested without valid Preview Token, refused to render the page");
+            console.error("🔴 [OnPageEdit] Edit mode requested without valid Preview Token, refused to render the page");
             return notFound();
         }
         if (context.isDebug)
-            console.log(`[OnPageEdit] Valid edit mode request: EpiEditMode=${searchParams.epieditmode}`);
+            console.log(`⚪ [OnPageEdit] Valid edit mode request: EpiEditMode=${searchParams.epieditmode}`);
         // Build context
         const client = clientFactory(token);
         context.setOptimizelyGraphClient(client);
@@ -110,27 +110,27 @@ export function createEditPageComponent(factory, options) {
         // Get information from the Request URI
         const contentRequest = getContentRequest(path, searchParams);
         if (!contentRequest) {
-            console.error("[OnPageEdit] Unable to resolve requested content");
+            console.error("🔴 [OnPageEdit] Unable to resolve requested content");
             return notFound();
         }
         if (context.isDebug) {
-            console.log("[OnPageEdit] Requested content:", JSON.stringify(contentRequest));
-            console.log("[OnPageEdit] Creating GraphQL Client:", token);
+            console.log("⚪ [OnPageEdit] Requested content:", JSON.stringify(contentRequest));
+            console.log("⚪ [OnPageEdit] Creating GraphQL Client:", token);
         }
         try {
             const contentInfo = await getContentById(client, contentRequest);
             if ((contentInfo?.content?.total ?? 0) > 1) {
-                console.warn("[OnPageEdit] Content request " + JSON.stringify(contentRequest) + " yielded more then one item, picking first matching");
+                console.warn("🟠 [OnPageEdit] Content request " + JSON.stringify(contentRequest) + " yielded more then one item, picking first matching");
             }
             const contentItem = (contentInfo?.content?.items ?? [])[0];
             const contentType = Utils.normalizeContentType(contentItem?._metadata.types);
             // Return a 404 if the content item or type could not be resolved
             if (!contentItem) {
-                console.warn(`[OnPageEdit] The content item for ${JSON.stringify(contentRequest)} could not be loaded from Optimizely Graph`);
+                console.warn(`🟠 [OnPageEdit] The content item for ${JSON.stringify(contentRequest)} could not be loaded from Optimizely Graph`);
                 return notFound();
             }
             if (!contentType) {
-                console.warn(`[OnPageEdit] The content item for ${JSON.stringify(contentRequest)} did not contain content type information`);
+                console.warn(`🟠 [OnPageEdit] The content item for ${JSON.stringify(contentRequest)} did not contain content type information`);
                 return notFound();
             }
             const contentLink = {
@@ -139,7 +139,7 @@ export function createEditPageComponent(factory, options) {
                 version: contentItem._metadata.version
             };
             if (context.isDebug) {
-                console.log("[OnPageEdit] Resolved content:", JSON.stringify({
+                console.log("⚪ [OnPageEdit] Resolved content:", JSON.stringify({
                     ...contentLink,
                     type: (contentItem.contentType ?? []).join('/')
                 }));
@@ -155,7 +155,7 @@ export function createEditPageComponent(factory, options) {
             return output;
         }
         catch (e) {
-            console.error("[OnPageEdit] Caught error", e);
+            console.error("🔴 [OnPageEdit] Caught error", e);
             return notFound();
         }
     }

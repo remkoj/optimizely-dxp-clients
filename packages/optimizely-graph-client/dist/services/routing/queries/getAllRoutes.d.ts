@@ -9,6 +9,7 @@ export type Route = {
             path: string;
             domain: string;
         };
+        slug?: string | null;
     };
     changed: string;
 };

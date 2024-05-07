@@ -12,11 +12,16 @@ export class RouteResolver {
     /**
      * Create a new Route Resolver
      *
-     * @param client        ContentGraph configuration override
-     * @param apolloConfig  Apollo Client configuration override
+     * @param clientOrConfig    The Optimizely Graph client or configuration to
+     *                          use. If omitted, the paramterless factory method
+     *                          used to create a new instance.
+     * @param urlBase           The value for the base parameter of the URL
+     *                          constructor when reading routes from Optimizely
+     *                          Graph
      */
-    constructor(clientOrConfig) {
+    constructor(clientOrConfig, urlBase = "https://example.com") {
         this._cgClient = isContentGraphClient(clientOrConfig) ? clientOrConfig : createClient(clientOrConfig);
+        this._defaultUrlBase = urlBase;
     }
     /**
      * Retrieve all registered routes for the provided domain - all domains if none specified
@@ -48,29 +53,24 @@ export class RouteResolver {
         this._cgClient.restoreFlags();
         return results.map(this.tryConvertResponse.bind(this)).filter(this.isNotNullOrUndefined);
     }
-    /**
-     * Retrieve route details by path
-     *
-     * @param       path
-     * @param       domain
-     * @returns     The route information for the path
-     */
     async getContentInfoByPath(path, domain) {
+        const queryPath = typeof path == 'object' && path != null ? path.pathname : path;
+        const queryDomain = typeof path == 'object' && path != null ? path.protocol + '//' + path.host : domain;
         if (this._cgClient.debug)
-            console.log(`Resolving content info for ${path} on ${domain ? domain : "all domains"}`);
+            console.log(`⚪ [RouteResolver] Resolving content info for ${path} on ${domain ? domain : "all domains"}`);
         const resultSet = await this._cgClient.request({
             document: GetRouteByPath.query,
-            variables: { path, domain }
+            variables: { path: queryPath, domain: queryDomain }
         });
         if ((resultSet.Content?.items?.length ?? 0) === 0) {
             if (this._cgClient.debug)
-                console.warn("No items in the resultset");
+                console.warn("🟠 [RouteResolver] No items in the resultset");
             return undefined;
         }
         if ((resultSet.Content?.items?.length ?? 0) > 1)
-            throw new Error("Ambiguous URL provided, did you omit the siteId in a multi-channel setup?");
+            throw new Error("🔴 [RouteResolver] Ambiguous URL provided, did you omit the domain in a multi-site setup?");
         if (this._cgClient.debug)
-            console.log(`Resolved content info for ${path} to:`, resultSet.Content.items[0]);
+            console.log(`⚪ [RouteResolver] Resolved content info for ${path} to: ${JSON.stringify(resultSet.Content.items[0])}`);
         return this.convertResponse(resultSet.Content.items[0]);
     }
     async getContentInfoById(key, locale, version) {
@@ -102,18 +102,14 @@ export class RouteResolver {
         };
     }
     convertResponse(item) {
-        let itemUrl = new URL('http://localhost');
-        try {
-            itemUrl = new URL(item._metadata.url.path, item._metadata.url.domain);
-        }
-        catch (e) {
-            //Ignore
-        }
+        if (!item)
+            throw new Error("RouteResolver.convertResponse(): mandatory parameter \"item\" not provided!");
+        const itemUrl = new URL(item._metadata?.url?.path ?? '/', item._metadata?.url?.domain ?? this._defaultUrlBase);
         return {
             locale: item._metadata.locale,
             path: item._metadata.url.path,
             url: itemUrl,
-            slug: "",
+            slug: item._metadata?.slug ?? "",
             changed: item.changed ? new Date(item.changed) : null,
             contentType: item._metadata.types,
             version: item._metadata.version,

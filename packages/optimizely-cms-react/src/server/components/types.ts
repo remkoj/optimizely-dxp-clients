@@ -70,14 +70,6 @@ export type CmsContentProps<LocalesType = string> = PropsWithChildren<{
     contentTypePrefix?: string
 }>
 
-type RawContentLink = {
-    id?: number | null,
-    workId?: number | null,
-    guidValue?: string | null,
-}
-
-type RawLocale = { name?: string | null }
-
 export type ContentAreaItemDefinition = {
     __typename?:  string | null
     _type?: string | null

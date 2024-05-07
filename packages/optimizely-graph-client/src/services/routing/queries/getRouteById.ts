@@ -16,7 +16,7 @@ export type Result = {
 
 export const query = gql`query GetRouteById($key: String!, $version: String, $locale: [Locales]) {
     Content(
-        where: { _metadata: { key: { eq: $key }, version: { eq: $workId } } }
+        where: { _metadata: { key: { eq: $key }, version: { eq: $version } } }
         locale: $locale
     ) {
         total
@@ -30,6 +30,15 @@ export const query = gql`query GetRouteById($key: String!, $version: String, $lo
                 url {
                     path: hierarchical
                     domain: base
+                }
+                ... on ICompositionMetadata {
+                    slug: routeSegment
+                }
+                ... on IInstanceMetadata {
+                  	slug: routeSegment
+                }
+                ... on IMediaMetadata {
+                  	slug: routeSegment
                 }
             }
             changed: _modified

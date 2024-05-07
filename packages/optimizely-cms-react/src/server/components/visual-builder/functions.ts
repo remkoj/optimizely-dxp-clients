@@ -2,7 +2,7 @@ import { CompositionNode, CompositionElementNode, CompositionStructureNode } fro
 
 export function isElementNode(node: CompositionNode<Record<string,any>>) : node is CompositionElementNode<Record<string,any>>
 {
-    return node.type == "element"
+    return node.layoutType == "element"
 }
 
 export function isElementNodeOfType<ET extends Record<string,any>>(node: CompositionNode<Record<string,any>>, test: (data: Record<string,any>) => data is ET) : node is CompositionElementNode<ET>
@@ -22,9 +22,9 @@ export function isNode(toTest: any) : toTest is CompositionNode
     if (typeof(toTest) != 'object' || toTest == null)
         return false
 
-    const nodeTypes = ["outline", "grid", "row", "column", "element"]
+    const nodeTypes = ["experience", "outline", "grid", "row", "column", "element"]
     const hasValidName = (typeof (toTest as CompositionNode).name == 'string' && ((toTest as CompositionNode).name?.length ?? 0) > 0) || (toTest as CompositionNode).name == null
-    const hasValidType = typeof (toTest as CompositionNode).type == 'string' && nodeTypes.includes((toTest as CompositionNode).type)
+    const hasValidType = typeof (toTest as CompositionNode).layoutType == 'string' && nodeTypes.includes((toTest as CompositionNode).layoutType)
 
     return hasValidName && hasValidType
 }

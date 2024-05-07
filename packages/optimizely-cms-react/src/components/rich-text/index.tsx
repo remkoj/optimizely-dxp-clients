@@ -11,6 +11,16 @@ export type RichTextProps = {
      * structured data.
      */
     text: string | null | undefined
+
+    /**
+     * The value for the "data-epi-edit" marker on the top level element
+     */
+    editId?: string | null
+
+    /**
+     * The CSS Class to apply to the text container
+     */
+    className?: string
 }
 
 export type RichTextTextNode = {
@@ -35,7 +45,7 @@ export function isRichTextText(toTest: any) : toTest is RichTextTextNode
     return typeof (toTest as RichTextTextNode).text == 'string' && (toTest as RichTextTextNode).text.length > 0
 }
 
-export const RichText : (props: RichTextProps) => JSX.Element = ({ factory, text }) =>
+export const RichText : (props: RichTextProps) => JSX.Element = ({ factory, text, editId, className }) =>
 {
     const debug = process.env.NODE_ENV != 'production'
     let data : RichTextData | undefined = undefined
@@ -44,14 +54,14 @@ export const RichText : (props: RichTextProps) => JSX.Element = ({ factory, text
     } catch (e) { /* Ignore any error as we'll fall-back to HTML injection */}
     
     if (!data)
-        return <div dangerouslySetInnerHTML={{ __html: text ?? '' }}></div>
+        return <div dangerouslySetInnerHTML={{ __html: text ?? '' }} className={ className } data-epi-edit={ editId }></div>
 
     if (!isRichTextData(data)) {
         if (debug) console.warn(`[Rich Text] Invalid rich text data received: ${ text }`)
-        return <></>
+        return <div className={ className } data-epi-edit={ editId }></div>
     }
 
-    return <RichTextElement factory={ factory } { ...data } />
+    return <div className={ className } data-epi-edit={ editId }><RichTextElement factory={ factory } { ...data } /></div>
 }
 
 const RichTextElement : (props: Partial<RichTextData> & Partial<RichTextTextNode> & { factory: ComponentFactory }) => JSX.Element = ({ type, children, text, factory, ...props }) =>
@@ -62,7 +72,7 @@ const RichTextElement : (props: Partial<RichTextData> & Partial<RichTextTextNode
     
     if (!type) {
         if (debug) console.warn(`[Rich Text] Invalid rich text element data received: ${ { type, children, text, ...props } }`)
-        return <></>
+            return <></>
     }
     const DivElement = 'div'
     const Component = factory.resolve(type) ?? DivElement

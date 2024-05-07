@@ -146,14 +146,18 @@ export function createPage<
                 context.setOptimizelyGraphClient(client)
             context.setComponentFactory(factory)
 
-            // Analyze the locale
-            const currentLocale = propsToCmsLocale(props, defaultLocale)
-            const graphLocale = (currentLocale ? localeToGraphLocale(currentLocale as string, channel) : undefined) as LocaleEnum
-            if (currentLocale)
-                context.setLocale(currentLocale as string)
-
-            // Resolve the content based upon the route
+            // Analyze the Next.JS Request props
+            const requestLocale = propsToCmsLocale(props, defaultLocale)
             const requestPath = propsToCmsPath(props)
+            if (isDebug())
+                console.log(`⚪ [CmsPage] Processed Next.JS route: ${ JSON.stringify(props) } => Optimizely CMS route: ${ JSON.stringify({path: requestPath, locale: requestLocale})}`)
+
+            // Process the locale
+            const graphLocale = (requestLocale ? localeToGraphLocale(requestLocale as string, channel) : undefined) as LocaleEnum
+            if (requestLocale)
+                context.setLocale(requestLocale as string)
+
+            // Resolve the content based upon the path
             if (!requestPath)
                 return notFound()
             const response = await getContentByPath(client, { path: requestPath, locale: graphLocale })

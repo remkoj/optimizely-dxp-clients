@@ -9,7 +9,7 @@ export function isRichTextText(toTest) {
         return false;
     return typeof toTest.text == 'string' && toTest.text.length > 0;
 }
-export const RichText = ({ factory, text }) => {
+export const RichText = ({ factory, text, editId, className }) => {
     const debug = process.env.NODE_ENV != 'production';
     let data = undefined;
     try {
@@ -17,13 +17,13 @@ export const RichText = ({ factory, text }) => {
     }
     catch (e) { /* Ignore any error as we'll fall-back to HTML injection */ }
     if (!data)
-        return _jsx("div", { dangerouslySetInnerHTML: { __html: text ?? '' } });
+        return _jsx("div", { dangerouslySetInnerHTML: { __html: text ?? '' }, className: className, "data-epi-edit": editId });
     if (!isRichTextData(data)) {
         if (debug)
             console.warn(`[Rich Text] Invalid rich text data received: ${text}`);
-        return _jsx(_Fragment, {});
+        return _jsx("div", { className: className, "data-epi-edit": editId });
     }
-    return _jsx(RichTextElement, { factory: factory, ...data });
+    return _jsx("div", { className: className, "data-epi-edit": editId, children: _jsx(RichTextElement, { factory: factory, ...data }) });
 };
 const RichTextElement = ({ type, children, text, factory, ...props }) => {
     const debug = process.env.NODE_ENV != 'production';

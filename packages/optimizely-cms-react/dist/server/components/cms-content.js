@@ -80,7 +80,7 @@ export const CmsContent = async ({ contentType, contentTypePrefix, contentLink: 
             console.error("🔴 [CmsContent] Invalid fragment data received for ", Component.displayName ?? contentType?.join("/") ?? "[Undetermined component]");
             return _jsx(_Fragment, {});
         }
-        return _jsx(Component, { contentLink: contentLink, data: fragmentData || {} });
+        return _jsx(Component, { contentLink: contentLink, data: fragmentData || {}, inEditMode: context.inEditMode });
     }
     if (isInline) {
         console.error(`🔴 [CmsContent] No data for content ${contentLinkToString(contentLink)}, data cannot be resolved for inline content`);
@@ -95,7 +95,7 @@ export const CmsContent = async ({ contentType, contentTypePrefix, contentLink: 
         const gqlResponse = await client.request(gqlQuery, gqlVariables);
         if (context.isDebug)
             console.log("⚪ [CmsContent] Component request the following data:", gqlResponse);
-        return _jsx(Component, { contentLink: contentLink, data: gqlResponse });
+        return _jsx(Component, { contentLink: contentLink, data: gqlResponse, inEditMode: context.inEditMode });
     }
     // Render using included fragment
     if (Utils.isCmsComponentWithFragment(Component)) {
@@ -112,12 +112,12 @@ export const CmsContent = async ({ contentType, contentTypePrefix, contentLink: 
             throw new Error(`CmsContent expected to load exactly one content item of type ${name}, received ${totalItems} from Optimizely Graph. Content Item: ${JSON.stringify(fragmentVariables)}`);
         if (totalItems > 1 && context.isDebug)
             console.warn(`🟠 [CmsContent] Resolved ${totalItems} content items, expected only 1. Picked the first one`);
-        return _jsx(Component, { contentLink: contentLink, data: fragmentResponse.contentById.items[0] });
+        return _jsx(Component, { contentLink: contentLink, data: fragmentResponse.contentById.items[0], inEditMode: context.inEditMode });
     }
     // Assume there's no server side prepared data needed for the component
     if (context.isDebug)
         console.log(`⚪ [CmsContent] Component of type "${contentType?.join('/') ?? Component.displayName ?? '?'}" did not request pre-loading of data`);
-    return _jsx(Component, { contentLink: contentLink, data: fragmentData || {} });
+    return _jsx(Component, { contentLink: contentLink, data: fragmentData || {}, inEditMode: context.inEditMode });
 };
 export default CmsContent;
 //# sourceMappingURL=cms-content.js.map

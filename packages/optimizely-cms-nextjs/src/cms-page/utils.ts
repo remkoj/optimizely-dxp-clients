@@ -5,7 +5,7 @@ import { localeToGraphLocale as coreLocaleToGraphLocale } from "@remkoj/optimize
 export function urlToPath(baseUrl: URL, language?: string) : string[] {
     let slugs : string[] = baseUrl.pathname.split('/').filter(s => s)
     if (language && slugs[0] == language)
-        slugs.shift()
+        return slugs.slice(1)
     return slugs
 }
 

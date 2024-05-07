@@ -10,13 +10,16 @@ export enum StructureNodeTypes {
 }
 export type CompositionStructureNode = {
     name: string | null
-    type: "outline" | "grid" | "row" | "column"
+    layoutType: "outline" | "grid" | "row" | "column"
     nodes?: Array<CompositionNode>
+    key: string | null
+    type: string | null
 }
 export type CompositionElementNode<E extends Record<string,any> = Record<string,any>> = {
     name: string | null
-    type: "element"
+    layoutType: "element"
     element: E
+    key: string | null
 }
 export type CompositionNode<E extends Record<string,any> = Record<string,any>> = CompositionStructureNode | CompositionElementNode<E>
 

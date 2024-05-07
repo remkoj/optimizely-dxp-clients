@@ -31,7 +31,7 @@ export async function OptimizelyComposition({ node, elementFactory, propsFactory
         propsFactory
     })));
     const Element = elementFactory(node);
-    return _jsx(Element, { node: { name: node.name, type: node.type }, children: children });
+    return _jsx(Element, { node: { name: node.name, layoutType: node.layoutType, type: node.type, key: node.key }, children: children });
 }
 export default OptimizelyComposition;
 //# sourceMappingURL=Composition.js.map

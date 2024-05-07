@@ -9,11 +9,13 @@ export const fragments = [
     _type: __typename
 }`,
 `fragment CompositionData on ICompositionNode {
-    name
+    name: displayName
+    layoutType
     type
+    key
     ... on ICompositionStructureNode {
         nodes @recursive(depth: 5) {
-            name
+            name: displayName
         }
     }
     ... on ICompositionElementNode {
@@ -44,7 +46,6 @@ export const fragments = [
 }`,
 `fragment ReferenceData on ContentReference {
     key
-    locale
     url {
         ...LinkData
     }
@@ -62,104 +63,6 @@ export const fragments = [
 `fragment IContentListItem on IContent {
     ...IContentData
 }`
-  /*
-    `fragment ContentLink on ContentModelReference {
-      id: Id,
-      workId: WorkId,
-      guidValue: GuidValue
-    }`,
-    `fragment ContentLinkSearch on ContentModelReferenceSearch {
-      id: Id,
-      workId: WorkId,
-      guidValue: GuidValue
-    }`,
-    `fragment IContentData on IContent {
-        contentType: ContentType
-        id: ContentLink {
-          ...ContentLink
-        }
-        locale: Language {
-            name: Name
-        }
-        path:RelativePath
-    }`,
-    `fragment ContentAreaItemData on ContentAreaItemModelSearch {
-        item: ContentLink {
-            ...ContentLinkSearch
-            data: Expanded {
-            ...BlockData
-            }
-        }
-        displayOption:DisplayOption
-    }`,
-    `fragment BlockContentAreaItemSearchData on ContentAreaItemModelSearch {
-        item: ContentLink {
-            ...ContentLinkSearch
-            data: Expanded {
-            ...IContentData
-            }
-        }
-        displayOption:DisplayOption
-    }`,
-    `fragment BlockContentAreaItemData on ContentAreaItemModel {
-        item: ContentLink {
-            ...ContentLink
-            data: Expanded {
-            ...IContentData
-            }
-        }
-        displayOption:DisplayOption
-    }`,
-    `fragment LinkItemData on LinkItemNode {
-      children: Text
-      title: Title
-      href: Href
-      target: Target
-      content: ContentLink {
-        href: Url
-        data: Expanded {
-          path: RelativePath
-        }
-      }
-    }`,
-    `fragment ImageData on ContentModelReference {
-      ...ContentLink
-      url: Url
-      data: Expanded {
-        ...IContentData
-        url: Url
-        alt: Name 
-        path: RelativePath
-      }
-    }`,
-    `fragment ImageDataSearch on ContentModelReferenceSearch {
-      ...ContentLinkSearch
-      url: Url
-      data: Expanded {
-        ...IContentData
-        url: Url
-        alt: Name 
-        path: RelativePath
-      }
-    }`,
-    `fragment BlockData on IContent {
-        ...IContentData
-    }`,
-    `fragment PageData on IContent {
-        ...IContentData
-    }`,
-    `fragment ContentAreaItemBase on ContentAreaItemModelSearch {
-        contentLink:ContentLink { 
-            id:Id
-            workId:WorkId
-            guidValue:GuidValue
-            component:Expanded {
-                path:RelativePath
-                type:ContentType
-            }
-        }
-        displayOption:DisplayOption
-    }`*/
 ]
 export const queries = [
 `query getContentById($key: String!, $version: String, $locale: [Locales!], $path: String, $domain: String) {
@@ -183,7 +86,7 @@ export const queries = [
 `query getContentByPath($path: String!, $version: String, $locale: [Locales!], $domain: String) {
     content: Content(
         where: {
-            _metadata: { url: { hierarchical: { eq: $path }, base: { eq: $domain } } version: { eq: $version }}
+            _metadata: { url: { default: { eq: $path }, base: { eq: $domain } }, version: { eq: $version }}
         }
         locale: $locale
     ) {

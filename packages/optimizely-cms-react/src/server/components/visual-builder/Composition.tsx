@@ -39,7 +39,7 @@ export async function OptimizelyComposition({ node, elementFactory, propsFactory
         propsFactory
     })));
     const Element = elementFactory(node)
-    return <Element node={{ name: node.name, type: node.type }}>{ children }</Element>
+    return <Element node={{ name: node.name, layoutType: node.layoutType, type: node.type, key: node.key }}>{ children }</Element>
 }
 
 export default OptimizelyComposition

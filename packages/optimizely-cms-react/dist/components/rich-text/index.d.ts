@@ -10,6 +10,14 @@ export type RichTextProps = {
      * structured data.
      */
     text: string | null | undefined;
+    /**
+     * The value for the "data-epi-edit" marker on the top level element
+     */
+    editId?: string | null;
+    /**
+     * The CSS Class to apply to the text container
+     */
+    className?: string;
 };
 export type RichTextTextNode = {
     text: string;

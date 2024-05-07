@@ -21,17 +21,8 @@ export type CmsComponentProps<T> = PropsWithChildren<{
 
     /**
      * Use the Server/Client context instead if you need this information
-     * 
-     * @deprecated
      */
     inEditMode?: boolean
-
-    /**
-     * Use the Server/Client context instead if you need this information
-     * 
-     * @deprecated
-     */
-    client?: IOptiGraphClient
 }>
 
 export type ContentQueryProps<LocaleType = string> = ContentLink & {

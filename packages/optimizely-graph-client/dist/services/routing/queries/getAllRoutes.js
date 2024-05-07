@@ -21,6 +21,15 @@ export const query = gql `query GetAllRoutes($cursor: String, $pageSize: Int = 1
                     path: hierarchical
                     domain: base
                 }
+                ... on ICompositionMetadata {
+                    slug: routeSegment
+                }
+                ... on IInstanceMetadata {
+                    slug: routeSegment
+                }
+                ... on IMediaMetadata {
+                    slug: routeSegment
+                }
             }
             changed: _modified
         }

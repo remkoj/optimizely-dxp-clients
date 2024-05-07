@@ -1,6 +1,6 @@
 {
   "name": "optimizely-dxp-clients",
-  "version": "2.0.0-pre1",
+  "version": "2.0.0-pre2",
   "description": "Javascript client for Optimizely Products",
   "repository": "https://github.com/remkoj/optimizely-dxp-clients.git",
   "author": "Remko Jantzen <693172+remkoj@users.noreply.github.com>",
@@ -8,11 +8,13 @@
   "license": "Apache-2.0",
   "private": true,
   "devDependencies": {
-    "@yarnpkg/sdks": "^3.1.0",
+    "@yarnpkg/sdks": "^3.1.2",
+    "browserslist": "^4.23.0",
     "tslib": "^2.6.2",
-    "typescript": "^5.4.5"
+    "typescript": "^5.4.5",
+    "update-browserslist-db": "^1.0.15"
   },
-  "packageManager": "yarn@4.1.1",
+  "packageManager": "yarn@4.2.1",
   "workspaces": [
     "packages/*"
   ],
@@ -21,10 +23,12 @@
     "vscode": "^1.22.0"
   },
   "scripts": {
-    "prepare": "yarn workspaces foreach -Wt --exclude optimizely-dxp-clients run prepare",
+    "prepare": "yarn update-browserslist-db && yarn workspaces foreach -Wt --exclude optimizely-dxp-clients run prepare",
     "recompile": "yarn workspaces foreach -Wt --exclude optimizely-dxp-clients run recompile",
     "watch": "yarn workspaces foreach -Api --exclude optimizely-dxp-clients run watch",
-    "artefacts": "yarn run prepare && yarn workspaces foreach -Wt --exclude optimizely-dxp-clients pack --install-if-needed --out ../../artefacts/%s-%v.tgz && yarn workspaces foreach -Wt --exclude optimizely-dxp-clients pack --install-if-needed --out ../../artefacts/%s-dev.tgz",
+    "artefacts": "yarn run prepare && yarn run pack-version && yarn run pack-development",
+    "pack-version": "yarn workspaces foreach -Wt --exclude optimizely-dxp-clients pack --install-if-needed --out ../../artefacts/%s-%v.tgz",
+    "pack-development": "yarn workspaces foreach -Wt --exclude optimizely-dxp-clients pack --install-if-needed --out ../../artefacts/%s-dev.tgz",
     "version-bump-patch": "yarn workspaces foreach -A version -d patch",
     "version-apply": "yarn workspaces foreach -A version apply",
     "versions": "yarn workspaces foreach -A version",

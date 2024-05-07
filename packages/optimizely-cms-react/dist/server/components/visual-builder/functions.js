@@ -1,5 +1,5 @@
 export function isElementNode(node) {
-    return node.type == "element";
+    return node.layoutType == "element";
 }
 export function isElementNodeOfType(node, test) {
     if (!isElementNode(node))
@@ -12,9 +12,9 @@ export function isStructureNode(node) {
 export function isNode(toTest) {
     if (typeof (toTest) != 'object' || toTest == null)
         return false;
-    const nodeTypes = ["outline", "grid", "row", "column", "element"];
+    const nodeTypes = ["experience", "outline", "grid", "row", "column", "element"];
     const hasValidName = (typeof toTest.name == 'string' && (toTest.name?.length ?? 0) > 0) || toTest.name == null;
-    const hasValidType = typeof toTest.type == 'string' && nodeTypes.includes(toTest.type);
+    const hasValidType = typeof toTest.layoutType == 'string' && nodeTypes.includes(toTest.layoutType);
     return hasValidName && hasValidType;
 }
 //# sourceMappingURL=functions.js.map

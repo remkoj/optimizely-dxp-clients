@@ -24,20 +24,24 @@ export class MetaDataResolver
     public async resolve(factory: ComponentFactory, contentLink: ContentLink, contentType: string[], locale?: string | null): Promise<Metadata>
     {
         if (this._cgClient.debug)
-            console.log("[MetaDataResolver] Resolving metadata for:", contentLink, contentType, locale)
+            console.log(`⚪ [MetaDataResolver] Resolving metadata for: ${ JSON.stringify({contentLink, contentType, locale})}`)
 
         if (locale && locale.includes("-"))
-            throw new Error("Invalid character detected within the locale")
+            throw new Error("🟠 [MetaDataResolver] Invalid character detected within the locale")
 
         const Component = factory.resolve(contentType)
         if (!Component)
             return {}
 
         if (isOptimizelyNextPageWithMetaData(Component) && Component.getMetaData) {
+            console.log("⚪ [MetaDataResolver] Component for content type has 'getMetaData, invoking...")
             const meta = await Component.getMetaData(contentLink, locale, this._cgClient)
             if (this._cgClient.debug)
-                console.log("[MetaDataResolver] Resolved metadata to:", meta)
+                console.log(`⚪ [MetaDataResolver] Resolved metadata to: ${ JSON.stringify(meta) }`)
             return meta
+        } else {
+            if (this._cgClient.debug)
+                console.warn(`🟠 [MetaDataResolver] Resolved component for ${ JSON.stringify(contentType) } does provide additional metadata`)
         }
         return {}
     }
