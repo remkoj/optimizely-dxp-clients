@@ -2,6 +2,7 @@ import 'server-only'
 import { isElementNode } from './functions'
 import { CmsContent } from '../cms-content'
 import type { ContentType } from '../../../types'
+import { getRandomKey } from '../../../utilities'
 import { isContentLink, ContentLinkWithLocale, isInlineContentLink } from '@remkoj/optimizely-graph-client'
 import type { OptimizelyCompositionProps, CmsComponentPropsFactory, CompositionElementNode } from './types'
 
@@ -32,12 +33,16 @@ export async function OptimizelyComposition({ node, elementFactory, propsFactory
         return CmsContent({contentLink, contentType, fragmentData })
     }
 
-    const children = await Promise.all((node.nodes ?? []).map((child, idx) => OptimizelyComposition({
-        key:`${ node.name }::${ node.key }::${ idx }::${ child.name }::${ Math.round(Math.random()*100000) }`,
-        node: child,
-        elementFactory,
-        propsFactory
-    })));
+    const children = await Promise.all((node.nodes ?? []).map((child, idx) => {
+        const childKey = `vb::node::${child.key}::${ Math.round(Math.random()*10000) }` ?? getRandomKey(child.name ?? 'vb::node')
+        //console.log("Visual builder child: ", childKey)
+        return OptimizelyComposition({
+            key: childKey,
+            node: child,
+            elementFactory,
+            propsFactory
+        })
+    }));
     const Element = elementFactory(node)
     return <Element node={{ name: node.name, layoutType: node.layoutType, type: node.type, key: node.key }}>{ children }</Element>
 }

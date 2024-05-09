@@ -41,9 +41,7 @@ const defaultOptions : EditViewOptions = {
         <div className='optly-error-title'>{ props.title }</div>
         <div className='optly-error-message'>{ props.message }</div>
     </div>,
-    layout: props => <div className='optly-edit-page' data-locale={ props.locale }>
-        { props.children }
-    </div>,
+    layout: props => <>{ props.children }</>,
     loader: getContentById,
     clientFactory: (token?: string) => getAuthorizedServerClient(token),
     communicationInjectorPath: '/util/javascript/communicationinjector.js'
@@ -133,7 +131,7 @@ export function createEditPageComponent(
         const client = clientFactory(token)
         context.setOptimizelyGraphClient(client)
         context.setComponentFactory(factory)
-        context.setInEditMode(epiEditMode == 'true')
+        context.setInEditMode(true)
 
         // Get information from the Request URI
         const contentRequest = getContentRequest(path, searchParams)

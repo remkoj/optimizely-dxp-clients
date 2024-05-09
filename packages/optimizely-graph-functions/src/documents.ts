@@ -13,8 +13,13 @@ export const fragments = [
     layoutType
     type
     key
+    template: displayTemplateKey
+    settings: displaySettings {
+        key
+        value
+    }
     ... on ICompositionStructureNode {
-        nodes @recursive(depth: 5) {
+        nodes @recursive(depth: 10) {
             name: displayName
         }
     }
@@ -67,12 +72,7 @@ export const fragments = [
     experience: _metadata {
         ... on CompositionMetadata {
             composition {
-                key
-                layoutType
-                type
-                nodes {
-                    ...CompositionData
-                }
+                ...CompositionData
             }
         }
     }
@@ -91,7 +91,6 @@ export const queries = [
     ) {
         total
         items {
-            ...IContentData
             ...BlockData
             ...PageData
         }
@@ -106,8 +105,6 @@ export const queries = [
     ) {
         total
         items {
-            ...IContentData
-            ...BlockData
             ...PageData
         }
     }

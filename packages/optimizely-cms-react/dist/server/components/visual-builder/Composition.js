@@ -2,6 +2,7 @@ import { jsx as _jsx } from "react/jsx-runtime";
 import 'server-only';
 import { isElementNode } from './functions';
 import { CmsContent } from '../cms-content';
+import { getRandomKey } from '../../../utilities';
 import { isContentLink, isInlineContentLink } from '@remkoj/optimizely-graph-client';
 function isContentType(toTest) {
     return Array.isArray(toTest) && toTest.every(x => typeof (x) == 'string' && x.length > 0);
@@ -24,12 +25,16 @@ export async function OptimizelyComposition({ node, elementFactory, propsFactory
         const [contentLink, contentType, fragmentData] = propsFactory(node);
         return CmsContent({ contentLink, contentType, fragmentData });
     }
-    const children = await Promise.all((node.nodes ?? []).map((child, idx) => OptimizelyComposition({
-        key: `${node.name}::${node.key}::${idx}::${child.name}::${Math.round(Math.random() * 100000)}`,
-        node: child,
-        elementFactory,
-        propsFactory
-    })));
+    const children = await Promise.all((node.nodes ?? []).map((child, idx) => {
+        const childKey = `vb::node::${child.key}::${Math.round(Math.random() * 10000)}` ?? getRandomKey(child.name ?? 'vb::node');
+        //console.log("Visual builder child: ", childKey)
+        return OptimizelyComposition({
+            key: childKey,
+            node: child,
+            elementFactory,
+            propsFactory
+        });
+    }));
     const Element = elementFactory(node);
     return _jsx(Element, { node: { name: node.name, layoutType: node.layoutType, type: node.type, key: node.key }, children: children });
 }

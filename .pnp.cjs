@@ -3378,7 +3378,7 @@ const RAW_RUNTIME_STATE =
         "packageLocation": "./.yarn/cache/browserslist-npm-4.23.0-8126a959d4-496c3862df.zip/node_modules/browserslist/",\
         "packageDependencies": [\
           ["browserslist", "npm:4.23.0"],\
-          ["caniuse-lite", "npm:1.0.30001616"],\
+          ["caniuse-lite", "npm:1.0.30001617"],\
           ["electron-to-chromium", "npm:1.4.717"],\
           ["node-releases", "npm:2.0.14"],\
           ["update-browserslist-db", "virtual:8126a959d46e6def6d7f2497c47970a23a94adac85f5be1df9be290c674503b9bcbe0dc057e2741ee222cc2a8a3b9f584b20c3a9eb5ce085704d99fc5d94514c#npm:1.0.13"]\
@@ -3498,10 +3498,10 @@ const RAW_RUNTIME_STATE =
       }]\
     ]],\
     ["caniuse-lite", [\
-      ["npm:1.0.30001616", {\
-        "packageLocation": "./.yarn/cache/caniuse-lite-npm-1.0.30001616-da356c6432-779c126bbe.zip/node_modules/caniuse-lite/",\
+      ["npm:1.0.30001617", {\
+        "packageLocation": "./.yarn/cache/caniuse-lite-npm-1.0.30001617-5cf8ee8c51-eac442b9ad.zip/node_modules/caniuse-lite/",\
         "packageDependencies": [\
-          ["caniuse-lite", "npm:1.0.30001616"]\
+          ["caniuse-lite", "npm:1.0.30001617"]\
         ],\
         "linkType": "HARD"\
       }]\
@@ -5392,7 +5392,7 @@ const RAW_RUNTIME_STATE =
           ["@types/react-dom", "npm:18.3.0"],\
           ["@types/sass", null],\
           ["busboy", "npm:1.6.0"],\
-          ["caniuse-lite", "npm:1.0.30001616"],\
+          ["caniuse-lite", "npm:1.0.30001617"],\
           ["graceful-fs", "npm:4.2.11"],\
           ["postcss", "npm:8.4.31"],\
           ["react", "npm:18.3.1"],\
@@ -8549,6 +8549,12 @@ class ProxiedFS extends FakeFS {
   rmdirSync(p, opts) {
     return this.baseFs.rmdirSync(this.mapToBase(p), opts);
   }
+  async rmPromise(p, opts) {
+    return this.baseFs.rmPromise(this.mapToBase(p), opts);
+  }
+  rmSync(p, opts) {
+    return this.baseFs.rmSync(this.mapToBase(p), opts);
+  }
   async linkPromise(existingP, newP) {
     return this.baseFs.linkPromise(this.mapToBase(existingP), this.mapToBase(newP));
   }
@@ -8929,6 +8935,18 @@ class NodeFS extends BasePortableFakeFS {
   }
   rmdirSync(p, opts) {
     return this.realFs.rmdirSync(npath.fromPortablePath(p), opts);
+  }
+  async rmPromise(p, opts) {
+    return await new Promise((resolve, reject) => {
+      if (opts) {
+        this.realFs.rm(npath.fromPortablePath(p), opts, this.makeCallback(resolve, reject));
+      } else {
+        this.realFs.rm(npath.fromPortablePath(p), this.makeCallback(resolve, reject));
+      }
+    });
+  }
+  rmSync(p, opts) {
+    return this.realFs.rmSync(npath.fromPortablePath(p), opts);
   }
   async linkPromise(existingP, newP) {
     return await new Promise((resolve, reject) => {
@@ -9585,6 +9603,20 @@ class MountFS extends BasePortableFakeFS {
       return mountFs.rmdirSync(subPath, opts);
     });
   }
+  async rmPromise(p, opts) {
+    return await this.makeCallPromise(p, async () => {
+      return await this.baseFs.rmPromise(p, opts);
+    }, async (mountFs, { subPath }) => {
+      return await mountFs.rmPromise(subPath, opts);
+    });
+  }
+  rmSync(p, opts) {
+    return this.makeCallSync(p, () => {
+      return this.baseFs.rmSync(p, opts);
+    }, (mountFs, { subPath }) => {
+      return mountFs.rmSync(subPath, opts);
+    });
+  }
   async linkPromise(existingP, newP) {
     return await this.makeCallPromise(newP, async () => {
       return await this.baseFs.linkPromise(existingP, newP);
@@ -10223,6 +10255,7 @@ const SYNC_IMPLEMENTATIONS = /* @__PURE__ */ new Set([
   `realpathSync`,
   `renameSync`,
   `rmdirSync`,
+  `rmSync`,
   `statSync`,
   `symlinkSync`,
   `truncateSync`,
@@ -10258,6 +10291,7 @@ const ASYNC_IMPLEMENTATIONS = /* @__PURE__ */ new Set([
   `readlinkPromise`,
   `renamePromise`,
   `rmdirPromise`,
+  `rmPromise`,
   `statPromise`,
   `symlinkPromise`,
   `truncatePromise`,
@@ -12281,6 +12315,27 @@ class ZipFS extends BasePortableFakeFS {
     const index = this.entries.get(resolvedP);
     if (typeof index === `undefined`)
       throw EINVAL(`rmdir '${p}'`);
+    this.deleteEntry(p, index);
+  }
+  async rmPromise(p, opts) {
+    return this.rmSync(p, opts);
+  }
+  rmSync(p, { recursive = false } = {}) {
+    if (this.readOnly)
+      throw EROFS(`rm '${p}'`);
+    if (recursive) {
+      this.removeSync(p);
+      return;
+    }
+    const resolvedP = this.resolveFilename(`rm '${p}'`, p);
+    const directoryListing = this.listings.get(resolvedP);
+    if (!directoryListing)
+      throw ENOTDIR(`rm '${p}'`);
+    if (directoryListing.size > 0)
+      throw ENOTEMPTY(`rm '${p}'`);
+    const index = this.entries.get(resolvedP);
+    if (typeof index === `undefined`)
+      throw EINVAL(`rm '${p}'`);
     this.deleteEntry(p, index);
   }
   hydrateDirectory(resolvedP) {

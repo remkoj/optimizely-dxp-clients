@@ -34,7 +34,7 @@ const defaultOptions = {
     refreshDelay: 2000,
     refreshNotice: () => _jsx("div", { className: 'optly-refresh-notice', children: "Updating preview, please wait...." }),
     errorNotice: props => _jsxs("div", { className: 'optly-error-notice', children: [_jsx("div", { className: 'optly-error-title', children: props.title }), _jsx("div", { className: 'optly-error-message', children: props.message })] }),
-    layout: props => _jsx("div", { className: 'optly-edit-page', "data-locale": props.locale, children: props.children }),
+    layout: props => _jsx(_Fragment, { children: props.children }),
     loader: getContentById,
     clientFactory: (token) => getAuthorizedServerClient(token),
     communicationInjectorPath: '/util/javascript/communicationinjector.js'
@@ -106,7 +106,7 @@ export function createEditPageComponent(factory, options) {
         const client = clientFactory(token);
         context.setOptimizelyGraphClient(client);
         context.setComponentFactory(factory);
-        context.setInEditMode(epiEditMode == 'true');
+        context.setInEditMode(true);
         // Get information from the Request URI
         const contentRequest = getContentRequest(path, searchParams);
         if (!contentRequest) {
