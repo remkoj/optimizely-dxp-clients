@@ -78,6 +78,14 @@ exports.fragments = [
             }
         }
     }
+}`,
+    `fragment LinkItemData on Link {
+    title
+    text
+    target
+    url {
+        ...LinkData
+    }
 }`
 ];
 exports.queries = [
