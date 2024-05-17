@@ -12,6 +12,7 @@ export type { ContentTypeDefinition_V3 } from './models/ContentTypeDefinition_V3
 export type { ContentTypeMap_V3 } from './models/ContentTypeMap_V3.js';
 export type { ContentTypeProperty_V2 } from './models/ContentTypeProperty_V2.js';
 export type { ContentTypeProperty_V3 } from './models/ContentTypeProperty_V3.js';
+export { DeleteMode } from './models/DeleteMode.js';
 export type { FilterMap } from './models/FilterMap.js';
 export type { GraphQLRequest } from './models/GraphQLRequest.js';
 export type { GraphQLResponse } from './models/GraphQLResponse.js';

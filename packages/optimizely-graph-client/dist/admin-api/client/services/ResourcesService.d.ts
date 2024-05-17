@@ -10,10 +10,19 @@ export declare class ResourcesService {
      * Stop words are the words in a stop list (or stop list or negative dictionary) which are filtered out (stopped) before or after processing of natural language data (text) because they are insignificant
      * @param requestBody
      * @param languageRouting
+     * @param sourceRouting
      * @returns void
      * @throws ApiError
      */
-    upsertStopwordHandler(requestBody: StopwordsBody, languageRouting?: string): CancelablePromise<void>;
+    upsertStopwordHandler(requestBody: StopwordsBody, languageRouting?: string, sourceRouting?: string): CancelablePromise<void>;
+    /**
+     * Delete stop words
+     * @param languageRouting
+     * @param sourceRouting
+     * @returns void
+     * @throws ApiError
+     */
+    deleteStopwordHandler(languageRouting?: string, sourceRouting?: string): CancelablePromise<void>;
     /**
      * Store synonyms
      * When you write a query, you can use synonyms to expand the keywords to get results that users otherwise may not have found.
@@ -22,9 +31,18 @@ export declare class ResourcesService {
      * This happens when you store synonyms in Optimizely Graph and enable them per field in your query. Otherwise, many relevant results may not be retrieved.
      * @param requestBody
      * @param languageRouting
+     * @param sourceRouting
      * @param synonymSlot
      * @returns void
      * @throws ApiError
      */
-    upsertSynonymHandler(requestBody: SynonymsBody, languageRouting?: string, synonymSlot?: 'one' | 'two'): CancelablePromise<void>;
+    upsertSynonymHandler(requestBody: SynonymsBody, languageRouting?: string, sourceRouting?: string, synonymSlot?: 'one' | 'two'): CancelablePromise<void>;
+    /**
+     * Delete synonyms
+     * @param languageRouting
+     * @param sourceRouting
+     * @returns void
+     * @throws ApiError
+     */
+    deleteSynonymHandler(languageRouting?: string, sourceRouting?: string): CancelablePromise<void>;
 }

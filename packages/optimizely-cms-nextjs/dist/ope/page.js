@@ -15,7 +15,8 @@ const defaultOptions = {
     errorNotice: props => _jsxs("div", { className: 'optly-error-notice', children: [_jsx("div", { className: 'optly-error-title', children: props.title }), _jsx("div", { className: 'optly-error-message', children: props.message })] }),
     layout: props => _jsx("div", { className: 'optly-edit-page', "data-locale": props.locale, children: props.children }),
     loader: getContentById,
-    clientFactory: (token) => getAuthorizedServerClient(token)
+    clientFactory: (token) => getAuthorizedServerClient(token),
+    communicationInjectorPath: '/ui/CMS/latest/clientresources/communicationinjector.js'
 };
 /**
  * Create the EditPage component needed by Next.JS to render the "On Page
@@ -29,8 +30,7 @@ const defaultOptions = {
  * @returns The React Component that can be used by Next.JS to render the page
  */
 export function createEditPageComponent(channel, factory, options) {
-    const { layout: PageLayout, refreshNotice: RefreshNotice, refreshDelay, errorNotice: ErrorNotice, loader: getContentById, clientFactory } = { ...defaultOptions, ...options };
-    const dxpUrl = channel.getCmsUrl();
+    const { layout: PageLayout, refreshNotice: RefreshNotice, refreshDelay, errorNotice: ErrorNotice, loader: getContentById, clientFactory, communicationInjectorPath } = { ...defaultOptions, ...options };
     async function EditPage({ params, searchParams }) {
         // Create context
         const context = getServerContext();
@@ -74,7 +74,7 @@ export function createEditPageComponent(channel, factory, options) {
         const client = clientFactory(token);
         context.setOptimizelyGraphClient(client);
         context.setComponentFactory(factory);
-        context.setInEditMode(epiEditMode == 'true');
+        context.setInEditMode(true);
         // Get information from the Request URI
         const requestPath = ('/' + params.path.map(decodeURIComponent).join('/')).replace(/^(\/ui){0,1}(\/cms){0,1}(\/content){0,1}\//i, '');
         const slugs = requestPath.split('/');
@@ -127,7 +127,7 @@ export function createEditPageComponent(channel, factory, options) {
             const isPage = contentItem.contentType?.some(x => x?.toLowerCase() == "page") ?? false;
             const loadedContentId = Utils.normalizeContentLinkWithLocale({ ...contentItem?.id, locale: contentItem?.locale?.name });
             const Layout = isPage ? PageLayout : React.Fragment;
-            const output = _jsxs(_Fragment, { children: [context.inEditMode && _jsx(Script, { src: `${dxpUrl}/ui/CMS/latest/clientresources/communicationinjector.js`, strategy: 'afterInteractive' }), _jsxs(Layout, { locale: locale, children: [_jsx(OnPageEdit, { timeout: refreshDelay, mode: context.inEditMode ? 'edit' : 'preview', className: 'bg-slate-900 absolute top-0 left-0 w-screen h-screen opacity-60 z-50', children: _jsx(RefreshNotice, {}) }), _jsx(CmsContent, { contentType: contentType, contentLink: contentLink, fragmentData: contentItem })] }), _jsxs("div", { className: 'optly-contentLink', children: ["ID: ", loadedContentId?.id ?? "-", " | Version: ", loadedContentId?.workId ?? "-", " | Global ID: ", loadedContentId?.guidValue ?? "-", " | Locale: ", loadedContentId?.locale ?? ""] })] });
+            const output = _jsxs(_Fragment, { children: [_jsx(Script, { src: new URL(communicationInjectorPath, client.siteInfo.cmsURL).href, strategy: 'afterInteractive' }), _jsxs(Layout, { locale: locale, children: [_jsx(OnPageEdit, { timeout: refreshDelay, mode: context.inEditMode ? 'edit' : 'preview', className: 'bg-slate-900 absolute top-0 left-0 w-screen h-screen opacity-60 z-50', children: _jsx(RefreshNotice, {}) }), _jsx(CmsContent, { contentType: contentType, contentLink: contentLink, fragmentData: contentItem })] }), _jsxs("div", { className: 'optly-contentLink', children: ["ID: ", loadedContentId?.id ?? "-", " | Version: ", loadedContentId?.workId ?? "-", " | Global ID: ", loadedContentId?.guidValue ?? "-", " | Locale: ", loadedContentId?.locale ?? ""] })] });
             return output;
         }
         catch (e) {
