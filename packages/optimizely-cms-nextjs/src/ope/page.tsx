@@ -22,7 +22,8 @@ const defaultOptions : EditViewOptions = {
         { props.children }
     </div>,
     loader: getContentById,
-    clientFactory: (token?: string) => getAuthorizedServerClient(token)
+    clientFactory: (token?: string) => getAuthorizedServerClient(token),
+    communicationInjectorPath: '/ui/CMS/latest/clientresources/communicationinjector.js'
 }
 
 /**
@@ -49,10 +50,9 @@ export function createEditPageComponent(
         refreshDelay, 
         errorNotice: ErrorNotice, 
         loader: getContentById,
-        clientFactory
+        clientFactory,
+        communicationInjectorPath
     } = { ...defaultOptions, ...options }
-
-    const dxpUrl = channel.getCmsUrl()
 
     async function EditPage({ params, searchParams }: EditPageProps) : Promise<JSX.Element>
     {
@@ -102,7 +102,7 @@ export function createEditPageComponent(
         const client = clientFactory(token)
         context.setOptimizelyGraphClient(client)
         context.setComponentFactory(factory)
-        context.setInEditMode(epiEditMode == 'true')
+        context.setInEditMode(true)
 
         // Get information from the Request URI
         const requestPath = ('/'+params.path.map(decodeURIComponent).join('/')).replace(/^(\/ui){0,1}(\/cms){0,1}(\/content){0,1}\//i, '')
@@ -163,7 +163,7 @@ export function createEditPageComponent(
             const loadedContentId = Utils.normalizeContentLinkWithLocale({ ...contentItem?.id, locale: contentItem?.locale?.name })
             const Layout = isPage ? PageLayout : React.Fragment
             const output =  <>
-                { context.inEditMode && <Script src={`${ dxpUrl }/ui/CMS/latest/clientresources/communicationinjector.js`} strategy='afterInteractive' /> }
+                <Script src={new URL(communicationInjectorPath, client.siteInfo.cmsURL).href} strategy='afterInteractive' />
                 <Layout locale={ locale }>
                     <OnPageEdit timeout={ refreshDelay } mode={ context.inEditMode ? 'edit' : 'preview' } className='bg-slate-900 absolute top-0 left-0 w-screen h-screen opacity-60 z-50'>
                         <RefreshNotice />

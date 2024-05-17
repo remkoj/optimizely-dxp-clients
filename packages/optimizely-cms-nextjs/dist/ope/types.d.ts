@@ -44,6 +44,15 @@ export type EditViewOptions = {
      * The base content loader to be used for the edit view
      */
     loader: GetContentByIdMethod;
+    /**
+     * The path to the communicationInjector to use while in On-Page-Edit
+     * mode. Set this value to override the default path.
+     */
+    communicationInjectorPath: string;
+    /**
+     * The factory to be used to obtain an instance of the Optimizely Graph
+     * client.
+     */
     clientFactory: ClientFactory;
 };
 export type GetContentByIdVariables = {

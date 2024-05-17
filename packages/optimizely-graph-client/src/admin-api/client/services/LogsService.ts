@@ -9,7 +9,7 @@ export class LogsService {
     constructor(public readonly httpRequest: BaseHttpRequest) {}
     /**
      * Get request logs
-     * Get in/out request logs
+     * Get _incoming/outgoing_ request logs
      * @param page
      * @param requestId
      * @param host
