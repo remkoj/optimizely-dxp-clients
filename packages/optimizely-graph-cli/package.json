@@ -3,7 +3,7 @@
   "repository": "https://github.com/remkoj/optimizely-dxp-clients.git",
   "author": "Remko Jantzen <693172+remkoj@users.noreply.github.com>",
   "homepage": "https://github.com/remkoj/optimizely-dxp-clients",
-  "version": "2.0.0-pre2",
+  "version": "2.0.0-pre3",
   "license": "Apache-2.0",
   "packageManager": "yarn@4.1.1",
   "type": "module",
@@ -27,13 +27,13 @@
     "bundle": "yarn rollup --config rollup.config.js"
   },
   "devDependencies": {
-    "@remkoj/optimizely-graph-client": "workspace:2.0.0-pre2",
+    "@remkoj/optimizely-graph-client": "workspace:2.0.0-pre3",
     "@rollup/plugin-commonjs": "^25.0.7",
     "@rollup/plugin-json": "^6.1.0",
     "@rollup/pluginutils": "^5.1.0",
     "@types/crypto-js": "^4.2.2",
     "@types/glob": "^8.1.0",
-    "@types/node": "^20.12.10",
+    "@types/node": "^20.12.11",
     "@types/source-map-support": "^0.5.10",
     "@types/yargs": "^17.0.32",
     "rollup": "^4.17.2",
@@ -43,14 +43,14 @@
   },
   "dependencies": {
     "chalk": "^5.3.0",
-    "cli-table3": "^0.6.4",
+    "cli-table3": "^0.6.5",
     "dotenv": "^16.4.5",
     "dotenv-expand": "^11.0.6",
     "figures": "^6.1.0",
     "yargs": "^17.7.2"
   },
   "peerDependencies": {
-    "@remkoj/optimizely-graph-client": "2.0.0-pre2"
+    "@remkoj/optimizely-graph-client": "2.0.0-pre3"
   },
   "stableVersion": "1.0.4"
 }

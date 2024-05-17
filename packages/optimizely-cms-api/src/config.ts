@@ -1,3 +1,5 @@
+import { OpenAPI } from './client/core/OpenAPI'
+
 export type CmsIntegrationApiOptions = {
     base: URL
     clientId?: string
@@ -5,21 +7,23 @@ export type CmsIntegrationApiOptions = {
     actAs?: string
 }
 
-export const API_VERSION = 'v0.5'
-
 export function getCmsIntegrationApiConfigFromEnvironment() : CmsIntegrationApiOptions
 {
     const cmsUrl = getMandatory('OPTIMIZELY_CMS_URL')
     const clientId = getMandatory('OPTIMIZELY_CMS_CLIENT_ID')
     const clientSecret = getMandatory('OPTIMIZELY_CMS_CLIENT_SECRET')
     const actAs = getOptional('OPTIMIZELY_CMS_USER_ID')
+    const debug = getOptional('OPTIMIZELY_DEBUG',"0") == "1"
 
     let baseUrl : URL
     try {
-        baseUrl = new URL('/_cms/'+API_VERSION, cmsUrl)
+        baseUrl = new URL(OpenAPI.BASE, cmsUrl)
     } catch {
         throw new Error("Invalid URL provided")
     }
+
+    if (debug)
+        console.log(`[Optimizely CMS API] Connecting to ${ baseUrl } as ${ clientId }`)
 
     return {
         base: baseUrl,

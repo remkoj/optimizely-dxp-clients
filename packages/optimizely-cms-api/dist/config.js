@@ -1,19 +1,22 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getCmsIntegrationApiConfigFromEnvironment = exports.API_VERSION = void 0;
-exports.API_VERSION = 'v0.5';
+exports.getCmsIntegrationApiConfigFromEnvironment = void 0;
+const OpenAPI_1 = require("./client/core/OpenAPI");
 function getCmsIntegrationApiConfigFromEnvironment() {
     const cmsUrl = getMandatory('OPTIMIZELY_CMS_URL');
     const clientId = getMandatory('OPTIMIZELY_CMS_CLIENT_ID');
     const clientSecret = getMandatory('OPTIMIZELY_CMS_CLIENT_SECRET');
     const actAs = getOptional('OPTIMIZELY_CMS_USER_ID');
+    const debug = getOptional('OPTIMIZELY_DEBUG', "0") == "1";
     let baseUrl;
     try {
-        baseUrl = new URL('/_cms/' + exports.API_VERSION, cmsUrl);
+        baseUrl = new URL(OpenAPI_1.OpenAPI.BASE, cmsUrl);
     }
     catch {
         throw new Error("Invalid URL provided");
     }
+    if (debug)
+        console.log(`[Optimizely CMS API] Connecting to ${baseUrl} as ${clientId}`);
     return {
         base: baseUrl,
         clientId,
