@@ -1,7 +1,7 @@
 /// <reference types="react" />
 import 'server-only';
-import type { CmsContentProps } from './types';
-export type { CmsContentProps } from './types';
+import type { CmsContentProps } from './types.js';
+export type { CmsContentProps } from './types.js';
 /**
  * React Server Side component for the CmsContent
  *

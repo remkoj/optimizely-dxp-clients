@@ -1,15 +1,15 @@
 import { jsx as _jsx } from "react/jsx-runtime";
 import 'server-only';
 import deepmerge from 'deepmerge';
-import { notFound } from 'next/navigation';
+import { notFound } from 'next/navigation.js';
 import { RouteResolver } from '@remkoj/optimizely-graph-client';
 import { normalizeContentLinkWithLocale } from '@remkoj/optimizely-graph-client/utils';
 import { CmsContent, isDebug, getServerContext } from '@remkoj/optimizely-cms-react/rsc';
 import { Utils } from '@remkoj/optimizely-cms-react';
-import { MetaDataResolver } from '../metadata';
-import { urlToPath, localeToGraphLocale } from './utils';
-import getContentByPathBase from './data';
-import { getServerClient } from '../client';
+import { MetaDataResolver } from '../metadata.js';
+import { urlToPath, localeToGraphLocale } from './utils.js';
+import getContentByPathBase from './data.js';
+import { getServerClient } from '../client.js';
 export var SystemLocales;
 (function (SystemLocales) {
     SystemLocales["All"] = "ALL";

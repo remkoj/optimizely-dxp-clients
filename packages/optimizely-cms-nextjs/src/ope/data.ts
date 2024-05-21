@@ -1,4 +1,4 @@
-import type { GetContentByIdMethod, ContentQueryProps, GetContentByIdData } from './types'
+import type { GetContentByIdMethod, ContentQueryProps, GetContentByIdData } from './types.js'
 import { type GraphQLClient , gql } from 'graphql-request'
 
 export const getContentById : GetContentByIdMethod = async <LocaleType = string>(client: GraphQLClient, variables: ContentQueryProps<LocaleType>) =>

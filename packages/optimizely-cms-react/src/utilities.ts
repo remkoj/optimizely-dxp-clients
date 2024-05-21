@@ -1,5 +1,5 @@
 import type { ComponentType } from 'react'
-import type * as Types from './types'
+import type * as Types from './types.js'
 import type { DocumentNode } from 'graphql'
 import { localeToGraphLocale } from '@remkoj/optimizely-graph-client/utils'
 

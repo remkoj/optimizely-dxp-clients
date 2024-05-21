@@ -1,5 +1,5 @@
 import type { IOptiGraphClient } from "@remkoj/optimizely-graph-client";
-import type { ContentType, ContentLinkWithLocale } from "../../types";
+import type { ContentType, ContentLinkWithLocale } from "../../types.js";
 /**
  * Resolve the ContentType of an Optimizely CMS Component, identified by its content link
  *

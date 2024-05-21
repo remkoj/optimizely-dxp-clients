@@ -1,6 +1,6 @@
 import { Utils } from "@remkoj/optimizely-cms-react";
-import { getMetaDataByPath as getMetaDataByPathBase } from './data';
-import { getServerClient } from "../client";
+import { getMetaDataByPath as getMetaDataByPathBase } from './data.js';
+import { getServerClient } from "../client.js";
 import { isDebug } from '@remkoj/optimizely-cms-react/rsc';
 const defaultCreateLayoutOptions = {
     defaultLocale: null,

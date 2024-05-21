@@ -1,5 +1,5 @@
-import { type NextRequest, NextResponse } from "next/server";
-import { revalidatePath } from "next/cache";
+import { type NextRequest, NextResponse } from "next/server.js";
+import { revalidatePath } from "next/cache.js";
 import { type IOptiGraphClient, type OptimizelyGraphConfig, type ClientFactory } from "@remkoj/optimizely-graph-client";
 type PublishScopes = NonNullable<Parameters<typeof revalidatePath>[1]>;
 type OptiGraphClientFactory = IOptiGraphClient | OptimizelyGraphConfig | ClientFactory;

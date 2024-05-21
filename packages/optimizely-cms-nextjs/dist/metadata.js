@@ -1,7 +1,6 @@
 import createClient, { isContentGraphClient } from '@remkoj/optimizely-graph-client';
-import { isOptimizelyNextPageWithMetaData } from './page';
+import { isOptimizelyNextPageWithMetaData } from './page.js';
 export class MetaDataResolver {
-    _cgClient;
     constructor(clientOrConfig) {
         this._cgClient = isContentGraphClient(clientOrConfig) ? clientOrConfig : createClient(clientOrConfig);
     }

@@ -1,8 +1,8 @@
-export * from './client';
-export * from './metadata';
-export * from './types';
-export * from './page';
-export * as Auth from './auth';
-export * as OnPageEdit from './ope';
-export * as CmsPage from './cms-page';
+export * from './client.js';
+export * from './metadata.js';
+export * from './types.js';
+export * from './page.js';
+//export * as Auth from './auth'
+export * as OnPageEdit from './ope/index.js';
+export * as CmsPage from './cms-page/index.js';
 //# sourceMappingURL=index.js.map

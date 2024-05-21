@@ -1,2 +1,2 @@
-export * from './rich-text';
+export * from './rich-text/index.js';
 //# sourceMappingURL=index.js.map

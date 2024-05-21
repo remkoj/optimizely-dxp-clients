@@ -1,5 +1,5 @@
 import 'server-only';
-import type { ComponentFactory, GenericContext } from '../types';
+import type { ComponentFactory, GenericContext } from '../types.js';
 import { type IOptiGraphClient, type ContentLink } from "@remkoj/optimizely-graph-client";
 export interface ServerContext extends GenericContext {
     readonly forceEditorWarnings: boolean;

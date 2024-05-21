@@ -1,7 +1,7 @@
-import { NextResponse } from "next/server";
-import { revalidatePath, revalidateTag } from "next/cache";
+import { NextResponse } from "next/server.js";
+import { revalidatePath, revalidateTag } from "next/cache.js";
 import { isContentGraphClient, ContentGraphClient } from "@remkoj/optimizely-graph-client";
-import { getServerClient } from '../client';
+import { getServerClient } from '../client.js';
 export function createPublishApi(options) {
     const defaultOptions = {
         paths: [],

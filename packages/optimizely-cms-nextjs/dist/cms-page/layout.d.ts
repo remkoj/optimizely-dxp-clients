@@ -1,8 +1,8 @@
 import { type PropsWithChildren, type ReactNode } from "react";
 import { type Metadata, type ResolvingMetadata } from "next";
 import type { ChannelDefinition, ClientFactory } from "@remkoj/optimizely-graph-client";
-import type { DefaultCmsPageProps } from './page';
-import { type GetMetaDataByPathMethod } from './data';
+import type { DefaultCmsPageProps } from './page.js';
+import { type GetMetaDataByPathMethod } from './data.js';
 export type CmsPageLayout = {
     generateMetadata: (props: Omit<DefaultCmsPageProps, 'searchParams'>, resolving: ResolvingMetadata) => Promise<Metadata>;
     PageLayout: (props: PropsWithChildren<Omit<DefaultCmsPageProps, 'searchParams'>>) => JSX.Element | ReactNode;

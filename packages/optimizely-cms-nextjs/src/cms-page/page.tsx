@@ -1,16 +1,16 @@
 import 'server-only'
 import type { Metadata, ResolvingMetadata } from 'next'
 import deepmerge from 'deepmerge'
-import { notFound } from 'next/navigation'
+import { notFound } from 'next/navigation.js'
 import { RouteResolver, type Route, type ClientFactory, type ChannelDefinition } from '@remkoj/optimizely-graph-client'
 import { normalizeContentLinkWithLocale } from '@remkoj/optimizely-graph-client/utils'
 import { CmsContent, isDebug, getServerContext, type ComponentFactory } from '@remkoj/optimizely-cms-react/rsc'
 import { Utils } from '@remkoj/optimizely-cms-react'
 
-import { MetaDataResolver } from '../metadata'
-import { urlToPath, localeToGraphLocale } from './utils'
-import getContentByPathBase, { type GetContentByPathMethod } from './data'
-import { getServerClient } from '../client'
+import { MetaDataResolver } from '../metadata.js'
+import { urlToPath, localeToGraphLocale } from './utils.js'
+import getContentByPathBase, { type GetContentByPathMethod } from './data.js'
+import { getServerClient } from '../client.js'
 
 export type DefaultCmsPageParams = {
     path?: string[]

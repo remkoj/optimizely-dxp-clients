@@ -1,4 +1,4 @@
-import { type ComponentFactory } from "../../types"
+import { type ComponentFactory } from "../../types.js"
 
 export type RichTextProps = {
     /**

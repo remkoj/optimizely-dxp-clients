@@ -7,6 +7,7 @@ import ExpScript from './snippets/optimizely-web-experimentation';
 export default function (props) {
     const odp_id = props.dataPlatformTrackerId || EnvTools.readValue(EnvVars.OdpApiKey);
     const exp_id = props.experimentationProjectId || EnvTools.readValue(EnvVars.WebExperimentationProject);
-    return _jsxs(_Fragment, { children: [odp_id && _jsx(OdpScript, { trackerId: odp_id }), exp_id && _jsx(ExpScript, { projectId: exp_id })] });
+    const useOptiOneHelper = EnvTools.readValueAsBoolean(EnvVars.HelperEnabled, false);
+    return _jsxs(_Fragment, { children: [odp_id && _jsx(OdpScript, { trackerId: odp_id }), exp_id && _jsx(ExpScript, { projectId: exp_id, useApiProxy: useOptiOneHelper })] });
 }
 //# sourceMappingURL=header.js.map

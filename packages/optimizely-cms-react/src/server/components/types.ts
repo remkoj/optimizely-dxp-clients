@@ -1,6 +1,6 @@
 import type { SuspenseProps, PropsWithChildren } from "react"
-import type { ComponentFactory, ContentType } from "../../types"
-import type { ElementChildrenProps, ElementProps, ElementType, PropTypeIfPropExists, MayBeArray, TypeIfPropExists } from '../type-utils'
+import type { ComponentFactory, ContentType } from "../../types.js"
+import type { ElementChildrenProps, ElementProps, ElementType, PropTypeIfPropExists, MayBeArray, TypeIfPropExists } from '../type-utils.js'
 import type { IOptiGraphClient, ContentLinkWithLocale, InlineContentLinkWithLocale } from "@remkoj/optimizely-graph-client"
 
 export type CmsContentProps<LocalesType = string> = PropsWithChildren<{

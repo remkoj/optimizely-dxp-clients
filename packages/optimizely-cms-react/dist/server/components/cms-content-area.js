@@ -1,11 +1,11 @@
 import { Fragment as _Fragment, jsx as _jsx } from "react/jsx-runtime";
 import 'server-only';
-import CmsContent from './cms-content';
-import * as Utils from '../../utilities';
-import * as Errors from '../../errors';
+import CmsContent from './cms-content.js';
+import * as Utils from '../../utilities.js';
+import * as Errors from '../../errors.js';
 import createClient from '@remkoj/optimizely-graph-client';
 import { normalizeContentLinkWithLocale, contentLinkToString } from '@remkoj/optimizely-graph-client/utils';
-import getServerContext from '../context';
+import getServerContext from '../context.js';
 //#endregion
 /**
  * React server component to render a content area

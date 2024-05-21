@@ -1,8 +1,8 @@
 import 'server-only'
 import React from 'react'
-import { isDevelopment, isDebug } from "./is-debug"
-import { getFactory } from '../factory'
-import type { ComponentFactory, GenericContext } from '../types'
+import { isDevelopment, isDebug } from "./is-debug.js"
+import { getFactory } from '../factory.js'
+import type { ComponentFactory, GenericContext } from '../types.js'
 import { contentLinkIsEqual, type IOptiGraphClient, type ContentLink } from "@remkoj/optimizely-graph-client"
 
 export interface ServerContext extends GenericContext {

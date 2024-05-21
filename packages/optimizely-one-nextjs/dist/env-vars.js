@@ -10,6 +10,7 @@ export var EnvVars;
     EnvVars["ContentRecsHost"] = "OPTIMIZELY_CONTENTRECS_API";
     EnvVars["FrontendCookie"] = "OPTIMIZELY_FRONTEND_COOKIE";
     EnvVars["WebExperimentationProject"] = "OPTIMIZELY_WEB_EXPERIMENTATION_PROJECT";
+    EnvVars["OptimizelyDebug"] = "OPTIMIZELY_DEBUG";
 })(EnvVars || (EnvVars = {}));
 export default EnvVars;
 //# sourceMappingURL=env-vars.js.map

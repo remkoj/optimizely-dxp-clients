@@ -16,24 +16,19 @@
     "opti-graph": "bin/index.js"
   },
   "scripts": {
-    "watch": "yarn tsc --watch",
-    "clean": "yarn tsc --build --clean",
-    "compile": "yarn tsc --build",
-    "recompile": "yarn tsc --build --clean && yarn tsc --build && yarn rollup --config rollup.config.js",
-    "run-compiled": "yarn node dist/index.js",
-    "prepare": "yarn tsc --build --force && yarn rollup --config rollup.config.js",
-    "rebuild": "yarn tsc --build --clean && yarn tsc --build && yarn rollup --config rollup.config.js",
-    "run": "yarn node bin/index.js",
-    "bundle": "yarn rollup --config rollup.config.js"
+    "watch": "yarn rollup --config rollup.config.js --watch",
+    "prepare": "yarn rollup --config rollup.config.js",
+    "opti-graph": "yarn node bin/index.js"
   },
   "devDependencies": {
     "@remkoj/optimizely-graph-client": "workspace:2.0.0-pre3",
     "@rollup/plugin-commonjs": "^25.0.7",
     "@rollup/plugin-json": "^6.1.0",
+    "@rollup/plugin-typescript": "^11.1.6",
     "@rollup/pluginutils": "^5.1.0",
     "@types/crypto-js": "^4.2.2",
     "@types/glob": "^8.1.0",
-    "@types/node": "^20.12.11",
+    "@types/node": "^20.12.12",
     "@types/source-map-support": "^0.5.10",
     "@types/yargs": "^17.0.32",
     "rollup": "^4.17.2",

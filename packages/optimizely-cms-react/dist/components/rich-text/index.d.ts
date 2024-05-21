@@ -1,5 +1,5 @@
 /// <reference types="react" />
-import { type ComponentFactory } from "../../types";
+import { type ComponentFactory } from "../../types.js";
 export type RichTextProps = {
     /**
      * The component factory used for this rich text content

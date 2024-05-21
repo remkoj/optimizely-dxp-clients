@@ -1,9 +1,9 @@
-/// <reference types="react" />
+/// <reference types="react" resolution-mode="require"/>
 import 'server-only';
 import type { Metadata, ResolvingMetadata } from 'next';
 import { type Route, type ClientFactory, type ChannelDefinition } from '@remkoj/optimizely-graph-client';
 import { type ComponentFactory } from '@remkoj/optimizely-cms-react/rsc';
-import { type GetContentByPathMethod } from './data';
+import { type GetContentByPathMethod } from './data.js';
 export type DefaultCmsPageParams = {
     path?: string[];
     lang?: string;

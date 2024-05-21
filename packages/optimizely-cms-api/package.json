@@ -12,7 +12,7 @@
     "./dist"
   ],
   "devDependencies": {
-    "@types/node": "^20.12.11",
+    "@types/node": "^20.12.12",
     "openapi-typescript-codegen": "^0.29.0",
     "tslib": "^2.6.2",
     "typescript": "^5.4.5"

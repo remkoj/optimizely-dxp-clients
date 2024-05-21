@@ -6,7 +6,7 @@ export type ApiServiceErrorMessage = {
         message: string;
     };
 };
-export type ApiServiceErrorResponse = [ApiServiceErrorMessage, number];
+export type ApiServiceErrorResponse = [ApiServiceErrorMessage, number] | [string, number, string];
 export type ApiServiceResponse<T extends {} = {}> = [T, 200 | undefined] | ApiServiceErrorResponse;
 export type ApiService<T extends {} = {}> = {
     for: {

@@ -1,11 +1,11 @@
 import { Fragment as _Fragment, jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
 import 'server-only';
-import getContentType from './get-content-type';
-import getServerContext from '../context';
+import getContentType from './get-content-type.js';
+import getServerContext from '../context.js';
 import createClient, { AuthMode, normalizeContentLink, contentLinkToString, isInlineContentLink } from '@remkoj/optimizely-graph-client';
 import { print } from 'graphql';
-import * as Utils from "../../utilities";
-import * as Queries from './queries';
+import * as Utils from "../../utilities.js";
+import * as Queries from './queries.js';
 /**
  * React Server Side component for the CmsContent
  *

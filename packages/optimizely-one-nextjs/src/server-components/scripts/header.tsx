@@ -13,8 +13,9 @@ export default function (props: HeaderScriptsProps)
 {
     const odp_id = props.dataPlatformTrackerId || EnvTools.readValue(EnvVars.OdpApiKey)
     const exp_id = props.experimentationProjectId || EnvTools.readValue(EnvVars.WebExperimentationProject)
+    const useOptiOneHelper = EnvTools.readValueAsBoolean(EnvVars.HelperEnabled, false)
     return <>
         { odp_id && <OdpScript trackerId={ odp_id } /> }
-        { exp_id && <ExpScript projectId={ exp_id } /> }
+        { exp_id && <ExpScript projectId={ exp_id } useApiProxy={ useOptiOneHelper } /> }
     </>
 }

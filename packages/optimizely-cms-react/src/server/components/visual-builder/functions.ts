@@ -1,4 +1,4 @@
-import { CompositionNode, CompositionElementNode, CompositionStructureNode } from './types'
+import { CompositionNode, CompositionElementNode, CompositionStructureNode } from './types.js'
 
 export function isElementNode(node: CompositionNode<Record<string,any>>) : node is CompositionElementNode<Record<string,any>>
 {

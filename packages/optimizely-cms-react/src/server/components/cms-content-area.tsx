@@ -1,16 +1,16 @@
 import 'server-only'
 import React from 'react'
-import CmsContent from './cms-content'
-import type { ElementType } from '../type-utils'
-import * as Utils from '../../utilities'
-import * as Errors from '../../errors'
+import CmsContent from './cms-content.js'
+import type { ElementType } from '../type-utils.js'
+import * as Utils from '../../utilities.js'
+import * as Errors from '../../errors.js'
 import createClient from '@remkoj/optimizely-graph-client'
 import { normalizeContentLinkWithLocale, contentLinkToString } from '@remkoj/optimizely-graph-client/utils'
-import getServerContext from '../context'
-import type { CmsContentAreaProps, ContentAreaItemDefinition, ValidContentAreaItemDefinition } from './types'
+import getServerContext from '../context.js'
+import type { CmsContentAreaProps, ContentAreaItemDefinition, ValidContentAreaItemDefinition } from './types.js'
 
 //#region Export Type definitions
-export type { CmsContentAreaClassMapper, CmsContentAreaProps, ContentAreaItemDefinition } from './types'
+export type { CmsContentAreaClassMapper, CmsContentAreaProps, ContentAreaItemDefinition } from './types.js'
 //#endregion
 
 /**

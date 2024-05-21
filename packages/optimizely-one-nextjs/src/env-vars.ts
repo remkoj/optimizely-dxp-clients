@@ -8,6 +8,7 @@ export const enum EnvVars {
     ContentRecsDeliveryKey = 'OPTIMIZELY_CONTENTRECS_DELIVERY_KEY',
     ContentRecsHost = 'OPTIMIZELY_CONTENTRECS_API',
     FrontendCookie = 'OPTIMIZELY_FRONTEND_COOKIE',
-    WebExperimentationProject = 'OPTIMIZELY_WEB_EXPERIMENTATION_PROJECT'
+    WebExperimentationProject = 'OPTIMIZELY_WEB_EXPERIMENTATION_PROJECT',
+    OptimizelyDebug = 'OPTIMIZELY_DEBUG'
 }
 export default EnvVars

@@ -1,5 +1,5 @@
 import type { ComponentType } from 'react';
-import type * as Types from './types';
+import type * as Types from './types.js';
 import type { DocumentNode } from 'graphql';
 export declare function isNonEmptyString(toTest: any): toTest is string;
 export declare function isNotNullOrUndefined<T>(toTest?: T | null): toTest is T;

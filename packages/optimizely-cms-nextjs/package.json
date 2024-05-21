@@ -34,29 +34,28 @@
   "devDependencies": {
     "@remkoj/optimizely-cms-react": "workspace:2.0.0-pre3",
     "@remkoj/optimizely-graph-client": "workspace:2.0.0-pre3",
-    "@types/node": "^20.12.11",
+    "@types/node": "^20.12.12",
     "@types/react": "^18.3.2",
     "@types/react-dom": "18.3.0",
-    "deepmerge": "^4.3.1",
     "graphql": "^16.8.1",
-    "graphql-request": "^7.0.1",
+    "graphql-request": "^6.1.0",
     "next": "^14.2.3",
-    "next-auth": "^4.24.7",
     "prop-types": "^15.8.1",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "scheduler": "^0.23.2",
     "typescript": "^5.4.5"
   },
+  "dependencies": {
+    "deepmerge": "^4.3.1"
+  },
   "peerDependencies": {
     "@remkoj/optimizely-cms-react": "2.0.0-pre3",
     "@remkoj/optimizely-graph-client": "2.0.0-pre3",
-    "deepmerge": "*",
-    "graphql": "*",
-    "graphql-request": "*",
-    "next": "*",
-    "next-auth": "*",
-    "react": "*"
+    "graphql": "^16.8.1",
+    "graphql-request": "^6.1.0",
+    "next": "^14.2.3",
+    "react": "^18.3.1"
   },
   "scripts": {
     "clean": "yarn tsc --build --clean",

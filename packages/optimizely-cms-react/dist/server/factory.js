@@ -1,8 +1,8 @@
 import 'server-only';
 import React from 'react';
-import { DefaultComponentFactory as DefaultFactory } from '../factory';
-import isDebug from './is-debug';
-export { DefaultComponentFactory } from '../factory';
+import { DefaultComponentFactory as DefaultFactory } from '../factory.js';
+import isDebug from './is-debug.js';
+export { DefaultComponentFactory } from '../factory.js';
 /**
  * Retrieve the working instance of the component factory, which is memoized through the React.cache()
  * server side react method

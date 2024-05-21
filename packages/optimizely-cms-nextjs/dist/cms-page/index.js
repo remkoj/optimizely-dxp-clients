@@ -1,3 +1,3 @@
-export { createPage } from './page';
-export { createLayout } from './layout';
+export { createPage } from './page.js';
+export { createLayout } from './layout.js';
 //# sourceMappingURL=index.js.map

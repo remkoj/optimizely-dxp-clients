@@ -1,4 +1,4 @@
-import type { ComponentFactory, ComponentType, ComponentTypeHandle, ComponentTypeDictionary } from './types';
+import type { ComponentFactory, ComponentType, ComponentTypeHandle, ComponentTypeDictionary } from './types.js';
 export declare const EmptyComponentHandle = "$$fragment$$";
 /**
  * The default implementation of the ComponentFactory iterface

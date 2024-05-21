@@ -4,9 +4,8 @@ export const EmptyComponentHandle = '$$fragment$$';
  * The default implementation of the ComponentFactory iterface
  */
 export class DefaultComponentFactory {
-    registry = {};
-    dbg;
     constructor() {
+        this.registry = {};
         this.dbg = process.env.OPTIMIZELY_DEBUG == '1';
     }
     register(type, component) {

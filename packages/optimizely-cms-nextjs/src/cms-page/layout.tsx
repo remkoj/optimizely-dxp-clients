@@ -2,10 +2,10 @@ import { type PropsWithChildren, type ReactNode } from "react"
 import { type Metadata, type ResolvingMetadata } from "next"
 import type { ChannelDefinition, ClientFactory } from "@remkoj/optimizely-graph-client"
 import { Utils } from "@remkoj/optimizely-cms-react"
-import type { DefaultCmsPageProps } from './page'
-import { getMetaDataByPath as getMetaDataByPathBase, type GetMetaDataByPathMethod } from './data'
+import type { DefaultCmsPageProps } from './page.js'
+import { getMetaDataByPath as getMetaDataByPathBase, type GetMetaDataByPathMethod } from './data.js'
 
-import { getServerClient } from "../client"
+import { getServerClient } from "../client.js"
 import { isDebug } from '@remkoj/optimizely-cms-react/rsc'
 
 export type CmsPageLayout = {

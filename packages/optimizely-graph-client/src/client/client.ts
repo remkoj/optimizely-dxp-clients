@@ -111,7 +111,6 @@ export class ContentGraphClient extends GraphQLClient implements IOptiGraphClien
                     console.log(`[Optimizely Graph] [Response Data] ${ JSON.stringify(response.data) }`)
                     console.log(`[Optimizely Graph] [Response Cost] ${ JSON.stringify((response.extensions as { cost?: number } | undefined )?.cost || 0) }`)
                 }
-                return response
             }
 
         })

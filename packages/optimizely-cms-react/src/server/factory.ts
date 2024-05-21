@@ -1,11 +1,11 @@
 import 'server-only'
 import React from 'react'
-import type * as Types from '../types'
-import { DefaultComponentFactory as DefaultFactory } from '../factory'
-import isDebug from './is-debug'
+import type * as Types from '../types.js'
+import { DefaultComponentFactory as DefaultFactory } from '../factory.js'
+import isDebug from './is-debug.js'
 
-export type { ComponentFactory } from '../types'
-export { DefaultComponentFactory } from '../factory'
+export type { ComponentFactory } from '../types.js'
+export { DefaultComponentFactory } from '../factory.js'
 
 /**
  * Retrieve the working instance of the component factory, which is memoized through the React.cache()

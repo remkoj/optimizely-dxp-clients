@@ -1,11 +1,11 @@
 #!/usr/bin/env node
 /**
  * Frontend Utility providing helpers for common tasks when building a Vercel
- * hosted, Next.JS based website that uses Optimizely Content-Graph as content
- * repository
+ * hosted, Next.JS based website that uses Optimizely Graph as content 
+ * repository.
  * 
  * License: Apache 2
- * Copyright (c) 2023 - Remko Jantzen
+ * Copyright (c) 2023-2024 - Remko Jantzen
  */
 
 import * as dotenv from 'dotenv';
@@ -512,3 +512,4 @@ var APP;
 const app = createCliApp(APP.Script, APP.Version);
 app.command(modules);
 app.parse(process.argv.slice(2));
+//# sourceMappingURL=index.js.map

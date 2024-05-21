@@ -1,6 +1,6 @@
-export type * from './types'
+export type * from './types.js'
 
-export * from './functions'
+export * from './functions.js'
 
-export { OptimizelyComposition } from './Composition'
-export { OptimizelyComposition as default } from './Composition'
+export { OptimizelyComposition } from './Composition.js'
+export { OptimizelyComposition as default } from './Composition.js'

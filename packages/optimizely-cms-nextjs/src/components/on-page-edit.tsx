@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, type FunctionComponent, type PropsWithChildren } from 'react'
-import { useRouter } from 'next/navigation'
+import { useRouter } from 'next/navigation.js'
 
 export type OnPageEditProps = PropsWithChildren<{
     mode?: 'edit' | 'preview'

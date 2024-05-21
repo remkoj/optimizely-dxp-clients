@@ -1,8 +1,8 @@
 import { jsx as _jsx } from "react/jsx-runtime";
 import 'server-only';
-import { isElementNode } from './functions';
-import { CmsContent } from '../cms-content';
-import { getRandomKey } from '../../../utilities';
+import { isElementNode } from './functions.js';
+import { CmsContent } from '../cms-content.js';
+import { getRandomKey } from '../../../utilities.js';
 import { isContentLink, isInlineContentLink } from '@remkoj/optimizely-graph-client';
 function isContentType(toTest) {
     return Array.isArray(toTest) && toTest.every(x => typeof (x) == 'string' && x.length > 0);

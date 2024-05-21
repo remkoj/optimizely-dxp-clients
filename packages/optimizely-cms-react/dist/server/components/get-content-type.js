@@ -1,5 +1,5 @@
 import { gql } from 'graphql-request';
-import * as Utils from "../../utilities";
+import * as Utils from "../../utilities.js";
 import { isContentLink } from "@remkoj/optimizely-graph-client/utils";
 const DEBUG = false;
 /**

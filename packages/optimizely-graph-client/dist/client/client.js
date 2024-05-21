@@ -88,7 +88,6 @@ export class ContentGraphClient extends GraphQLClient {
                     console.log(`[Optimizely Graph] [Response Data] ${JSON.stringify(response.data)}`);
                     console.log(`[Optimizely Graph] [Response Cost] ${JSON.stringify(response.extensions?.cost || 0)}`);
                 }
-                return response;
             }
         });
         this.query = (...args) => {

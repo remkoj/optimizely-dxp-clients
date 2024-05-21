@@ -1,6 +1,6 @@
 'use client';
 import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter } from 'next/navigation.js';
 export const OnPageEdit = ({ mode, children, className, timeout }) => {
     const router = useRouter();
     const [optiCmsReady, setOptiCmsReady] = useState(false);

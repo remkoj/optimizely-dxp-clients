@@ -1,10 +1,10 @@
 import 'server-only'
-import { isElementNode } from './functions'
-import { CmsContent } from '../cms-content'
-import type { ContentType } from '../../../types'
-import { getRandomKey } from '../../../utilities'
+import { isElementNode } from './functions.js'
+import { CmsContent } from '../cms-content.js'
+import type { ContentType } from '../../../types.js'
+import { getRandomKey } from '../../../utilities.js'
 import { isContentLink, ContentLinkWithLocale, isInlineContentLink } from '@remkoj/optimizely-graph-client'
-import type { OptimizelyCompositionProps, CmsComponentPropsFactory, CompositionElementNode } from './types'
+import type { OptimizelyCompositionProps, CmsComponentPropsFactory, CompositionElementNode } from './types.js'
 
 function isContentType(toTest: any) : toTest is ContentType
 {

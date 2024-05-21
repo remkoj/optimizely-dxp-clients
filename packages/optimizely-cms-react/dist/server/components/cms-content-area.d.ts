@@ -1,8 +1,8 @@
 /// <reference types="react" />
 import 'server-only';
-import type { ElementType } from '../type-utils';
-import type { CmsContentAreaProps, ContentAreaItemDefinition } from './types';
-export type { CmsContentAreaClassMapper, CmsContentAreaProps, ContentAreaItemDefinition } from './types';
+import type { ElementType } from '../type-utils.js';
+import type { CmsContentAreaProps, ContentAreaItemDefinition } from './types.js';
+export type { CmsContentAreaClassMapper, CmsContentAreaProps, ContentAreaItemDefinition } from './types.js';
 /**
  * React server component to render a content area
  *

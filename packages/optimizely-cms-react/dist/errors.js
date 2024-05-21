@@ -1,5 +1,4 @@
 export class InvalidContentLinkError extends Error {
-    _contentLink;
     get contentLink() {
         return this._contentLink;
     }

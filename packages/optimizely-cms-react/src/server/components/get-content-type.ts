@@ -1,7 +1,7 @@
 import type { IOptiGraphClient } from "@remkoj/optimizely-graph-client"
-import type { ContentType, ContentLinkWithLocale } from "../../types"
+import type { ContentType, ContentLinkWithLocale } from "../../types.js"
 import { gql } from 'graphql-request'
-import * as Utils from "../../utilities"
+import * as Utils from "../../utilities.js"
 import { isContentLink } from "@remkoj/optimizely-graph-client/utils"
 
 const DEBUG = false

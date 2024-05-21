@@ -1,16 +1,16 @@
 import 'server-only'
 
-import type { EditPageProps, EditPageComponent, EditViewOptions, ContentQueryProps } from './types'
+import type { EditPageProps, EditPageComponent, EditViewOptions, ContentQueryProps } from './types.js'
 import { AuthMode } from '@remkoj/optimizely-graph-client'
 import { contentLinkToString } from '@remkoj/optimizely-graph-client/utils'
 import { Utils, type ContentLinkWithLocale } from '@remkoj/optimizely-cms-react'
 import { CmsContent, getServerContext, type ComponentFactory } from '@remkoj/optimizely-cms-react/rsc'
-import { notFound } from 'next/navigation'
-import OnPageEdit from '../components/on-page-edit'
-import { getAuthorizedServerClient } from '../client'
+import { notFound } from 'next/navigation.js'
+import OnPageEdit from '../components/on-page-edit.js'
+import { getAuthorizedServerClient } from '../client.js'
 import React from 'react'
-import Script from 'next/script'
-import { getContentById } from './data'
+import Script from 'next/script.js'
+import { getContentById } from './data.js'
 
 function readValue<T extends string | undefined>(variableName: string, defaultValue?: T) : T extends string ? string : string | undefined
 {
@@ -183,6 +183,7 @@ export function createEditPageComponent(
             const isPage = contentType.some(x => x?.toLowerCase() == "page") ?? false
             const Layout = isPage ? PageLayout : React.Fragment
             const output =  <>
+                {/* @ts-expect-error */}
                 <Script src={new URL(communicationInjectorPath, client.siteInfo.cmsURL).href} strategy='afterInteractive' />
                 <Layout locale={ contentItem.locale?.name ?? '' }>
                     <OnPageEdit timeout={ refreshDelay } mode={ context.inEditMode ? 'edit' : 'preview' }>

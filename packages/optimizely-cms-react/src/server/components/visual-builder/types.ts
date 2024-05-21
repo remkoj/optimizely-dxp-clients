@@ -1,5 +1,5 @@
 import { type ComponentType, type PropsWithChildren } from "react"
-import { type ContentType } from "../../../types"
+import { type ContentType } from "../../../types.js"
 import { type InlineContentLinkWithLocale, type ContentLinkWithLocale } from "@remkoj/optimizely-graph-client"
 
 export enum StructureNodeTypes {

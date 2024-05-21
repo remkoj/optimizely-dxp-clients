@@ -1,5 +1,5 @@
 import 'server-only';
-import type { EditPageComponent, EditViewOptions } from './types';
+import type { EditPageComponent, EditViewOptions } from './types.js';
 import { type ComponentFactory } from '@remkoj/optimizely-cms-react/rsc';
 /**
  * Create the EditPage component needed by Next.JS to render the "On Page

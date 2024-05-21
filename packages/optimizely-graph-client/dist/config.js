@@ -10,6 +10,8 @@ export function readEnvironmentVariables() {
         debug: getBoolean('OPTIMIZELY_DEBUG', () => getBoolean('DXP_DEBUG', false)),
         publish: getOptional('OPTIMIZELY_PUBLISH_TOKEN')
     };
+    if (config.gateway && config.gateway?.endsWith("/"))
+        config.gateway = config.gateway.substring(0, config.gateway.length - 1);
     return config;
 }
 export function applyConfigDefaults(configuredValues) {
@@ -21,10 +23,13 @@ export function applyConfigDefaults(configuredValues) {
         debug: false,
         query_log: false,
     };
-    return {
+    const config = {
         ...defaults,
         ...configuredValues
     };
+    if (config.gateway && config.gateway?.endsWith("/"))
+        config.gateway = config.gateway.substring(0, config.gateway.length - 1);
+    return config;
 }
 /**
  * Validate the configuration

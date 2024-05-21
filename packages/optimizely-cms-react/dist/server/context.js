@@ -1,15 +1,17 @@
 import 'server-only';
 import React from 'react';
-import { isDevelopment, isDebug } from "./is-debug";
-import { getFactory } from '../factory';
+import { isDevelopment, isDebug } from "./is-debug.js";
+import { getFactory } from '../factory.js';
 import { contentLinkIsEqual } from "@remkoj/optimizely-graph-client";
 class DefaultServerContext {
-    _inEditMode = false;
-    _forceEditorWarnings = false;
-    _client = undefined;
-    _factory = undefined;
-    _locale = undefined;
-    _editableContent = undefined;
+    constructor() {
+        this._inEditMode = false;
+        this._forceEditorWarnings = false;
+        this._client = undefined;
+        this._factory = undefined;
+        this._locale = undefined;
+        this._editableContent = undefined;
+    }
     get inEditMode() {
         return this._inEditMode;
     }

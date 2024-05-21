@@ -4,12 +4,12 @@ import { AuthMode } from '@remkoj/optimizely-graph-client';
 import { contentLinkToString } from '@remkoj/optimizely-graph-client/utils';
 import { Utils } from '@remkoj/optimizely-cms-react';
 import { CmsContent, getServerContext } from '@remkoj/optimizely-cms-react/rsc';
-import { notFound } from 'next/navigation';
-import OnPageEdit from '../components/on-page-edit';
-import { getAuthorizedServerClient } from '../client';
+import { notFound } from 'next/navigation.js';
+import OnPageEdit from '../components/on-page-edit.js';
+import { getAuthorizedServerClient } from '../client.js';
 import React from 'react';
-import Script from 'next/script';
-import { getContentById } from './data';
+import Script from 'next/script.js';
+import { getContentById } from './data.js';
 function readValue(variableName, defaultValue) {
     try {
         const stringValue = process?.env ? process.env[variableName] : undefined;

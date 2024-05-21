@@ -1,4 +1,4 @@
-import type { ComponentFactory, ComponentType, ComponentTypeHandle, ComponentTypeDictionary } from './types'
+import type { ComponentFactory, ComponentType, ComponentTypeHandle, ComponentTypeDictionary } from './types.js'
 const MERGE_SYMBOL = '/'
 
 export const EmptyComponentHandle =  '$$fragment$$'

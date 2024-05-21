@@ -1,7 +1,7 @@
 import { type ComponentFactory, type ContentLink } from '@remkoj/optimizely-cms-react'
 import createClient, { isContentGraphClient, type OptimizelyGraphConfig, type IOptiGraphClient } from '@remkoj/optimizely-graph-client'
 import { Metadata } from 'next'
-import { isOptimizelyNextPageWithMetaData } from './page'
+import { isOptimizelyNextPageWithMetaData } from './page.js'
 
 export class MetaDataResolver
 {

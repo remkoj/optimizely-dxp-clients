@@ -1,4 +1,4 @@
-export * from './functions';
-export { OptimizelyComposition } from './Composition';
-export { OptimizelyComposition as default } from './Composition';
+export * from './functions.js';
+export { OptimizelyComposition } from './Composition.js';
+export { OptimizelyComposition as default } from './Composition.js';
 //# sourceMappingURL=index.js.map

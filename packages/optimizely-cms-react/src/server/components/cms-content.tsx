@@ -1,20 +1,20 @@
 import 'server-only'
 import type { ComponentType, ComponentProps } from 'react'
-import type { CmsComponent } from '../../types'
-import type { CmsContentProps } from './types'
-import getContentType from './get-content-type'
-import getServerContext from '../context'
+import type { CmsComponent } from '../../types.js'
+import type { CmsContentProps } from './types.js'
+import getContentType from './get-content-type.js'
+import getServerContext from '../context.js'
 import createClient, { AuthMode, normalizeContentLink, contentLinkToString, isInlineContentLink, type ContentLink } from '@remkoj/optimizely-graph-client'
 import { print } from 'graphql'
-import * as Utils from "../../utilities"
-import * as Queries from './queries'
+import * as Utils from "../../utilities.js"
+import * as Queries from './queries.js'
 
 type CmsComponentProps = ComponentProps<CmsComponent> & {
     [key: string]: any
 }
 type EnhancedCmsComponent = ComponentType<CmsComponentProps>
 
-export type { CmsContentProps } from './types'
+export type { CmsContentProps } from './types.js'
 
 /**
  * React Server Side component for the CmsContent
