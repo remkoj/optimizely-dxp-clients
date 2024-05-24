@@ -21,7 +21,8 @@ function getCmsIntegrationApiConfigFromEnvironment() {
         base: baseUrl,
         clientId,
         clientSecret,
-        actAs
+        actAs,
+        debug
     };
 }
 exports.getCmsIntegrationApiConfigFromEnvironment = getCmsIntegrationApiConfigFromEnvironment;

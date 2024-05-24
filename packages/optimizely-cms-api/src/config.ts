@@ -5,6 +5,7 @@ export type CmsIntegrationApiOptions = {
     clientId?: string
     clientSecret?: string
     actAs?: string
+    debug?: boolean
 }
 
 export function getCmsIntegrationApiConfigFromEnvironment() : CmsIntegrationApiOptions
@@ -29,7 +30,8 @@ export function getCmsIntegrationApiConfigFromEnvironment() : CmsIntegrationApiO
         base: baseUrl,
         clientId,
         clientSecret,
-        actAs
+        actAs,
+        debug
     }
 }
 

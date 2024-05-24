@@ -8,7 +8,9 @@ export type OptimizelyCmsContext = {
     ready: boolean;
     inEditMode: boolean;
     isEditable: boolean;
-    subscribe: (event: string, handler: (...args: any) => void) => void;
+    subscribe: (event: string, handler: (...args: any) => void) => {
+        remove: () => void;
+    };
 };
 export type OptimizelyCmsContentSavedEvent = {
     contentLink: string;

@@ -3,6 +3,7 @@ import type { OpenAPIConfig } from './core/OpenAPI';
 import { ChangesetsService } from './services/ChangesetsService';
 import { ContentService } from './services/ContentService';
 import { ContentTypesService } from './services/ContentTypesService';
+import { DisplayTemplatesService } from './services/DisplayTemplatesService';
 import { OauthService } from './services/OauthService';
 import { PackagesService } from './services/PackagesService';
 import { PropertyFormatsService } from './services/PropertyFormatsService';
@@ -12,6 +13,7 @@ export declare class CmsIntegrationApiClient {
     readonly changesets: ChangesetsService;
     readonly content: ContentService;
     readonly contentTypes: ContentTypesService;
+    readonly displayTemplates: DisplayTemplatesService;
     readonly oauth: OauthService;
     readonly packages: PackagesService;
     readonly propertyFormats: PropertyFormatsService;

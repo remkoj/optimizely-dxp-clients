@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.PropertyGroupsService = exports.PropertyFormatsService = exports.PackagesService = exports.OauthService = exports.ContentTypesService = exports.ContentService = exports.ChangesetsService = exports.VersionStatus = exports.PropertyDataType = exports.LocaleStatus = exports.IndexingType = exports.ContentTypeUsage = exports.ContentTypeFeature = exports.ContentBaseType = exports.OpenAPI = exports.CancelError = exports.CancelablePromise = exports.BaseHttpRequest = exports.ApiError = exports.CmsIntegrationApiClient = void 0;
+exports.PropertyGroupsService = exports.PropertyFormatsService = exports.PackagesService = exports.OauthService = exports.DisplayTemplatesService = exports.ContentTypesService = exports.ContentService = exports.ChangesetsService = exports.VersionStatus = exports.PropertyDataType = exports.LocaleStatus = exports.IndexingType = exports.ContentTypeUsage = exports.ContentTypeFeature = exports.ContentBaseType = exports.OpenAPI = exports.CancelError = exports.CancelablePromise = exports.BaseHttpRequest = exports.ApiError = exports.CmsIntegrationApiClient = void 0;
 /* generated using openapi-typescript-codegen -- do not edit */
 /* istanbul ignore file */
 /* tslint:disable */
@@ -36,6 +36,8 @@ var ContentService_1 = require("./services/ContentService");
 Object.defineProperty(exports, "ContentService", { enumerable: true, get: function () { return ContentService_1.ContentService; } });
 var ContentTypesService_1 = require("./services/ContentTypesService");
 Object.defineProperty(exports, "ContentTypesService", { enumerable: true, get: function () { return ContentTypesService_1.ContentTypesService; } });
+var DisplayTemplatesService_1 = require("./services/DisplayTemplatesService");
+Object.defineProperty(exports, "DisplayTemplatesService", { enumerable: true, get: function () { return DisplayTemplatesService_1.DisplayTemplatesService; } });
 var OauthService_1 = require("./services/OauthService");
 Object.defineProperty(exports, "OauthService", { enumerable: true, get: function () { return OauthService_1.OauthService; } });
 var PackagesService_1 = require("./services/PackagesService");

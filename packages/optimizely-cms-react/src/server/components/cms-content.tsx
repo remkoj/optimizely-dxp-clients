@@ -22,7 +22,7 @@ export type { CmsContentProps } from './types.js'
  * @param     param0 
  * @returns   
  */
-export const CmsContent = async <LocalesType = string>({contentType, contentTypePrefix, contentLink: rawContentLink, children, fragmentData} : CmsContentProps<LocalesType>) : Promise<JSX.Element> => 
+export const CmsContent = async <LocalesType = string>({contentType, contentTypePrefix, contentLink: rawContentLink, children, fragmentData, layoutProps} : CmsContentProps<LocalesType>) : Promise<JSX.Element> => 
 {
     const context = getServerContext()
     const contentLink = normalizeContentLink(rawContentLink)
@@ -103,7 +103,7 @@ export const CmsContent = async <LocalesType = string>({contentType, contentType
             console.error("🔴 [CmsContent] Invalid fragment data received for ", Component.displayName ?? contentType?.join("/") ?? "[Undetermined component]")
             return <></>
         }
-        return <Component contentLink={ contentLink } data={ fragmentData || {} } inEditMode={ context.inEditMode } />
+        return <Component contentLink={ contentLink } data={ fragmentData || {} } inEditMode={ context.inEditMode } layoutProps={ layoutProps } >{children}</Component>
     }
 
     if (isInline) {
@@ -120,7 +120,7 @@ export const CmsContent = async <LocalesType = string>({contentType, contentType
         const gqlResponse = await client.request<{}>(gqlQuery, gqlVariables)
         if (context.isDebug)
             console.log("⚪ [CmsContent] Component request the following data:", gqlResponse)
-        return <Component contentLink={ contentLink as ContentLink } data={ gqlResponse } inEditMode={ context.inEditMode } />
+        return <Component contentLink={ contentLink as ContentLink } data={ gqlResponse } inEditMode={ context.inEditMode } layoutProps={ layoutProps } >{children}</Component>
     } 
     
     // Render using included fragment
@@ -136,13 +136,13 @@ export const CmsContent = async <LocalesType = string>({contentType, contentType
         if (totalItems < 1)
             throw new Error(`CmsContent expected to load exactly one content item of type ${ name }, received ${ totalItems } from Optimizely Graph. Content Item: ${ JSON.stringify( fragmentVariables )}`)
         if (totalItems > 1 && context.isDebug) console.warn(`🟠 [CmsContent] Resolved ${ totalItems } content items, expected only 1. Picked the first one`)
-        return <Component contentLink={ contentLink as ContentLink } data={ fragmentResponse.contentById.items[0] } inEditMode={ context.inEditMode } />
+        return <Component contentLink={ contentLink as ContentLink } data={ fragmentResponse.contentById.items[0] } inEditMode={ context.inEditMode } layoutProps={ layoutProps } >{children}</Component>
     }
     
     // Assume there's no server side prepared data needed for the component
     if (context.isDebug)
         console.log(`⚪ [CmsContent] Component of type "${ contentType?.join('/') ?? Component.displayName ?? '?'}" did not request pre-loading of data`)
-    return <Component contentLink={ contentLink as ContentLink } data={ fragmentData || {} } inEditMode={ context.inEditMode } />
+    return <Component contentLink={ contentLink as ContentLink } data={ fragmentData || {} } inEditMode={ context.inEditMode } layoutProps={ layoutProps } >{children}</Component>
 }
 
 export default CmsContent

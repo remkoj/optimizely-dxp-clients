@@ -13,7 +13,7 @@ export type OptimizelyCmsContext = {
     ready: boolean
     inEditMode: boolean
     isEditable: boolean
-    subscribe: (event: string, handler: (...args: any) => void) => void
+    subscribe: (event: string, handler: (...args: any) => void) => { remove: () => void }
 }
 
 export type OptimizelyCmsContentSavedEvent = {
@@ -62,15 +62,11 @@ export const OnPageEdit : FunctionComponent<OnPageEditProps> = ({ mode, children
             return
 
         const previewUrl = window.location.href
-        let handlerEnabled = true
 
         // Define event handler
         let maskTimer : NodeJS.Timeout  | false = false
         function onContentSaved(eventData: OptimizelyCmsContentSavedEvent)
         {
-            // If the effect has been undone, disable this handler
-            if (!handlerEnabled) return
-
             setShowMask(true)
             if (maskTimer != false)
                 clearTimeout(maskTimer)
@@ -107,14 +103,14 @@ export const OnPageEdit : FunctionComponent<OnPageEditProps> = ({ mode, children
         // Subscribe to event
         console.log(`Subscribing to ContentSaved Event`)
         const opti = tryGetCms()
-        opti?.subscribe('contentSaved', onContentSaved)
+        const disposer = opti?.subscribe('contentSaved', onContentSaved)
 
         // Unsubscribe when needed
         return () => {
             console.log(`Navigating away, disabling ContentSaved event handler`)
             if (maskTimer != false)
                 clearTimeout(maskTimer)
-            handlerEnabled = false
+            disposer?.remove()
         }
     }, [ optiCmsReady, router, timeout ])
 

@@ -68,6 +68,11 @@ export type CmsContentProps<LocalesType = string> = PropsWithChildren<{
      * it will not be applied.
      */
     contentTypePrefix?: string
+
+    /**
+     * Any layout properties inferred from the context
+     */
+    layoutProps?: Record<string, any>
 }>
 
 export type ContentAreaItemDefinition = {

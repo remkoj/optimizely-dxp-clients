@@ -18,6 +18,10 @@ export type CmsComponentProps<T> = PropsWithChildren<{
      * Use the Server/Client context instead if you need this information
      */
     inEditMode?: boolean;
+    /**
+     * Contextual layout data, if any
+     */
+    layoutProps?: Record<string, any>;
 }>;
 export type ContentQueryProps<LocaleType = string> = ContentLink & {
     locale?: Array<LocaleType> | LocaleType | null;
@@ -62,6 +66,7 @@ export type CmsComponentWithOptionalQuery<T = DocumentNode> = BaseCmsComponent<T
 export type CmsComponent<T = DocumentNode> = T extends TypedDocumentNode<infer R, any> ? CmsComponentWithQuery<R> : T extends DocumentNode ? CmsComponentWithQuery<{
     [key: string]: any;
 }> : T extends GraphQLFragmentBase ? CmsComponentWithFragment<T> : T extends GraphQLQueryBase ? CmsComponentWithQuery<T> : CmsComponentWithOptionalQuery<T>;
+export type CmsLayoutComponent<T = never> = ReactComponentType<CmsComponentProps<T>>;
 export type ComponentType = (ReactComponentType<any>) | (ReactExoticComponent<any>) | (keyof JSX.IntrinsicElements);
 export type ComponentTypeHandle = string | string[];
 export type ComponentTypeDictionary = {

@@ -3,5 +3,6 @@ export type CmsIntegrationApiOptions = {
     clientId?: string;
     clientSecret?: string;
     actAs?: string;
+    debug?: boolean;
 };
 export declare function getCmsIntegrationApiConfigFromEnvironment(): CmsIntegrationApiOptions;

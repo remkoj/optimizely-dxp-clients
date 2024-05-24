@@ -7,18 +7,23 @@ export declare enum StructureNodeTypes {
     Row = "row",
     Column = "column"
 }
-export type CompositionStructureNode = {
+export type CompositionNodeBase = {
     name: string | null;
+    key: string | null;
+    type?: string | null;
+    template?: string | null;
+    settings?: Array<{
+        key: string;
+        value: string | number | boolean;
+    } | null> | null;
+};
+export type CompositionStructureNode = CompositionNodeBase & {
     layoutType: "outline" | "grid" | "row" | "column";
     nodes?: Array<CompositionNode>;
-    key: string | null;
-    type: string | null;
 };
-export type CompositionElementNode<E extends Record<string, any> = Record<string, any>> = {
-    name: string | null;
+export type CompositionElementNode<E extends Record<string, any> = Record<string, any>> = CompositionNodeBase & {
     layoutType: "element";
     element: E;
-    key: string | null;
 };
 export type CompositionNode<E extends Record<string, any> = Record<string, any>> = CompositionStructureNode | CompositionElementNode<E>;
 export type CompositionComponentType<NT extends CompositionNode> = ComponentType<NT extends CompositionElementNode<infer DT> ? {
@@ -27,11 +32,11 @@ export type CompositionComponentType<NT extends CompositionNode> = ComponentType
 } : PropsWithChildren<{
     node: Omit<NT, 'nodes'>;
 }>>;
-export type CompositionComponentFactory = (node: CompositionStructureNode) => CompositionComponentType<CompositionStructureNode>;
-export type CmsComponentPropsFactory = <ET extends Record<string, any>, LT = string>(node: CompositionElementNode<ET>) => [ContentLinkWithLocale<LT> | InlineContentLinkWithLocale<LT>, ContentType, ET];
+export type LeafPropsFactory = <ET extends Record<string, any>, LT = string>(node: CompositionElementNode<ET>) => [ContentLinkWithLocale<LT> | InlineContentLinkWithLocale<LT>, ContentType, ET] | [ContentLinkWithLocale<LT> | InlineContentLinkWithLocale<LT>, ContentType, ET, Record<string, any>];
+export type NodePropsFactory = <ET extends Record<string, any>, LT = string>(node: CompositionStructureNode) => [ContentLinkWithLocale<LT> | InlineContentLinkWithLocale<LT>, Array<ContentType>, ET] | [ContentLinkWithLocale<LT> | InlineContentLinkWithLocale<LT>, Array<ContentType>, ET, Record<string, any>];
 export type OptimizelyCompositionProps = {
     node: CompositionNode<Record<string, any>>;
-    elementFactory: CompositionComponentFactory;
-    propsFactory?: CmsComponentPropsFactory;
+    leafPropsFactory?: LeafPropsFactory;
+    nodePropsFactory?: NodePropsFactory;
     key?: string;
 };

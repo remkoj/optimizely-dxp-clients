@@ -31,13 +31,9 @@ export const OnPageEdit = ({ mode, children, className, timeout }) => {
         if (!optiCmsReady)
             return;
         const previewUrl = window.location.href;
-        let handlerEnabled = true;
         // Define event handler
         let maskTimer = false;
         function onContentSaved(eventData) {
-            // If the effect has been undone, disable this handler
-            if (!handlerEnabled)
-                return;
             setShowMask(true);
             if (maskTimer != false)
                 clearTimeout(maskTimer);
@@ -71,13 +67,13 @@ export const OnPageEdit = ({ mode, children, className, timeout }) => {
         // Subscribe to event
         console.log(`Subscribing to ContentSaved Event`);
         const opti = tryGetCms();
-        opti?.subscribe('contentSaved', onContentSaved);
+        const disposer = opti?.subscribe('contentSaved', onContentSaved);
         // Unsubscribe when needed
         return () => {
             console.log(`Navigating away, disabling ContentSaved event handler`);
             if (maskTimer != false)
                 clearTimeout(maskTimer);
-            handlerEnabled = false;
+            disposer?.remove();
         };
     }, [optiCmsReady, router, timeout]);
     return showMask ? children : null;

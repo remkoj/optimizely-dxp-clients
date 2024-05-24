@@ -5,6 +5,7 @@ const FetchHttpRequest_1 = require("./core/FetchHttpRequest");
 const ChangesetsService_1 = require("./services/ChangesetsService");
 const ContentService_1 = require("./services/ContentService");
 const ContentTypesService_1 = require("./services/ContentTypesService");
+const DisplayTemplatesService_1 = require("./services/DisplayTemplatesService");
 const OauthService_1 = require("./services/OauthService");
 const PackagesService_1 = require("./services/PackagesService");
 const PropertyFormatsService_1 = require("./services/PropertyFormatsService");
@@ -25,6 +26,7 @@ class CmsIntegrationApiClient {
         this.changesets = new ChangesetsService_1.ChangesetsService(this.request);
         this.content = new ContentService_1.ContentService(this.request);
         this.contentTypes = new ContentTypesService_1.ContentTypesService(this.request);
+        this.displayTemplates = new DisplayTemplatesService_1.DisplayTemplatesService(this.request);
         this.oauth = new OauthService_1.OauthService(this.request);
         this.packages = new PackagesService_1.PackagesService(this.request);
         this.propertyFormats = new PropertyFormatsService_1.PropertyFormatsService(this.request);

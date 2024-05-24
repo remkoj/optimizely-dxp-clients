@@ -8,6 +8,7 @@ import { FetchHttpRequest } from './core/FetchHttpRequest';
 import { ChangesetsService } from './services/ChangesetsService';
 import { ContentService } from './services/ContentService';
 import { ContentTypesService } from './services/ContentTypesService';
+import { DisplayTemplatesService } from './services/DisplayTemplatesService';
 import { OauthService } from './services/OauthService';
 import { PackagesService } from './services/PackagesService';
 import { PropertyFormatsService } from './services/PropertyFormatsService';
@@ -17,6 +18,7 @@ export class CmsIntegrationApiClient {
     public readonly changesets: ChangesetsService;
     public readonly content: ContentService;
     public readonly contentTypes: ContentTypesService;
+    public readonly displayTemplates: DisplayTemplatesService;
     public readonly oauth: OauthService;
     public readonly packages: PackagesService;
     public readonly propertyFormats: PropertyFormatsService;
@@ -37,6 +39,7 @@ export class CmsIntegrationApiClient {
         this.changesets = new ChangesetsService(this.request);
         this.content = new ContentService(this.request);
         this.contentTypes = new ContentTypesService(this.request);
+        this.displayTemplates = new DisplayTemplatesService(this.request);
         this.oauth = new OauthService(this.request);
         this.packages = new PackagesService(this.request);
         this.propertyFormats = new PropertyFormatsService(this.request);
