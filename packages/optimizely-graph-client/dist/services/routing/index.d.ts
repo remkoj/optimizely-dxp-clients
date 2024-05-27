@@ -11,7 +11,7 @@ export declare class RouteResolver {
      */
     constructor(clientOrConfig?: IOptiGraphClient | OptimizelyGraphConfig);
     getRoutes(siteId?: string): Promise<Route[]>;
-    getContentInfoByPath(path: string, siteId?: null): Promise<undefined | Route>;
+    getContentInfoByPath(path: string, siteId?: string | null): Promise<undefined | Route>;
     getContentInfoById(contentId: string, locale: string): Promise<undefined | Route>;
     routeToContentLink(route: Route): ContentLinkWithLocale;
     protected parseIdString(id: string): [number, number | null];

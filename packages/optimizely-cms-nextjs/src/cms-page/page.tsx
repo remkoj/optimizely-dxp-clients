@@ -75,7 +75,7 @@ export function createPage(
             const metaResolver = new MetaDataResolver(client)
 
             // Resolve the route to a content link
-            const route = await routeResolver.getContentInfoByPath(requestPath)
+            const route = await routeResolver.getContentInfoByPath(requestPath, channel?.id)
             if (!route)
                 return Promise.resolve({})
             

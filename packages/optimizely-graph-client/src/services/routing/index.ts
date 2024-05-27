@@ -43,7 +43,7 @@ export class RouteResolver {
         return results.map(this.tryConvertResponse.bind(this)).filter(this.isNotNullOrUndefined)
     }
 
-    public async getContentInfoByPath(path: string, siteId?: null) : Promise<undefined | Route>
+    public async getContentInfoByPath(path: string, siteId?: string | null) : Promise<undefined | Route>
     {
         if (this._cgClient.debug)
             console.log(`Resolving content info for ${ path } on ${ siteId ? "site " + siteId : "all sites"}`)
