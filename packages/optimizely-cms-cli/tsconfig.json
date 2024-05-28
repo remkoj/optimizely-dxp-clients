@@ -1,0 +1,20 @@
+{
+    "compilerOptions": {
+        "module": "NodeNext",
+        "moduleResolution": "NodeNext",
+        
+        "esModuleInterop": true,
+        "allowSyntheticDefaultImports": true,
+
+        "sourceMap": true,
+        "sourceRoot": "./src",
+        "outDir": "./build",
+        "rootDir": "./src",
+        "incremental": true,
+        "composite": false,
+        "tsBuildInfoFile": ".tsbuildinfo",
+        "resolveJsonModule": true
+    },
+    "exclude": ["./build","./dist"],
+    "include": ["./src"]
+}

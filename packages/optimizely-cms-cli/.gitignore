@@ -1,0 +1,7 @@
+# Cache / Intermediary outputs
+build
+.rollup.cache
+
+# Typescript artefacts
+.tsbuildinfo
+*.tsbuildinfo
