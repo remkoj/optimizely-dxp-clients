@@ -5,7 +5,7 @@ import APP from './version.json'
 
 // Create the application
 prepare()
-const app = createOptiCmsApp(APP.version, APP.name)
+const app = createOptiCmsApp(APP.name, APP.version)
 app.command(commands)
 
 // Run the application

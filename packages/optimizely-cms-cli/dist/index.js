@@ -632,7 +632,7 @@ var APP = {
 
 // Create the application
 prepare();
-const app = createOptiCmsApp(APP.version, APP.name);
+const app = createOptiCmsApp(APP.name, APP.version);
 app.command(commands);
 // Run the application
 app.parse(process.argv.slice(2));
