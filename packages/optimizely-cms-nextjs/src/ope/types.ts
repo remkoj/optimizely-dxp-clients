@@ -20,12 +20,6 @@ export type EditPageProps = {
 
 export type EditViewOptions = {
     /**
-     * The number of miliseconds to wait between receiving the 'dataSaved'
-     * event from the Optimizely CMS and actually refreshing the preview.
-     */
-    refreshDelay: number
-
-    /**
      * The message to show to the editor when awaiting the data to be updated
      * in ContentGraph
      */
@@ -53,10 +47,16 @@ export type EditViewOptions = {
     clientFactory: ClientFactory
 
     /**
-     * If provided, this allows to override the CommunicationInjector 
+     * If provided, this allows to override the CommunicationInjector
      * path.
      */
     communicationInjectorPath: string
+
+    /**
+     * If provided, this allows to override the DeliveryPropertyRenderer
+     * path.
+     */
+    deliveryPropertyRendererPath: string
 }
 
 export type GetContentByIdData<LocaleType = string> = {

@@ -6,7 +6,6 @@ import { useRouter } from 'next/navigation.js'
 export type OnPageEditProps = PropsWithChildren<{
     mode?: 'edit' | 'preview'
     className?: string
-    timeout?: number
 }>
 
 export type OptimizelyCmsContext = {
@@ -23,17 +22,16 @@ export type OptimizelyCmsContentSavedEvent = {
 }
 
 declare global {
-    interface Window { 
+    interface Window {
         epi?: OptimizelyCmsContext
     }
 }
 
-export const OnPageEdit : FunctionComponent<OnPageEditProps> = ({ mode, children, className, timeout }) => 
+export const OnPageEdit : FunctionComponent<OnPageEditProps> = ({ mode, children, className }) =>
 {
     const router = useRouter()
     const [ optiCmsReady, setOptiCmsReady ] = useState<boolean>(false)
     const [ showMask, setShowMask ] = useState<boolean>(false)
-    timeout = timeout ?? 1500
 
     // Bind to the CMS & CMS Ready State
     useEffect(() => {
@@ -64,40 +62,21 @@ export const OnPageEdit : FunctionComponent<OnPageEditProps> = ({ mode, children
         const previewUrl = window.location.href
 
         // Define event handler
-        let maskTimer : NodeJS.Timeout  | false = false
         function onContentSaved(eventData: OptimizelyCmsContentSavedEvent)
         {
             setShowMask(true)
-            if (maskTimer != false)
-                clearTimeout(maskTimer)
-            
-            console.log(`Delaying refresh with ${ timeout }ms to allow Optimizely Graph to update`, eventData)
-            maskTimer = setTimeout(() => {
-                const contentId = window.location.pathname.split(',,')[1]
-                const newContentId = eventData?.contentLink as string | undefined
 
-                // First: Use the updated preview URL if we have it
-                if (eventData?.previewUrl && previewUrl != eventData.previewUrl) {
-                    const newUrl = new URL(eventData.previewUrl)
-                    console.log(`Navigating to provided preview path: ${ newUrl.pathname }${ newUrl.search }`)
-                    router.push(newUrl.pathname + newUrl.search)
-
-                // Second: Use the provided Content ID to navigate to the new URL 
-                } else if (newContentId && contentId != newContentId) {
-                    const newUrl = new URL(window.location.href)
-                    const pathParts = newUrl.pathname.split(',,')
-                    pathParts[1] = newContentId
-                    newUrl.pathname = pathParts.join(',,')
-                    console.log(`Navigating to newly constructed URL to reflect ContentID change: ${ newUrl.href }`)
-                    router.push(newUrl.pathname + newUrl.search)
-
-                // Third: Refresh the page
-                } else {
-                    console.log(`Refreshing preview: ${ contentId }`)
-                    router.refresh()
-                }
-                setShowMask(false)
-            }, timeout)
+            // First: Use the updated preview URL if we have it
+            if (eventData?.previewUrl && previewUrl != eventData.previewUrl) {
+                const newUrl = new URL(eventData.previewUrl)
+                console.log(`Navigating to provided preview path: ${ newUrl.pathname }${ newUrl.search }`)
+                router.push(newUrl.pathname + newUrl.search)
+            // Third: Refresh the page
+            } else {
+                console.log(`Refreshing preview: ${ eventData.contentLink }`)
+                router.refresh()
+            }
+            setShowMask(false)
         }
 
         // Subscribe to event
@@ -108,11 +87,9 @@ export const OnPageEdit : FunctionComponent<OnPageEditProps> = ({ mode, children
         // Unsubscribe when needed
         return () => {
             console.log(`Navigating away, disabling ContentSaved event handler`)
-            if (maskTimer != false)
-                clearTimeout(maskTimer)
             disposer?.remove()
         }
-    }, [ optiCmsReady, router, timeout ])
+    }, [ optiCmsReady, router ])
 
     return showMask ? children : null
 }

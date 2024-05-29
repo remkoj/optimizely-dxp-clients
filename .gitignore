@@ -17,3 +17,5 @@
 # NPM build artifacts
 artefacts/*.tgz
 !artefacts/*-dev.tgz
+
+.idea
