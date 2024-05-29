@@ -6,7 +6,6 @@ import { contentLinkToString } from '@remkoj/optimizely-graph-client/utils'
 import { Utils, type ContentLinkWithLocale } from '@remkoj/optimizely-cms-react'
 import { CmsContent, getServerContext, type ComponentFactory } from '@remkoj/optimizely-cms-react/rsc'
 import { notFound } from 'next/navigation.js'
-import OnPageEdit from '../components/on-page-edit.js'
 import { getAuthorizedServerClient } from '../client.js'
 import React from 'react'
 import Script from 'next/script.js'
@@ -43,7 +42,8 @@ const defaultOptions : EditViewOptions = {
     layout: props => <>{ props.children }</>,
     loader: getContentById,
     clientFactory: (token?: string) => getAuthorizedServerClient(token),
-    communicationInjectorPath: '/util/javascript/communicationinjector.js'
+    communicationInjectorPath: '/util/javascript/communicationinjector.js',
+    deliveryPropertyRendererPath: '/util/javascript/deliveryPropertyRenderer.js'
 }
 
 // Helper function to read the ContentID & WorkID
@@ -99,7 +99,8 @@ export function createEditPageComponent(
         errorNotice: ErrorNotice,
         loader: getContentById,
         clientFactory,
-        communicationInjectorPath
+        communicationInjectorPath,
+        deliveryPropertyRendererPath,
     } = { ...defaultOptions, ...options }
 
     async function EditPage({ params: { path }, searchParams }: EditPageProps) : Promise<JSX.Element>
@@ -182,10 +183,9 @@ export function createEditPageComponent(
             const output =  <>
                 {/* @ts-expect-error */}
                 <Script src={new URL(communicationInjectorPath, client.siteInfo.cmsURL).href} strategy='afterInteractive' />
+                {/* @ts-expect-error */}
+                <Script src={new URL(deliveryPropertyRendererPath, client.siteInfo.cmsURL).href} strategy='afterInteractive' />
                 <Layout locale={ contentItem.locale?.name ?? '' }>
-                    <OnPageEdit mode={ context.inEditMode ? 'edit' : 'preview' }>
-                        <RefreshNotice />
-                    </OnPageEdit>
                     <CmsContent contentType={ contentType } contentLink={ contentLink } fragmentData={ contentItem } />
                 </Layout>
                 <div className='optly-contentLink'>ContentItem: { contentLink ? contentLinkToString(contentLink) : "Invalid content link returned from Optimizely Graph" }</div>

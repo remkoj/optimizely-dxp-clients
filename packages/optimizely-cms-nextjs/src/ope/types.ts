@@ -51,6 +51,12 @@ export type EditViewOptions = {
      * path.
      */
     communicationInjectorPath: string
+
+    /**
+     * If provided, this allows to override the DeliveryPropertyRenderer
+     * path.
+     */
+    deliveryPropertyRendererPath: string
 }
 
 export type GetContentByIdData<LocaleType = string> = {
