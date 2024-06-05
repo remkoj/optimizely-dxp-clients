@@ -35,7 +35,6 @@ function readValueAsInt<T extends number | undefined>(variableName: string, defa
 }
 
 const defaultOptions : EditViewOptions = {
-    refreshDelay: 2000,
     refreshNotice: () => <div className='optly-refresh-notice'>Updating preview, please wait....</div>,
     errorNotice: props => <div className='optly-error-notice'>
         <div className='optly-error-title'>{ props.title }</div>
@@ -82,7 +81,7 @@ function getContentRequest(path: string | string[] = "", searchParams: Record<st
 /**
  * Create the EditPage component needed by Next.JS to render the "On Page
  * Editing" variant of the content item selected by the editor.
- * 
+ *
  * @param   dxpUrl      The domain of the CMS instance
  * @param   client      The Apollo GraphQL client to use
  * @param   factory     The component factory to be used
@@ -94,16 +93,14 @@ export function createEditPageComponent(
     options?: Partial<EditViewOptions>
 ) : EditPageComponent
 {
-    const envRefreshDelay = readValueAsInt("OPTIMIZELY_GRAPH_UPDATE_DELAY", defaultOptions.refreshDelay );
-    const { 
-        layout: PageLayout, 
-        refreshNotice: RefreshNotice, 
-        refreshDelay, 
-        errorNotice: ErrorNotice, 
+    const {
+        layout: PageLayout,
+        refreshNotice: RefreshNotice,
+        errorNotice: ErrorNotice,
         loader: getContentById,
         clientFactory,
         communicationInjectorPath
-    } = { ...defaultOptions, refreshDelay: envRefreshDelay, ...options }
+    } = { ...defaultOptions, ...options }
 
     async function EditPage({ params: { path }, searchParams }: EditPageProps) : Promise<JSX.Element>
     {
@@ -143,7 +140,7 @@ export function createEditPageComponent(
             console.log("⚪ [OnPageEdit] Requested content:", JSON.stringify(contentRequest))
             console.log("⚪ [OnPageEdit] Creating GraphQL Client:", token)
         }
-        
+
         try {
             const contentInfo = await getContentById(client, contentRequest)
             if ((contentInfo?.content?.total ?? 0) > 1) {
@@ -168,7 +165,7 @@ export function createEditPageComponent(
                 version: contentItem._metadata.version
             }
             if (context.isDebug) {
-                console.log("⚪ [OnPageEdit] Resolved content:", JSON.stringify({ 
+                console.log("⚪ [OnPageEdit] Resolved content:", JSON.stringify({
                     ...contentLink,
                     type: (contentItem.contentType ?? []).join('/')
                 }))
@@ -176,7 +173,7 @@ export function createEditPageComponent(
 
             // Store the editable content so it can be tested
             context.setEditableContentId(contentLink)
-            if (contentLink.locale) 
+            if (contentLink.locale)
                 context.setLocale(contentLink.locale)
 
             // Render the content, with edit mode context
@@ -186,7 +183,7 @@ export function createEditPageComponent(
                 {/* @ts-expect-error */}
                 <Script src={new URL(communicationInjectorPath, client.siteInfo.cmsURL).href} strategy='afterInteractive' />
                 <Layout locale={ contentItem.locale?.name ?? '' }>
-                    <OnPageEdit timeout={ refreshDelay } mode={ context.inEditMode ? 'edit' : 'preview' }>
+                    <OnPageEdit mode={ context.inEditMode ? 'edit' : 'preview' }>
                         <RefreshNotice />
                     </OnPageEdit>
                     <CmsContent contentType={ contentType } contentLink={ contentLink } fragmentData={ contentItem } />
