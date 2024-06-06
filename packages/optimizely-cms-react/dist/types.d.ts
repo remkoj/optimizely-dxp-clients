@@ -5,7 +5,7 @@ import type { IOptiGraphClient } from "@remkoj/optimizely-graph-client";
 import type { ContentLink, ContentLinkWithLocale, InlineContentLinkWithLocale } from "@remkoj/optimizely-graph-client";
 export type ContentType = string[];
 export type { ContentLink, ContentLinkWithLocale } from "@remkoj/optimizely-graph-client";
-export type CmsComponentProps<T> = PropsWithChildren<{
+export type CmsComponentProps<T, L extends Record<string, any> = Record<string, any>> = PropsWithChildren<{
     /**
      * The identifier of the content item
      */
@@ -21,7 +21,7 @@ export type CmsComponentProps<T> = PropsWithChildren<{
     /**
      * Contextual layout data, if any
      */
-    layoutProps?: Record<string, any>;
+    layoutProps?: L;
 }>;
 export type ContentQueryProps<LocaleType = string> = ContentLink & {
     locale?: Array<LocaleType> | LocaleType | null;
@@ -43,17 +43,17 @@ export type WithGqlFragment<BaseComponent, DataType> = BaseComponent & {
 export type WithGqlQuery<B, T> = B & {
     getDataQuery: GetDataQuery<T>;
 };
-export type BaseCmsComponent<T = {}> = T extends never | TypedDocumentNode | DocumentNode ? DynamicCmsComponent<T> : ReactComponentType<CmsComponentProps<T>>;
-export type DynamicCmsComponent<T extends TypedDocumentNode | DocumentNode = DocumentNode> = ReactComponentType<CmsComponentProps<ResponseDataType<T>>>;
+export type BaseCmsComponent<T = {}, L extends Record<string, any> = Record<string, any>> = T extends never | TypedDocumentNode | DocumentNode ? DynamicCmsComponent<T> : ReactComponentType<CmsComponentProps<T, L>>;
+export type DynamicCmsComponent<T extends TypedDocumentNode | DocumentNode = DocumentNode, L extends Record<string, any> = Record<string, any>> = ReactComponentType<CmsComponentProps<ResponseDataType<T>, L>>;
 export type GraphQLFragmentBase = {
     ' $fragmentName'?: string;
 };
 export type GraphQLQueryBase = {
     __typename?: 'Query';
 };
-export type CmsComponentWithFragment<T = DocumentNode> = BaseCmsComponent<T> & WithGqlFragment<{}, T>;
-export type CmsComponentWithQuery<T = DocumentNode> = BaseCmsComponent<T> & WithGqlQuery<{}, T>;
-export type CmsComponentWithOptionalQuery<T = DocumentNode> = BaseCmsComponent<T> & Partial<WithGqlQuery<{}, T>>;
+export type CmsComponentWithFragment<T = DocumentNode, L extends Record<string, any> = Record<string, any>> = BaseCmsComponent<T, L> & WithGqlFragment<{}, T>;
+export type CmsComponentWithQuery<T = DocumentNode, L extends Record<string, any> = Record<string, any>> = BaseCmsComponent<T, L> & WithGqlQuery<{}, T>;
+export type CmsComponentWithOptionalQuery<T = DocumentNode, L extends Record<string, any> = Record<string, any>> = BaseCmsComponent<T, L> & Partial<WithGqlQuery<{}, T>>;
 /**
  * A generic Optimizely CMS Component that will change the static surface based upon the
  * provided data type for the component. It will detect automatically whether the component
@@ -63,10 +63,10 @@ export type CmsComponentWithOptionalQuery<T = DocumentNode> = BaseCmsComponent<T
  * When a type is provided that cannot be resolved to either the output of a Query or a Fragment,
  * it will assume an optional getDataQuery method.
  */
-export type CmsComponent<T = DocumentNode> = T extends TypedDocumentNode<infer R, any> ? CmsComponentWithQuery<R> : T extends DocumentNode ? CmsComponentWithQuery<{
+export type CmsComponent<T = DocumentNode, L extends Record<string, any> = Record<string, any>> = T extends TypedDocumentNode<infer R, any> ? CmsComponentWithQuery<R, L> : T extends DocumentNode ? CmsComponentWithQuery<{
     [key: string]: any;
-}> : T extends GraphQLFragmentBase ? CmsComponentWithFragment<T> : T extends GraphQLQueryBase ? CmsComponentWithQuery<T> : CmsComponentWithOptionalQuery<T>;
-export type CmsLayoutComponent<T = never> = ReactComponentType<CmsComponentProps<T>>;
+}, L> : T extends GraphQLFragmentBase ? CmsComponentWithFragment<T, L> : T extends GraphQLQueryBase ? CmsComponentWithQuery<T, L> : CmsComponentWithOptionalQuery<T, L>;
+export type CmsLayoutComponent<L extends Record<string, any> = Record<string, any>, T = never> = ReactComponentType<CmsComponentProps<T, L>>;
 export type ComponentType = (ReactComponentType<any>) | (ReactExoticComponent<any>) | (keyof JSX.IntrinsicElements);
 export type ComponentTypeHandle = string | string[];
 export type ComponentTypeDictionary = {

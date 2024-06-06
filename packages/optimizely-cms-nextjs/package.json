@@ -34,7 +34,7 @@
   "devDependencies": {
     "@remkoj/optimizely-cms-react": "workspace:2.0.0-pre4",
     "@remkoj/optimizely-graph-client": "workspace:2.0.0-pre4",
-    "@types/node": "^20.12.12",
+    "@types/node": "^20.14.2",
     "@types/react": "^18.3.3",
     "@types/react-dom": "18.3.0",
     "graphql": "^16.8.1",

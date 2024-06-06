@@ -20,10 +20,10 @@
     "@remkoj/optimizely-cms-api": "workspace:2.0.0-pre4",
     "@rollup/plugin-json": "^6.1.0",
     "@rollup/plugin-typescript": "^11.1.6",
-    "@types/node": "^20.12.12",
+    "@types/node": "^20.14.2",
     "@types/yargs": "^17.0.32",
     "rollup": "^4.18.0",
-    "tslib": "^2.6.2",
+    "tslib": "^2.6.3",
     "typescript": "^5.4.5"
   },
   "peerDependencies": {
