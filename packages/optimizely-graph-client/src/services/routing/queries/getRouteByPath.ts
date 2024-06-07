@@ -14,7 +14,7 @@ export type Result = {
 }
 
 export const query = gql`query GetRouteByPath($path: String!, $domain: String) {
-    Content(
+    _Content(
         where: { _metadata: { url: { default: { eq: $path }, base: { eq: $domain } } } }
     ) {
         total
@@ -28,9 +28,6 @@ export const query = gql`query GetRouteByPath($path: String!, $domain: String) {
                 url {
                     path: default
                     domain: base
-                }
-                ... on ICompositionMetadata {
-                    slug: routeSegment
                 }
                 ... on IInstanceMetadata {
                     slug: routeSegment

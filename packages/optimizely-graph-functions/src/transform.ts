@@ -164,6 +164,6 @@ export const transform : Types.DocumentTransformFunction<TransformOptions> = ({d
 export default { transform }
 
 // The recursive sections to add
-const recursiveSelections = (parse(`fragment IContentListItem on IContent {
+const recursiveSelections = (parse(`fragment IContentListItem on _IContent {
     ...IContentData
 }`).definitions[0] as FragmentDefinitionNode)?.selectionSet.selections || [];
