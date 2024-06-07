@@ -2,7 +2,6 @@ import { type FunctionComponent, type PropsWithChildren } from 'react';
 export type OnPageEditProps = PropsWithChildren<{
     mode?: 'edit' | 'preview';
     className?: string;
-    timeout?: number;
 }>;
 export type OptimizelyCmsContext = {
     ready: boolean;

@@ -1,6 +1,6 @@
 import { gql } from "graphql-request";
 export const query = gql `query GetRouteById($key: String!, $version: String, $locale: [Locales]) {
-    Content(
+    _Content(
         where: { _metadata: { key: { eq: $key }, version: { eq: $version } } }
         locale: $locale
     ) {
@@ -15,9 +15,6 @@ export const query = gql `query GetRouteById($key: String!, $version: String, $l
                 url {
                     path: hierarchical
                     domain: base
-                }
-                ... on ICompositionMetadata {
-                    slug: routeSegment
                 }
                 ... on IInstanceMetadata {
                   	slug: routeSegment

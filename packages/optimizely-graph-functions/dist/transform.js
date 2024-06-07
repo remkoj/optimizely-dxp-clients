@@ -157,7 +157,7 @@ const transform = ({ documents: files, config, schema, pluginContext }) => {
 exports.transform = transform;
 exports.default = { transform: exports.transform };
 // The recursive sections to add
-const recursiveSelections = (0, graphql_1.parse)(`fragment IContentListItem on IContent {
+const recursiveSelections = (0, graphql_1.parse)(`fragment IContentListItem on _IContent {
     ...IContentData
 }`).definitions[0]?.selectionSet.selections || [];
 //# sourceMappingURL=transform.js.map

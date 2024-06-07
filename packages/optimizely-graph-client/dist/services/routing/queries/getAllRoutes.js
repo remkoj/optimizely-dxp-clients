@@ -1,6 +1,6 @@
 import { gql } from "graphql-request";
 export const query = gql `query GetAllRoutes($cursor: String, $pageSize: Int = 100, $typeFilter: [String] = "Page", $domain: String) {
-    Content(
+    _Content(
         where: {
             _metadata: {
                 url: { hierarchical: { exist: true }, base: { eq: $domain } }
@@ -20,9 +20,6 @@ export const query = gql `query GetAllRoutes($cursor: String, $pageSize: Int = 1
                 url {
                     path: hierarchical
                     domain: base
-                }
-                ... on ICompositionMetadata {
-                    slug: routeSegment
                 }
                 ... on IInstanceMetadata {
                     slug: routeSegment

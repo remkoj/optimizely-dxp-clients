@@ -49,7 +49,7 @@ function processComponentTypeHandle(handle: ComponentTypeHandle) : string
     if (typeof(handle) == 'string')
         return handle == "" ? EmptyComponentHandle : handle
     if (Array.isArray(handle) && handle.every(s => typeof(s) == 'string'))
-        return handle.filter(s => s.toLowerCase() != 'content').map(s => s == "" ? EmptyComponentHandle : s).join(MERGE_SYMBOL)
+        return handle.map(s => s.startsWith("_") ? s.substring(1) : s).filter(s => s.toLowerCase() != 'content').map(s => s == "" ? EmptyComponentHandle : s).join(MERGE_SYMBOL)
     throw new Error(`Invalid component type handle: ${ typeof(handle) }`)
 }
 

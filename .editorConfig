@@ -4,4 +4,3 @@ root = true
 # All Files
 [*]
 charset = utf-8
-end_of_line = crlf

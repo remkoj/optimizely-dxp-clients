@@ -3,7 +3,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.DefaultFunctions = exports.queries = exports.fragments = exports.IContentDataProps = void 0;
 exports.IContentDataProps = ["contentType", "id", "locale", "path", "__typename"];
 exports.fragments = [
-    `fragment IContentData on IContent
+    `fragment IContentData on _IContent
 {
     _metadata {
         ...IContentInfo
@@ -12,7 +12,7 @@ exports.fragments = [
 }`,
     `fragment CompositionData on ICompositionNode {
     name: displayName
-    layoutType
+    layoutType: nodeType    
     type
     key
     template: displayTemplateKey
@@ -31,19 +31,19 @@ exports.fragments = [
         }
     }
 }`,
-    `fragment IElementData on IElement {
+    `fragment IElementData on _IElement {
     _metadata {
         ...IContentInfo
     }
     _type: __typename
 }`,
-    `fragment ElementData on IElement {
+    `fragment ElementData on _IElement {
     ...IElementData
 }`,
-    `fragment BlockData on IContent {
+    `fragment BlockData on _IContent {
     ...IContentData
 }`,
-    `fragment PageData on IContent {
+    `fragment PageData on _IContent {
     ...IContentData
 }`,
     `fragment LinkData on ContentUrl {
@@ -67,16 +67,12 @@ exports.fragments = [
         ...LinkData
     }
 }`,
-    `fragment IContentListItem on IContent {
+    `fragment IContentListItem on _IContent {
     ...IContentData
 }`,
-    `fragment ExperienceData on IExperience {
-    experience: _metadata {
-        ... on CompositionMetadata {
-            composition {
-                ...CompositionData
-            }
-        }
+    `fragment ExperienceData on _IExperience {
+    composition {
+        ...CompositionData
     }
 }`,
     `fragment LinkItemData on Link {
@@ -90,7 +86,7 @@ exports.fragments = [
 ];
 exports.queries = [
     `query getContentById($key: String!, $version: String, $locale: [Locales!], $path: String, $domain: String) {
-    content: Content(
+    content: _Content(
         where: {
             _or: [
                 { _metadata: { key: { eq: $key }, version: { eq: $version } } }
@@ -107,7 +103,7 @@ exports.queries = [
     }
 }`,
     `query getContentByPath($path: String!, $version: String, $locale: [Locales!], $domain: String) {
-    content: Content(
+    content: _Content(
         where: {
             _metadata: { url: { default: { eq: $path }, base: { eq: $domain } }, version: { eq: $version }}
         }
@@ -120,7 +116,7 @@ exports.queries = [
     }
 }`,
     `query getContentType($key: String!, $version: String, $locale: [Locales!], $path: String, $domain: String) {
-    content: Content(
+    content: _Content(
         where: {
             _or: [
                 { _metadata: { key: { eq: $key }, version: { eq: $version } } }
