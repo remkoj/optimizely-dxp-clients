@@ -32,14 +32,6 @@ export type ContentMetadata = {
      */
     readonly locales?: Record<string, ContentLocaleInfo>;
     /**
-     * A timestamp indicating when this content was first created.
-     */
-    readonly created?: string;
-    /**
-     * The username of the user that created this content.
-     */
-    readonly createdBy?: string;
-    /**
      * A timestamp, which if provided, indicates when this content was deleted.
      */
     readonly deleted?: string | null;

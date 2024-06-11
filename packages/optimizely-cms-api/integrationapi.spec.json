@@ -3507,6 +3507,19 @@
                         "readOnly": true,
                         "example": ""
                     },
+                    "created": {
+                        "type": "string",
+                        "description": "The date and time when the first locale version for the content was created.",
+                        "format": "date-time",
+                        "readOnly": true,
+                        "example": ""
+                    },
+                    "createdBy": {
+                        "type": "string",
+                        "description": "The username of the user that created this locale version of content.",
+                        "readOnly": true,
+                        "example": ""
+                    },
                     "status": {
                         "$ref": "#/components/schemas/LocaleStatus"
                     }
@@ -3546,17 +3559,6 @@
                             "$ref": "#/components/schemas/ContentLocaleInfo"
                         },
                         "description": "Set of locales that the content item has been created for.",
-                        "readOnly": true
-                    },
-                    "created": {
-                        "type": "string",
-                        "description": "A timestamp indicating when this content was first created.",
-                        "format": "date-time",
-                        "readOnly": true
-                    },
-                    "createdBy": {
-                        "type": "string",
-                        "description": "The username of the user that created this content.",
                         "readOnly": true
                     },
                     "deleted": {
