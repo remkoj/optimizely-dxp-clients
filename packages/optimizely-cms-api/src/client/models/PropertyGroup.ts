@@ -9,7 +9,7 @@ export type PropertyGroup = {
     /**
      * The key that identifies this PropertyGroup.
      */
-    key: string;
+    readonly key: string;
     /**
      * The display name of this PropertyGroup.
      */

@@ -13,7 +13,7 @@ export class PackagesService {
      * Get job status
      * Get a package job status.
      * @param key The key of the package job.
-     * @returns PackageJob Success
+     * @returns PackageJob OK
      * @throws ApiError
      */
     public packagesGet(
@@ -34,7 +34,7 @@ export class PackagesService {
      * Export package
      * Export a data package.
      * @param includeReadOnly Indicates if read-only resources should be included in the export data.
-     * @returns Manifest Success
+     * @returns Manifest OK
      * @throws ApiError
      */
     public packagesExport(
@@ -62,7 +62,7 @@ export class PackagesService {
      * @param locale Specifies the locale in which content item in that locale will be imported. If no locale is defined
      * then content in all locales are imported.
      * @param requestBody
-     * @returns ImportPackageResult Success
+     * @returns ImportPackageResult OK
      * @returns PackageJob Accepted
      * @throws ApiError
      */

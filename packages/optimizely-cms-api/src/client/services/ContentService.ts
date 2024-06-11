@@ -43,7 +43,7 @@ export class ContentService {
      * Get shared metadata about the content instance with the provided key.
      * @param key The key of the content to retrieve metadata for.
      * @param allowDeleted Indicates that metadata for a deleted content may be returned.
-     * @returns ContentMetadata Success
+     * @returns ContentMetadata OK
      * @throws ApiError
      */
     public contentGetMetadata(
@@ -69,7 +69,7 @@ export class ContentService {
      * Update an existing content item. If a content item with the provided key does not exist an error is returned.
      * @param key The key of the content item to patch.
      * @param requestBody The values of the content item that should be updated.
-     * @returns ContentMetadata Success
+     * @returns ContentMetadata OK
      * @throws ApiError
      */
     public contentPatchMetadata(
@@ -95,7 +95,7 @@ export class ContentService {
      * Deletes the content item with the provided key. If a content item with the provided key does not exist an error is returned.
      * @param key The key of the content item to delete.
      * @param permanent Indicates that the content item should be permanently deleted immediately or if it should be soft deleted first.
-     * @returns ContentMetadata Success
+     * @returns ContentMetadata OK
      * @throws ApiError
      */
     public contentDelete(
@@ -123,7 +123,7 @@ export class ContentService {
      * @param key The key of the content path to retrieve.
      * @param pageIndex
      * @param pageSize
-     * @returns ContentMetadataPage Success
+     * @returns ContentMetadataPage OK
      * @throws ApiError
      */
     public contentGetPath(
@@ -153,7 +153,7 @@ export class ContentService {
      * @param contentTypes Indicates which content types or base types to include in the list.
      * @param pageIndex
      * @param pageSize
-     * @returns ContentMetadataPage Success
+     * @returns ContentMetadataPage OK
      * @throws ApiError
      */
     public contentListItems(
@@ -185,7 +185,7 @@ export class ContentService {
      * @param contentTypes Indicates which content types or base types to include in the list.
      * @param pageIndex
      * @param pageSize
-     * @returns ContentMetadataPage Success
+     * @returns ContentMetadataPage OK
      * @throws ApiError
      */
     public contentListAssets(
@@ -215,7 +215,7 @@ export class ContentService {
      * Create a copy of the content item with the provided key.
      * @param key The key of the content item to copy.
      * @param requestBody Optional instructions for how to copy content.
-     * @returns ContentMetadata Success
+     * @returns ContentMetadata OK
      * @throws ApiError
      */
     public contentCopy(
@@ -240,7 +240,7 @@ export class ContentService {
      * Restore content
      * Restore the deleted content item with the provided key. If a content item with the provided key is not deleted an error is returned.
      * @param key The key of the content item to undelete.
-     * @returns ContentMetadata Success
+     * @returns ContentMetadata OK
      * @throws ApiError
      */
     public contentUndelete(
@@ -266,7 +266,7 @@ export class ContentService {
      * @param statuses Indicates which status content versions must have to be listed.
      * @param pageIndex
      * @param pageSize
-     * @returns ContentItemPage Success
+     * @returns ContentItemPage OK
      * @throws ApiError
      */
     public contentListAllVersions(
@@ -298,7 +298,7 @@ export class ContentService {
      * @param statuses Indicates which status content versions must have to be listed.
      * @param pageIndex
      * @param pageSize
-     * @returns ContentItemPage Success
+     * @returns ContentItemPage OK
      * @throws ApiError
      */
     public contentListVersions(
@@ -361,7 +361,7 @@ export class ContentService {
      * Deletes the content item with the provided key. If a content item with the provided key does not exist an error is returned.
      * @param key
      * @param locale
-     * @returns ContentItem Success
+     * @returns ContentItem OK
      * @throws ApiError
      */
     public contentDeleteLocale(
@@ -389,7 +389,7 @@ export class ContentService {
      * @param key
      * @param version
      * @param locale
-     * @returns ContentItem Success
+     * @returns ContentItem OK
      * @throws ApiError
      */
     public contentGetVersion(
@@ -420,7 +420,7 @@ export class ContentService {
      * @param requestBody The content information that should be updated.
      * @param locale The locale of the content that should be updated.
      * @param skipValidation Indicates that the content validation should be ignored.
-     * @returns ContentItem Success
+     * @returns ContentItem OK
      * @throws ApiError
      */
     public contentPatchVersion(
@@ -454,7 +454,7 @@ export class ContentService {
      * Deletes the content item with the provided key. If a content item with the provided key does not exist an error is returned.
      * @param key
      * @param version
-     * @returns ContentItem Success
+     * @returns ContentItem OK
      * @throws ApiError
      */
     public contentDeleteVersion(

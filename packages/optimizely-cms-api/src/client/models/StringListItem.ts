@@ -10,9 +10,6 @@ import type { StringEnumerationSettings } from './StringEnumerationSettings';
 export type StringListItem = (ListPropertyItem & {
     minLength?: number | null;
     maxLength?: number | null;
-    /**
-     * Regular expression pattern that limits what strings that list items of this type should be able to contain.
-     */
     pattern?: string | null;
     enum?: StringEnumerationSettings;
 });

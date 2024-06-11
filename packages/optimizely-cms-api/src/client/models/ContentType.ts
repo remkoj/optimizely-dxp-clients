@@ -24,7 +24,7 @@ export type ContentType = {
     /**
      * The key that identifies this ContentType.
      */
-    key: string;
+    readonly key: string;
     /**
      * The display name of this ContentType.
      */

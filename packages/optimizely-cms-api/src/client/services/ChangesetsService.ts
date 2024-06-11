@@ -15,7 +15,7 @@ export class ChangesetsService {
      * Lists all changeset using the provided options.
      * @param pageIndex
      * @param pageSize
-     * @returns ChangesetPage Success
+     * @returns ChangesetPage OK
      * @throws ApiError
      */
     public changesetsList(
@@ -38,7 +38,7 @@ export class ChangesetsService {
      * Create changeset
      * Creates a new changeset.
      * @param requestBody The changeset that should be created.
-     * @returns Changeset Success
+     * @returns Changeset OK
      * @throws ApiError
      */
     public changesetsCreate(
@@ -59,7 +59,7 @@ export class ChangesetsService {
      * Get changeset
      * Gets the changeset with the provided key.
      * @param key The key of the changeset to retrieve.
-     * @returns Changeset Success
+     * @returns Changeset OK
      * @throws ApiError
      */
     public changesetsGet(
@@ -80,7 +80,7 @@ export class ChangesetsService {
      * Delete changeset
      * Deletes the changeset with the provided key. If a changeset with the provided key does not exist an error is returned.
      * @param key The key of the changeset to delete.
-     * @returns Changeset Success
+     * @returns Changeset OK
      * @throws ApiError
      */
     public changesetsDelete(
@@ -104,7 +104,7 @@ export class ChangesetsService {
      * Otherwise a new changeset is created.
      * @param key The key of the changeset to update or create.
      * @param requestBody The values of the created or replaced changeset.
-     * @returns Changeset Success
+     * @returns Changeset OK
      * @throws ApiError
      */
     public changesetsPut(
@@ -131,7 +131,7 @@ export class ChangesetsService {
      * @param changeset The changeset key
      * @param key The content key
      * @param version The content version
-     * @returns ChangesetItem Success
+     * @returns ChangesetItem OK
      * @throws ApiError
      */
     public changesetsGetItem(
@@ -158,7 +158,7 @@ export class ChangesetsService {
      * @param changeset The changeset key
      * @param key The content key
      * @param version The content version
-     * @returns ChangesetItem Success
+     * @returns ChangesetItem OK
      * @throws ApiError
      */
     public changesetsDeleteItem(
@@ -187,7 +187,7 @@ export class ChangesetsService {
      * @param changeset The changeset key
      * @param pageIndex
      * @param pageSize
-     * @returns ChangesetItemPage Success
+     * @returns ChangesetItemPage OK
      * @throws ApiError
      */
     public changesetsListItems(
@@ -215,7 +215,7 @@ export class ChangesetsService {
      * Creates the given changeset item.
      * @param changeset The changeset key
      * @param requestBody The changeset item
-     * @returns ChangesetItem Success
+     * @returns ChangesetItem OK
      * @throws ApiError
      */
     public changesetsCreateItem(
@@ -244,7 +244,7 @@ export class ChangesetsService {
      * @param contentVersion The content version
      * @param requestBody The changeset item
      * @param allowCreate Indicates if a new changeset item should be created if it does not exist
-     * @returns ChangesetItem Success
+     * @returns ChangesetItem OK
      * @throws ApiError
      */
     public changesetsUpdateItem(

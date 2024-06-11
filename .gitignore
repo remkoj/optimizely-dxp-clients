@@ -1,9 +1,12 @@
+# Yarn artefacts
 .yarn/*
 !.yarn/patches
 !.yarn/plugins
 !.yarn/releases
 !.yarn/sdks
 !.yarn/versions
+/.pnp.cjs
+/.pnp.loader.mjs
 
 # Typescript build artifacts
 .tsbuildinfo
@@ -13,4 +16,6 @@
 artefacts/*.tgz
 !artefacts/*-dev.tgz
 
+# IDE Configuration
 .idea
+.vscode

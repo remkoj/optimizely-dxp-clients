@@ -14,7 +14,7 @@ export class PropertyGroupsService {
      * @param sources Indicates which property groups sources that should be listed.
      * Use All to include groups from all sources or
      * Default to include groups without a specific sources.
-     * @returns PropertyGroupPage Success
+     * @returns PropertyGroupPage OK
      * @throws ApiError
      */
     public propertyGroupsList(
@@ -35,7 +35,7 @@ export class PropertyGroupsService {
      * Create property group
      * Create a new property group.
      * @param requestBody The property group that should be created.
-     * @returns PropertyGroup Success
+     * @returns PropertyGroup OK
      * @throws ApiError
      */
     public propertyGroupsCreate(
@@ -56,7 +56,7 @@ export class PropertyGroupsService {
      * Get property group
      * Get the property group with the provided key.
      * @param key The key of the property group to retrieve.
-     * @returns PropertyGroup Success
+     * @returns PropertyGroup OK
      * @throws ApiError
      */
     public propertyGroupsGet(
@@ -79,7 +79,7 @@ export class PropertyGroupsService {
      * Otherwise a new property group is created.
      * @param key The key of the property group to update or create.
      * @param requestBody The values of the created or replaced property group.
-     * @returns PropertyGroup Success
+     * @returns PropertyGroup OK
      * @throws ApiError
      */
     public propertyGroupsPut(
@@ -105,7 +105,7 @@ export class PropertyGroupsService {
      * Update an existing property group.
      * @param key The key of the property group to patch.
      * @param requestBody The values of the property group that should be updated.
-     * @returns PropertyGroup Success
+     * @returns PropertyGroup OK
      * @throws ApiError
      */
     public propertyGroupsPatch(
@@ -130,7 +130,7 @@ export class PropertyGroupsService {
      * Delete property group
      * Deletes the property group with the provided key.
      * @param key The key of the property group to delete.
-     * @returns PropertyGroup Success
+     * @returns PropertyGroup OK
      * @throws ApiError
      */
     public propertyGroupsDelete(

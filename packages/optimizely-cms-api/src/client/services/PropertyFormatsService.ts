@@ -13,7 +13,7 @@ export class PropertyFormatsService {
      * List all property formats using the provided options.
      * @param pageIndex
      * @param pageSize
-     * @returns PropertyFormatPage Success
+     * @returns PropertyFormatPage OK
      * @throws ApiError
      */
     public propertyFormatsList(
@@ -37,7 +37,7 @@ export class PropertyFormatsService {
      * Get the property format with the provided key.
      * @param key The key of the property format to retrieve.
      * @param allowDeleted Indicates that a deleted property format may be returned.
-     * @returns PropertyFormat Success
+     * @returns PropertyFormat OK
      * @throws ApiError
      */
     public propertyFormatsGet(

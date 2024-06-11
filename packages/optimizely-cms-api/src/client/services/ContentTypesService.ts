@@ -17,7 +17,7 @@ export class ContentTypesService {
      * Default to include content types without a specific sources.
      * @param pageIndex
      * @param pageSize
-     * @returns ContentTypePage Success
+     * @returns ContentTypePage OK
      * @throws ApiError
      */
     public contentTypesList(
@@ -44,7 +44,7 @@ export class ContentTypesService {
      * Create content type
      * Create a new content type.
      * @param requestBody The content type that should be created.
-     * @returns ContentType Success
+     * @returns ContentType OK
      * @throws ApiError
      */
     public contentTypesCreate(
@@ -65,7 +65,7 @@ export class ContentTypesService {
      * Get content type
      * Get the content type with the provided key.
      * @param key The key of the content type to retrieve.
-     * @returns ContentType Success
+     * @returns ContentType OK
      * @throws ApiError
      */
     public contentTypesGet(
@@ -89,7 +89,7 @@ export class ContentTypesService {
      * @param key The key of the content type to update or create.
      * @param requestBody The values of the created or replaced content type.
      * @param ignoreDataLossWarnings Update the content type even though the changes might result in data loss.
-     * @returns ContentType Success
+     * @returns ContentType OK
      * @throws ApiError
      */
     public contentTypesPut(
@@ -120,7 +120,7 @@ export class ContentTypesService {
      * @param key The key of the content type to patch.
      * @param requestBody The values of the content type that should be updated.
      * @param ignoreDataLossWarnings Update the content type even though the changes might result in data loss.
-     * @returns ContentType Success
+     * @returns ContentType OK
      * @throws ApiError
      */
     public contentTypesPatch(
@@ -149,7 +149,7 @@ export class ContentTypesService {
      * Delete content type
      * Deletes the content type with the provided key. If a content type with the provided key does not exist an error is returned.
      * @param key The key of the content type to delete.
-     * @returns ContentType Success
+     * @returns ContentType OK
      * @throws ApiError
      */
     public contentTypesDelete(

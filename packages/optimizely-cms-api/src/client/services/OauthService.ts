@@ -13,7 +13,7 @@ export class OauthService {
      * Request an access token. This endpoint only supports the 'client_credentials' grant type
      * and will only issue short-lived tokens.
      * @param requestBody
-     * @returns OauthToken Success
+     * @returns OauthToken OK
      * @throws ApiError
      */
     public oauthToken(
