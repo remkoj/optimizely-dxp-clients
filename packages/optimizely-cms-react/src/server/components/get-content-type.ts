@@ -29,7 +29,7 @@ export async function getContentType(link: ContentLinkWithLocale, gqlClient: IOp
     if (!items || items.length == 0)
         throw new Error("The content item could not be found!")
 
-    const contentType = Utils.normalizeContentType(items[0]?.ContentType)
+    const contentType = Utils.normalizeContentType(items[0]?._metadata?.types)
     if (!contentType)
         throw new Error("The item did not contain type information")
 
@@ -40,34 +40,31 @@ export default getContentType
 
 type GetContentTypeResponse = {
     Content: {
-        items: {
-            ContentType: string[]
-        }[]
+        items: Partial<{
+            _metadata: Partial<{
+              types: string[]
+            }>
+        }>[]
         total: number
     }
 }
 
-export const getContentTypeQuery = gql`query getContentType($id: Int, $workId: Int, $guidValue: String, $locale: [Locales])
+export const getContentTypeQuery = gql`query getContentType($key: String!, $version: String, $locale: [Locales])
 {
-  Content(
+  _Content(
     where: {
-      ContentLink: {
-        GuidValue: {
-          eq: $guidValue
-        }
-        Id: {
-          eq: $id
-        },
-        WorkId: {
-          eq: $workId
-        }
+      _metadata: {
+        key: { eq: $key }
+        version: { eq: $version }
       }
     },
     locale: $locale
     limit: 1
   ) {
     items {
-    	ContentType
+    	_metadata {
+        types
+      }
     },
     total
   }

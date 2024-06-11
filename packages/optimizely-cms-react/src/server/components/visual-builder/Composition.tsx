@@ -2,7 +2,6 @@ import 'server-only'
 import { isElementNode } from './functions.js'
 import { CmsContent } from '../cms-content.js'
 import type { ContentType } from '../../../types.js'
-import { getRandomKey } from '../../../utilities.js'
 import { isContentLink, ContentLinkWithLocale, isInlineContentLink } from '@remkoj/optimizely-graph-client'
 import type { OptimizelyCompositionProps, LeafPropsFactory, CompositionElementNode, NodePropsFactory, CompositionStructureNode } from './types.js'
 import getServerContext from '../../context.js'
@@ -72,8 +71,11 @@ export async function OptimizelyComposition({ node, leafPropsFactory = defaultPr
     if (!factory)
         throw new Error("OptimizelyComposition requires the factory be defined within the serverContext")
 
-    const children = await Promise.all((node.nodes ?? []).map((child, idx) => {
-        const childKey = `vb::node::${child.key}::${child.name}`
+    const children = await Promise.all((node.nodes ?? []).map((child,) => {
+
+        const childKey = child.key ? child.key : `vb::${ JSON.stringify( child )}`
+        if (isDebug)
+            console.log(`⚪ [VisualBuilder] Generated child key: ${ childKey }`)
         return OptimizelyComposition({
             key: childKey,
             node: child,

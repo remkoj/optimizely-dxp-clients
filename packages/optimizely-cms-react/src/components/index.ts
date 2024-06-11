@@ -1,1 +1,2 @@
-export * from './rich-text/index.js'
+export * from './rich-text.js'
+export * from './cms-styles.js'
