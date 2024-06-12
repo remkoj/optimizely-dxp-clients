@@ -2,7 +2,7 @@
   "name": "@remkoj/optimizely-cms-api",
   "displayName": "Optimizely CMS - Integration API Client",
   "description": "A Javascript client for the Integration API provided by the Optimizely CMS.",
-  "version": "2.0.0-pre5",
+  "version": "2.0.0-pre6",
   "packageManager": "yarn@4.3.0",
   "type": "commonjs",
   "license": "Apache-2.0",

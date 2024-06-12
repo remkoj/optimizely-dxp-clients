@@ -1,5 +1,6 @@
 import { type ComponentFactory, type ComponentType, type ComponentTypeDictionary } from "@remkoj/optimizely-cms-react"
 import { type FunctionComponent, type PropsWithChildren } from "react"
+import { decodeHTML } from 'entities'
 
 //#region Type defintions
 export type RichTextProps = {
@@ -165,11 +166,11 @@ const RichTextElement : FunctionComponent<RichTextElementProps> = ({ factory, no
 
 const DefaultTextNode : FunctionComponent<{ node: TextNode }> = ({ node }) => {
     if (node.bold)
-        return <strong>{ node.text }</strong>
+        return <strong>{ decodeHTML(node.text) }</strong>
     const unsupportedProps = Object.getOwnPropertyNames(node).filter(x => x != 'text')
     if (unsupportedProps.length > 0 && process.env.NODE_ENV != 'production')
         console.warn('🟠 [Rich Text] Text node with unsupported additional properties:', unsupportedProps.join(', '));
-    return node.text?.replaceAll("&nbsp;", " ")
+    return decodeHTML(node.text)
 }
 //#endregion
 

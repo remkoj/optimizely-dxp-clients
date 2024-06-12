@@ -28,9 +28,21 @@ export type CompositionComponentType<NT extends CompositionNode> = ComponentType
 export type LeafPropsFactory = <ET extends Record<string,any>, LT = string>(node: CompositionElementNode<ET>) => [ ContentLinkWithLocale<LT> | InlineContentLinkWithLocale<LT>, ContentType, ET ] | [ ContentLinkWithLocale<LT> | InlineContentLinkWithLocale<LT>, ContentType, ET, Record<string, any> ]
 export type NodePropsFactory = <ET extends Record<string,any>, LT = string>(node: CompositionStructureNode) => [ ContentLinkWithLocale<LT> | InlineContentLinkWithLocale<LT>, Array<ContentType>, ET ] | [ ContentLinkWithLocale<LT> | InlineContentLinkWithLocale<LT>, Array<ContentType>, ET, Record<string, any> ]
 
-export type OptimizelyCompositionProps = {
+export type OptimizelyCompositionProps = JSX.IntrinsicAttributes & {
+    /**
+     * The Visual Builder node to start rendering from
+     */
     node: CompositionNode<Record<string,any>>
+
+    /**
+     * Allows overriding of the factory that transforms the data received from
+     * Optimizely Graph into properties for an element.
+     */
     leafPropsFactory?: LeafPropsFactory
+
+    /**
+     * Allows overriding of the factory that transforms the data received from
+     * Optimizely Graph into properties for a structure node.
+     */
     nodePropsFactory?: NodePropsFactory
-    key?:string
 }

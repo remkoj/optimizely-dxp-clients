@@ -1,7 +1,7 @@
 {
   "name": "optimizely-dxp-clients",
-  "version": "2.0.0-pre5",
-  "description": "Javascript client for Optimizely Products",
+  "version": "2.0.0-pre6",
+  "description": "Javascript clients for Optimizely Products",
   "repository": "https://github.com/remkoj/optimizely-dxp-clients.git",
   "author": "Remko Jantzen <693172+remkoj@users.noreply.github.com>",
   "homepage": "https://github.com/remkoj/optimizely-dxp-clients",
@@ -14,7 +14,8 @@
     "glob": "^10.4.1",
     "tslib": "^2.6.3",
     "typescript": "^5.4.5",
-    "update-browserslist-db": "^1.0.16"
+    "update-browserslist-db": "^1.0.16",
+    "yaml": "^2.4.5"
   },
   "packageManager": "yarn@4.3.0",
   "workspaces": [
@@ -29,16 +30,18 @@
     "prepare": "yarn update-browserslist-db && yarn dedupe && yarn workspaces foreach -Apt --topological-dev --exclude optimizely-dxp-clients run prepare",
     "recompile": "yarn workspaces foreach -Apt --topological-dev --exclude optimizely-dxp-clients run recompile",
     "watch": "yarn workspaces foreach -Api --exclude optimizely-dxp-clients run watch",
-    "artefacts": "yarn run prepare && yarn run pack-version && yarn run pack-development",
-    "pack-version": "yarn workspaces foreach -Apt --topological-dev --exclude optimizely-dxp-clients pack --install-if-needed --out ../../artefacts/%s-%v.tgz",
-    "pack-development": "yarn workspaces foreach -Apt --topological-dev --exclude optimizely-dxp-clients pack --install-if-needed --out ../../artefacts/%s-dev.tgz",
-    "version-bump-patch": "yarn workspaces foreach -Apt --topological-dev version -d patch",
-    "version-apply": "yarn workspaces foreach -Apt --topological-dev version apply",
-    "versions": "yarn workspaces foreach -Apt --topological-dev version",
-    "update-sdks": "yarn sdks vscode",
-    "update-deps": "yarn upgrade-interactive && yarn dedupe && yarn sdks vscode",
-    "update-yarn": "yarn set version stable && yarn install && yarn dedupe && yarn sdks vscode",
-    "update-all": "yarn run update-yarn && yarn run update-deps"
+    "artefacts": "yarn run prepare && yarn run pack:version && yarn run pack:dev",
+    "pack:all": "yarn run pack:version && yarn run pack:dev",
+    "pack:version": "yarn workspaces foreach -Apt --topological-dev --exclude optimizely-dxp-clients pack --install-if-needed --out ../../artefacts/%s-%v.tgz",
+    "pack:dev": "yarn workspaces foreach -Apt --topological-dev --exclude optimizely-dxp-clients pack --install-if-needed --out ../../artefacts/%s-dev.tgz",
+    "version-bump-patch": "yarn workspaces foreach -At --topological-dev version -d patch",
+    "version-apply": "yarn workspaces foreach -At --topological-dev version apply",
+    "versions": "yarn workspaces foreach -At --topological-dev version",
+    "update:sdks": "yarn sdks vscode",
+    "update:deps": "yarn upgrade-interactive && yarn dedupe && yarn update:sdks && yarn update:license-info",
+    "update:yarn": "yarn set version stable && yarn install && yarn dedupe && yarn run update:sdks",
+    "update:all": "yarn run update:yarn && yarn run update:deps",
+    "update:license-info": "yarn node ./scripts/licenses.js"
   },
   "stableVersion": "1.0.4"
 }

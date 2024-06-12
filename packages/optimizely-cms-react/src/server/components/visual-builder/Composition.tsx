@@ -1,4 +1,5 @@
 import 'server-only'
+import type { ReactNode } from 'react'
 import { isElementNode } from './functions.js'
 import { CmsContent } from '../cms-content.js'
 import type { ContentType } from '../../../types.js'
@@ -60,7 +61,13 @@ const defaultNodePropsFactory : NodePropsFactory = <ET extends Record<string, an
     return [ contentLink, componentTypes, componentData, layoutData ]
 }
 
-export async function OptimizelyComposition({ node, leafPropsFactory = defaultPropsFactory, nodePropsFactory = defaultNodePropsFactory}: OptimizelyCompositionProps) : Promise<JSX.Element>
+/**
+ * Render the composition as made available through Optimizely Graph for Visual Builder
+ * 
+ * @param param0 
+ * @returns     The
+ */
+export async function OptimizelyComposition({ node, leafPropsFactory = defaultPropsFactory, nodePropsFactory = defaultNodePropsFactory}: OptimizelyCompositionProps) : Promise<ReactNode>
 {
     if (isElementNode(node)) {
         const [ contentLink, contentType, fragmentData, layoutProps ] = leafPropsFactory(node)

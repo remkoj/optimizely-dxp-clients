@@ -3,7 +3,7 @@
   "repository": "https://github.com/remkoj/optimizely-dxp-clients.git",
   "author": "Remko Jantzen <693172+remkoj@users.noreply.github.com>",
   "homepage": "https://github.com/remkoj/optimizely-dxp-clients",
-  "version": "2.0.0-pre5",
+  "version": "2.0.0-pre6",
   "license": "Apache-2.0",
   "packageManager": "yarn@4.1.1",
   "type": "module",
@@ -21,7 +21,7 @@
     "opti-graph": "yarn node bin/index.js"
   },
   "devDependencies": {
-    "@remkoj/optimizely-graph-client": "workspace:2.0.0-pre5",
+    "@remkoj/optimizely-graph-client": "workspace:2.0.0-pre6",
     "@rollup/plugin-commonjs": "^26.0.1",
     "@rollup/plugin-json": "^6.1.0",
     "@rollup/plugin-typescript": "^11.1.6",
@@ -45,7 +45,7 @@
     "yargs": "^17.7.2"
   },
   "peerDependencies": {
-    "@remkoj/optimizely-graph-client": "2.0.0-pre5"
+    "@remkoj/optimizely-graph-client": "2.0.0-pre6"
   },
   "stableVersion": "1.0.4"
 }
