@@ -31,20 +31,20 @@ export class ContentGraphClient extends GraphQLClient implements IOptiGraphClien
     protected set token(newValue: string | undefined)
     {
         if (!validateToken(newValue))
-            throw new Error("Invalid ContentGraph token")
+            throw new Error("❌ [Optimizely Graph] Invalid ContentGraph token")
         const newMode = getAuthMode(newValue)
         if ((newMode == AuthMode.Basic || newMode == AuthMode.HMAC) && !validateConfig(this._config, false)) {
-            throw new Error("[Optimizely Graph] Configuration is invalid for selected authentication mode")
+            throw new Error("❌ [Optimizely Graph] Configuration is invalid for selected authentication mode")
         }
         if (this.debug)
-            console.log(`[Optimizely Graph] Updating token to ${ newValue }`) 
+            console.log(`🔑 [Optimizely Graph] Updating token to ${ newValue }`) 
         this._token = newValue
     }
     protected get hmacFetch() : FetchAPI
     {
         if (!this._hmacFetch) {
             if (this._config.app_key == undefined || this._config.secret == undefined)
-                throw new Error("Unable to create an authenticated connection, make sure both the AppKey & Secret are configured")
+                throw new Error("❌ [Optimizely Graph] Unable to create an authenticated connection, make sure both the AppKey & Secret are configured")
             this._hmacFetch = createHmacFetch(this._config.app_key, this._config.secret)
         }
         return this._hmacFetch
@@ -71,10 +71,10 @@ export class ContentGraphClient extends GraphQLClient implements IOptiGraphClien
         // Validate inputs
         const optiConfig : OptimizelyGraphConfig = applyConfigDefaults(config ?? readEnvironmentVariables())
         if (!validateToken(token))
-            throw new Error("Invalid ContentGraph token")
+            throw new Error("❌ [Optimizely Graph] Invalid ContentGraph token")
         const authMode = getAuthMode(token)
         if (!validateConfig(optiConfig, authMode == AuthMode.Public || authMode == AuthMode.Token, true))
-            throw new Error("Invalid ContentGraph configuration")
+            throw new Error("❌ [Optimizely Graph] Invalid ContentGraph configuration")
 
         // Create instance
         const QUERY_LOG = optiConfig.query_log ?? false
@@ -86,14 +86,14 @@ export class ContentGraphClient extends GraphQLClient implements IOptiGraphClien
             method: "post",
             requestMiddleware: request => {
                 if (QUERY_LOG) {
-                    console.log(`[Optimizely Graph] [Request Query] ${ request.body }`)
-                    console.log(`[Optimizely Graph] [Request Variables] ${ JSON.stringify(request.variables) }`)
+                    console.log(`🔎 [Optimizely Graph] [Request Query] ${ request.body }`)
+                    console.log(`🔖 [Optimizely Graph] [Request Variables] ${ JSON.stringify(request.variables) }`)
                 }
                 return request
             },
             responseMiddleware: response => {
                 if (isError(response)) {
-                    console.error(`[Optimizely Graph] [Error] ${ response.name } => ${ response.message }`)
+                    console.error(`❌ [Optimizely Graph] [Error] ${ response.name } => ${ response.message }`)
                 } else if (response.errors) {
                     response.errors.forEach(
                         ({ message, locations, path, name, source }) => 
@@ -104,12 +104,12 @@ export class ContentGraphClient extends GraphQLClient implements IOptiGraphClien
                             const errorName = name && name != 'undefined' ? ` ${ name }` : ""
                             const sourceInfo = source?.body ?? ""
                             const sourceName = source?.name ? ` in ${ source.name }` : ""
-                            console.error(`[Optimizely Graph] [GraphQL${ errorName } error${sourceName}]:\n  Message: ${message}\n  Location: ${ locationList }\n  Path: ${path}\n  Query: ${ sourceInfo }`)
+                            console.error(`❌ [Optimizely Graph] [GraphQL${ errorName } error${sourceName}]:\n  Message: ${message}\n  Location: ${ locationList }\n  Path: ${path}\n  Query: ${ sourceInfo }`)
                         }
                     );
                 } else if (QUERY_LOG) {
-                    console.log(`[Optimizely Graph] [Response Data] ${ JSON.stringify(response.data) }`)
-                    console.log(`[Optimizely Graph] [Response Cost] ${ JSON.stringify((response.extensions as { cost?: number } | undefined )?.cost || 0) }`)
+                    console.log(`📦 [Optimizely Graph] [Response Data] ${ JSON.stringify(response.data) }`)
+                    console.log(`🔖 [Optimizely Graph] [Response Cost] ${ JSON.stringify((response.extensions as { cost?: number } | undefined )?.cost || 0) }`)
                 }
             }
 
@@ -134,7 +134,7 @@ export class ContentGraphClient extends GraphQLClient implements IOptiGraphClien
     public updateAuthentication(tokenOrAuthmode?: string | AuthMode | undefined) : ContentGraphClient
     {
         if (tokenOrAuthmode == AuthMode.Token)
-            throw new Error("Provide the authentication token to switch to AuthMode.Token");
+            throw new Error("❌ [Optimizely Graph] Provide the authentication token to switch to AuthMode.Token");
         this.token = tokenOrAuthmode == AuthMode.Public ? undefined : tokenOrAuthmode
         this.updateRequestConfig()
         return this
@@ -152,7 +152,7 @@ export class ContentGraphClient extends GraphQLClient implements IOptiGraphClien
     {
         // Determine the new flags
         if (this._oldFlags)
-            throw new Error("There's a temporary flag update in progress, revert that one first prior to updating the flags")
+            throw new Error("❌ [Optimizely Graph] There's a temporary flag update in progress, revert that one first prior to updating the flags")
         if (temporary)
             this._oldFlags = this._flags
         this._flags = { ...this._flags, ...newFlags }

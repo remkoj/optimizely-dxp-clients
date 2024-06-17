@@ -88,7 +88,7 @@ export const Utils = {
             typeof toTest == 'object' &&
             toTest != null &&
             (typeof (toTest as TextNode).text) == 'string' &&
-            (toTest as TextNode).text.length > 0
+            (toTest as TextNode).text.length >= 0
         )
     },
 
@@ -143,6 +143,8 @@ const RichTextElement : FunctionComponent<RichTextElementProps> = ({ factory, no
 {
     const debug = process.env.NODE_ENV != 'production'
     if (Utils.isText(node)) {
+        if (node.text.length == 0)
+            return null
         const TextComponent = factory?.resolve(`RichText/text`) ?? DefaultTextNode
         return <TextComponent node={ node } />
     }
@@ -158,10 +160,41 @@ const RichTextElement : FunctionComponent<RichTextElementProps> = ({ factory, no
     })
     if (!factory?.has(`RichText/${ node.type }`)) {
         console.warn('🟠 [Rich Text] No renderer for node type, falling back to "div":', `RichText/${ node.type }`)
-        return <div>{ childData }</div>
+        const DivComponent = createHtmlComponent("div", false, { "data-type": node.type })
+        return <DivComponent node={ node }>{ childData }</DivComponent>
     }
     const Component = factory?.resolve(`RichText/${ node.type }`) ?? 'div'
     return <Component node={ node }>{ childData }</Component>
+}
+//#endregion
+
+
+export function createHtmlComponent<E extends keyof JSX.IntrinsicElements>(element: E, ignoreChildren: boolean = false, defaultProps?: JSX.IntrinsicElements[E] & Record<string,string>)
+{
+    const HtmlElement = element as string
+    const reservedProps = ['url','class','children','type']
+    const component = ({ children, node, ...props }: PropsWithChildren<JSX.IntrinsicElements[E] & { node: TypedNode } >) => {
+        const nodeProps : Record<string,string | number | boolean> = {}
+        const renderProps = Object.getOwnPropertyNames(node) as Array<keyof TypedNode>
+        renderProps.filter(x => !reservedProps.includes(x)).forEach(x => nodeProps[x] = node[x])
+        if (renderProps.includes('class')) nodeProps['className'] = node['class']
+        if (renderProps.includes('url')) {
+            switch (node.type) {
+                case 'link':
+                    nodeProps['href'] = node['url']
+                    break
+                case 'image':
+                    nodeProps['src'] = node['url']
+                    break
+                default:
+                    nodeProps['data-url'] = node['url']
+                    break
+            }
+        }
+
+        return ignoreChildren ? <HtmlElement { ...defaultProps }{ ...nodeProps }{ ...props } /> : <HtmlElement { ...defaultProps }{ ...nodeProps }{ ...props }>{ children }</HtmlElement>
+    }
+    return component
 }
 
 const DefaultTextNode : FunctionComponent<{ node: TextNode }> = ({ node }) => {
@@ -172,15 +205,26 @@ const DefaultTextNode : FunctionComponent<{ node: TextNode }> = ({ node }) => {
         console.warn('🟠 [Rich Text] Text node with unsupported additional properties:', unsupportedProps.join(', '));
     return decodeHTML(node.text)
 }
-//#endregion
 
 /**
  * A default component dictionary that allows to serialize the structured HTML
  * into React, using the component library shared across the react SDK.
  */
 export const DefaultComponents : ComponentTypeDictionary = [
-    { type: 'RichText/paragraph', component: ({ children, node, ...props }: PropsWithChildren<JSX.IntrinsicElements["p"] & { node: Node }>) => { return <p { ...props }>{ children }</p>} },
-    { type: 'RichText/text', component: DefaultTextNode}
+    { type: 'RichText/richText', component: createHtmlComponent("div", false, { className: "cms:rich-text" })},
+    { type: 'RichText/paragraph', component: createHtmlComponent("p")},
+    { type: 'RichText/span', component: createHtmlComponent("span")},
+    { type: 'RichText/div', component: createHtmlComponent("div")},
+    { type: 'RichText/heading-one', component: createHtmlComponent("h1")},
+    { type: 'RichText/heading-two', component: createHtmlComponent("h2")},
+    { type: 'RichText/heading-three', component: createHtmlComponent("h3")},
+    { type: 'RichText/heading-four', component: createHtmlComponent("h4")},
+    { type: 'RichText/heading-five', component: createHtmlComponent("h5")},
+    { type: 'RichText/heading-six', component: createHtmlComponent("h6")},
+    { type: 'RichText/link', component: createHtmlComponent("a")},
+    { type: 'RichText/image', component: createHtmlComponent("img", true)},
+    { type: 'RichText/text', component: DefaultTextNode},
+    { type: 'RichText/br', component: createHtmlComponent("br", true)}
 ]
 
 export default RichText

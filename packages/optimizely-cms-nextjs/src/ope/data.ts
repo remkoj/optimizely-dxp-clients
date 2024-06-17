@@ -7,7 +7,7 @@ export const getContentById : GetContentByIdMethod = async <LocaleType = string>
 }
 
 const gqlQuery = gql`query getContentByIdBase($key: String!, $version: String, $locale: [Locales!], $path: String, $domain: String) {
-    content: Content(
+    content: _Content(
         where: {
             _or: [
                 { _metadata: { key: { eq: $key }, version: { eq: $version } } }

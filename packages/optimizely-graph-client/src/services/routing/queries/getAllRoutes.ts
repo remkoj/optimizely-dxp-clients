@@ -31,8 +31,8 @@ export type Variables = {
     domain?: string
 }
 
-export const query = gql`query GetAllRoutes($cursor: String, $pageSize: Int = 100, $typeFilter: [String] = "Page", $domain: String) {
-    _Content(
+export const query = gql`query GetAllRoutes($cursor: String, $pageSize: Int = 100, $typeFilter: [String] = "_Page", $domain: String) {
+    Content: _Content(
         where: {
             _metadata: {
                 url: { hierarchical: { exist: true }, base: { eq: $domain } }

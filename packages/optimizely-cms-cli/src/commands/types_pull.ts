@@ -7,9 +7,11 @@ import chalk from 'chalk'
 import figures from 'figures'
 
 type TypesPullModule = CliModule<{ 
-    force: boolean, 
-    excludeBaseTypes: string[], 
-    excludeTypes: string[] 
+    force: boolean
+    excludeBaseTypes: string[]
+    excludeTypes: string[]
+    baseTypes?: string[]
+    types?: string[]
 }>
 
 export const TypesPullCommand : TypesPullModule = {
@@ -19,10 +21,12 @@ export const TypesPullCommand : TypesPullModule = {
         yargs.option('force', { alias: 'f', description: "Overwrite existing files", boolean: true, type: 'boolean', demandOption: false, default: false })
         yargs.option('excludeTypes', { alias: 'ect', description: "Exclude these content types", string: true, type: 'array', demandOption: false, default: []})
         yargs.option('excludeBaseTypes', { alias: 'ebt', description: "Exclude these base types", string: true, type: 'array', demandOption: false, default: ['folder','media','image','video']})
+        yargs.option("baseTypes", { alias: 'b', description: "Select only these base types", string: true, type: 'array', demandOption: false, default: []})
+        yargs.option("types", { alias: 't', description: "Select only these types", string: true, type: 'array', demandOption: false, default: []})
         return yargs
     },
     handler: async (args) => {
-        const { _config: cfg, components: basePath, excludeBaseTypes, excludeTypes } = parseArgs(args)
+        const { _config: cfg, components: basePath, excludeBaseTypes, excludeTypes, baseTypes, types, force } = parseArgs(args)
         const client = createClient(cfg)
         const pageSize = 100
 
@@ -53,22 +57,22 @@ export const TypesPullCommand : TypesPullModule = {
             process.exit(1)
         }
 
-        const updatedTypes : Array<string> = results.map(contentType => {
-            if (excludeBaseTypes.includes(contentType.baseType)) {
-                if (cfg.debug)
-                    process.stdout.write(chalk.gray(`${ figures.arrowRight } Skipping ${ contentType.displayName } (${ contentType.key }) - Base type excluded\n`))
-                return undefined
-            }
-            if (excludeTypes.includes(contentType.key)) {
-                if (cfg.debug)
-                    process.stdout.write(chalk.gray(`${ figures.arrowRight } Skipping ${ contentType.displayName } (${ contentType.key }) - Content type excluded\n`))
-                return undefined
-            }
+        const updatedTypes : Array<string> = results.filter(data => {
+            return (!excludeBaseTypes.includes(data.baseType)) && 
+                (!excludeTypes.includes(data.key)) && 
+                (!baseTypes || baseTypes.length == 0 || baseTypes.includes(data.baseType)) && 
+                (!types || types.length == 0 || types.includes(data.key))
+        }).map(contentType => {
             const typePath = path.join(basePath, contentType.baseType, contentType.key)
             const typeFile = path.join(typePath, `${ contentType.key }.opti-type.json`)
 
             if (!fs.existsSync(typePath))
                 fs.mkdirSync(typePath, { recursive: true })
+
+            if (fs.existsSync(typeFile) && !force) {
+                process.stdout.write(chalk.yellow(`${ figures.cross } Skipping type definition for ${ contentType.displayName } (${ contentType.key }) - File already exists\n`))
+                return contentType.key
+            }
 
             if (cfg.debug)
                 process.stdout.write(chalk.gray(`${ figures.arrowRight } Writing type definition for ${ contentType.displayName } (${ contentType.key })\n`))

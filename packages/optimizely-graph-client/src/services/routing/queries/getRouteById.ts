@@ -15,7 +15,7 @@ export type Result = {
 }
 
 export const query = gql`query GetRouteById($key: String!, $version: String, $locale: [Locales]) {
-    _Content(
+    Content: _Content(
         where: { _metadata: { key: { eq: $key }, version: { eq: $version } } }
         locale: $locale
     ) {

@@ -1,5 +1,6 @@
 import 'server-only'
-import type { ComponentType, ComponentProps } from 'react'
+import type { ComponentType, ComponentProps, ReactNode } from 'react'
+import type {  } from 'react'
 import type { CmsComponent } from '../../types.js'
 import type { CmsContentProps } from './types.js'
 import getContentType from './get-content-type.js'
@@ -128,7 +129,7 @@ export const CmsContent = async <LocalesType = string>({contentType, contentType
         type FragmentQueryResponse = { contentById: { total: number, items: Array<any> }}
         const [name, fragment]  = Component.getDataFragment()
         if (context.isDebug) console.log(`⚪ [CmsContent] Component data fetching using fragment: ${ name }`)
-        const fragmentQuery = `query getContentFragmentById($key: String!, $version: String, $locale: [Locales!]) {contentById: Content(where: {_metadata: {key: { eq: $key }, version: { eq: $version }}} locale: $locale) { total, items { _type: __typename, _metadata { key, version, locale } ...${ name } }}} ${ print(fragment) }`
+        const fragmentQuery = `query getContentFragmentById($key: String!, $version: String, $locale: [Locales!]) {contentById: _Content(where: {_metadata: {key: { eq: $key }, version: { eq: $version }}} locale: $locale) { total, items { _type: __typename, _metadata { key, version, locale } ...${ name } }}} ${ print(fragment) }`
         const fragmentVariables = Utils.contentLinkToRequestVariables(contentLink as ContentLink)
         if (context.isDebug) console.log(`⚪ [CmsContent] Component data fetching using variables: ${ JSON.stringify(fragmentVariables) }`)
         const fragmentResponse = await client.request<FragmentQueryResponse, any>(fragmentQuery, fragmentVariables)

@@ -158,6 +158,10 @@ function createFactory(contentTypes: IntegrationApi.ContentType[], basePath: str
     lines.push('')
     baseTypeFactories.forEach(type => {
         lines.push(`prefixDictionaryEntries(${ type }Components, '${ ucFirst(type) }');`)
+        if (type == "experience")
+            lines.push(`prefixDictionaryEntries(${ type }Components, 'Page'); // Experiences are a subtype of Page`)
+        if (type == "element")
+            lines.push(`prefixDictionaryEntries(${ type }Components, 'Component'); // Elements are a subtype of Component`)
     })
     lines.push('')
     lines.push('export const cmsComponentDictionary : ComponentTypeDictionary = [')
@@ -188,7 +192,7 @@ function createComponent(contentType : IntegrationApi.ContentType, typePath: str
         }
     }
     const varName = `${ contentType.key }${ ucFirst(contentType.baseType ?? 'part' ) }`
-    const component = `import { CmsComponent } from "@remkoj/optimizely-cms-react";
+    const component = `import ${ contentType.baseType == 'page' ? '{ OptimizelyNextPage as CmsComponent } from "@remkoj/optimizely-cms-nextjs"' : '{ CmsComponent } from "@remkoj/optimizely-cms-react"'};
 import { ${ contentType.key }DataFragmentDoc, type ${ contentType.key }DataFragment } from "@/gql/graphql";
 
 export const ${ varName } : CmsComponent<${ contentType.key }DataFragment> = ({ data }) => {
