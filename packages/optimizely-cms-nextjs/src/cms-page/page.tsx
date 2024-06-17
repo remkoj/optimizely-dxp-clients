@@ -84,23 +84,24 @@ export function createPage<
         ...CreatePageOptionDefaults,
         ...options 
     } as CreatePageOptions<LocaleEnum>
+    const globalClient = clientFactory()
 
     const pageDefintion : OptiCmsNextJsPage = {
         generateStaticParams : async () =>
         {
-            const client = clientFactory()
-            const resolver = new RouteResolver(client)
+            //const client = clientFactory()
+            const resolver = new RouteResolver(globalClient)
             return (await resolver.getRoutes()).map(r => routeToParams(r))
         },
         generateMetadata: async ( props, resolving ) =>
         {
             // Read variables from request            
-            const client = clientFactory()
+            //const client = clientFactory()
             const requestPath = propsToCmsPath(props)
             if (!requestPath)
                 return Promise.resolve({})
-            const routeResolver = new RouteResolver(client)
-            const metaResolver = new MetaDataResolver(client)
+            const routeResolver = new RouteResolver(globalClient)
+            const metaResolver = new MetaDataResolver(globalClient)
 
             // Resolve the route to a content link
             const route = await routeResolver.getContentInfoByPath(requestPath)
@@ -108,8 +109,9 @@ export function createPage<
                 return Promise.resolve({})
             
             // Set context
-            getServerContext().setLocale(localeToGraphLocale(route.locale, channel))
-            getServerContext().setOptimizelyGraphClient(client)
+            getServerContext().setLocale(route.locale)
+            getServerContext().setOptimizelyGraphClient(globalClient)
+            getServerContext().setComponentFactory(factory)
 
             // Prepare metadata fetching
             const contentLink = routeResolver.routeToContentLink(route)
@@ -141,7 +143,7 @@ export function createPage<
         {
             // Prepare the context
             const context = getServerContext()
-            const client = context.client ?? clientFactory()
+            const client = context.client ?? globalClient
             if (!context.client)
                 context.setOptimizelyGraphClient(client)
             context.setComponentFactory(factory)

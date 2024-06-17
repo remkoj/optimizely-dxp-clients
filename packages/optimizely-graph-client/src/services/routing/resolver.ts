@@ -93,19 +93,19 @@ export class RouteResolver {
             variables: { path: queryPath, domain: queryDomain }
         })
 
-        if ((resultSet.Content?.items?.length ?? 0) === 0) {
+        if ((resultSet.getRouteByPath?.items?.length ?? 0) === 0) {
             if (this._cgClient.debug) 
                 console.warn("🟠 [RouteResolver] No items in the resultset");
             return undefined
         }
 
-        if ((resultSet.Content?.items?.length ?? 0) > 1)
+        if ((resultSet.getRouteByPath?.items?.length ?? 0) > 1)
             throw new Error("🔴 [RouteResolver] Ambiguous URL provided, did you omit the domain in a multi-site setup?")
 
         if (this._cgClient.debug)
-            console.log(`⚪ [RouteResolver] Resolved content info for ${ path } to: ${ JSON.stringify(resultSet.Content.items[0]) }`)
+            console.log(`⚪ [RouteResolver] Resolved content info for ${ path } to: ${ JSON.stringify(resultSet.getRouteByPath.items[0]) }`)
         
-        return this.convertResponse(resultSet.Content.items[0])
+        return this.convertResponse(resultSet.getRouteByPath.items[0])
     }
 
     public async getContentInfoById(key: string, locale?: string, version?: string | number) : Promise<undefined | Route>
@@ -155,7 +155,7 @@ export class RouteResolver {
             url: itemUrl,
             slug: item._metadata?.slug ?? "",
             changed: item.changed ? new Date(item.changed) : null,
-            contentType: item._metadata.types,
+            contentType: item._metadata.types.reverse(),
             version: item._metadata.version,
             key: item._metadata.key
         }

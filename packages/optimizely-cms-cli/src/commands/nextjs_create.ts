@@ -191,10 +191,15 @@ function createComponent(contentType : IntegrationApi.ContentType, typePath: str
             return undefined
         }
     }
+    const isPage = contentType.baseType == 'page' || (contentType.baseType as string) == 'experience'
     const varName = `${ contentType.key }${ ucFirst(contentType.baseType ?? 'part' ) }`
-    const component = `import ${ contentType.baseType == 'page' ? '{ OptimizelyNextPage as CmsComponent } from "@remkoj/optimizely-cms-nextjs"' : '{ CmsComponent } from "@remkoj/optimizely-cms-react"'};
+    const component = `import ${ isPage ? '{ OptimizelyNextPage as CmsComponent } from "@remkoj/optimizely-cms-nextjs"' : '{ CmsComponent } from "@remkoj/optimizely-cms-react"'};
 import { ${ contentType.key }DataFragmentDoc, type ${ contentType.key }DataFragment } from "@/gql/graphql";
 
+/**
+ * ${ contentType.displayName }
+ * ${ contentType.description }
+ */
 export const ${ varName } : CmsComponent<${ contentType.key }DataFragment> = ({ data }) => {
     const componentName = '${ contentType.displayName }'
     const componentInfo = '${ contentType.description ?? '' }'
@@ -204,7 +209,12 @@ export const ${ varName } : CmsComponent<${ contentType.key }DataFragment> = ({ 
         <pre className="w-full overflow-x-hidden font-mono text-sm">{ JSON.stringify(data, undefined, 4) }</pre>
     </div>
 }
+${ varName }.displayName = "${ contentType.displayName } (${ ucFirst(contentType.baseType)}/${ contentType.key })"
 ${ varName }.getDataFragment = () => ['${ contentType.key }Data', ${ contentType.key }DataFragmentDoc]
+${ isPage && `${ varName }.getMetaData = async (contentLink) => {
+    // Add your metadata logic here
+    return {}
+}`.trim()}
 
 export default ${ varName }`
     fs.writeFileSync(componentFile, component)

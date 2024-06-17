@@ -7,14 +7,14 @@ export type Variables = {
 }
 
 export type Result = {
-    Content: {
+    getRouteByPath: {
         total: number
         items: Route[]
     }
 }
 
-export const query = gql`query GetRouteByPath($path: String!, $domain: String) {
-    Content: _Content(
+export const query = gql`query getRouteByPath($path: String!, $domain: String) {
+    getRouteByPath: _Content(
         where: { _metadata: { url: { default: { eq: $path }, base: { eq: $domain } } } }
     ) {
         total
