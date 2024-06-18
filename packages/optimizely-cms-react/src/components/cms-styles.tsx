@@ -65,8 +65,9 @@ export function extractSettings<T extends LayoutProps<any>>(from: T | undefined)
     if (!from)
         return {} as RT
     const extracted : Partial<RT> = {}
-    from?.settings?.map((itm) => {
-        extracted[itm.key as keyof RT] = itm.value as RT[keyof RT]
+    from?.settings?.forEach((itm) => {
+        if (itm.value)
+            extracted[itm.key as keyof RT] = itm.value as RT[keyof RT]
     })
     return extracted as RT
 }
