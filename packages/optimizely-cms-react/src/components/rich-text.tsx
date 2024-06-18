@@ -1,4 +1,5 @@
-import { type ComponentFactory, type ComponentType, type ComponentTypeDictionary } from "@remkoj/optimizely-cms-react"
+import type { ComponentFactory, ComponentType, ComponentTypeDictionary } from "../types.js"
+import { DefaultComponentFactory } from "../factory.js"
 import { type FunctionComponent, type PropsWithChildren } from "react"
 import { decodeHTML } from 'entities'
 
@@ -120,16 +121,22 @@ export const Utils = {
 
 //#endregion
 
-export const RichText : FunctionComponent<RichTextProps> = ({ factory, text, className = 'rich-text', as : Wrapper = "div", ...props }) =>
-{
+export const RichText : FunctionComponent<RichTextProps> = ({ 
+    factory, 
+    text, 
+    className = 'rich-text', 
+    as : Wrapper = "div", 
+    ...props 
+}) => {
     const debug = process.env.NODE_ENV != 'production'
     const id = Utils.getRandomId("rich-text")
+    const richTextFactory = factory ?? new DefaultComponentFactory(DefaultComponents)
     try {
         const data = Utils.processNodeInput(text)
         return <Wrapper className={ className } {...props}>
             { (data?.children || []).map((child, idx) => {
                 const elementId = id+'::'+idx;
-                return <RichTextElement key={ elementId } factory={ factory } node={ child } idPrefix={ elementId + '::' } />
+                return <RichTextElement key={ elementId } factory={ richTextFactory } node={ child } idPrefix={ elementId + '::' } />
             })}
         </Wrapper>
     } catch {

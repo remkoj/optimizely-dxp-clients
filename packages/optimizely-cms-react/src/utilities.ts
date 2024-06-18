@@ -21,13 +21,47 @@ export function isContentType(toTest: any) : toTest is Types.ContentType
     return toTest.every(isNonEmptyString)
 }
 
-export function normalizeContentType(toNormalize: (string | null)[] | null | undefined) : Types.ContentType | undefined
+/**
+ * Normalizes the content type by:
+ *  - Converting strings to ContentType
+ *  - Stripping the leading underscore, if any
+ * 
+ * @param       toNormalize         The Content Type value to process
+ * @param       stripContent        When set to true, the global base type "Content" will be removed as well
+ * @returns 
+ */
+export function normalizeContentType(toNormalize: (string | null)[] | string | null | undefined, stripContent: boolean = false) : Types.ContentType | undefined
 {
-    if (!Array.isArray(toNormalize))
+    if (!toNormalize)
         return undefined
 
-    const filtered = toNormalize.filter(isNonEmptyString)
+    let filtered = (typeof(toNormalize) == 'string' ? toNormalize.split('/') : toNormalize).filter(isNonEmptyString).map(x => x.startsWith('_') ? x.substring(1) : x)
+    if (stripContent)
+        filtered = filtered.filter(x => x.toLowerCase() != 'content')
     return filtered.length > 0 ? filtered : undefined
+}
+
+/**
+ * Normalizes and prefixes the content type by:
+ *  - Converting strings to ContentType
+ *  - Stripping the leading underscore, if any
+ *  - Removing the global base type "Content"
+ *  - Ensuring that in the remaining type the least specific type is equal to the provided prefix
+ * 
+ * @param       contentType 
+ * @param       prefix 
+ * @returns 
+ */
+export function normalizeAndPrefixContentType(contentType: Array<string | null> | string | null | undefined, prefix: string) : Types.ContentType
+{
+    if (!contentType)
+        return [ prefix ]
+
+    const processedContentType = (typeof(contentType) == 'string' ? contentType.split('/') : contentType).filter(isNonEmptyString).map(x => x.startsWith('_') ? x.substring(1) : x).filter(x => x.toLowerCase() != 'content')
+    if (processedContentType[0] != prefix)
+        processedContentType.unshift(prefix)
+    
+    return processedContentType
 }
 
 export function isCmsComponentWithDataQuery<T = DocumentNode>(toTest?: Types.BaseCmsComponent<T>) : toTest is Types.CmsComponentWithQuery<T>

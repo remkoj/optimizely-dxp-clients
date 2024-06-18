@@ -4,15 +4,24 @@ const MERGE_SYMBOL = '/'
 export const EmptyComponentHandle =  '$$fragment$$'
 
 /**
- * The default implementation of the ComponentFactory iterface
+ * The default implementation of the ComponentFactory interface, which works both
+ * client and server side.
  */
 export class DefaultComponentFactory implements ComponentFactory {
     private registry : { [typeName: string]: ComponentType } = {}
     private dbg : boolean
 
-    public constructor() 
+    /**
+     * Create a new instance of the DefaultComponentFactory
+     * 
+     * @param   initialComponents   If provided, this dictionary will be registered
+     *                              with the factory.
+     */
+    public constructor(initialComponents?: ComponentTypeDictionary) 
     {
         this.dbg = process.env.OPTIMIZELY_DEBUG == '1'
+        if (initialComponents)
+            this.registerAll(initialComponents)
     }
 
     register(type: ComponentTypeHandle, component: ComponentType) : void
@@ -42,6 +51,18 @@ export class DefaultComponentFactory implements ComponentFactory {
             return this.registry[type]
         return undefined
     }
+
+    extract() : ComponentTypeDictionary
+    {
+        const extracted : ComponentTypeDictionary = []
+        Object.getOwnPropertyNames(this.registry).map(typeKey => {
+            extracted.push({
+                type: typeKey,
+                component: this.registry[typeKey]
+            })
+        })
+        return extracted
+    }
 }
 
 function processComponentTypeHandle(handle: ComponentTypeHandle) : string
@@ -49,7 +70,11 @@ function processComponentTypeHandle(handle: ComponentTypeHandle) : string
     if (typeof(handle) == 'string')
         return handle == "" ? EmptyComponentHandle : handle
     if (Array.isArray(handle) && handle.every(s => typeof(s) == 'string'))
-        return handle.map(s => s.startsWith("_") ? s.substring(1) : s).filter(s => s.toLowerCase() != 'content').map(s => s == "" ? EmptyComponentHandle : s).join(MERGE_SYMBOL)
+        return handle
+            .map(s => s.startsWith("_") ? s.substring(1) : s)   // Remove all leading underscores
+            .filter(s => s.toLowerCase() != 'content')          // Remove the "Content" base type
+            .map(s => s == "" ? EmptyComponentHandle : s)       // Fall back to a fragment
+            .join(MERGE_SYMBOL)                                 // Types are processed as a string
     throw new Error(`Invalid component type handle: ${ typeof(handle) }`)
 }
 

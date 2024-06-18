@@ -1,5 +1,5 @@
 import 'server-only'
-import type { ComponentType, ComponentProps, ReactNode } from 'react'
+import type { ComponentType, ComponentProps } from 'react'
 import type {  } from 'react'
 import type { CmsComponent } from '../../types.js'
 import type { CmsContentProps } from './types.js'
@@ -25,6 +25,7 @@ export type { CmsContentProps } from './types.js'
  */
 export const CmsContent = async <LocalesType = string>({contentType, contentTypePrefix, contentLink: rawContentLink, children, fragmentData, layoutProps} : CmsContentProps<LocalesType>) : Promise<JSX.Element> => 
 {
+    let myContentType = contentType ? [ ...contentType ] : undefined
     const context = getServerContext()
     const contentLink = normalizeContentLink(rawContentLink)
 
@@ -54,38 +55,33 @@ export const CmsContent = async <LocalesType = string>({contentType, contentType
         
     // DEBUG Tracing
     if (context.isDebug)
-        console.log("⚪ [CmsContent] Rendering CMS Content for:", JSON.stringify(contentType), contentLinkToString(contentLink), context.inEditMode ? "edit-mode" : "published")
+        console.log("⚪ [CmsContent] Rendering CMS Content for:", JSON.stringify(myContentType), contentLinkToString(contentLink), context.inEditMode ? "edit-mode" : "published")
 
     // Ensure we have a content type to work with
-    if (!contentType) {
+    if (!myContentType) {
         if (isInline) {
             console.error(`🔴 [CmsContent] No content type provided for content ${ contentLinkToString(contentLink) }, content types cannot be resolved for inline content`)
             throw new Error("Unable to render Inline CMS Content without Content Type information")
         }
         if (context.isDebugOrDevelopment) 
-            console.warn(`🟠 [CmsContent] No content type provided for content ${ contentLinkToString(contentLink) }, this causes an additional GraphQL query to resolve the ContentType`)
-        contentType = await getContentType(contentLink as ContentLink, client)
+            console.warn(`🟠 [CmsContent] No content type provided for content ${ contentLinkToString(contentLink) }, this causes an additional GraphQL query to resolve the myContentType`)
+        myContentType = await getContentType(contentLink as ContentLink, client)
     }
 
     // Optimizely Graph stores the type in Most Significant first order, we need least significant first, also we're stripping out the common "Content" item from it
-    if (Array.isArray(contentType))
-        contentType = contentType.filter(x => x.toLowerCase() != "content").reverse()
-
-    // Apply the content-type prefix if needed
-    if (Array.isArray(contentType) && Utils.isNonEmptyString(contentTypePrefix) && contentType.length > 0 && contentType[0] != contentTypePrefix) {
-        if (context.isDebug)
-            console.info(`⚪ [CmsContent] Component type [${ contentType.join('/')}] doesn't have the configured prefix, adding ${ contentTypePrefix } as prefix`)
-        contentType.unshift(contentTypePrefix)
-    }
+    if (Array.isArray(myContentType))
+        myContentType = contentTypePrefix ?
+            Utils.normalizeAndPrefixContentType(myContentType.reverse(), contentTypePrefix) :
+            Utils.normalizeContentType(myContentType.reverse(), true)
     
     // Resolve component
-    const Component = factory.resolve(contentType ?? "") as EnhancedCmsComponent | undefined
+    const Component = factory.resolve(myContentType ?? "") as EnhancedCmsComponent | undefined
     if (!Component) {
         if (context.isDebugOrDevelopment) {
-            console.warn(`🟠 [CmsContent] Component of type "${ contentType?.join('/') ?? "" }" not resolved by factory`)
+            console.warn(`🟠 [CmsContent] Component of type "${ myContentType?.join('/') ?? "" }" not resolved by factory`)
         }
         if (context.isDebug || context.inEditMode || outputEditorWarning) {
-            const errorMsg = <div className='opti-error'>Component of type "{ contentType?.join('/') ?? "" }" not resolved by factory</div>
+            const errorMsg = <div className='opti-error'>Component of type "{ myContentType?.join('/') ?? "" }" not resolved by factory</div>
             return children ? <>{ errorMsg }{children}</> : errorMsg
         }
         return <>{children ? children : undefined }</>
@@ -101,7 +97,7 @@ export const CmsContent = async <LocalesType = string>({contentType, contentType
             console.log("⚪ [CmsContent] Rendering CMS Component using fragment information", fragmentProps)
 
         if (Utils.validatesFragment(Component) && !Component.validateFragment(fragmentData)) {
-            console.error("🔴 [CmsContent] Invalid fragment data received for ", Component.displayName ?? contentType?.join("/") ?? "[Undetermined component]")
+            console.error("🔴 [CmsContent] Invalid fragment data received for ", Component.displayName ?? myContentType?.join("/") ?? "[Undetermined component]")
             return <></>
         }
         return <Component contentLink={ contentLink } data={ fragmentData || {} } inEditMode={ context.inEditMode } layoutProps={ layoutProps } >{children}</Component>
@@ -109,7 +105,7 @@ export const CmsContent = async <LocalesType = string>({contentType, contentType
 
     if (isInline) {
         console.error(`🔴 [CmsContent] No data for content ${ contentLinkToString(contentLink) }, data cannot be resolved for inline content`)
-        throw new Error(`Unable to render Inline CMS Content without data. (Content Type: ${ Component?.displayName ?? contentType?.join('/') ?? "Unknown" }; Content Link: ${ contentLinkToString(contentLink )}; Data keys: ${ Object.getOwnPropertyNames(fragmentData ?? {}).join(", ")})`)
+        throw new Error(`Unable to render Inline CMS Content without data. (Content Type: ${ Component?.displayName ?? myContentType?.join('/') ?? "Unknown" }; Content Link: ${ contentLinkToString(contentLink )}; Data keys: ${ Object.getOwnPropertyNames(fragmentData ?? {}).join(", ")})`)
     }
 
     // Render using included query 
@@ -142,7 +138,7 @@ export const CmsContent = async <LocalesType = string>({contentType, contentType
     
     // Assume there's no server side prepared data needed for the component
     if (context.isDebug)
-        console.log(`⚪ [CmsContent] Component of type "${ contentType?.join('/') ?? Component.displayName ?? '?'}" did not request pre-loading of data`)
+        console.log(`⚪ [CmsContent] Component of type "${ myContentType?.join('/') ?? Component.displayName ?? '?'}" did not request pre-loading of data`)
     return <Component contentLink={ contentLink as ContentLink } data={ fragmentData || {} } inEditMode={ context.inEditMode } layoutProps={ layoutProps } >{children}</Component>
 }
 
