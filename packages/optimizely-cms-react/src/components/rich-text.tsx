@@ -231,7 +231,10 @@ export const DefaultComponents : ComponentTypeDictionary = [
     { type: 'RichText/link', component: createHtmlComponent("a")},
     { type: 'RichText/image', component: createHtmlComponent("img", true)},
     { type: 'RichText/text', component: DefaultTextNode},
-    { type: 'RichText/br', component: createHtmlComponent("br", true)}
+    { type: 'RichText/br', component: createHtmlComponent("br", true)},
+    { type: 'RichText/bulleted-list', component: createHtmlComponent("ul")},
+    { type: 'RichText/numbered-list', component: createHtmlComponent("ol")},
+    { type: 'RichText/list-item', component: createHtmlComponent("li")}
 ]
 
 export default RichText
