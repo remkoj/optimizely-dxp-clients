@@ -3,19 +3,46 @@ import { type ClientFactory } from '@remkoj/optimizely-graph-client'
 import { type GraphQLClient } from 'graphql-request'
 import { type ContentQueryProps } from '@remkoj/optimizely-cms-react'
 
-export { type ContentQueryProps } from '@remkoj/optimizely-cms-react'
+export type ContentRequest = (Omit<ContentQueryProps<string>, 'path'> & { path: string | null, token: string, ctx: 'edit' | 'preview' })
 
 type ServerPageProps = { params: Record<string,string | Array<string>>, searchParams: Record<string,string>}
 export type EditPageComponent<T extends ServerPageProps = EditPageProps> = ({ params, searchParams }: T) => Promise<JSX.Element>
 
 export type EditPageProps = {
     params: {
-        path: string[]
+        path?: string[] | string
+        lang?: string
     },
-    searchParams: Partial<{
-        epieditmode: string
+    searchParams: {
         preview_token: string
-    }>
+        key?: string
+        ver?: string
+        loc?: string
+        ctx?: 'edit' | 'preview'
+        epieditmode?: string
+    }
+}
+
+export type ValidatedEditPageProps = {
+    params: {
+        path?: string[] | string
+        lang?: string
+    },
+    searchParams: {
+        preview_token: string
+    } & ({
+        key: string
+        ver: string
+        loc: string
+        ctx: 'edit' | 'preview'
+        epieditmode: undefined
+    } | {
+        key: undefined
+        ver: undefined
+        loc: undefined
+        ctx: undefined
+        epieditmode: 'true' | 'false'
+    })
 }
 
 export type EditViewOptions = {
@@ -24,12 +51,6 @@ export type EditViewOptions = {
      * in ContentGraph
      */
     refreshNotice: ComponentType<{}>
-
-    /**
-     * The message to show to the editor when an error occured in rendering the
-     * on page editing mode
-     */
-    errorNotice: ComponentType<{ title: string, message: string }>
 
     /**
      * The layout to use when rendering a page component

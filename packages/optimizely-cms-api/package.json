@@ -12,12 +12,12 @@
     "./dist"
   ],
   "devDependencies": {
-    "@types/node": "^20.14.2",
+    "@types/node": "^20.14.7",
     "dotenv": "^16.4.5",
-    "glob": "^10.4.1",
+    "glob": "^10.4.2",
     "openapi-typescript-codegen": "^0.29.0",
     "tslib": "^2.6.3",
-    "typescript": "^5.4.5"
+    "typescript": "^5.5.2"
   },
   "scripts": {
     "clean": "tsc --build --clean",

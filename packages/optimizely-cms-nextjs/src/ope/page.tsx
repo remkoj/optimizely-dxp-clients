@@ -1,7 +1,6 @@
 import 'server-only'
 
-import type { EditPageProps, EditPageComponent, EditViewOptions, ContentQueryProps } from './types.js'
-import { AuthMode } from '@remkoj/optimizely-graph-client'
+import type { EditPageProps, EditPageComponent, EditViewOptions } from './types.js'
 import { contentLinkToString } from '@remkoj/optimizely-graph-client/utils'
 import { Utils, type ContentLinkWithLocale } from '@remkoj/optimizely-cms-react'
 import { CmsContent, getServerContext, type ComponentFactory } from '@remkoj/optimizely-cms-react/rsc'
@@ -11,71 +10,14 @@ import { getAuthorizedServerClient } from '../client.js'
 import React from 'react'
 import Script from 'next/script.js'
 import { getContentById } from './data.js'
-
-function readValue<T extends string | undefined>(variableName: string, defaultValue?: T) : T extends string ? string : string | undefined
-{
-    try {
-        const stringValue = process?.env ? process.env[variableName] : undefined
-        return stringValue || defaultValue as T extends string ? string : undefined
-    } catch {
-        return defaultValue as T extends string ? string : undefined
-    }
-}
-
-function readValueAsInt<T extends number | undefined>(variableName: string, defaultValue?: T) : T extends number ? number : number | undefined
-{
-    const stringValue = readValue(variableName)
-    if (!stringValue)
-        return defaultValue as T extends number ? number : undefined
-    try {
-        return parseInt(stringValue)
-    } catch {
-        return defaultValue as T extends number ? number : undefined
-    }
-}
+import { getContentRequest, isValidRequest } from './tools.js'
 
 const defaultOptions : EditViewOptions = {
     refreshNotice: () => <div className='optly-refresh-notice'>Updating preview, please wait....</div>,
-    errorNotice: props => <div className='optly-error-notice'>
-        <div className='optly-error-title'>{ props.title }</div>
-        <div className='optly-error-message'>{ props.message }</div>
-    </div>,
     layout: props => <>{ props.children }</>,
     loader: getContentById,
     clientFactory: (token?: string) => getAuthorizedServerClient(token),
     communicationInjectorPath: '/util/javascript/communicationinjector.js'
-}
-
-// Helper function to read the ContentID & WorkID
-function getContentRequest(path: string | string[] = "", searchParams: Record<string, string>) : (ContentQueryProps<string> & { path: string }) | undefined
-{
-    try {
-        if (searchParams.preview_token == AuthMode.HMAC || searchParams.preview_token == AuthMode.Basic) {
-            console.error("🦺 [OnPageEdit] Edit mode requested with developer tokens, falling back to URL parsing to determine content")
-            const fullPath = Array.isArray(path) ? path.map(p => decodeURIComponent(p)).join('/') : decodeURI(path);
-            const [ cmsPath, contentString ] = fullPath.split(',,',3);
-            const [ contentKey, contentVersion ] = (contentString ?? '').split('_',3);
-            const contentPath = (cmsPath.startsWith('/') ? cmsPath.substring(1) : cmsPath).replace(/^(ui\/){0,1}(CMS\/){0,1}(Content\/){0,1}/gi, "")
-            const firstSlug : string | undefined = contentPath.split('/')[0]
-            const contentLocale = firstSlug?.length == 2 || firstSlug?.length == 5 ? firstSlug : undefined
-            return {
-                key: contentKey,
-                version: contentVersion,
-                locale: contentLocale,
-                path: '/' + contentPath + (contentPath.endsWith('/') || contentPath == '' ? '' : '/')
-            }
-        } else {
-            const tokenInfo = JSON.parse(atob(searchParams.preview_token.split('.')[1]))
-            return {
-                key: tokenInfo.key,
-                version: tokenInfo.ver,
-                locale: tokenInfo.loc,
-                path: ''
-            }
-        }
-    } catch {
-        return undefined
-    }
 }
 
 /**
@@ -96,33 +38,29 @@ export function createEditPageComponent(
     const {
         layout: PageLayout,
         refreshNotice: RefreshNotice,
-        errorNotice: ErrorNotice,
         loader: getContentById,
         clientFactory,
         communicationInjectorPath
     } = { ...defaultOptions, ...options }
 
-    async function EditPage({ params: { path }, searchParams }: EditPageProps) : Promise<JSX.Element>
+    async function EditPage(props: EditPageProps) : Promise<JSX.Element>
     {
         // Create context
         const context = getServerContext()
 
         // Validate the search parameters
-        const epiEditMode = searchParams?.epieditmode?.toLowerCase()
-        if (epiEditMode != 'true' && epiEditMode != 'false') {
-            console.error("🔴 [OnPageEdit] Edit mode requested without valid EpiEditMode, refused to render the page. Mode set:", searchParams.epieditmode)
+        if (!isValidRequest(props, false, context.isDevelopment)) {
+            console.error("🔴 [OnPageEdit] Invalid edit mode request")
             return notFound()
         }
 
-        // Allow use-hmac as magic token to be used only on a development environment, otherwise require a minimal length string as token
-        const token = searchParams.preview_token
-        const validDev = context.isDevelopment && (searchParams.preview_token == AuthMode.HMAC || searchParams.preview_token == AuthMode.Basic)
-        if (!token || (token.length < 20 && !validDev)) {
-            console.error("🔴 [OnPageEdit] Edit mode requested without valid Preview Token, refused to render the page")
+        // Get the requested content item
+        const contentRequestInfo = getContentRequest(props)
+        if (!contentRequestInfo) {
+            console.error("🔴 [OnPageEdit] Unable to resolve requested content")
             return notFound()
         }
-        if (context.isDebug)
-            console.log(`⚪ [OnPageEdit] Valid edit mode request: EpiEditMode=${ searchParams.epieditmode }`)
+        const { token, ctx, ...contentRequest } = contentRequestInfo
 
         // Build context
         const client = clientFactory(token)
@@ -131,14 +69,10 @@ export function createEditPageComponent(
         context.setInEditMode(true)
 
         // Get information from the Request URI
-        const contentRequest = getContentRequest(path, searchParams)
-        if (!contentRequest) {
-            console.error("🔴 [OnPageEdit] Unable to resolve requested content")
-            return notFound()
-        }
         if (context.isDebug) {
+            console.log("⚪ [OnPageEdit] Request context:", ctx)
+            console.log("⚪ [OnPageEdit] Request token:", token)
             console.log("⚪ [OnPageEdit] Requested content:", JSON.stringify(contentRequest))
-            console.log("⚪ [OnPageEdit] Creating GraphQL Client:", token)
         }
 
         try {

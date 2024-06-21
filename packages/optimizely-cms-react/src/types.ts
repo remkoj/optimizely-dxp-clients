@@ -30,8 +30,7 @@ export type CmsComponentProps<T, L extends Record<string, any> = Record<string, 
     layoutProps?: L
 }>
 
-export type ContentQueryProps<LocaleType = string> = ContentLink & {
-    locale?: Array<LocaleType> | LocaleType | null
+export type ContentQueryProps<LocaleType = string> = ContentLinkWithLocale<LocaleType> & {
     path?: string | null
     domain?: string | null
 }

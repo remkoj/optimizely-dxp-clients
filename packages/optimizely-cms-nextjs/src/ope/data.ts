@@ -1,4 +1,5 @@
-import type { GetContentByIdMethod, ContentQueryProps, GetContentByIdData } from './types.js'
+import type { GetContentByIdMethod, GetContentByIdData } from './types.js'
+import type { ContentQueryProps } from '@remkoj/optimizely-cms-react'
 import { type GraphQLClient , gql } from 'graphql-request'
 
 export const getContentById : GetContentByIdMethod = async <LocaleType = string>(client: GraphQLClient, variables: ContentQueryProps<LocaleType>) =>

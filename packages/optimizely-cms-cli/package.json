@@ -20,11 +20,11 @@
     "@remkoj/optimizely-cms-api": "workspace:2.0.0-pre6",
     "@rollup/plugin-json": "^6.1.0",
     "@rollup/plugin-typescript": "^11.1.6",
-    "@types/node": "^20.14.2",
+    "@types/node": "^20.14.7",
     "@types/yargs": "^17.0.32",
     "rollup": "^4.18.0",
     "tslib": "^2.6.3",
-    "typescript": "^5.4.5"
+    "typescript": "^5.5.2"
   },
   "peerDependencies": {
     "@remkoj/optimizely-cms-api": "2.0.0-pre6"
@@ -35,7 +35,7 @@
     "dotenv": "^16.4.5",
     "dotenv-expand": "^11.0.6",
     "figures": "^6.1.0",
-    "glob": "^10.4.1",
+    "glob": "^10.4.2",
     "yargs": "^17.7.2"
   },
   "stableVersion": "2.0.0-pre4"
