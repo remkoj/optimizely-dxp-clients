@@ -175,7 +175,7 @@ const RichTextElement : FunctionComponent<RichTextElementProps> = ({ factory, no
 }
 //#endregion
 
-
+//#region HTML Components
 export function createHtmlComponent<E extends keyof JSX.IntrinsicElements>(element: E, ignoreChildren: boolean = false, defaultProps?: JSX.IntrinsicElements[E] & Record<string,string>)
 {
     const HtmlElement = element as string
@@ -236,5 +236,6 @@ export const DefaultComponents : ComponentTypeDictionary = [
     { type: 'RichText/numbered-list', component: createHtmlComponent("ol")},
     { type: 'RichText/list-item', component: createHtmlComponent("li")}
 ]
+//#endregion
 
 export default RichText

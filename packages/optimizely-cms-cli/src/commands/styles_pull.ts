@@ -1,27 +1,40 @@
 import type { CliModule } from '../types.js'
 import { parseArgs } from '../tools/parseArgs.js'
-import { createClient } from '@remkoj/optimizely-cms-api'
+import { createClient, type IntegrationApi } from '@remkoj/optimizely-cms-api'
 import chalk from 'chalk'
 import figures from 'figures'
 import fs from 'node:fs'
 import path from 'node:path'
 
-export const StylesPullCommand : CliModule = {
+type StylesPullModule = CliModule<{
+    excludeTemplates: string[]
+    templates?: string[]
+    definitions?: boolean
+    force?: boolean
+}>
+
+export const StylesPullCommand : StylesPullModule = {
     command: "styles:pull",
     describe: "Create Visual Builder style definitions from the CMS",
+    builder: (yargs) => {
+        yargs.option('force', { alias: 'f', description: "Overwrite existing files", boolean: true, type: 'boolean', demandOption: false, default: false })
+        yargs.option("excludeTemplates", { alias: 'e', description: "Exclude these templates", string: true, type: 'array', demandOption: false, default: []})
+        yargs.option("templates", { alias: 't', description: "Select only these templates", string: true, type: 'array', demandOption: false, default: []})
+        yargs.option("definitions", { alias: 'd', description: "Create/overwrite typescript definitions", boolean: true, type: 'boolean', demandOption: false, default: false})
+        return yargs
+    },
     handler: async (args) => {
-        const { _config: cfg, components: basePath } = parseArgs(args)
+        const { _config: cfg, components: basePath, force, definitions, excludeTemplates, templates } = parseArgs(args)
         const client = createClient(cfg)
         const pageSize = 100
 
+        //#region Load all templates from Optimizely CMS
         process.stdout.write(chalk.yellowBright(`${ figures.arrowRight } Reading DisplayStyles from Optimizely CMS\n`))
-
         if (cfg.debug)
             process.stdout.write(chalk.gray(`${ figures.arrowRight } Fetching page 1 of ? (${ pageSize } items per page)\n`))
         let templatesPage = await client.displayTemplates.displayTemplatesList(0, pageSize)
         const results : (typeof templatesPage)["items"] = templatesPage.items ?? []
         let pagesRemaining = Math.ceil(templatesPage.totalItemCount / templatesPage.pageSize) - (templatesPage.pageIndex + 1)
-
         while (pagesRemaining > 0 && results.length < templatesPage.totalItemCount) {
             if (cfg.debug)
                 process.stdout.write(chalk.gray(`${ figures.arrowRight } Fetching page ${ templatesPage.pageIndex + 2 } of ${ Math.ceil(templatesPage.totalItemCount / templatesPage.pageSize) } (${ templatesPage.pageSize } items per page)\n`))
@@ -29,20 +42,30 @@ export const StylesPullCommand : CliModule = {
             results.push(...templatesPage.items)
             pagesRemaining = Math.ceil(templatesPage.totalItemCount / templatesPage.pageSize) - (templatesPage.pageIndex + 1)
         }
-
         if (cfg.debug)
             process.stdout.write(chalk.gray(`${ figures.arrowRight } Fetched ${ results.length } Content-Types from Optimizely CMS\n`))
+        //#endregion
 
+        //#region Ensure target base path exists
         if (!fs.existsSync(basePath))
             fs.mkdirSync(basePath, { recursive: true })
-
         if (!fs.statSync(basePath).isDirectory()) {
             process.stderr.write(chalk.redBright(`${ chalk.bold(figures.cross) } The components path ${ basePath } is not a folder\n`))
             process.exit(1)
         }
+        //#endregion
 
-        const typeFiles : Record<string, { templates: typeof results, filePath: string }> = {}
-        const updatedTemplates = await Promise.all(results.map(async displayTemplate => {
+        //#region Apply template filters
+        const filteredResults = results.filter(result => {
+            if (excludeTemplates.includes(result.key)) return false
+            if (templates.length > 0 && !templates.includes(result.key)) return false
+            return true
+        })
+        //#endregion
+
+        //#region Create & Write opti-style.json files
+        const typeFiles : Record<string, { templates: Array<{ file: string, data: IntegrationApi.DisplayTemplate }>, filePath: string }> = {}
+        const updatedTemplates = (await Promise.all(filteredResults.map(async displayTemplate => {
             let itemPath : string | undefined = undefined
             let targetType : string
             let typesPath : string
@@ -74,45 +97,69 @@ export const StylesPullCommand : CliModule = {
                     templates: []
                 }
             }
-            typeFiles[targetType].templates.push(displayTemplate)
+            typeFiles[targetType].templates.push({ file: filePath, data: displayTemplate})
             
             return displayTemplate.key
-        }))
+        })))
+        //#endregion
         
-        for (const targetId of Object.getOwnPropertyNames(typeFiles)) {
-            const { filePath: typeFilePath, templates } = typeFiles[targetId]
-            
-            // Write Style definition
-            const typeContents : string[] = []
-            let typeId : string | undefined = undefined
-            templates.forEach(displayTemplate => {
-                if (Object.getOwnPropertyNames(displayTemplate.settings).length > 0) {
-                    typeContents.push(`export type ${ displayTemplate.key }Settings = Array<`)
-                    const typeSettings : string[] = []
-                    for (const settingName of Object.getOwnPropertyNames(displayTemplate.settings)) {
-                        const settingOptions = '"'+Object.getOwnPropertyNames(displayTemplate.settings[settingName].choices).join('" | "')+'"'
-                        typeSettings.push(`    { key: "${settingName}", value: ${ settingOptions }}`)
-                    }
-                    typeContents.push(typeSettings.join(" |\n"))
-                    typeContents.push('>')
-                } else {
-                    typeContents.push(`export type ${ displayTemplate.key }Settings = []`)
-                }
-                typeContents.push(`export type ${ displayTemplate.key }LayoutProps = {`)
-                typeContents.push(`    template: "${ displayTemplate.key }"`)
-                typeContents.push(`    settings: ${ displayTemplate.key }Settings`)
-                typeContents.push(`}`)
+        //#region Create needed definition files
+        if (definitions) {
+            for (const targetId of Object.getOwnPropertyNames(typeFiles)) {
+                const { filePath: typeFilePath, templates } = typeFiles[targetId]
 
-                typeId = displayTemplate.contentType ?? displayTemplate.baseType ?? displayTemplate.nodeType
-                typeId = typeId[0]?.toUpperCase() + typeId.substring(1) + "LayoutProps"
-            })
-            typeContents.push(`export type ${ typeId } = ${ templates.map(t => t.key + "LayoutProps").join(' | ') }`)
-            typeContents.push(`export default ${ typeId }`)
-            fs.writeFileSync(typeFilePath, typeContents.join("\n"))
+                if (fs.existsSync(typeFilePath) && !force) {
+                    if (cfg.debug)
+                        process.stdout.write(chalk.gray(`${ figures.cross } Skipped writing definition file ${ typeFilePath } as it already exists\n`))
+                    continue
+                }
+                
+                // Write Style definition
+                const imports : string[] = ['import type { LayoutProps } from "@remkoj/optimizely-cms-react/components"','import type { ReactNode } from "react"']
+                const typeContents : string[] = []
+                const props : string[] = []
+                let typeId : string | undefined = targetId.split('/',2)[1]
+                templates.forEach(({ file: displayTemplateFile, data: displayTemplate }) => {
+                    const importPath = path.relative(path.dirname(typeFilePath), displayTemplateFile).replaceAll('\\','/')
+                    imports.push(`import type ${ displayTemplate.key }Styles from "./${ importPath }"`)
+                    typeContents.push(`export type ${ displayTemplate.key }Props = LayoutProps<typeof ${ displayTemplate.key }Styles>`)
+                    typeContents.push(`export type ${ displayTemplate.key }ComponentProps<DT extends Record<string, any> = Record<string, any>> = {
+    data: DT
+    layoutProps: ${ displayTemplate.key }Props | undefined
+} & JSX.IntrinsicElements['div']`)
+                    typeContents.push(`export type ${ displayTemplate.key }Component<DT extends Record<string, any> = Record<string, any>> = (props: ${ displayTemplate.key }ComponentProps<DT>) => ReactNode`)
+                    typeContents.push('')
+                    props.push(`${ displayTemplate.key }Props`)
+                    if (!typeId)
+                        typeId = displayTemplate.nodeType ?? displayTemplate.baseType ?? displayTemplate.contentType
+                })
+
+                if (typeId) {
+                    typeId = ucFirst(typeId)
+                    typeContents.push('')
+                    typeContents.push(`export type ${ typeId }LayoutProps = ${ props.join(' | ')}
+export type ${ typeId }ComponentProps<DT extends Record<string, any> = Record<string, any>, LP extends ${ typeId }LayoutProps = ${ typeId }LayoutProps> = {
+    data: DT
+    layoutProps: LP | undefined
+} & JSX.IntrinsicElements['div']
+
+export type ${ typeId }Component<DT extends Record<string, any> = Record<string, any>, LP extends ${ typeId }LayoutProps = ${ typeId }LayoutProps> = (props: ${ typeId }ComponentProps<DT,LP>) => ReactNode`)
+                }
+
+                fs.writeFileSync(typeFilePath, imports.join("\n") + "\n\n" + typeContents.join("\n"))
+            }
         }
+        //#endregion
 
         process.stdout.write(chalk.yellowBright(`${ figures.arrowRight } Created/updated style definitions for ${ updatedTemplates.join(', ') }\n`))
         process.stdout.write(chalk.green(chalk.bold(figures.tick+" Done"))+"\n")
     }
 }
 export default StylesPullCommand
+
+function ucFirst(input: string) 
+{
+    if (typeof(input) != 'string' || input.length < 1)
+        return input
+    return input[0].toUpperCase() + input.substring(1)
+}

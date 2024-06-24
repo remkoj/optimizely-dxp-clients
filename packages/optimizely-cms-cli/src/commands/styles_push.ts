@@ -1,6 +1,6 @@
 import type { CliModule } from '../types.js'
 import { parseArgs } from '../tools/parseArgs.js'
-import { createClient } from '@remkoj/optimizely-cms-api'
+import { createClient, type IntegrationApi } from '@remkoj/optimizely-cms-api'
 import { glob } from 'glob'
 import path from 'node:path'
 import fs from 'node:fs'
@@ -8,37 +8,44 @@ import chalk from 'chalk'
 import figures from 'figures'
 import Table from 'cli-table3'
 
-export const StylesPushCommand : CliModule = {
+type StylesPushModule = CliModule<{
+    excludeTemplates: string[]
+    templates?: string[]
+}>
+
+export const StylesPushCommand : StylesPushModule = {
     command: "styles:push",
     describe: "Push Visual Builder style definitions into the CMS (create/replace)",
+    builder: (yargs) => {
+        yargs.option('excludeTemplates', { alias: 'e', description: "Exclude these templates", string: true, type: 'array', demandOption: false, default: []})
+        yargs.option("templates", { alias: 't', description: "Select only these templates", string: true, type: 'array', demandOption: false, default: []})
+        return yargs
+    },
     handler: async (args) => {
-        const { _config: cfg, ...opts } = parseArgs(args)
+        const { _config: cfg, excludeTemplates, templates, ...opts } = parseArgs(args)
         const client = createClient(cfg)
-
-        /*const currentTemplates = await client.displayTemplates.displayTemplatesList()
-        currentTemplates.items?.map(tpl => {
-            console.log(JSON.stringify(tpl, undefined, 4))
-        })*/
         
         process.stdout.write(chalk.yellowBright(`${ figures.arrowRight } Pushing (create/replace) DisplayStyles into Optimizely CMS\n`))
 
         const styleDefinitionFiles = await glob("./**/*.opti-style.json", {
             cwd: opts.components
         })
-        const results = await Promise.all(styleDefinitionFiles.map(async styleDefinitionFile => {
+        const results = (await Promise.all(styleDefinitionFiles.map(async styleDefinitionFile => {
             const filePath = path.normalize(path.join(opts.components, styleDefinitionFile))
             const styleDefinition = tryReadJsonFile(filePath, cfg.debug)
             const styleKey = styleDefinition.key
             if (!styleKey) {
                 process.stderr.write(chalk.redBright(`${ chalk.bold(figures.cross) } The style definition in ${ path.relative(opts.path, filePath) } does not have a key defined\n`))
-                return
+                return undefined
             }
+            if (excludeTemplates.includes(styleKey)) return undefined // Skip excluded styles
+            if (templates.length > 0 && !templates.includes(styleKey)) return undefined // Only include defined styles, if any
             if (cfg.debug)
                 process.stdout.write(chalk.gray(`${ figures.arrowRight } Pushing: ${ styleKey }\n`))
 
             const newTemplate = await client.displayTemplates.displayTemplatesPut(styleKey, styleDefinition)
             return newTemplate
-        }))
+        }))).filter(isNotNullOrUndefined)
 
         const styles = new Table({
             head: [
@@ -74,4 +81,9 @@ function tryReadJsonFile<T = any>(filePath: string, debug: boolean = false): T |
         process.stderr.write(chalk.redBright(`${ chalk.bold(figures.cross) } Error while reading ${ filePath }\n`))
     }
     return undefined
+}
+
+function isNotNullOrUndefined<T>(i: T | null | undefined | void): i is T
+{
+    return i ? true : false
 }
