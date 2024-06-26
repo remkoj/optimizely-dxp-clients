@@ -4,6 +4,7 @@ import { type CmsIntegrationApiOptions, getCmsIntegrationApiConfigFromEnvironmen
 import type { InstanceApiVersionInfo } from "./types";
 import type { CancelablePromise } from "./client";
 import buildInfo from "./version.json"
+import { OpenAPI } from "./client/core/OpenAPI"
 
 export class ApiClient extends CmsIntegrationApiClient
 {
@@ -17,12 +18,26 @@ export class ApiClient extends CmsIntegrationApiClient
     public constructor (config?: CmsIntegrationApiOptions)
     {
         const options = config ?? getCmsIntegrationApiConfigFromEnvironment()
+        options.base = new URL(OpenAPI.BASE, options.base)
+        let access_token : string | undefined = undefined
         super({
             BASE: options.base.href, 
-            TOKEN: () => getAccessToken(options),
+            TOKEN: async () => {
+                if (!access_token)
+                    access_token = await getAccessToken(options).catch(e => {
+                        if (options.debug) {
+                            console.error(`🔴 [CMS API] Failed to obtain an access token`)
+                            console.error(e)
+                        }
+                        return undefined
+                    })
+                return access_token ?? ''
+            },
             HEADERS: {
                 Connection: "Close"
-            }
+            },
+            WITH_CREDENTIALS: true,
+            CREDENTIALS: "include"
         })
         this._config = options
     }
@@ -41,6 +56,11 @@ export class ApiClient extends CmsIntegrationApiClient
     public get debug() : boolean
     {
         return this._config.debug ?? false
+    }
+
+    public get version() : string
+    {
+        return OpenAPI.VERSION
     }
 
     /**
