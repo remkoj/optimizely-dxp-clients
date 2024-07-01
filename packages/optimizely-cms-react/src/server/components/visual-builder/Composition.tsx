@@ -40,7 +40,7 @@ export async function OptimizelyComposition({ node, leafPropsFactory = defaultPr
         throw new Error("🟡 [VisualBuilder] [OptimizelyComposition] The factory must have a definition for Component/Node")
 
     //@ts-expect-error CmsContent is an Asynchronous server component, which isn't supported by the generic React Typings
-    return <CmsContent contentType={contentType} contentLink={contentLink} fragmentData={fragmentData} layoutProps={layoutProps} >
+    return <CmsContent contentType={contentType} contentLink={contentLink} fragmentData={fragmentData} layoutProps={layoutProps} noDataLoad>
         {(node.nodes ?? []).map((child) => {
             const childKey = child.key ? child.key : `vb::${ JSON.stringify( child )}`
             //@ts-expect-error OptimizelyComposition is an Asynchronous server component, which isn't supported by the generic React Typings

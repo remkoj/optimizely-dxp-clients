@@ -207,6 +207,8 @@ export function createHtmlComponent<E extends keyof JSX.IntrinsicElements>(eleme
 const DefaultTextNode : FunctionComponent<{ node: TextNode }> = ({ node }) => {
     if (node.bold)
         return <strong>{ decodeHTML(node.text) }</strong>
+    if (node.italic)
+        return <em>{ decodeHTML(node.text) }</em>
     const unsupportedProps = Object.getOwnPropertyNames(node).filter(x => x != 'text')
     if (unsupportedProps.length > 0 && process.env.NODE_ENV != 'production')
         console.warn('🟠 [Rich Text] Text node with unsupported additional properties:', unsupportedProps.join(', '));

@@ -1,5 +1,4 @@
-import type { Argv } from 'yargs'
-import type { CommandModule } from 'yargs'
+import type { Argv, CommandModule, ArgumentsCamelCase } from 'yargs'
 import type { CmsIntegrationApiOptions } from '@remkoj/optimizely-cms-api'
 
 export type OptiCmsArgs<P extends Record<string,any> = {}> = {
@@ -29,5 +28,14 @@ export type OptiCmsArgsWithConfig<P extends Record<string,any> = {}> = {
 
 export type OptiCmsApp<E extends Record<string,any> = {}> = Argv<OptiCmsArgs<E>>
 export type CliModuleBase<P extends Record<string,any> = {}> = CommandModule<OptiCmsArgs, OptiCmsArgs<Partial<P>>>
-export type CliModule<P = {}> = Pick<Required<CliModuleBase<P>>, 'command' | 'describe'> & Omit<CliModuleBase<P>, 'command' | 'describe'>
+/**
+ * Defines an Optimizely CMS CLI Module, which is a Yargs CommandModule where:
+ * - The Command is mandatory
+ * - The Description is mandatory
+ * - An additional parameters object may be provided to the handler, usefull to prevent double-fetching
+ *   when creating "group methods" that combine multiple others
+ */
+export type CliModule<P = {}, O = any> = Pick<Required<CliModuleBase<P>>, 'command' | 'describe'> & Omit<CliModuleBase<P>, 'command' | 'describe' | 'handler'> & {
+    handler: (args: ArgumentsCamelCase<OptiCmsArgs<P>>, opts?: O | undefined) => ReturnType<CliModuleBase<P>['handler']>
+}
 export type CliModuleList = CliModuleBase<any>[]

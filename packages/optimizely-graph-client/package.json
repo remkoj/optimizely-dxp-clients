@@ -1,7 +1,7 @@
 {
   "name": "@remkoj/optimizely-graph-client",
   "license": "Apache-2.0",
-  "version": "2.0.0",
+  "version": "2.0.1-pre1",
   "packageManager": "yarn@4.1.1",
   "repository": "https://github.com/remkoj/optimizely-dxp-clients.git",
   "author": "Remko Jantzen <693172+remkoj@users.noreply.github.com>",
@@ -52,8 +52,8 @@
   },
   "devDependencies": {
     "@types/crypto-js": "^4.2.2",
-    "@types/node": "^20.14.7",
-    "graphql": "^16.8.2",
+    "@types/node": "^20.14.9",
+    "graphql": "^16.9.0",
     "graphql-request": "^6.1.0",
     "openapi-typescript-codegen": "^0.29.0",
     "prop-types": "^15.8.1",
@@ -73,5 +73,6 @@
     "watch": "yarn tsc --watch",
     "recompile": "tsc --build --clean && tsc --build --force",
     "generate-admin": "openapi --input https://cg.optimizely.com/app/swagger/swagger.json --output ./src/admin-api/client --name OptimizelyGraphAdminApi && node ./build/update-imports.cjs"
-  }
+  },
+  "stableVersion": "2.0.1"
 }

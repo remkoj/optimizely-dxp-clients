@@ -1,0 +1,14 @@
+import type { CliModule } from '../types.js'
+import { createClient, type ApiClient as CmsApiClient } from '@remkoj/optimizely-cms-api'
+import { parseArgs } from '../tools/parseArgs.js'
+import chalk from 'chalk'
+import figures from 'figures'
+
+export function createCmsClient(args: Parameters<CliModule['handler']>[0]) : CmsApiClient
+{
+    const { _config: cfg } = parseArgs(args)
+    const client = createClient(cfg)
+    if (cfg.debug)
+        process.stdout.write(chalk.gray(`${ figures.arrowRight } Connecting to ${ cfg.base.href } as ${ cfg.actAs ?? cfg.clientId }\n`))
+    return client
+}

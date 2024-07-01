@@ -1,4 +1,4 @@
-import { CliModuleList } from '../types.js'
+import type { CliModuleList } from '../types.js'
 
 // Style processing
 import StylesPushCommand from './styles_push.js'
@@ -11,6 +11,10 @@ import TypesPushCommand from './types_push.js'
 
 // Framework specific logic
 import NextJsCreateCommand from './nextjs_create.js'
+import NextJsQueriesCommand from './nextjs_fragments.js'
+import NextJsComponentsCommand from './nextjs_components.js'
+import NextJsVisualBuilderCommand from './nextjs_visualbuilder.js'
+import NextJsFactoryCommand from './nextjs_factories.js'
 
 // Generic
 import CmsVersionCommand from './cms_info.js'
@@ -22,6 +26,10 @@ export const commands : CliModuleList = [
     TypesPullCommand,
     TypesPushCommand,
     NextJsCreateCommand,
+    NextJsQueriesCommand,
+    NextJsComponentsCommand,
+    NextJsVisualBuilderCommand,
+    NextJsFactoryCommand,
     CmsVersionCommand
 ]
 

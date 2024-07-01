@@ -73,6 +73,12 @@ export type CmsContentProps<LocalesType = string> = PropsWithChildren<{
      * Any layout properties inferred from the context
      */
     layoutProps?: Record<string, any>
+
+    /**
+     * When set to true, this will prevent the CmsContent component to try loading content from
+     * the store
+     */
+    noDataLoad?: boolean
 }>
 
 export type ContentAreaItemDefinition = {

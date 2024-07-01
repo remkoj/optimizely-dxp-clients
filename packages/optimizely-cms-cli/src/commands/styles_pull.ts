@@ -1,67 +1,32 @@
 import type { CliModule } from '../types.js'
 import { parseArgs } from '../tools/parseArgs.js'
-import { createClient, type IntegrationApi } from '@remkoj/optimizely-cms-api'
+import { type IntegrationApi } from '@remkoj/optimizely-cms-api'
 import chalk from 'chalk'
 import figures from 'figures'
 import fs from 'node:fs'
 import path from 'node:path'
 
+import { createCmsClient  } from '../tools/cmsClient.js'
+import { StylesArgs, stylesBuilder, getStyles } from '../tools/styles.js'
+
 type StylesPullModule = CliModule<{
-    excludeTemplates: string[]
-    templates?: string[]
     definitions?: boolean
     force?: boolean
-}>
+} & StylesArgs>
 
 export const StylesPullCommand : StylesPullModule = {
     command: "styles:pull",
     describe: "Create Visual Builder style definitions from the CMS",
     builder: (yargs) => {
-        yargs.option('force', { alias: 'f', description: "Overwrite existing files", boolean: true, type: 'boolean', demandOption: false, default: false })
-        yargs.option("excludeTemplates", { alias: 'e', description: "Exclude these templates", string: true, type: 'array', demandOption: false, default: []})
-        yargs.option("templates", { alias: 't', description: "Select only these templates", string: true, type: 'array', demandOption: false, default: []})
-        yargs.option("definitions", { alias: 'd', description: "Create/overwrite typescript definitions", boolean: true, type: 'boolean', demandOption: false, default: false})
-        return yargs
+        const newYargs = stylesBuilder(yargs)
+        newYargs.option('force', { alias: 'f', description: "Overwrite existing files", boolean: true, type: 'boolean', demandOption: false, default: false })
+        newYargs.option("definitions", { alias: 'd', description: "Create/overwrite typescript definitions", boolean: true, type: 'boolean', demandOption: false, default: true})
+        return newYargs
     },
     handler: async (args) => {
-        const { _config: cfg, components: basePath, force, definitions, excludeTemplates, templates } = parseArgs(args)
-        const client = createClient(cfg)
-        const pageSize = 100
-
-        //#region Load all templates from Optimizely CMS
-        process.stdout.write(chalk.yellowBright(`${ figures.arrowRight } Reading DisplayStyles from Optimizely CMS\n`))
-        if (cfg.debug)
-            process.stdout.write(chalk.gray(`${ figures.arrowRight } Fetching page 1 of ? (${ pageSize } items per page)\n`))
-        let templatesPage = await client.displayTemplates.displayTemplatesList(0, pageSize)
-        const results : (typeof templatesPage)["items"] = templatesPage.items ?? []
-        let pagesRemaining = Math.ceil(templatesPage.totalItemCount / templatesPage.pageSize) - (templatesPage.pageIndex + 1)
-        while (pagesRemaining > 0 && results.length < templatesPage.totalItemCount) {
-            if (cfg.debug)
-                process.stdout.write(chalk.gray(`${ figures.arrowRight } Fetching page ${ templatesPage.pageIndex + 2 } of ${ Math.ceil(templatesPage.totalItemCount / templatesPage.pageSize) } (${ templatesPage.pageSize } items per page)\n`))
-            templatesPage = await client.displayTemplates.displayTemplatesList(templatesPage.pageIndex + 1, templatesPage.pageSize)
-            results.push(...templatesPage.items)
-            pagesRemaining = Math.ceil(templatesPage.totalItemCount / templatesPage.pageSize) - (templatesPage.pageIndex + 1)
-        }
-        if (cfg.debug)
-            process.stdout.write(chalk.gray(`${ figures.arrowRight } Fetched ${ results.length } Content-Types from Optimizely CMS\n`))
-        //#endregion
-
-        //#region Ensure target base path exists
-        if (!fs.existsSync(basePath))
-            fs.mkdirSync(basePath, { recursive: true })
-        if (!fs.statSync(basePath).isDirectory()) {
-            process.stderr.write(chalk.redBright(`${ chalk.bold(figures.cross) } The components path ${ basePath } is not a folder\n`))
-            process.exit(1)
-        }
-        //#endregion
-
-        //#region Apply template filters
-        const filteredResults = results.filter(result => {
-            if (excludeTemplates.includes(result.key)) return false
-            if (templates.length > 0 && !templates.includes(result.key)) return false
-            return true
-        })
-        //#endregion
+        const { _config: cfg, components: basePath, force, definitions } = parseArgs(args)
+        const client = createCmsClient(args)
+        const { styles: filteredResults } = await getStyles(client, args)
 
         //#region Create & Write opti-style.json files
         const typeFiles : Record<string, { templates: Array<{ file: string, data: IntegrationApi.DisplayTemplate }>, filePath: string }> = {}
@@ -70,8 +35,8 @@ export const StylesPullCommand : StylesPullModule = {
             let targetType : string
             let typesPath : string
             if (displayTemplate.nodeType) {
-                itemPath = path.join(basePath,'styles',displayTemplate.nodeType,displayTemplate.key)
-                typesPath = path.join(basePath,'styles',displayTemplate.nodeType)
+                itemPath = path.join(basePath,'nodes',displayTemplate.nodeType,displayTemplate.key)
+                typesPath = path.join(basePath,'nodes',displayTemplate.nodeType)
                 targetType = 'node/'+displayTemplate.nodeType
             } else if (displayTemplate.baseType) {
                 itemPath = path.join(basePath,displayTemplate.baseType,'styles',displayTemplate.key)
@@ -89,6 +54,17 @@ export const StylesPullCommand : StylesPullModule = {
 
             // Write Style JSON
             const filePath = path.join(itemPath,`${ displayTemplate.key }.opti-style.json`)
+            if (fs.existsSync(filePath)) {
+                if (!force) {
+                    if (cfg.debug)
+                        process.stdout.write(chalk.gray(`${ figures.cross } Skipping style file for ${ displayTemplate.key } - File already exists\n`))
+                    return
+                }
+                if (cfg.debug)
+                    process.stdout.write(chalk.gray(`${ figures.arrowRight } Overwriting style file for ${ displayTemplate.key }\n`))
+            } else if (cfg.debug)
+                process.stdout.write(chalk.gray(`${ figures.arrowRight } Creating style file for ${ displayTemplate.key }\n`))
+            
             fs.writeFileSync(filePath, JSON.stringify(displayTemplate, undefined, 2))
 
             if (!typeFiles[targetType]) {
@@ -100,7 +76,7 @@ export const StylesPullCommand : StylesPullModule = {
             typeFiles[targetType].templates.push({ file: filePath, data: displayTemplate})
             
             return displayTemplate.key
-        })))
+        }))).filter(x => x)
         //#endregion
         
         //#region Create needed definition files
@@ -108,11 +84,16 @@ export const StylesPullCommand : StylesPullModule = {
             for (const targetId of Object.getOwnPropertyNames(typeFiles)) {
                 const { filePath: typeFilePath, templates } = typeFiles[targetId]
 
-                if (fs.existsSync(typeFilePath) && !force) {
+                if (fs.existsSync(typeFilePath)) {
+                    if (!force) {
+                        if (cfg.debug)
+                            process.stdout.write(chalk.gray(`${ figures.cross } Skipped writing definition file for ${ targetId } - it already exists\n`))
+                        continue
+                    }
                     if (cfg.debug)
-                        process.stdout.write(chalk.gray(`${ figures.cross } Skipped writing definition file ${ typeFilePath } as it already exists\n`))
-                    continue
-                }
+                        process.stdout.write(chalk.gray(`${ figures.arrowRight } Overwriting definition file for ${ targetId }\n`))
+                } else if (cfg.debug)
+                    process.stdout.write(chalk.gray(`${ figures.arrowRight } Creating definition file for ${ targetId }\n`))
                 
                 // Write Style definition
                 const imports : string[] = ['import type { LayoutProps } from "@remkoj/optimizely-cms-react/components"','import type { ReactNode } from "react"']
@@ -151,8 +132,7 @@ export type ${ typeId }Component<DT extends Record<string, any> = Record<string,
         }
         //#endregion
 
-        process.stdout.write(chalk.yellowBright(`${ figures.arrowRight } Created/updated style definitions for ${ updatedTemplates.join(', ') }\n`))
-        process.stdout.write(chalk.green(chalk.bold(figures.tick+" Done"))+"\n")
+        process.stdout.write(chalk.green(chalk.bold(figures.tick+` Created/updated style definitions for ${ updatedTemplates.join(', ') }`))+"\n")
     }
 }
 export default StylesPullCommand

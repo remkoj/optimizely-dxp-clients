@@ -24,7 +24,7 @@ export function isNode(toTest: any) : toTest is CompositionNode
     if (typeof(toTest) != 'object' || toTest == null)
         return false
 
-    const nodeTypes = ["experience", "outline", "grid", "row", "column", "element"]
+    const nodeTypes = ["experience", "section", "row", "column", "element"]
     const hasValidName = (typeof (toTest as CompositionNode).name == 'string' && ((toTest as CompositionNode).name?.length ?? 0) > 0) || (toTest as CompositionNode).name == null
     const hasValidType = typeof (toTest as CompositionNode).layoutType == 'string' && nodeTypes.includes((toTest as CompositionNode).layoutType)
 
@@ -61,8 +61,19 @@ export const defaultPropsFactory : LeafPropsFactory = <ET extends Record<string,
 
 export const defaultNodePropsFactory : NodePropsFactory = <ET extends Record<string, any>, LT = string>(node: CompositionStructureNode) => {
     const componentTypes = [
+        // New style logic
+        node.template && [ node.template, ucFirst(node.type), ucFirst(node.layoutType), "Content"].filter(x => x) as string[],
+        [ ucFirst(node.type), ucFirst(node.layoutType), "Content"].filter(x => x) as string[],
+        node.template && [ node.template, ucFirst(node.layoutType), "Content"].filter(x => x) as string[],
+        node.template && [ node.template, "Styles", ucFirst(node.layoutType), "Content"].filter(x => x) as string[],
+        node.template && [ node.template, ucFirst(node.layoutType), "Nodes", "Content"].filter(x => x) as string[],
+
+        // Old style logic
         [ node.template, ucFirst(node.type), ucFirst(node.layoutType), "Component", "Content"].filter(x => x) as string[],
         (node.template && node.type) ? [ node.type ? ucFirst(node.type) : null, ucFirst(node.layoutType), "Component", "Content"].filter(x => x) as string[] : null,
+
+        // Fallback
+        ["Node","Content"],
         ["Node","Component","Content"]
     ].filter(x => x) as Array<Array<string>>
     const contentLink : ContentLinkWithLocale<LT> = { key: node.key ?? '' }

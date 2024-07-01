@@ -23,7 +23,7 @@ export type { CmsContentProps } from './types.js'
  * @param     param0 
  * @returns   
  */
-export const CmsContent = async <LocalesType = string>({contentType, contentTypePrefix, contentLink: rawContentLink, children, fragmentData, layoutProps} : CmsContentProps<LocalesType>) : Promise<JSX.Element> => 
+export const CmsContent = async <LocalesType = string>({contentType, contentTypePrefix, contentLink: rawContentLink, children, fragmentData, layoutProps, noDataLoad} : CmsContentProps<LocalesType>) : Promise<JSX.Element> => 
 {
     let myContentType = contentType ? [ ...contentType ] : undefined
     const context = getServerContext()
@@ -106,6 +106,12 @@ export const CmsContent = async <LocalesType = string>({contentType, contentType
     if (isInline) {
         console.error(`🔴 [CmsContent] No data for content ${ contentLinkToString(contentLink) }, data cannot be resolved for inline content`)
         throw new Error(`Unable to render Inline CMS Content without data. (Content Type: ${ Component?.displayName ?? myContentType?.join('/') ?? "Unknown" }; Content Link: ${ contentLinkToString(contentLink )}; Data keys: ${ Object.getOwnPropertyNames(fragmentData ?? {}).join(", ")})`)
+    }
+
+    if (noDataLoad) {
+        if (context.isDebug)
+            console.log(`⚪ [CmsContent] Component of type "${ myContentType?.join('/') ?? Component.displayName ?? '?'}" was prohibited to load data`)
+        return <Component contentLink={ contentLink as ContentLink } data={ fragmentData || {} } inEditMode={ context.inEditMode } layoutProps={ layoutProps } >{children}</Component>
     }
 
     // Render using included query 

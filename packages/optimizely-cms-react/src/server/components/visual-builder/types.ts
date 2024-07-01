@@ -3,8 +3,8 @@ import { type ContentType } from "../../../types.js"
 import { type InlineContentLinkWithLocale, type ContentLinkWithLocale } from "@remkoj/optimizely-graph-client"
 
 export enum StructureNodeTypes {
-    Outline = "outline",
-    Grid = "grid",
+    Experience = "experience",
+    Section = "section",
     Row = "row",
     Column = "column"
 }
@@ -16,7 +16,7 @@ export type CompositionNodeBase = {
     settings?: Array<{ key: string, value: string | number | boolean } | null> | null
 }
 export type CompositionStructureNode = CompositionNodeBase & {
-    layoutType: "outline" | "grid" | "row" | "column"
+    layoutType: "experience" | "section" | "row" | "column"
     nodes?: Array<CompositionNode>
 }
 export type CompositionElementNode<E extends Record<string,any> = Record<string,any>> = CompositionNodeBase & {

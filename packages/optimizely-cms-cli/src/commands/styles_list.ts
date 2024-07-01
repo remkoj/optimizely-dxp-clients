@@ -1,34 +1,16 @@
 import type { CliModule } from '../types.js'
-import { parseArgs } from '../tools/parseArgs.js'
-import { createClient } from '@remkoj/optimizely-cms-api'
 import chalk from 'chalk'
 import figures from 'figures'
 import Table from 'cli-table3'
+
+import { createCmsClient } from '../tools/cmsClient.js'
+import { getStyles } from '../tools/styles.js'
 
 export const StylesListCommand : CliModule = {
     command: "styles:list",
     describe: "List Visual Builder style definitions from the CMS",
     handler: async (args) => {
-        const { _config: cfg, ...opts } = parseArgs(args)
-        const client = createClient(cfg)
-        const pageSize = 100
-
-        process.stdout.write(chalk.yellowBright(`${ figures.arrowRight } Reading DisplayStyles from Optimizely CMS\n`))
-
-        if (cfg.debug)
-            process.stdout.write(chalk.gray(`${ figures.arrowRight } Fetching page 1 of ? (${ pageSize } items per page)\n`))
-        let templatesPage = await client.displayTemplates.displayTemplatesList(0, pageSize)
-        const results : (typeof templatesPage)["items"] = templatesPage.items ?? []
-        let pagesRemaining = Math.ceil(templatesPage.totalItemCount / templatesPage.pageSize) - (templatesPage.pageIndex + 1)
-
-        while (pagesRemaining > 0 && results.length < templatesPage.totalItemCount) {
-            if (cfg.debug)
-                process.stdout.write(chalk.gray(`${ figures.arrowRight } Fetching page ${ templatesPage.pageIndex + 2 } of ${ Math.ceil(templatesPage.totalItemCount / templatesPage.pageSize) } (${ templatesPage.pageSize } items per page)\n`))
-            templatesPage = await client.displayTemplates.displayTemplatesList(templatesPage.pageIndex + 1, templatesPage.pageSize)
-            results.push(...templatesPage.items)
-            pagesRemaining = Math.ceil(templatesPage.totalItemCount / templatesPage.pageSize) - (templatesPage.pageIndex + 1)
-        }
-
+        const { all: results } = await getStyles(createCmsClient(args), { ...args, excludeBaseTypes: [], excludeNodeTypes: [], excludeTemplates: [], excludeTypes: [], baseTypes: [], nodes: [], templates: [], types: [], templateTypes: []})
         const styles = new Table({
             head: [
                 chalk.yellow(chalk.bold("Name")),
