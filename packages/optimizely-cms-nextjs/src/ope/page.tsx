@@ -117,9 +117,9 @@ export function createEditPageComponent(
                 {/* @ts-expect-error */}
                 <Script src={new URL(communicationInjectorPath, client.siteInfo.cmsURL).href} strategy='afterInteractive' />
                 <Layout locale={ contentItem.locale?.name ?? '' }>
-                    <OnPageEdit mode={ context.inEditMode ? 'edit' : 'preview' }>
+                    {context.inEditMode ?? <OnPageEdit>
                         <RefreshNotice />
-                    </OnPageEdit>
+                    </OnPageEdit>}
                     <CmsContent contentType={ contentType } contentLink={ contentLink } fragmentData={ contentItem } />
                 </Layout>
                 <div className='optly-contentLink'>ContentItem: { contentLink ? contentLinkToString(contentLink) : "Invalid content link returned from Optimizely Graph" }</div>
