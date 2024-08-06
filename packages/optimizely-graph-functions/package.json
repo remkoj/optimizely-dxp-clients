@@ -1,7 +1,7 @@
 {
   "name": "@remkoj/optimizely-graph-functions",
   "license": "Apache-2.0",
-  "version": "2.0.1-pre1",
+  "version": "2.0.1-pre2",
   "packageManager": "yarn@4.1.1",
   "repository": "https://github.com/remkoj/optimizely-dxp-clients.git",
   "author": "Remko Jantzen <693172+remkoj@users.noreply.github.com>",
@@ -35,19 +35,19 @@
     }
   },
   "devDependencies": {
-    "@types/node": "^20.14.9",
+    "@types/node": "^22.1.0",
     "graphql": "^16.9.0",
     "graphql-request": "^6.1.0",
     "graphql-tag": "^2.12.6",
-    "typescript": "^5.5.2"
+    "typescript": "^5.5.4"
   },
   "dependencies": {
     "@graphql-codegen/add": "^5.0.3",
-    "@graphql-codegen/client-preset": "^4.3.1",
+    "@graphql-codegen/client-preset": "^4.3.3",
     "@graphql-codegen/plugin-helpers": "^5.0.4",
-    "@graphql-codegen/typescript": "^4.0.8",
+    "@graphql-codegen/typescript": "^4.0.9",
     "@graphql-codegen/typescript-graphql-request": "^6.2.0",
-    "@graphql-codegen/typescript-operations": "^4.2.2",
+    "@graphql-codegen/typescript-operations": "^4.2.3",
     "tslib": "^2.6.3"
   },
   "scripts": {
@@ -63,7 +63,7 @@
     "graphql-tag": "*"
   },
   "optionalDependencies": {
-    "@remkoj/optimizely-graph-client": "2.0.1-pre1"
+    "@remkoj/optimizely-graph-client": "2.0.1-pre2"
   },
   "stableVersion": "2.0.1"
 }

@@ -3246,7 +3246,10 @@
                     "media",
                     "image",
                     "video",
-                    "folder"
+                    "folder",
+                    "experience",
+                    "section",
+                    "element"
                 ],
                 "type": "string",
                 "description": "Represent the base type of a ContentType."
@@ -3719,6 +3722,7 @@
                     "key": {
                         "maxLength": 255,
                         "minLength": 2,
+                        "pattern": "^[A-Za-z][_0-9A-Za-z]+\\z",
                         "type": "string",
                         "description": "The key that identifies this ContentType.",
                         "readOnly": true
@@ -4111,6 +4115,7 @@
                     "key": {
                         "maxLength": 255,
                         "minLength": 2,
+                        "pattern": "^[A-Za-z][_0-9A-Za-z]+\\z",
                         "type": "string",
                         "description": "The key that identifies this display template.",
                         "readOnly": true
@@ -4124,6 +4129,7 @@
                     "nodeType": {
                         "maxLength": 50,
                         "minLength": 2,
+                        "pattern": "^[A-Za-z][_0-9A-Za-z]+\\z",
                         "type": "string",
                         "description": "The optional node type this display template is valid for.",
                         "nullable": true
@@ -4134,6 +4140,7 @@
                     "contentType": {
                         "maxLength": 255,
                         "minLength": 2,
+                        "pattern": "^[A-Za-z][_0-9A-Za-z]+\\z",
                         "type": "string",
                         "description": "The optional key of the content type this display template is valid for.",
                         "nullable": true
@@ -4884,6 +4891,7 @@
                     "key": {
                         "maxLength": 255,
                         "minLength": 2,
+                        "pattern": "^[A-Za-z][_0-9A-Za-z]+\\z",
                         "type": "string",
                         "description": "The key that identifies this PropertyGroup.",
                         "readOnly": true

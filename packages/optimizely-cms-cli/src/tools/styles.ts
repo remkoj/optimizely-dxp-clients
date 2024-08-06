@@ -4,6 +4,7 @@ import { type ApiClient as CmsApiClient, type IntegrationApi } from '@remkoj/opt
 import { parseArgs } from '../tools/parseArgs.js'
 import chalk from 'chalk'
 import figures from 'figures'
+import { getContentTypes } from './contentTypes.js'
 
 import { ContentTypesArgs, contentTypesBuilder } from './contentTypes.js'
 
@@ -97,4 +98,36 @@ function isExcluded<T>(value: T, exclusions: Array<T>, inclusions: Array<T>) : b
     if (value == undefined || value == null)
         return false
     return exclusions.includes(value) || (inclusions.length > 0 && !inclusions.includes(value))
+}
+
+export async function getStyleFilePath(definition: IntegrationApi.DisplayTemplate, opts?: { contentBaseType?: IntegrationApi.ContentBaseType, client?: CmsApiClient}) : Promise<string>
+{
+    if (definition.nodeType)
+        return `nodes/${ definition.nodeType }/${ definition.key }/${ definition.key }.opti-style.json`
+    if (definition.baseType)
+        return `${ definition.baseType }/styles/${ definition.key }/${ definition.key }.opti-style.json`
+    if (definition.contentType) {
+        if (opts?.contentBaseType)
+            return `${ opts?.contentBaseType }/${ definition.contentType }/${ definition.key }.opti-style.json`
+        
+        if (!opts?.client)
+            throw new Error("Neither the contentBaseType, nor the ApiClient has been provided for a definition for a specific ContentType - unable to generate the path")
+        
+        const pageSize = 50
+        let resultsPage = await opts.client.contentTypes.contentTypesList(undefined, undefined, 0, pageSize)
+        const contentTypes : (typeof resultsPage)["items"] = resultsPage.items ?? []
+        let pagesRemaining = Math.ceil(resultsPage.totalItemCount / resultsPage.pageSize) - (resultsPage.pageIndex + 1)
+    
+        while (pagesRemaining > 0 && contentTypes.length < resultsPage.totalItemCount) {
+            resultsPage = await opts.client.contentTypes.contentTypesList(undefined, undefined, resultsPage.pageIndex + 1, resultsPage.pageSize)
+            contentTypes.push(...resultsPage.items)
+            pagesRemaining = Math.ceil(resultsPage.totalItemCount / resultsPage.pageSize) - (resultsPage.pageIndex + 1)
+        }
+
+        const fetchedBaseType = contentTypes.filter(x => x.key == definition.contentType).map(x => x.baseType).at(0)
+        if (fetchedBaseType)
+            return `${ fetchedBaseType }/${ definition.contentType }/${ definition.key }.opti-style.json`
+
+    }
+    throw new Error(`Unable to resolve the target for the DisplayTemplate: ${ definition.key }`)
 }

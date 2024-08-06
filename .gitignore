@@ -19,3 +19,6 @@ artefacts/*.tgz
 # IDE Configuration
 .idea
 .vscode
+
+# Exclude local files
+*.local

@@ -4,6 +4,7 @@ import type { CliModuleList } from '../types.js'
 import StylesPushCommand from './styles_push.js'
 import StylesListCommand from './styles_list.js'
 import StylesPullCommand from './styles_pull.js'
+import StylesCreateCommand from './style_create.js'
 
 // Type processing
 import TypesPullCommand from './types_pull.js'
@@ -20,6 +21,7 @@ import NextJsFactoryCommand from './nextjs_factories.js'
 import CmsVersionCommand from './cms_info.js'
 
 export const commands : CliModuleList = [
+    StylesCreateCommand,
     StylesPushCommand,
     StylesListCommand,
     StylesPullCommand,

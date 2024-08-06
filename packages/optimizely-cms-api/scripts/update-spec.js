@@ -15,6 +15,7 @@ createSchemaFile()
 async function createSchemaFile()
 {
     const infoEndpoint = buildCmsEndpoint(CMS_PATHS.apiSpec)
+    console.log(`Reading API specification from: ${ infoEndpoint }`)
     const response = await fetch(infoEndpoint)
     if (!response.ok) {
         throw new Error(`HTTP Error while reading version: ${ response.status } ${ response.statusText }`)
@@ -29,6 +30,7 @@ async function createSchemaFile()
 async function createVersionFile()
 {
     const infoEndpoint = buildCmsEndpoint(CMS_PATHS.info)
+    console.log(`Reading CMS version information from: ${ infoEndpoint }`)
     const response = await fetch(infoEndpoint)
     if (!response.ok) {
         throw new Error(`HTTP Error while reading version: ${ response.status } ${ response.statusText }`)

@@ -12,4 +12,7 @@ export enum ContentBaseType {
     IMAGE = 'image',
     VIDEO = 'video',
     FOLDER = 'folder',
+    EXPERIENCE = 'experience',
+    SECTION = 'section',
+    ELEMENT = 'element',
 }

@@ -100,7 +100,7 @@ function getDisplayTemplateInfo(contentType: IntegrationApi.ContentType, typePat
 
 type TemplateFn = (contentType: IntegrationApi.ContentType, varName: string, displayTemplate?: string, baseDisplayTemplate?: string) => string
 
-const Templates : Record<'default', TemplateFn> & Partial<Record<IntegrationApi.ContentBaseType | 'experience' | 'element', TemplateFn>> = 
+const Templates : Record<'default', TemplateFn> & Partial<Record<IntegrationApi.ContentBaseType, TemplateFn>> = 
 {
     // Default Template for all components without specifics
     default: (contentType, varName, displayTemplate, baseDisplayTemplate) => `import { CmsComponent } from "@remkoj/optimizely-cms-react";

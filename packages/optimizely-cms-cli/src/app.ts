@@ -1,10 +1,17 @@
-import { getCmsIntegrationApiConfigFromEnvironment } from '@remkoj/optimizely-cms-api'
+import { CmsIntegrationApiOptions, getCmsIntegrationApiConfigFromEnvironment } from '@remkoj/optimizely-cms-api'
 import yargs from 'yargs'
 import { OptiCmsApp } from './types.js'
 
 export function createOptiCmsApp(scriptName: string, version?: string, epilogue?: string) : OptiCmsApp
 {
-    const config = getCmsIntegrationApiConfigFromEnvironment()
+    let config : CmsIntegrationApiOptions;
+    try {
+        config = getCmsIntegrationApiConfigFromEnvironment()
+    } catch {
+        config = {
+            base: new URL('https://example.cms.optimizely.com')
+        }
+    }
     return yargs(process.argv)
         .scriptName(scriptName)
         .version(version ?? "development")
