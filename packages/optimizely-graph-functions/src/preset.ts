@@ -1,5 +1,6 @@
 import { type Types, normalizeConfig } from '@graphql-codegen/plugin-helpers'
 import { fragments, queries } from './documents'
+import { Kind, parse, visit,  } from 'graphql'
 
 // Import base preset
 import { preset as clientPreset, type ClientPresetConfig as ClientPresetOptions } from '@graphql-codegen/client-preset'
@@ -46,6 +47,30 @@ export const preset : Types.OutputPreset<PresetOptions> =
                 config: pickTransformOptions(options.presetConfig)
             }
         ]
+
+        // The packages contain quite a few utility fragments, however these 
+        // can cause errors if there're no Content Types using the types 
+        // targeted by these fragments as they won't be available in Optimizely
+        // Graph - so we're removing them first
+        options.documents = options.documents.map(doc => {
+            if (doc.document) {
+                const newDocument = visit(doc.document, {
+                    FragmentDefinition: {
+                        enter: (node) => {
+                            if (!options.schema.definitions.some(x => (x.kind == Kind.OBJECT_TYPE_DEFINITION || x.kind == Kind.INTERFACE_TYPE_DEFINITION) && x.name.value == node.typeCondition.name.value)) {
+                                return null
+                            }
+                        }
+                    }
+                })
+                return {
+                    ...doc,
+                    document: newDocument
+                }
+            }
+            return doc
+        })
+        
 
         // Build the preset files
         const section = await clientPreset.buildGeneratesSection(options)

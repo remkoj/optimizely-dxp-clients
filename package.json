@@ -1,6 +1,6 @@
 {
   "name": "optimizely-dxp-clients",
-  "version": "2.0.1-pre2",
+  "version": "2.0.1",
   "description": "Javascript clients for Optimizely Products",
   "repository": "https://github.com/remkoj/optimizely-dxp-clients.git",
   "author": "Remko Jantzen <693172+remkoj@users.noreply.github.com>",
@@ -11,7 +11,7 @@
     "@types/node": "^22.1.0",
     "@yarnpkg/sdks": "^3.2.0",
     "browserslist": "^4.23.3",
-    "glob": "^10.4.5",
+    "glob": "^11.0.0",
     "tslib": "^2.6.3",
     "typescript": "^5.5.4",
     "update-browserslist-db": "^1.1.0",
@@ -30,7 +30,7 @@
     "prepare": "yarn update-browserslist-db && yarn dedupe && yarn workspaces foreach -Apt --topological-dev --exclude optimizely-dxp-clients run prepare",
     "recompile": "yarn workspaces foreach -Apt --topological-dev --exclude optimizely-dxp-clients run recompile",
     "watch": "yarn workspaces foreach -Api --exclude optimizely-dxp-clients run watch",
-    "artefacts": "yarn run prepare && yarn run pack:version && yarn run pack:dev",
+    "artefacts": "yarn run prepare && yarn run pack:all",
     "pack:all": "yarn run pack:version && yarn run pack:dev",
     "pack:version": "yarn workspaces foreach -Apt --topological-dev --exclude optimizely-dxp-clients pack --install-if-needed --out ../../artefacts/%s-%v.tgz",
     "pack:dev": "yarn workspaces foreach -Apt --topological-dev --exclude optimizely-dxp-clients pack --install-if-needed --out ../../artefacts/%s-dev.tgz",
@@ -43,6 +43,5 @@
     "update:all": "yarn run update:yarn && yarn run update:deps",
     "update:license-info": "yarn node ./scripts/licenses.js",
     "publish": "yarn workspaces foreach -Apt --topological-dev --exclude optimizely-dxp-clients npm publish"
-  },
-  "stableVersion": "2.0.1"
+  }
 }
