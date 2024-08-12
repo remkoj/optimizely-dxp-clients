@@ -141,8 +141,8 @@ Locally, you may use a `.env.local` file, which must be added to the ignore list
 | Data Platform | OPTIMIZLEY_DATAPLATFORM_ENDPOINT | https://api.zaius.com/ | The endpoint used to read data from ODP |
 | Data Platform | OPTIMIZELY_DATAPLATFORM_BATCH_SIZE | 25 | The maximum number of items to fetch in one request, if there are more results, paging will be used to get the full data set |
 | Content Intelligence & Recommendations | OPTIMIZELY_CONTENTRECS_CLIENT | | The client ID for Content Intelligence & Recommendations |
-| Content Intelligence & Recommendations | OPTIMIZELY_CONTENTRECS_DELIVERY | 0 | The delivery ID for Content Intelligence & Recommendations |
-| Content Intelligence & Recommendations | OPTIMIZELY_CONTENTRECS_DELIVERY_KEY | | The delivery Key for Content Intelligence & Recommendations |
+| Content Intelligence & Recommendations | OPTIMIZELY_CONTENTRECS_DELIVERY | 0 | The Delivery ID setup in the main tracking script |
+| Content Intelligence & Recommendations | OPTIMIZELY_CONTENTRECS_DELIVERY_KEY | | The Delivery Key used to fetch visitor topic and goal information |
 | Content Intelligence & Recommendations | OPTIMIZELY_CONTENTRECS_API | https://api.idio.co | The API Endpoint of Content Intelligence & Recommendations to be used |
 | Web Experimentation | OPTIMIZELY_WEB_EXPERIMENTATION_PROJECT | | The project identifier of the Web Experimentation Project |
 

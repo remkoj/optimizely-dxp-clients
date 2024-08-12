@@ -17,7 +17,7 @@ export const OptimizelyContentRecsTrackingScript = (props: OptimizelyContentRecs
         ['delivery', ${ JSON.stringify(delivery_id) }]
     ];
 
-    // Include the Content Analytics & Recommendations JavaScript
+    // Include Content Analytics
     !function(d,s){var ia=d.createElement(s);ia.async=1,s=d.getElementsByTagName(s)[0],ia.src='//s.idio.co/ia.js',s.parentNode.insertBefore(ia,s)}(document,'script');
 `}
 </Script>

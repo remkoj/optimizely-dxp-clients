@@ -37,6 +37,8 @@ export interface OptimizelyOneService<T = any>
 
     updateProfile?: (profileData: OptimizelyOneProfileData) => void
 
+    discoverProfileData?: (signal?: AbortSignal | null) => Promise<OptimizelyOneProfileData>
+
     getBrowserApi: () => T | undefined
 }
 
@@ -55,14 +57,14 @@ type NavigationSearchEvent = {
 }
 
 export type OptimizelyOneProfileData = {
-    content_intelligence_id: string,
+    content_intelligence_id?: string,
     custom: Record<string, string | number | boolean>
 }
 
 export type OptimizelyDataPlatformApi = {
     event: (name: string, data?: { [param: string]: any }) => Promise<void>
     dispatch: (group: string, action: string, params?: { [param: string]: any }) => Promise<void>
-    customer: (customerProps: any) => void
+    customer: (customerIds: Record<string,string|number>, customerAttributes?: Record<string, any>) => void
 }
 
 export type OptimizelyContentRecsApi = {

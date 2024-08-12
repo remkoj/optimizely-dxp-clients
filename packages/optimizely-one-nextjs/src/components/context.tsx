@@ -82,6 +82,16 @@ type OptimizelyOneHookResult<TM extends DefaultServiceMap = DefaultServiceMap> =
     getTrackPageServices: () => (Omit<ClientApi.OptimizelyOneService, 'trackPage' | 'isActive'> & { trackPage: NonNullable<ClientApi.OptimizelyOneService['trackPage']>, isActive: true })[]
 
     /**
+     * Retrieve all services that must be invoked when new profile information has
+     * been discovered
+     * 
+     * @returns     A list of active services
+     */
+    getProfileServices: () => (Omit<ClientApi.OptimizelyOneService, 'updateProfile' | 'isActive'> & { updateProfile: NonNullable<ClientApi.OptimizelyOneService['updateProfile']>, isActive: true })[]
+
+    getProfileDataSources: () => (Omit<ClientApi.OptimizelyOneService, 'discoverProfileData' | 'isActive'> & { discoverProfileData: NonNullable<ClientApi.OptimizelyOneService['discoverProfileData']>, isActive: true })[]
+
+    /**
      * Retrieve an individual service by its code from the collection of services
      * 
      * @param       code    The service code
@@ -100,6 +110,16 @@ function isActiveWithTrackPage(toTest: ClientApi.OptimizelyOneService) : toTest 
     return (toTest.isActive && toTest.trackPage && typeof(toTest.trackPage) == 'function') ?? false
 }
 
+function isActiveWithUpdateProfile(toTest: ClientApi.OptimizelyOneService) : toTest is Omit<ClientApi.OptimizelyOneService, 'updateProfile' | 'isActive'> & { updateProfile: NonNullable<ClientApi.OptimizelyOneService['updateProfile']>, isActive: true }
+{
+    return (toTest.isActive && toTest.updateProfile && typeof(toTest.updateProfile) == 'function') ?? false
+}
+
+function isActiveWithProfileDiscovery(toTest: ClientApi.OptimizelyOneService) : toTest is Omit<ClientApi.OptimizelyOneService, 'discoverProfileData' | 'isActive'> & { discoverProfileData: NonNullable<ClientApi.OptimizelyOneService['discoverProfileData']>, isActive: true }
+{
+    return (toTest.isActive && toTest.discoverProfileData && typeof(toTest.discoverProfileData) == 'function') ?? false
+}
+
 function isActiveWithEventTracker(toTest: ClientApi.OptimizelyOneService) : toTest is Omit<ClientApi.OptimizelyOneService, 'trackEvent' | 'isActive'> & { trackEvent: NonNullable<ClientApi.OptimizelyOneService['trackEvent']>, isActive: true }
 {
     return (toTest.isActive && toTest.trackEvent && typeof(toTest.trackEvent) == 'function') ?? false
@@ -116,6 +136,8 @@ function useOptimizelyOne() : OptimizelyOneHookResult
             ...ctx,
             getActivatePageServices: () => (ctx.services || []).filter(isActiveWithActivatePage),
             getTrackPageServices: () => (ctx.services || []).filter(isActiveWithTrackPage),
+            getProfileServices: () => (ctx.services || []).filter(isActiveWithUpdateProfile),
+            getProfileDataSources: () => (ctx.services || []).filter(isActiveWithProfileDiscovery),
             getService: (code) => (ctx.services || []).filter(s => s.code == code)[0],
             track: (event: ClientApi.OptimizelyOneEvent) => {
                 if (ctx.disableTracking) {

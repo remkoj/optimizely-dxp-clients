@@ -5,6 +5,8 @@ import type { ApiService } from './types'
 import ProfileApiService from './profile-api-service'
 import GraphInfoApiService from './graph-info-service'
 import ExperimentationApiService from './experimentation-api'
+import ContentRecsApiService from './content-recs'
+import ContentRecsGoalsService from './content-goals'
 
 type RequestContext = { params: Record<string, string | string[]> } 
 type OptimizelyOneApi = (req: NextRequest, ctx: RequestContext) => Promise<NextResponse>
@@ -29,7 +31,9 @@ export function createOptimizelyOneApi(config?: Partial<OptimizelyOneApiConfig>)
         ...(config?.services || []),
         ProfileApiService,
         GraphInfoApiService,
-        ExperimentationApiService
+        ExperimentationApiService,
+        ContentRecsApiService,
+        ContentRecsGoalsService
     ]
 
     // Basic service matcher, but get's the job done for now

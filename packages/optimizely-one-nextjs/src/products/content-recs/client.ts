@@ -6,7 +6,8 @@ export class ContentRecsService implements ClientApi.OptimizelyOneService<Client
 {
     public order : Readonly<number> = 300
     public code : Readonly<string> = "crecs"
-    public debug: boolean = false
+    public debug : boolean = false
+    public endpoint : string = "/api/me/cgoals"
     public get isActive() : boolean {
         return this.getBrowserApi() != undefined
     }
@@ -27,6 +28,17 @@ export class ContentRecsService implements ClientApi.OptimizelyOneService<Client
             return window._iaq
         } catch {
             return undefined
+        }
+    }
+
+    public async discoverProfileData(signal?: AbortSignal | null) : Promise<ClientApi.OptimizelyOneProfileData>
+    {
+        const nbg = await fetch(this.endpoint, { cache: 'no-store', signal }).then(r => r.ok ? r.json() as Promise<{ goals: Array<{ goal: string, score: number }>}> : undefined)
+        return {
+            custom: {
+                "next_best_goal": (nbg?.goals || []).at(0)?.goal || '',
+                "next_best_goals": (nbg?.goals || []).map(x => x.goal).join(", ")
+            }
         }
     }
 }

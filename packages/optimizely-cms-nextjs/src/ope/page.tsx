@@ -13,7 +13,7 @@ import { getContentById } from './data.js'
 import { getContentRequest, isValidRequest } from './tools.js'
 
 const defaultOptions : EditViewOptions = {
-    refreshNotice: () => <div className='optly-refresh-notice'>Updating preview, please wait....</div>,
+    refreshNotice: () => <></>,
     layout: props => <>{ props.children }</>,
     loader: getContentById,
     clientFactory: (token?: string) => getAuthorizedServerClient(token),
@@ -117,9 +117,7 @@ export function createEditPageComponent(
                 {/* @ts-expect-error */}
                 <Script src={new URL(communicationInjectorPath, client.siteInfo.cmsURL).href} strategy='afterInteractive' />
                 <Layout locale={ contentItem.locale?.name ?? '' }>
-                    {context.inEditMode ?? <OnPageEdit>
-                        <RefreshNotice />
-                    </OnPageEdit>}
+                    <OnPageEdit><RefreshNotice /></OnPageEdit>
                     <CmsContent contentType={ contentType } contentLink={ contentLink } fragmentData={ contentItem } />
                 </Layout>
                 <div className='optly-contentLink'>ContentItem: { contentLink ? contentLinkToString(contentLink) : "Invalid content link returned from Optimizely Graph" }</div>
