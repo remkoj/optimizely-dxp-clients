@@ -43,32 +43,35 @@ export const ExpPanel : FunctionComponent<{}> = () =>
         return !expIds.includes(c.experiment.id)
     })
 
-    return <dl className='oo-text-[14px]'>
-        <dt className='oo-font-bold oo-pt-1'>Script information:</dt>
-        <dd>Account id: { data?.accountId }; Project id: <Link href={`https://app.optimizely.com/v2/projects/${ data?.projectId ?? '' }`} target="_blank" className="oo-underline oo-text-blue-800">{ data?.projectId }</Link>; Revision: { data?.revision }</dd>
-        <dt className='oo-font-bold oo-pt-1'>Active page(s):</dt>
-        <dd>
-            <ul>
-            { pagesArray.map(p => <li key={`exp-page-${data?.projectId}-${p.id}`}><Link href={`https://app.optimizely.com/v2/projects/${ data?.projectId ?? '' }/implementation/pages/${ p.id }`} target="_blank" className="oo-underline oo-text-blue-800">{p.name || p.apiName}</Link></li>)}
-            </ul>
-        </dd>
-        <dt className='oo-font-bold oo-pt-1'>Active experiment(s):</dt>
-        <dd>
-            <ul>
-                { experimentsArray.map(e => <li key={`exp-${data?.projectId}-${e.id}`}>
-                    <Link href={`https://app.optimizely.com/v2/projects/${ data?.projectId ?? '' }/experiments/${ e.id }`} target="_blank" className="oo-underline oo-text-blue-800">{ e.experimentName || e.id }</Link>, variant: <Link href={`https://app.optimizely.com/v2/projects/${ data?.projectId ?? '' }/experiments/${ e.id }/variations/${ e.variation.id }`} target="_blank" className="oo-underline oo-text-blue-800">{ e.variation.name || e.variation.id }</Link>
-                </li>)}
-            </ul>
-        </dd>
-        <dt className='oo-font-bold oo-pt-1'>Active Personalization Campaigns(s):</dt>
-        <dd>
-            <ul>
-                { filteredCampaigns.map(e => <li key={`campaign-${data?.projectId}-${e.id}`}>
-                    <Link href={`https://app.optimizely.com/v2/projects/${ data?.projectId ?? '' }/campaigns/${ e.id }`} target="_blank" className="oo-underline oo-text-blue-800">{ e.campaignName || e.id }</Link>; Audience(s): { e.audiences.map(a => <span key={"exp-pers-aud-"+a.id}><Link href={`https://app.optimizely.com/v2/projects/${ data?.projectId ?? '' }/audiences/${ a.id }`} target="_blank" className="oo-underline oo-text-blue-800">{ a.name }</Link>, </span>)}
-                </li>)}
-            </ul>
-        </dd>
-    </dl>
+    return <>
+        <dl className='oo-text-[14px]'>
+            <dt className='oo-font-bold oo-pt-1'>Script information:</dt>
+            <dd>Account id: { data?.accountId }; Project id: <Link href={`https://app.optimizely.com/v2/projects/${ data?.projectId ?? '' }`} target="_blank" className="oo-underline oo-text-blue-800">{ data?.projectId }</Link>; Revision: { data?.revision }</dd>
+            <dt className='oo-font-bold oo-pt-1'>Active page(s):</dt>
+            <dd>
+                <ul>
+                { pagesArray.map(p => <li key={`exp-page-${data?.projectId}-${p.id}`}><Link href={`https://app.optimizely.com/v2/projects/${ data?.projectId ?? '' }/implementation/pages/${ p.id }`} target="_blank" className="oo-underline oo-text-blue-800">{p.name || p.apiName}</Link></li>)}
+                </ul>
+            </dd>
+            <dt className='oo-font-bold oo-pt-1'>Active experiment(s):</dt>
+            <dd>
+                <ul>
+                    { experimentsArray.map(e => <li key={`exp-${data?.projectId}-${e.id}`}>
+                        <Link href={`https://app.optimizely.com/v2/projects/${ data?.projectId ?? '' }/experiments/${ e.id }`} target="_blank" className="oo-underline oo-text-blue-800">{ e.experimentName || e.id }</Link>, variant: <Link href={`https://app.optimizely.com/v2/projects/${ data?.projectId ?? '' }/experiments/${ e.id }/variations/${ e.variation.id }`} target="_blank" className="oo-underline oo-text-blue-800">{ e.variation.name || e.variation.id }</Link>
+                    </li>)}
+                </ul>
+            </dd>
+            <dt className='oo-font-bold oo-pt-1'>Active Personalization Campaigns(s):</dt>
+            <dd>
+                <ul>
+                    { filteredCampaigns.map(e => <li key={`campaign-${data?.projectId}-${e.id}`}>
+                        <Link href={`https://app.optimizely.com/v2/projects/${ data?.projectId ?? '' }/campaigns/${ e.id }`} target="_blank" className="oo-underline oo-text-blue-800">{ e.campaignName || e.id }</Link>; Audience(s): { e.audiences.map(a => <span key={"exp-pers-aud-"+a.id}><Link href={`https://app.optimizely.com/v2/projects/${ data?.projectId ?? '' }/audiences/${ a.id }`} target="_blank" className="oo-underline oo-text-blue-800">{ a.name }</Link>, </span>)}
+                    </li>)}
+                </ul>
+            </dd>
+        </dl>
+        <p className='oo-text-[12px]'>Powered by: Optimizely Web Experimentation</p>
+    </>
 }
 
 export default ExpPanel

@@ -1533,11 +1533,11 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@remkoj/optimizely-cms-api@workspace:2.0.2, @remkoj/optimizely-cms-api@workspace:packages/optimizely-cms-api":
+"@remkoj/optimizely-cms-api@workspace:2.0.3, @remkoj/optimizely-cms-api@workspace:packages/optimizely-cms-api":
   version: 0.0.0-use.local
   resolution: "@remkoj/optimizely-cms-api@workspace:packages/optimizely-cms-api"
   dependencies:
-    "@types/node": "npm:^22.1.0"
+    "@types/node": "npm:^22.2.0"
     dotenv: "npm:^16.4.5"
     glob: "npm:^11.0.0"
     openapi-typescript-codegen: "npm:^0.29.0"
@@ -1551,10 +1551,10 @@ __metadata:
   resolution: "@remkoj/optimizely-cms-cli@workspace:packages/optimizely-cms-cli"
   dependencies:
     "@inquirer/prompts": "npm:^5.3.8"
-    "@remkoj/optimizely-cms-api": "workspace:2.0.2"
+    "@remkoj/optimizely-cms-api": "workspace:2.0.3"
     "@rollup/plugin-json": "npm:^6.1.0"
     "@rollup/plugin-typescript": "npm:^11.1.6"
-    "@types/node": "npm:^22.1.0"
+    "@types/node": "npm:^22.2.0"
     "@types/yargs": "npm:^17.0.33"
     chalk: "npm:^5.3.0"
     cli-table3: "npm:^0.6.5"
@@ -1567,7 +1567,7 @@ __metadata:
     typescript: "npm:^5.5.4"
     yargs: "npm:^17.7.2"
   peerDependencies:
-    "@remkoj/optimizely-cms-api": 2.0.2
+    "@remkoj/optimizely-cms-api": 2.0.3
   bin:
     opti-cms: ./dist/index.js
   languageName: unknown
@@ -1577,9 +1577,9 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@remkoj/optimizely-cms-nextjs@workspace:packages/optimizely-cms-nextjs"
   dependencies:
-    "@remkoj/optimizely-cms-react": "workspace:2.0.2"
-    "@remkoj/optimizely-graph-client": "workspace:2.0.2"
-    "@types/node": "npm:^22.1.0"
+    "@remkoj/optimizely-cms-react": "workspace:2.0.3"
+    "@remkoj/optimizely-graph-client": "workspace:2.0.3"
+    "@types/node": "npm:^22.2.0"
     "@types/react": "npm:^18.3.3"
     "@types/react-dom": "npm:18.3.0"
     deepmerge: "npm:^4.3.1"
@@ -1592,8 +1592,8 @@ __metadata:
     scheduler: "npm:^0.23.2"
     typescript: "npm:^5.5.4"
   peerDependencies:
-    "@remkoj/optimizely-cms-react": 2.0.2
-    "@remkoj/optimizely-graph-client": 2.0.2
+    "@remkoj/optimizely-cms-react": 2.0.3
+    "@remkoj/optimizely-graph-client": 2.0.3
     graphql: ^16
     graphql-request: ^6
     next: ^14
@@ -1601,14 +1601,14 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@remkoj/optimizely-cms-react@workspace:2.0.2, @remkoj/optimizely-cms-react@workspace:packages/optimizely-cms-react":
+"@remkoj/optimizely-cms-react@workspace:2.0.3, @remkoj/optimizely-cms-react@workspace:packages/optimizely-cms-react":
   version: 0.0.0-use.local
   resolution: "@remkoj/optimizely-cms-react@workspace:packages/optimizely-cms-react"
   dependencies:
     "@graphql-typed-document-node/core": "npm:^3.2.0"
-    "@remkoj/optimizely-graph-client": "workspace:2.0.2"
+    "@remkoj/optimizely-graph-client": "workspace:2.0.3"
     "@types/crypto-js": "npm:^4.2.2"
-    "@types/node": "npm:^22.1.0"
+    "@types/node": "npm:^22.2.0"
     "@types/react": "npm:^18.3.3"
     "@types/react-dom": "npm:18.3.0"
     crypto-js: "npm:^4.2.0"
@@ -1621,7 +1621,7 @@ __metadata:
     scheduler: "npm:^0.23.2"
     typescript: "npm:^5.5.4"
   peerDependencies:
-    "@remkoj/optimizely-graph-client": 2.0.2
+    "@remkoj/optimizely-graph-client": 2.0.3
     entities: "*"
     graphql: ^16.8.1
     graphql-request: ^6.1.0
@@ -1634,14 +1634,14 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@remkoj/optimizely-graph-cli@workspace:packages/optimizely-graph-cli"
   dependencies:
-    "@remkoj/optimizely-graph-client": "workspace:2.0.2"
+    "@remkoj/optimizely-graph-client": "workspace:2.0.3"
     "@rollup/plugin-commonjs": "npm:^26.0.1"
     "@rollup/plugin-json": "npm:^6.1.0"
     "@rollup/plugin-typescript": "npm:^11.1.6"
     "@rollup/pluginutils": "npm:^5.1.0"
     "@types/crypto-js": "npm:^4.2.2"
     "@types/glob": "npm:^8.1.0"
-    "@types/node": "npm:^22.1.0"
+    "@types/node": "npm:^22.2.0"
     "@types/source-map-support": "npm:^0.5.10"
     "@types/yargs": "npm:^17.0.33"
     chalk: "npm:^5.3.0"
@@ -1655,18 +1655,18 @@ __metadata:
     typescript: "npm:^5.5.4"
     yargs: "npm:^17.7.2"
   peerDependencies:
-    "@remkoj/optimizely-graph-client": 2.0.2
+    "@remkoj/optimizely-graph-client": 2.0.3
   bin:
     opti-graph: bin/index.js
   languageName: unknown
   linkType: soft
 
-"@remkoj/optimizely-graph-client@npm:2.0.2, @remkoj/optimizely-graph-client@workspace:2.0.2, @remkoj/optimizely-graph-client@workspace:^2.0.2, @remkoj/optimizely-graph-client@workspace:packages/optimizely-graph-client":
+"@remkoj/optimizely-graph-client@npm:2.0.3, @remkoj/optimizely-graph-client@workspace:2.0.3, @remkoj/optimizely-graph-client@workspace:^2.0.3, @remkoj/optimizely-graph-client@workspace:packages/optimizely-graph-client":
   version: 0.0.0-use.local
   resolution: "@remkoj/optimizely-graph-client@workspace:packages/optimizely-graph-client"
   dependencies:
     "@types/crypto-js": "npm:^4.2.2"
-    "@types/node": "npm:^22.1.0"
+    "@types/node": "npm:^22.2.0"
     crypto-js: "npm:^4.2.0"
     graphql: "npm:^16.9.0"
     graphql-request: "npm:^6.1.0"
@@ -1689,8 +1689,8 @@ __metadata:
     "@graphql-codegen/typescript": "npm:^4.0.9"
     "@graphql-codegen/typescript-graphql-request": "npm:^6.2.0"
     "@graphql-codegen/typescript-operations": "npm:^4.2.3"
-    "@remkoj/optimizely-graph-client": "npm:2.0.2"
-    "@types/node": "npm:^22.1.0"
+    "@remkoj/optimizely-graph-client": "npm:2.0.3"
+    "@types/node": "npm:^22.2.0"
     graphql: "npm:^16.9.0"
     graphql-request: "npm:^6.1.0"
     graphql-tag: "npm:^2.12.6"
@@ -1714,8 +1714,8 @@ __metadata:
     "@headlessui/react": "npm:^2.1.2"
     "@headlessui/tailwindcss": "npm:^0.2.1"
     "@heroicons/react": "npm:^2.1.5"
-    "@remkoj/optimizely-graph-client": "workspace:^2.0.2"
-    "@types/node": "npm:^22.1.0"
+    "@remkoj/optimizely-graph-client": "workspace:^2.0.3"
+    "@types/node": "npm:^22.2.0"
     "@types/react": "npm:^18.3.3"
     "@types/react-dom": "npm:18.3.0"
     "@types/uuid": "npm:^10.0.0"
@@ -1726,14 +1726,14 @@ __metadata:
     react-dom: "npm:^18.3.1"
     scheduler: "npm:^0.23.2"
     swr: "npm:^2.2.5"
-    tailwindcss: "npm:^3.4.8"
+    tailwindcss: "npm:^3.4.9"
     typescript: "npm:^5.5.4"
     update-browserslist-db: "npm:^1.1.0"
     uuid: "npm:^10.0.0"
   peerDependencies:
     "@headlessui/react": "*"
     "@heroicons/react": "*"
-    "@remkoj/optimizely-graph-client": ^2.0.2
+    "@remkoj/optimizely-graph-client": ^2.0.3
     next: "*"
     react: "*"
     react-dom: "*"
@@ -2065,12 +2065,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/node@npm:*, @types/node@npm:^22.1.0":
-  version: 22.1.0
-  resolution: "@types/node@npm:22.1.0"
+"@types/node@npm:*, @types/node@npm:^22.1.0, @types/node@npm:^22.2.0":
+  version: 22.2.0
+  resolution: "@types/node@npm:22.2.0"
   dependencies:
     undici-types: "npm:~6.13.0"
-  checksum: 10c0/553dafcb842b889c036d43b390d464e8ffcf3ca455ddd5b1a1ef98396381eafbeb0c112a15cc6bf9662b72bc25fc45efc4b6f604760e1e84c410f1b7936c488b
+  checksum: 10c0/c17900b34faecfec204f72970bd658d0c217aaf739c1bf7690c969465b6b26b77a8be1cd9ba735aadbd1dd20b5c3e4f406ec33528bf7c6eec90744886c5d5608
   languageName: node
   linkType: hard
 
@@ -4494,7 +4494,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "optimizely-dxp-clients@workspace:."
   dependencies:
-    "@types/node": "npm:^22.1.0"
+    "@types/node": "npm:^22.2.0"
     "@yarnpkg/sdks": "npm:^3.2.0"
     browserslist: "npm:^4.23.3"
     glob: "npm:^11.0.0"
@@ -5378,9 +5378,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"tailwindcss@npm:^3.4.8":
-  version: 3.4.8
-  resolution: "tailwindcss@npm:3.4.8"
+"tailwindcss@npm:^3.4.9":
+  version: 3.4.9
+  resolution: "tailwindcss@npm:3.4.9"
   dependencies:
     "@alloc/quick-lru": "npm:^5.2.0"
     arg: "npm:^5.0.2"
@@ -5407,7 +5407,7 @@ __metadata:
   bin:
     tailwind: lib/cli.js
     tailwindcss: lib/cli.js
-  checksum: 10c0/f4be9663f9ae3363e9de141541248c1455ef21a2fbdb84f7c44ae29cf535061b5380fadaa8d2bf6cdac42cb9dfa92ad9a4c50d1752d1db0ae8d26caace3a7216
+  checksum: 10c0/b072028e87dd9dcbf858285681bdb8b5a1ff0b4439b956cc1b7aae4ae288f4d531867dea6ce3a2d974cbbd9699f3552ee515a56d079903fdd1eeae06305f60ba
   languageName: node
   linkType: hard
 

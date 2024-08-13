@@ -4,12 +4,11 @@ import EnvVars from '../env-vars'
 
 export const ExperimentationApiService : ApiService<any> = {
     for: { path: '/exp', verb: 'get' },
-    handler: async (query, cookies) => {
+    handler: async (query) => {
         const configuredProjectId = EnvTools.readValue(EnvVars.WebExperimentationProject)
-        const cookieProjectId = cookies.get("wx.projectid")?.value
-        const queryProjectId = query.get('wx.projectid') ?? undefined
+        const queryProjectId = query.get('pid') ?? undefined
         const helperEnabled = EnvTools.readValueAsBoolean(EnvVars.HelperEnabled, false)
-        const projectId = helperEnabled ? cookieProjectId ?? queryProjectId ?? configuredProjectId : configuredProjectId
+        const projectId = helperEnabled ? queryProjectId ?? configuredProjectId : configuredProjectId
 
         // Make sure we have a Project ID
         if (!projectId) {

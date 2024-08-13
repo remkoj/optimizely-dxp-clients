@@ -2,7 +2,7 @@
   "name": "@remkoj/optimizely-cms-api",
   "displayName": "Optimizely CMS - Integration API Client",
   "description": "A Javascript client for the Integration API provided by the Optimizely CMS.",
-  "version": "2.0.2",
+  "version": "2.0.3",
   "packageManager": "yarn@4.3.0",
   "type": "commonjs",
   "license": "Apache-2.0",
@@ -12,7 +12,7 @@
     "./dist"
   ],
   "devDependencies": {
-    "@types/node": "^22.1.0",
+    "@types/node": "^22.2.0",
     "dotenv": "^16.4.5",
     "glob": "^11.0.0",
     "openapi-typescript-codegen": "^0.29.0",

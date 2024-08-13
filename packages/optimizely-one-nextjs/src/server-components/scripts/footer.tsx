@@ -1,7 +1,7 @@
 import 'server-only'
 import EnvTools from '../../utils/env'
 import EnvVars from '../../env-vars'
-import CRecsScript from './snippets/optimizely-content-recs'
+import CRecsScript from '../../products/content-recs/snippet'
 
 export type FooterScriptsProps = {
     contentRecsClient?: string

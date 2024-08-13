@@ -9,9 +9,11 @@ React components (both client & server) to integrate the browser-side products f
   - [2.3. Instrument your site with additional events](#23-instrument-your-site-with-additional-events)
   - [2.4. Enable session cookie for Visitor ID](#24-enable-session-cookie-for-visitor-id)
   - [2.5. Configuration](#25-configuration)
-    - [Prevent key leakage and unauthorized access](#prevent-key-leakage-and-unauthorized-access)
-    - [List of supported environment variables](#list-of-supported-environment-variables)
+    - [2.5.1. Prevent key leakage and unauthorized access](#251-prevent-key-leakage-and-unauthorized-access)
+    - [2.5.2. List of supported environment variables](#252-list-of-supported-environment-variables)
 - [3. Usage](#3-usage)
+  - [3.1. Optimizely One Gadget](#31-optimizely-one-gadget)
+  - [3.2. Selecting the Web Experimentation project in browser](#32-selecting-the-web-experimentation-project-in-browser)
 
 
 ## 1. Requirements
@@ -124,14 +126,14 @@ export const config = {
 ### 2.5. Configuration
 The Optimizely One Integration is configured by setting the appropriate environment variables. 
 
-#### Prevent key leakage and unauthorized access
+#### 2.5.1. Prevent key leakage and unauthorized access
 These environment variables must ***never*** be, consider them compromised when 
 1. Comitted into your source control system. Set them using the method available on your hosting environment.
 2. Configured to be exposed to the browser
 
 Locally, you may use a `.env.local` file, which must be added to the ignore list of you source control system.
 
-#### List of supported environment variables
+#### 2.5.2. List of supported environment variables
 | Product | Environment Variable | Default Value | Purpose |
 | - | - | - | - |
 | *Global* | OPTIMIZELY_ONE_HELPER | 0 | Set to "1" to enable the Optimizely One Demo tools.<br/>- Allow overriding of the WebEx project ID through the 'pid' query string parameter <br/>- Enable the `<OptimizelyOneGadget />` component. 
@@ -149,6 +151,14 @@ Locally, you may use a `.env.local` file, which must be added to the ignore list
 ## 3. Usage
 When leveraging the components and structure from the installation, everything should work immediately.
 
+### 3.1. Optimizely One Gadget
 The OptimizelyOneGadget will only show if the following two criteria have been met, this ensures that the gadget is only available when it has intentionally ben enabled:
  1. The environment variable `OPTIMIZELY_ONE_HELPER` has been set to "1"
  2. A test-cookie has been added to the browser using the 'Add test cookie' feature of the [Optimizely Assistant Chrome Add-On](https://support.optimizely.com/hc/en-us/articles/4410289500301-Optimizely-Experimentation-Assistant-Chrome-extension)
+
+Using the Optimizely One Gadget it is possible to demonstrate the in-session behaviour tracking and analysis performed by the configured Optimizely products.
+
+### 3.2. Selecting the Web Experimentation project in browser
+When the `OPTIMIZELY_ONE_HELPER` is set to "1" - or the Scripts.Header component has been instructed to do so explicitly - it is possible to change the Optimizely Web Experimentation project on the fly. This is done by adding a query string parameter `?pid=`, with the new project id.
+
+The project id is persisted in localStorage with the key `_pid` and needs to be removed manually to revert back to the configured Web Experimentation project.

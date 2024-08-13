@@ -2,7 +2,7 @@
 import { Fragment, useLayoutEffect, useCallback, type FunctionComponent } from 'react'
 import useCookie from '../use-cookie'
 import { Popover, PopoverButton, PopoverPanel, Tab, TabGroup, TabList, TabPanels, TabPanel } from '@headlessui/react'
-import { ChevronUpIcon, UserGroupIcon, TagIcon, RocketLaunchIcon, IdentificationIcon, Square3Stack3DIcon } from '@heroicons/react/20/solid'
+import { ChevronUpIcon, UserGroupIcon, TagIcon, RocketLaunchIcon, IdentificationIcon, Square3Stack3DIcon, TrophyIcon } from '@heroicons/react/20/solid'
 import OptiLogo from './logo'
 import { useIsInTestMode } from '../use-test-mode'
 import { useSearchParams, usePathname } from 'next/navigation'
@@ -17,7 +17,8 @@ const Panels = {
     Experiments: dynamic(() => import('./exp-panel'), { ssr: false }),
     Interests: dynamic(() => import('./interests-panel'), { ssr: false }),
     Audiences: dynamic(() => import('./audiences-panel'), { ssr: false }),
-    Graph: dynamic(() => import('./graph-panel'), { ssr: false })
+    Graph: dynamic(() => import('./graph-panel'), { ssr: false }),
+    Goals: dynamic(() => import('./goals-panel'), { ssr: false})
 }
 
 export type OptimizelyOneGadgetProps = {
@@ -106,6 +107,7 @@ export const OptimizelyOneGadget : FunctionComponent<OptimizelyOneGadgetProps> =
             <TabGroup as={ Fragment }>
                 <TabList className="oo-flex-none oo-flex oo-justify-between md:oo-justify-start oo-gap-2 oo-p-1 md:oo-p-2 oo-pb-0 md:oo-pb-0 oo-border-b oo-border-slate-300 oo-text-[14px]">
                     <Tab as="div" className='oo-text-center oo-inline-block oo-cursor-pointer oo-px-2 oo-py-1 oo-border oo-border-b-0 oo-border-slate-300 oo-rounded-t-md oo-ui-selected:oo-bg-blue-500 oo-ui-selected:oo-text-white'><TagIcon className='oo-inline-block oo-h-[18px] oo-w-[18px] oo-mr-2' />Interests</Tab>
+                    <Tab as="div" className='oo-text-center oo-inline-block oo-cursor-pointer oo-px-2 oo-py-1 oo-border oo-border-b-0 oo-border-slate-300 oo-rounded-t-md oo-ui-selected:oo-bg-blue-500 oo-ui-selected:oo-text-white'><TrophyIcon className='oo-inline-block oo-h-[18px] oo-w-[18px] oo-mr-2' />Goals</Tab>
                     <Tab as="div" className='oo-text-center oo-inline-block oo-cursor-pointer oo-px-2 oo-py-1 oo-border oo-border-b-0 oo-border-slate-300 oo-rounded-t-md oo-ui-selected:oo-bg-blue-500 oo-ui-selected:oo-text-white'><UserGroupIcon className='oo-inline-block oo-h-[18px] oo-w-[18px] oo-mr-2' />Audiences</Tab>
                     <Tab as="div" className='oo-text-center oo-inline-block oo-cursor-pointer oo-px-2 oo-py-1 oo-border oo-border-b-0 oo-border-slate-300 oo-rounded-t-md oo-ui-selected:oo-bg-blue-500 oo-ui-selected:oo-text-white'><RocketLaunchIcon className='oo-inline-block oo-h-[18px] oo-w-[18px] oo-mr-2' />Experiments</Tab>
                     <Tab as="div" className='oo-text-center oo-inline-block oo-cursor-pointer oo-px-2 oo-py-1 oo-border oo-border-b-0 oo-border-slate-300 oo-rounded-t-md oo-ui-selected:oo-bg-blue-500 oo-ui-selected:oo-text-white'><IdentificationIcon className='oo-inline-block oo-h-[18px] oo-w-[18px] oo-mr-2' />Identifiers</Tab>
@@ -114,6 +116,9 @@ export const OptimizelyOneGadget : FunctionComponent<OptimizelyOneGadgetProps> =
                 <TabPanels className="oo-flex-1 md:oo-h-24 oo-overscroll-contain oo-overflow-y-auto">
                     <TabPanel as="div" className='oo-p-1 md:oo-p-2'>
                         <Panels.Interests servicePrefix={ servicePrefix } refreshInterval={ refreshInterval } />
+                    </TabPanel>
+                    <TabPanel as="div" className='oo-p-1 md:oo-p-2'>
+                        <Panels.Goals servicePrefix={ servicePrefix } refreshInterval={ refreshInterval } />
                     </TabPanel>
                     <TabPanel as="div" className='oo-p-1 md:oo-p-2'>
                         <Panels.Audiences servicePrefix={ servicePrefix } refreshInterval={ refreshInterval } />

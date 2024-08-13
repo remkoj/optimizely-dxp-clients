@@ -1,7 +1,7 @@
 {
   "name": "@remkoj/optimizely-cms-nextjs",
   "license": "Apache-2.0",
-  "version": "2.0.2",
+  "version": "2.0.3",
   "packageManager": "yarn@4.1.1",
   "repository": "https://github.com/remkoj/optimizely-dxp-clients.git",
   "author": "Remko Jantzen <693172+remkoj@users.noreply.github.com>",
@@ -36,9 +36,9 @@
     }
   },
   "devDependencies": {
-    "@remkoj/optimizely-cms-react": "workspace:2.0.2",
-    "@remkoj/optimizely-graph-client": "workspace:2.0.2",
-    "@types/node": "^22.1.0",
+    "@remkoj/optimizely-cms-react": "workspace:2.0.3",
+    "@remkoj/optimizely-graph-client": "workspace:2.0.3",
+    "@types/node": "^22.2.0",
     "@types/react": "^18.3.3",
     "@types/react-dom": "18.3.0",
     "graphql": "^16.9.0",
@@ -54,8 +54,8 @@
     "deepmerge": "^4.3.1"
   },
   "peerDependencies": {
-    "@remkoj/optimizely-cms-react": "2.0.2",
-    "@remkoj/optimizely-graph-client": "2.0.2",
+    "@remkoj/optimizely-cms-react": "2.0.3",
+    "@remkoj/optimizely-graph-client": "2.0.3",
     "graphql": "^16",
     "graphql-request": "^6",
     "next": "^14",
