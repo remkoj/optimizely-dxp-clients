@@ -28,11 +28,12 @@ export const OptimizelyWebExperimentationScript = ({ projectId, allowProjectOver
     if (currentProject != localProject)
         l.setItem('_pid', currentProject)
 
-    let ia = d.createElement('script');
-    ia.async=0;
-    ia.src='${ buildUrl('\'+ currentProject +\'') }';
-    let s=d.getElementsByTagName('script')[0];
-    s.parentNode.insertBefore(ia,s);
+    let wx = d.createElement('script');
+    wx.fetchpriority = 'high';
+    wx.src='${ buildUrl('\'+ currentProject +\'') }';
+    wx.id='web-experimentation-snippet';
+    let s=d.getElementById('web-experimentation-project');
+    s.parentNode.insertBefore(wx,s);
 })(window,document,localStorage)
             `}</Script> :
             <Script id='web-experimentation-project' strategy='beforeInteractive' src={ buildUrl(projectId) } />

@@ -145,7 +145,7 @@ Locally, you may use a `.env.local` file, which must be added to the ignore list
 | Content Intelligence & Recommendations | OPTIMIZELY_CONTENTRECS_CLIENT | | The client ID for Content Intelligence & Recommendations |
 | Content Intelligence & Recommendations | OPTIMIZELY_CONTENTRECS_DELIVERY | 0 | The Delivery ID setup in the main tracking script |
 | Content Intelligence & Recommendations | OPTIMIZELY_CONTENTRECS_DELIVERY_KEY | | The Delivery Key used to fetch visitor topic and goal information |
-| Content Intelligence & Recommendations | OPTIMIZELY_CONTENTRECS_API | https://api.idio.co | The API Endpoint of Content Intelligence & Recommendations to be used |
+| Content Intelligence & Recommendations | OPTIMIZELY_CONTENTRECS_DOMAIN | idio.co | The main domain used for the Content Recs instance, without the prefix (such as "manager", "s", "api", etc...) |
 | Web Experimentation | OPTIMIZELY_WEB_EXPERIMENTATION_PROJECT | | The project identifier of the Web Experimentation Project |
 
 ## 3. Usage

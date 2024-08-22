@@ -18,7 +18,7 @@ export class ContentRecsClient
             clientId: EnvTools.readValue(EnvVars.ContentRecsClient, ''),
             deliveryId: EnvTools.readValueAsInt(EnvVars.ContentRecsDelivery, 0),
             deliveryKey: EnvTools.readValue(EnvVars.ContentRecsDeliveryKey, ''),
-            host: EnvTools.readValue(EnvVars.ContentRecsHost, 'https://api.idio.co')
+            host: EnvTools.readValue(EnvVars.ContentRecsHost, 'idio.co')
         }
     }
 
@@ -44,7 +44,7 @@ export class ContentRecsClient
         if (!visitorId || visitorId == "")
             return []
 
-        const profileUrl = new URL(`/1.0/users/idio_visitor_id:${ visitorId }/topics`, this._config.host)
+        const profileUrl = new URL(`/1.0/users/idio_visitor_id:${ visitorId }/topics`, 'https://api.'+this._config.host)
         profileUrl.searchParams.set('key', this._config.deliveryKey)
         const topics = await fetch(profileUrl, { cache: 'no-store'}).then(r => r.json()).catch(() => undefined)
         return ((topics?.topic ?? []) as { title: string }[]).map(x => x.title)
@@ -54,7 +54,7 @@ export class ContentRecsClient
         if (!visitorId || visitorId == "")
             return []
 
-        const profileUrl = new URL(`/1.0/users/idio_visitor_id:${ visitorId }/conversions/predictions`, this._config.host)
+        const profileUrl = new URL(`/1.0/users/idio_visitor_id:${ visitorId }/conversions/predictions`, 'https://api.'+this._config.host)
         profileUrl.searchParams.set('key', this._config.deliveryKey)
         profileUrl.searchParams.set('callback', 'fn')
         const body = await fetch(profileUrl, { cache: 'no-store'}).then(r => r.ok ? r.text() : undefined).catch(() => undefined)

@@ -3,7 +3,7 @@
   "description": "Optimizely CMS CLI Tools",
   "packageManager": "yarn@4.2.2",
   "type": "module",
-  "version": "2.0.3",
+  "version": "2.0.4",
   "bin": {
     "opti-cms": "./dist/index.js"
   },
@@ -17,7 +17,7 @@
     "compile": "rollup -c"
   },
   "devDependencies": {
-    "@remkoj/optimizely-cms-api": "workspace:2.0.3",
+    "@remkoj/optimizely-cms-api": "workspace:2.0.4",
     "@rollup/plugin-json": "^6.1.0",
     "@rollup/plugin-typescript": "^11.1.6",
     "@types/node": "^22.2.0",
@@ -27,7 +27,7 @@
     "typescript": "^5.5.4"
   },
   "peerDependencies": {
-    "@remkoj/optimizely-cms-api": "2.0.3"
+    "@remkoj/optimizely-cms-api": "2.0.4"
   },
   "dependencies": {
     "@inquirer/prompts": "^5.3.8",

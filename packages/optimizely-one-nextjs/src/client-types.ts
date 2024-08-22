@@ -72,10 +72,9 @@ export type OptimizelyContentRecsApi = {
 }
 
 export type OptimizelyWebExperimentationApi = {
-    initialized: boolean
+    initialized?: boolean
     push: (data: { type: string, [paramName: string]: any }) => void
     get?: <T extends keyof OptlyWebGet>(what: T) => OptlyWebGet[T]
-    //get?: (what: string) => any
 }
 
 export type OptlyWebGet = {
