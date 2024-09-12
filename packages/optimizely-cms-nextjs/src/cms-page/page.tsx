@@ -8,7 +8,7 @@ import { CmsContent, isDebug, getServerContext, type ComponentFactory } from '@r
 import { Utils } from '@remkoj/optimizely-cms-react'
 
 import { MetaDataResolver } from '../metadata.js'
-import { urlToPath, localeToGraphLocale } from './utils.js'
+import { urlToPath, localeToGraphLocale, slugToGraphLocale, slugToLocale, localeToSlug } from './utils.js'
 import getContentByPathBase, { type GetContentByPathMethod } from './data.js'
 import { getServerClient } from '../client.js'
 
@@ -50,7 +50,16 @@ export type CreatePageOptions<
     client: ClientFactory
     channel?: ChannelDefinition
     propsToCmsPath: (props: DefaultCmsPageProps<TParams, TSearchParams>) => string | null
-    propsToCmsLocale: (props: DefaultCmsPageProps<TParams, TSearchParams>, locale: LocaleEnum | null) => LocaleEnum | null
+
+    /**
+     * Extract the Optimizely CMS Locale Slug from the current request properties. This defaults to reading the
+     * 'lang' url segment, if it exists.
+     * 
+     * @param       props        The properties as received by this page from the Next.JS Router
+     * @param       defaultSlug  The default locale slug if none has been defined
+     * @returns     The locale slug from the request
+     */
+    propsToCmsLocale: (props: DefaultCmsPageProps<TParams, TSearchParams>, defaultSlug: string | null) => string | null
     routeToParams: (route: Route) => TParams
 }
 
@@ -149,13 +158,14 @@ export function createPage<
             context.setComponentFactory(factory)
 
             // Analyze the Next.JS Request props
-            const requestLocale = propsToCmsLocale(props, defaultLocale)
+            const requestLocaleSlug = propsToCmsLocale(props, defaultLocale ? localeToSlug(channel, defaultLocale) : null)
+            const requestLocale = slugToLocale(channel, requestLocaleSlug, defaultLocale as string)
             const requestPath = propsToCmsPath(props)
             if (isDebug())
                 console.log(`⚪ [CmsPage] Processed Next.JS route: ${ JSON.stringify(props) } => Optimizely CMS route: ${ JSON.stringify({path: requestPath, locale: requestLocale})}`)
 
             // Process the locale
-            const graphLocale = (requestLocale ? localeToGraphLocale(requestLocale as string, channel) : undefined) as LocaleEnum
+            const graphLocale = slugToGraphLocale(channel, requestLocaleSlug, undefined) as LocaleEnum | undefined
             if (requestLocale)
                 context.setLocale(requestLocale as string)
 

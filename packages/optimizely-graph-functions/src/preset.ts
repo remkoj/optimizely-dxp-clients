@@ -1,6 +1,5 @@
-import { type Types, normalizeConfig } from '@graphql-codegen/plugin-helpers'
-import { fragments, queries } from './documents'
-import { Kind, parse, visit,  } from 'graphql'
+import { type Types } from '@graphql-codegen/plugin-helpers'
+import { Kind, visit } from 'graphql'
 
 // Import base preset
 import { preset as clientPreset, type ClientPresetConfig as ClientPresetOptions } from '@graphql-codegen/client-preset'
@@ -24,13 +23,25 @@ export const preset : Types.OutputPreset<PresetOptions> =
      * @returns     An awaitable with the modified list of documents.
      */
     prepareDocuments: async (outputFilePath: Readonly<string>, outputSpecificDocuments: ReadonlyArray<Types.OperationDocument>) => {
+        // Get the configured documents
+        const optiDocs = outputSpecificDocuments.filter<string>((x => typeof(x) == 'string' && x.startsWith('opti-cms:')) as (x: Types.OperationDocument) => x is string)
+        const normalDocs = outputSpecificDocuments.filter(x => !(typeof(x) == 'string' && x.startsWith('opti-cms:')))
+
         // Get the base documents
         const documents = clientPreset.prepareDocuments ? 
-            await clientPreset.prepareDocuments(outputFilePath, outputSpecificDocuments as Array<Types.OperationDocument>) : 
-            [...outputSpecificDocuments, `!${outputFilePath}`]
+            await clientPreset.prepareDocuments(outputFilePath, normalDocs) : 
+            [...normalDocs, `!${outputFilePath}`]
+
+        // Transform / inject the Opti-CMS documents
+        const CmsDocLoaders : Array<Types.CustomDocumentLoader> = 
+            (optiDocs.length == 0 ? ['opti-cms:/fragments/13','opti-cms:/queries/13'] : optiDocs).map(optiDoc => {
+                const loader: Types.CustomDocumentLoader = {}
+                loader[optiDoc] = { loader: "@remkoj/optimizely-graph-functions/loader" }
+                return loader
+            })
 
         // Create a new, extended, array
-        return [...documents, ...fragments, ...queries]
+        return [...documents, ...CmsDocLoaders]
     },
 
     buildGeneratesSection: async (options)  => {

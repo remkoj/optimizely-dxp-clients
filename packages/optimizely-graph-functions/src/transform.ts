@@ -122,12 +122,22 @@ export const transform : Types.DocumentTransformFunction<TransformOptions> = ({d
                 }
             },
 
-            // Add items to the selection sets
+            // Replace the fragment occurances
             SelectionSet: {
-                enter(node, key, parent) {
-                    if (!isArray(parent) && parent?.kind == Kind.FRAGMENT_DEFINITION && intoNames.includes(parent.name.value)) {
-                        const addedSelections : SelectionNode[] = componentFragments[parent.name.value].map(fragment => {
-                            if (config.verbose) console.debug(`[ OPTIMIZELY ] Adding fragment ${ fragment.name.value } to ${ parent.name.value }`)
+                enter(node) {
+                    const sectionsToAdd = node.selections
+                        .map(selection => selection.kind == Kind.FRAGMENT_SPREAD && intoNames.includes(selection.name.value) ? selection.name.value : undefined)
+                        .filter(isNotNullOrUndefined)
+                    if (sectionsToAdd.length == 0)
+                        return
+                    if (config.verbose)
+                        console.debug(`[ OPTIMIZELY ] Identified usage of fragment(s) ${ sectionsToAdd.join(', ') }, starting replacement procedure`)
+
+                    const newSelections = [ ...node.selections ] //.filter(selection => !(selection.kind == Kind.FRAGMENT_SPREAD && intoNames.includes(selection.name.value)))
+                    sectionsToAdd.forEach(sectionName => {
+                        const addedSelections : SelectionNode[] = componentFragments[sectionName].map(fragment => {
+                            if (config.verbose) 
+                                console.debug(`[ OPTIMIZELY ] Adding fragment ${ fragment.name.value } adjacent to ${ sectionName }`)
                             return {
                                 kind: Kind.FRAGMENT_SPREAD,
                                 directives: [],
@@ -137,19 +147,18 @@ export const transform : Types.DocumentTransformFunction<TransformOptions> = ({d
                                 }
                             }
                         })
-                        componentSpreads[parent.name.value]?.forEach(spread => {
-                            if (config.verbose) console.debug(`[ OPTIMIZELY ] Adding inline fragment for ${ spread.typeCondition?.name.value ?? "Untyped" } to ${ parent.name.value}`)
+                        componentSpreads[sectionName]?.forEach(spread => {
+                            if (config.verbose) console.debug(`[ OPTIMIZELY ] Adding inline fragment ${ spread.typeCondition?.name.value ?? "Untyped" } adjacent to ${ sectionName }`)
                             addedSelections.push(spread)
                         })
-                        return {
-                            ...node,
-                            selections: [
-                                ...node.selections,
-                                ...addedSelections
-                            ]
-                        } as SelectionSetNode
+                        newSelections.push(...addedSelections)
+                    })
+
+                    const newNode : SelectionSetNode = {
+                        ...node,
+                        selections: newSelections
                     }
-                    return undefined
+                    return newNode
                 }
             }
         }) : undefined
@@ -167,3 +176,8 @@ export default { transform }
 const recursiveSelections = (parse(`fragment IContentListItem on _IContent {
     ...IContentData
 }`).definitions[0] as FragmentDefinitionNode)?.selectionSet.selections || [];
+
+function isNotNullOrUndefined<T>(toTest?: T | null) 
+{
+    return toTest !== null && toTest !== undefined
+}
