@@ -1,14 +1,8 @@
 import {type Types } from '@graphql-codegen/plugin-helpers'
-import type { Injection } from './types'
+import type { Injection, TransformOptions } from './types'
 import type { FragmentDefinitionNode, SelectionNode, FieldNode, SelectionSetNode, InlineFragmentNode } from 'graphql'
 import { Kind, parse, visit } from 'graphql'
 import fs from 'node:fs'
-
-export type TransformOptions = {
-    injections?: Injection[],
-    verbose?: boolean
-    recursion?: boolean
-}
 
 export function pickTransformOptions(options: Record<string,any>) : TransformOptions
 {

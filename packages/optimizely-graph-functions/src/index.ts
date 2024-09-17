@@ -13,6 +13,7 @@ export const DefaultFunctions = ['getContentType','getContentByPath','getContent
 export function pickPluginOptions(options: Record<string,any>) : PluginOptions
 {
     return {
+        ...(options.config ?? {}),
         functions: options.functions ?? DefaultFunctions,
         prettyPrintQuery: options.prettyPrintQuery ?? false,
         clientPath: options.clientPath ?? "./graphql"

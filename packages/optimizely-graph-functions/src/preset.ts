@@ -8,7 +8,8 @@ import * as AddPlugin from '@graphql-codegen/add'
 
 // Import injected parts
 import plugin, { pickPluginOptions, type PluginOptions } from './index'
-import transform, { pickTransformOptions, type TransformOptions } from './transform'
+import transform, { pickTransformOptions } from './transform'
+import { type TransformOptions } from './types'
 
 // Create preset configuration
 export type PresetOptions = ClientPresetOptions & PluginOptions & TransformOptions
@@ -45,17 +46,36 @@ export const preset : Types.OutputPreset<PresetOptions> =
     },
 
     buildGeneratesSection: async (options)  => {
-        // Extend the document transforms
+        // Extend the default plugin configuration
         options.config = {
             ...options.config,
             namingConvention: "keep", // Keep casing "as-is" from Optimizely Graph
+            useTypeImports: true, // Enable type importing to enhance bundling
+            skipTypename: true, // Only add __typename if explicitly requested
+            avoidOptionals: true, // Don't use TypeScript optionals (?)
+            dedupeFragments: true, // Remove duplicates
         }
+
+        if (options.presetConfig.fragmentMasking !== false) {
+            options.presetConfig = {
+                ...options.presetConfig,
+                fragmentMasking: {
+                    ...(typeof(options.presetConfig?.fragmentMasking) == 'object' ? options.presetConfig?.fragmentMasking : {}),
+                    unmaskFunctionName: 'getFragmentData'
+                }
+            }
+        }
+
+        //Extend the document transforms
         options.documentTransforms = [
             ...(options.documentTransforms || []),
             {
                 name: 'optly-transform',
                 transformObject: transform,
-                config: pickTransformOptions(options.presetConfig)
+                config: {
+                    ...options.config,
+                    ...pickTransformOptions(options.presetConfig)
+                }
             }
         ]
 
@@ -81,10 +101,9 @@ export const preset : Types.OutputPreset<PresetOptions> =
             }
             return doc
         })
-        
 
         // Build the preset files
-        const section = await clientPreset.buildGeneratesSection(options)
+        const section : Array<Types.GenerateOptions> = await clientPreset.buildGeneratesSection(options)
         
         // Add GraphQL Request Client
         section.push({
@@ -101,16 +120,18 @@ export const preset : Types.OutputPreset<PresetOptions> =
                 },
                 {
                     'typescript-graphql-request': {
-                        pureMagicComment: true,
+                        ...options.config,
+                        dedupeFragments: false,
                         useTypeImports: true,
-                        dedupeFragments: true,
                         importOperationTypesFrom: "Schema"
                     }
                 }
             ],
             schema: options.schema,
             schemaAst: options.schemaAst,
-            config: options.config,
+            config: {
+                ...options.config,
+            },
             profiler: options.profiler,
             documents: options.documents,
             documentTransforms: options.documentTransforms
@@ -130,13 +151,17 @@ export const preset : Types.OutputPreset<PresetOptions> =
             schema: options.schema,
             schemaAst: options.schemaAst,
             profiler: options.profiler,
-            config: pickPluginOptions(options.presetConfig),
+            config: {
+                ...options.config,
+                ...pickPluginOptions(options.presetConfig),
+            },
             documents: options.documents,
             documentTransforms: options.documentTransforms
         })
 
-        // Add functions to index plugin
+        
         section.forEach((fileConfig, idx) => {
+            // Modify index.ts with additional exports
             if (fileConfig.filename.endsWith("index.ts")) {
                 section[idx].plugins.unshift({
                     add: {
@@ -144,9 +169,38 @@ export const preset : Types.OutputPreset<PresetOptions> =
                     }
                 })
             }
+
+            if (options.presetConfig.recursion === true && fileConfig.filename.endsWith('graphql.ts')) {
+                section[idx].plugins = fileConfig.plugins.map(plugin => {
+                    const pluginName = Object.getOwnPropertyNames(plugin).at(0)
+                    switch (pluginName) {
+                        case "typed-document-node": {
+                            const config = plugin[pluginName]
+                            const newPlugin : Types.ConfiguredPlugin = {}
+                            newPlugin[pluginName] = {
+                                ...config,
+                                dedupeFragments: false
+                            }
+                            return newPlugin
+                        }
+                    }
+                    return plugin
+                })
+            }
+
+            // Set validation rules
+            if (fileConfig.skipDocumentsValidation != true && options.presetConfig.recursion === true) {
+                const currentOptions = fileConfig.skipDocumentsValidation || {}
+                section[idx].skipDocumentsValidation = {
+                    ...currentOptions,
+                    ignoreRules: ['NoFragmentCyclesRule']
+                }
+            }
         })
 
-        return section
+        const idx = 0
+        const output = section.filter(((x,i) => x && i == idx) as <T>(x: T | null | undefined, i: number) => x is T)
+        return output
     },
 }
 

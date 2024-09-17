@@ -32,21 +32,26 @@ const config: CodegenConfig = {
         './src/gql/': {
             preset: OptimizelyGraphPreset,
             presetConfig: {
-                // By default the preset will generate recursive queries
-                // untill multiple recursions are supported, this needs to
-                // be disabled when there's more then one component that
-                // will use recursion
+                // By default the preset will not support recursive queries, 
+                // however if your content model requires it, you can enable
+                // it here.
+                //
+                // When setting recursion to `true` it requires additional
+                // steps to work
                 recursion: false,
 
                 // The GQL tag to be used to identify inline GraphQL queries
                 gqlTagName: 'gql',
 
                 // Configure the fragments that will be spread into the utility
-                // partial fragments. You can use any fragment here, however the
-                // system is designed for the following receiving fragments:
+                // partial fragments. You can use any fragment here, however 
+                // the system is designed for the following receiving 
+                // fragments:
                 // - PageData => For all page-level components
-                // - BlockData => For everyting that can be rendered as individual component
-                // - ElementData => For all element types that are useable within Visual Builder
+                // - BlockData => For everyting that can be rendered as
+                //                individual component
+                // - ElementData => For all element types that are useable
+                //                  within Visual Builder
                 injections: [
                     {
                         // Add from all Pages, as .page.graphql file
@@ -82,7 +87,7 @@ The presetConfig of the `OptimizelyGraphPreset` is an extension of the configura
 
 | Configuration option | Usage |
 | --- | --- |
-| recursion | Set to `true` to automatically generate recursive queries to iterate down the result. |
+| recursion | Set to `true` to automatically generate recursive queries to iterate down the result.<br><br>The default logic of GraphQL Codegen contains an infite loop when disabling the recursion check. To patch this, a custom resolution must be added to the root `package.json`. This resolution must set the resolution for `@graphql-codegen/visitor-plugin-common` to the patched file [provided within this repository](../../dependencies/graphql-codegen-visitor-plugin-common-v5.3.1-patched.tgz) |
 | injections | A set of rules to define how individual fragments will be used to construct the master queries. Each rule has the following options: <br/>- `into`:  The name of the Fragment to inject into<br/>- `pathRegex`: The regular expression to be applied ot the file name to see if the fragment should be included with the `into` Fragment<br/>- `nameRegex`: The regular expression to be applied to the name of the Fragment
 | documents | The standard rules for preset specific documents, however there are four standard documents available:<br/>- `opti-cms:/queries/13` (included by default)<br/>- `opti-cms:/queries/12`<br/>- `opti-cms:/fragments/13` (included by default)<br/>- `opti-cms:/fragments/12`<br/>*The defaults are only applied when there's no document starting with `opti-cms:` defined*
 | functions | The list of GraphQL Functions that should be made available in the `functions.ts` file. When specified, this overrides the default list.<br/>*Default value: `['getContentType','getContentByPath','getContentById']`*
