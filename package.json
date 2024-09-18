@@ -30,7 +30,7 @@
     "prepare": "yarn update-browserslist-db && yarn dedupe && yarn workspaces foreach -Apt --topological-dev --exclude optimizely-dxp-clients run prepare",
     "recompile": "yarn workspaces foreach -Apt --topological-dev --exclude optimizely-dxp-clients run recompile",
     "watch": "yarn workspaces foreach -Api --exclude optimizely-dxp-clients run watch",
-    "artefacts": "yarn run prepare && yarn run pack:all",
+    "artefacts": "yarn clean && yarn run prepare && yarn run pack:all",
     "pack:all": "yarn run pack:version && yarn run pack:dev",
     "pack:version": "yarn workspaces foreach -Apt --topological-dev --exclude optimizely-dxp-clients pack --install-if-needed --out ../../artefacts/%s-%v.tgz",
     "pack:dev": "yarn workspaces foreach -Apt --topological-dev --exclude optimizely-dxp-clients pack --install-if-needed --out ../../artefacts/%s-dev.tgz",

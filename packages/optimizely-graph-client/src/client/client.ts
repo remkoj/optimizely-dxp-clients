@@ -1,6 +1,7 @@
 import { readEnvironmentVariables, applyConfigDefaults, validateConfig, type OptimizelyGraphConfigInternal, type OptimizelyGraphConfig } from "../config.js"
 import { GraphQLClient } from "graphql-request"
 import { AuthMode, type RequestMethod, type IOptiGraphClient, type OptiGraphSiteInfo, type IOptiGraphClientFlags } from "./types.js"
+import { type OptiCmsSchema } from "../types.js"
 import createHmacFetch, { type FetchAPI } from "../hmac-fetch.js"
 import { base64encode, isError, validateToken, getAuthMode } from "./utils.js"
 
@@ -19,7 +20,10 @@ export class ContentGraphClient extends GraphQLClient implements IOptiGraphClien
     private _token : string | undefined
     private _hmacFetch : FetchAPI | undefined
     private _flags : IOptiGraphClientFlags
-
+    public get currentOptiCmsSchema() : OptiCmsSchema
+    {
+        return this._config.opti_cms_schema
+    }
     public get debug() : boolean 
     {
         return this._config.debug ?? false

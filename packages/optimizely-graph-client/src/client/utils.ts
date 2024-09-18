@@ -1,4 +1,5 @@
 import { AuthMode, type IOptiGraphClient } from "./types.js"
+import { type GraphQLClient } from "graphql-request"
 
 const TOKEN_MIN_LENGTH = 16
 
@@ -32,7 +33,29 @@ export function isError(toTest: any): toTest is Error {
     return typeof(toTest) == 'object' && toTest != null && typeof(toTest as Error).name == 'string' && typeof(toTest as Error).message == 'string'
 }
 
+/**
+ * 
+ * @deprecated 
+ * @see         `isOptiGraphClient()`
+ * @param       client      The value to test
+ * @returns     `true` when the value can be used as IOptiGraphClient, `false` if not
+ */
 export function isContentGraphClient(client: any) : client is IOptiGraphClient
+{
+    if (typeof(client) != 'object' || client == null)
+        return false
+    return typeof(client as IOptiGraphClient).updateAuthentication == 'function' 
+        && typeof(client as IOptiGraphClient).request == 'function'
+}
+
+/**
+ * Test if the provided GraphQL Client is an IOptiGraphClient instance and thus allows
+ * the extended API of this interface to be used.
+ * 
+ * @param       client      The GraphQL Client to test
+ * @returns     `true` when the value can be used as IOptiGraphClient, `false` if not
+ */
+export function isOptiGraphClient(client: GraphQLClient | Record<string,string|number|boolean|object> | undefined | null) : client is IOptiGraphClient
 {
     if (typeof(client) != 'object' || client == null)
         return false

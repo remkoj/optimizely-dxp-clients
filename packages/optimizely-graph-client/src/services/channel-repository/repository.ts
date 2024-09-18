@@ -1,6 +1,6 @@
 import type { ChannelDomain, ChannelLocale } from './types.js'
-import type { OptimizelyGraphConfig } from '../../types.js'
-import createClient, { isContentGraphClient, type IOptiGraphClient } from '../../client/index.js'
+import { type OptimizelyGraphConfig, OptiCmsSchema } from '../../types.js'
+import createClient, { isOptiGraphClient, type IOptiGraphClient } from '../../client/index.js'
 import ChannelDefinition from './definition.js'
 import * as Queries from './queries.js'
 import { localeToGraphLocale } from '../utils.js'
@@ -11,7 +11,9 @@ export class ChannelRepository
 
     public constructor(clientOrConfig?: IOptiGraphClient | OptimizelyGraphConfig)
     {
-        this.client = isContentGraphClient(clientOrConfig) ? clientOrConfig : createClient(clientOrConfig)
+        this.client = isOptiGraphClient(clientOrConfig) ? clientOrConfig : createClient(clientOrConfig)
+        if (this.client.currentOptiCmsSchema != OptiCmsSchema.CMS12)
+            throw new Error("🦺 Optimizely SaaS CMS does not yet expose the Applications through Optimizely Graph")
     }
 
     public async getAll() : Promise<ReadonlyArray<Readonly<ChannelDefinition>>>

@@ -1,4 +1,5 @@
 import type { GraphQLClient } from "graphql-request"
+import type { OptiCmsSchema } from "../types.js"
 
 export type RequestMethod = InstanceType<typeof GraphQLClient>['request']
 export type ClientInstanceType = InstanceType<typeof GraphQLClient>
@@ -67,6 +68,13 @@ export interface IOptiGraphClient extends ClientInstanceType
      * Retrieve the current authentication mode
      */
     readonly currentAuthMode : AuthMode
+
+    /**
+     * Retrieve the currently active CMS Schema. This doesn't affect the client
+     * itself, however it can be used by users of this client to determine which
+     * query format must be used.
+     */
+    readonly currentOptiCmsSchema : OptiCmsSchema
     
     /**
      * Update the authentication data for this client. 
