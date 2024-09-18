@@ -48,10 +48,14 @@ export const preset : Types.OutputPreset<PresetOptions> =
     buildGeneratesSection: async (options)  => {
         // Extend the default plugin configuration
         options.config = {
+            // Overwriteable defaults
+            dedupeFragments: true, // Remove duplicate fragment references
+
+            // Provided options
             ...options.config,
+
+            // Enforced settings
             namingConvention: "keep", // Keep casing "as-is" from Optimizely Graph
-            useTypeImports: true, // Enable type importing to enhance bundling
-            skipTypename: true, // Only add __typename if explicitly requested
         }
 
         // Change the default for fragment masking from 'useFragment' to 
@@ -67,7 +71,8 @@ export const preset : Types.OutputPreset<PresetOptions> =
             }
         }
 
-        //Extend the document transforms
+        // Extend the document transforms in order to apply the transformations
+        // needed to automatically inject Block, Page & Element fragments
         options.documentTransforms = [
             ...(options.documentTransforms || []),
             {
@@ -90,6 +95,8 @@ export const preset : Types.OutputPreset<PresetOptions> =
                     FragmentDefinition: {
                         enter: (node) => {
                             if (!options.schema.definitions.some(x => (x.kind == Kind.OBJECT_TYPE_DEFINITION || x.kind == Kind.INTERFACE_TYPE_DEFINITION) && x.name.value == node.typeCondition.name.value)) {
+                                if (options.presetConfig.verbose)
+                                    console.log(`⚠ Removing fragment ${ node.name.value } from the documents, as its target ${ node.typeCondition.name.value } is not available in the schema`)
                                 return null
                             }
                         }
@@ -122,9 +129,8 @@ export const preset : Types.OutputPreset<PresetOptions> =
                 {
                     'typescript-graphql-request': {
                         ...options.config,
-                        dedupeFragments: false,
                         useTypeImports: true,
-                        importOperationTypesFrom: "Schema"
+                        importOperationTypesFrom: "Schema",
                     }
                 }
             ],
@@ -164,34 +170,19 @@ export const preset : Types.OutputPreset<PresetOptions> =
         section.forEach((fileConfig, idx) => {
             // Modify index.ts with additional exports
             if (fileConfig.filename.endsWith("index.ts")) {
-                const indexTsContent : string[] = [
-                    'export * as Schema from "./graphql";',
-                    'export * from "./functions";',
-                    'export { getSdk, type Sdk } from "./client";',
-                    `export const WITH_RECURSIVE_SUPPORT = ${ options.presetConfig.recursion === true ? 'true' : 'false' };`
-                ]
                 section[idx].plugins.unshift({
                     add: {
-                        content: indexTsContent
+                        content: [
+                            'export * as Schema from "./graphql";',
+                            'export * from "./functions";',
+                            'export { getSdk, type Sdk } from "./client";',
+                        ]
                     }
                 })
-            }
-
-            if (options.presetConfig.recursion === true && fileConfig.filename.endsWith('graphql.ts')) {
-                section[idx].plugins = fileConfig.plugins.map(plugin => {
-                    const pluginName = Object.getOwnPropertyNames(plugin).at(0)
-                    switch (pluginName) {
-                        case "typed-document-node": {
-                            const config = plugin[pluginName]
-                            const newPlugin : Types.ConfiguredPlugin = {}
-                            newPlugin[pluginName] = {
-                                ...config,
-                                dedupeFragments: false
-                            }
-                            return newPlugin
-                        }
+                section[idx].plugins.push({
+                    add: {
+                        content: ['',`export const WITH_RECURSIVE_SUPPORT = ${ options.presetConfig.recursion === true ? 'true' : 'false' };`]
                     }
-                    return plugin
                 })
             }
 
@@ -203,7 +194,7 @@ export const preset : Types.OutputPreset<PresetOptions> =
                 const currentOptions = fileConfig.skipDocumentsValidation || {}
                 section[idx].skipDocumentsValidation = {
                     ...currentOptions,
-                    ignoreRules: ['NoFragmentCyclesRule']
+                    ignoreRules: [...(currentOptions.ignoreRules ?? []), 'NoFragmentCyclesRule']
                 }
             }
         })
