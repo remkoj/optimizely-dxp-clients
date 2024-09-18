@@ -52,16 +52,17 @@ export const preset : Types.OutputPreset<PresetOptions> =
             namingConvention: "keep", // Keep casing "as-is" from Optimizely Graph
             useTypeImports: true, // Enable type importing to enhance bundling
             skipTypename: true, // Only add __typename if explicitly requested
-            avoidOptionals: true, // Don't use TypeScript optionals (?)
-            dedupeFragments: true, // Remove duplicates
         }
 
+        // Change the default for fragment masking from 'useFragment' to 
+        // 'getFragmentData', in order to prevent issues with code checks for
+        // React hooks
         if (options.presetConfig.fragmentMasking !== false) {
             options.presetConfig = {
                 ...options.presetConfig,
                 fragmentMasking: {
-                    ...(typeof(options.presetConfig?.fragmentMasking) == 'object' ? options.presetConfig?.fragmentMasking : {}),
-                    unmaskFunctionName: 'getFragmentData'
+                    unmaskFunctionName: 'getFragmentData',
+                    ...(typeof(options.presetConfig?.fragmentMasking) == 'object' ? options.presetConfig?.fragmentMasking : {})
                 }
             }
         }
@@ -159,13 +160,19 @@ export const preset : Types.OutputPreset<PresetOptions> =
             documentTransforms: options.documentTransforms
         })
 
-        
+        // Update all sections for Optimizely Graph
         section.forEach((fileConfig, idx) => {
             // Modify index.ts with additional exports
             if (fileConfig.filename.endsWith("index.ts")) {
+                const indexTsContent : string[] = [
+                    'export * as Schema from "./graphql";',
+                    'export * from "./functions";',
+                    'export { getSdk, type Sdk } from "./client";',
+                    `export const WITH_RECURSIVE_SUPPORT = ${ options.presetConfig.recursion === true ? 'true' : 'false' };`
+                ]
                 section[idx].plugins.unshift({
                     add: {
-                        content: ['export * as Schema from "./graphql";','export * from "./functions";','export { getSdk, type Sdk } from "./client";']
+                        content: indexTsContent
                     }
                 })
             }
@@ -188,7 +195,10 @@ export const preset : Types.OutputPreset<PresetOptions> =
                 })
             }
 
-            // Set validation rules
+            // Optimizely Graph supports recursive queries to allow fetching
+            // data as created in the CMS. This can cause issues when using
+            // multiple GraphQL sources, hence the ability to enable/disalbe
+            // the support for recursive queries.
             if (fileConfig.skipDocumentsValidation != true && options.presetConfig.recursion === true) {
                 const currentOptions = fileConfig.skipDocumentsValidation || {}
                 section[idx].skipDocumentsValidation = {
@@ -197,10 +207,11 @@ export const preset : Types.OutputPreset<PresetOptions> =
                 }
             }
         })
-
-        const idx = 0
-        const output = section.filter(((x,i) => x && i == idx) as <T>(x: T | null | undefined, i: number) => x is T)
-        return output
+        
+        //const idx = 0
+        //const output = section.filter(((x,i) => x && i == idx) as <T>(x: T | null | undefined, i: number) => x is T)
+        //return output
+        return section
     },
 }
 
