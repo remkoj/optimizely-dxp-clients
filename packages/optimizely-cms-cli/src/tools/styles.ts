@@ -1,6 +1,6 @@
 import type { OptiCmsArgs } from '../types.js'
 import type { Argv, ArgumentsCamelCase } from 'yargs'
-import { type ApiClient as CmsApiClient, type IntegrationApi } from '@remkoj/optimizely-cms-api'
+import { ApiClient as CmsApiClient, type IntegrationApi, OptiCmsVersion } from '@remkoj/optimizely-cms-api'
 import { parseArgs } from '../tools/parseArgs.js'
 import chalk from 'chalk'
 import figures from 'figures'
@@ -31,6 +31,7 @@ export type GetStylesResult = {all: Array<IntegrationApi.DisplayTemplate>,styles
 
 export async function getStyles(client: CmsApiClient, args: ArgumentsCamelCase<OptiCmsArgs<StylesArgs>>, pageSize: number = 100) : Promise<GetStylesResult>
 {
+    if (client.runtimeCmsVersion == OptiCmsVersion.CMS12) return { all: [], styles: [] }
     const { _config: cfg, excludeBaseTypes, excludeTypes, excludeNodeTypes, excludeTemplates, baseTypes, types, nodes, templates, templateTypes } = parseArgs(args)
 
     process.stdout.write(chalk.yellowBright(`${ figures.arrowRight } Pulling Style-Definitions from Optimizely CMS\n`))
