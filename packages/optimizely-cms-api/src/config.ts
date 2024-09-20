@@ -1,4 +1,5 @@
 import { OpenAPI } from './client/core/OpenAPI'
+import { OptiCmsVersion } from './types'
 
 export type CmsIntegrationApiOptions = {
     base: URL
@@ -6,20 +7,28 @@ export type CmsIntegrationApiOptions = {
     clientSecret?: string
     actAs?: string
     debug?: boolean
+
+    /**
+     * The CMS Schema version that is used
+     */
+    cmsVersion?: OptiCmsVersion
 }
 
 export function getCmsIntegrationApiConfigFromEnvironment() : CmsIntegrationApiOptions
 {
-    const cmsUrl = getMandatory('OPTIMIZELY_CMS_URL')
+    const cmsUrl = getOptional('OPTIMIZELY_CMS_URL', 'https://example.cms.optimizely.com')
     const clientId = getMandatory('OPTIMIZELY_CMS_CLIENT_ID')
     const clientSecret = getMandatory('OPTIMIZELY_CMS_CLIENT_SECRET')
     const actAs = getOptional('OPTIMIZELY_CMS_USER_ID')
     const debug = getOptional('OPTIMIZELY_DEBUG',"0") == "1"
+    const cmsVersion = getSelection<OptiCmsVersion>('OPTIMIZELY_CMS_SCHEMA', [OptiCmsVersion.CMS12,OptiCmsVersion.CMS13], OptiCmsVersion.CMS13)
 
     let baseUrl : URL
     try {
         baseUrl = new URL(OpenAPI.BASE, cmsUrl)
-    } catch {
+        if (cmsVersion == OptiCmsVersion.CMS12)
+            baseUrl.pathname = baseUrl.pathname.replace('preview2', 'preview1')
+    } catch (e) {
         throw new Error("Invalid URL provided")
     }
 
@@ -31,7 +40,8 @@ export function getCmsIntegrationApiConfigFromEnvironment() : CmsIntegrationApiO
         clientId,
         clientSecret,
         actAs,
-        debug
+        debug,
+        cmsVersion
     }
 }
 
@@ -48,4 +58,14 @@ function getMandatory(variable: string) : string
     if (!envValue)
         throw new Error(`The environment variable ${ variable } is missing or empty`)
     return envValue
+}
+
+function getSelection<T>(envVarName: string, allowedValues: T[], defaultValue: T) : T
+{
+    const rawValue = getOptional(envVarName, defaultValue as string)
+    if (!rawValue)
+        return defaultValue
+    if (allowedValues.some(av => av == rawValue))
+        return rawValue as T
+    return defaultValue
 }

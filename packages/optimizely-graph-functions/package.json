@@ -62,11 +62,9 @@
   },
   "peerDependencies": {
     "@graphql-typed-document-node/core": "*",
+    "@remkoj/optimizely-graph-client": "2.1.0",
     "graphql": "*",
     "graphql-request": "^6.1.0",
     "graphql-tag": "*"
-  },
-  "optionalDependencies": {
-    "@remkoj/optimizely-graph-client": "2.1.0"
   }
 }

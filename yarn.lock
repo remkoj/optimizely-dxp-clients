@@ -1637,7 +1637,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@remkoj/optimizely-graph-client@npm:2.1.0, @remkoj/optimizely-graph-client@workspace:2.1.0, @remkoj/optimizely-graph-client@workspace:^2.1.0, @remkoj/optimizely-graph-client@workspace:packages/optimizely-graph-client":
+"@remkoj/optimizely-graph-client@workspace:2.1.0, @remkoj/optimizely-graph-client@workspace:^2.1.0, @remkoj/optimizely-graph-client@workspace:packages/optimizely-graph-client":
   version: 0.0.0-use.local
   resolution: "@remkoj/optimizely-graph-client@workspace:packages/optimizely-graph-client"
   dependencies:
@@ -1665,7 +1665,6 @@ __metadata:
     "@graphql-codegen/typescript": "npm:^4.0.9"
     "@graphql-codegen/typescript-graphql-request": "npm:^6.2.0"
     "@graphql-codegen/typescript-operations": "npm:^4.2.3"
-    "@remkoj/optimizely-graph-client": "npm:2.1.0"
     "@types/node": "npm:^22.5.5"
     graphql: "npm:^16.9.0"
     graphql-request: "npm:^6.1.0"
@@ -1674,12 +1673,10 @@ __metadata:
     typescript: "npm:^5.6.2"
   peerDependencies:
     "@graphql-typed-document-node/core": "*"
+    "@remkoj/optimizely-graph-client": 2.1.0
     graphql: "*"
     graphql-request: ^6.1.0
     graphql-tag: "*"
-  dependenciesMeta:
-    "@remkoj/optimizely-graph-client":
-      optional: true
   languageName: unknown
   linkType: soft
 
@@ -2567,9 +2564,9 @@ __metadata:
   linkType: hard
 
 "caniuse-lite@npm:^1.0.30001579, caniuse-lite@npm:^1.0.30001646":
-  version: 1.0.30001660
-  resolution: "caniuse-lite@npm:1.0.30001660"
-  checksum: 10c0/d28900b56c597176d515c3175ca75c454f2d30cb2c09a44d7bdb009bb0c4d8a2557905adb77642889bbe9feb85fbfe9d974c8b8e53521fb4b50ee16ab246104e
+  version: 1.0.30001662
+  resolution: "caniuse-lite@npm:1.0.30001662"
+  checksum: 10c0/4af44610db30b9e63443d984be9d48ab93eef584609b3e87201c10972b9daff0b52674e3ed01f7b7b240460763428a3aa8ef7328d14b76ed31ed464203677007
   languageName: node
   linkType: hard
 

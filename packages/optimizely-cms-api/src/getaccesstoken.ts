@@ -1,5 +1,6 @@
 import { type CmsIntegrationApiOptions, getCmsIntegrationApiConfigFromEnvironment } from "./config";
 import { OpenAPI } from "./client/core/OpenAPI"
+import { OptiCmsVersion } from "./types";
 
 type TokenResponse = { access_token: string, expires_in: number, token_type: string }
 type ErrorResponse = { error: string, error_description: string }
@@ -13,8 +14,11 @@ function isErrorResponse(response: AuthResponse) : response is ErrorResponse
 export async function getAccessToken(config?: CmsIntegrationApiOptions) : Promise<string>
 {
     const options = config ?? getCmsIntegrationApiConfigFromEnvironment()
-    const authUrl = new URL(`${ OpenAPI.BASE }/oauth/token`, options.base).href
+    let authUrl = new URL(`${ OpenAPI.BASE }/oauth/token`, options.base).href
     const headers = new Headers()
+    if (options.cmsVersion == OptiCmsVersion.CMS12)
+        authUrl = authUrl.replace('preview2', 'preview1')
+
     headers.append('Authorization', `Basic ${ base64Encode(`${ options.clientId }:${ options.clientSecret }`)}`)
     headers.append('Content-Type','application/x-www-form-urlencoded')
     headers.append('Connection', 'close')
