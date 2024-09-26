@@ -21,7 +21,7 @@ export function createOptiCmsApp(scriptName: string, version?: string, epilogue?
         .option("cms_url", { alias: "cu", description: "Optimizely CMS URL", string: true, type: "string", demandOption: isDemanded(config.base), default: config.base, coerce: (val) => new URL(val)})
         .option("client_id", { alias: "ci", description: "API Client ID", string: true, type: "string", demandOption: isDemanded(config.clientId), default: config.clientId })
         .option('client_secret', { alias: "cs", description: "API Client Secrent", string: true, type: "string", demandOption: isDemanded(config.clientSecret), default: config.clientSecret })
-        .option('user_id', { alias: "uid", description: "Impersonate user id", string: true, type: "string", demandOption: false, default: config.actAs })
+        .option('user_id', { alias: "u", description: "Impersonate user id", string: true, type: "string", demandOption: false, default: config.actAs })
         .option('verbose', { description: "Enable logging", boolean: true, type: 'boolean', demandOption: false, default: config.debug })
         .demandCommand(1,1)
         .showHelpOnFail(true)

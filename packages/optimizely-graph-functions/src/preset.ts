@@ -50,6 +50,7 @@ export const preset : Types.OutputPreset<PresetOptions> =
         options.config = {
             // Overwriteable defaults
             dedupeFragments: true, // Remove duplicate fragment references
+            emitLegacyCommonJSImports: false, //Switch to ESM
 
             // Provided options
             ...options.config,
@@ -198,10 +199,7 @@ export const preset : Types.OutputPreset<PresetOptions> =
                 }
             }
         })
-        
-        //const idx = 0
-        //const output = section.filter(((x,i) => x && i == idx) as <T>(x: T | null | undefined, i: number) => x is T)
-        //return output
+
         return section
     },
 }

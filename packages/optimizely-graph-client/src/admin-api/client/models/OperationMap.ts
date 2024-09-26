@@ -3,7 +3,7 @@
 /* tslint:disable */
 /* eslint-disable */
 export type OperationMap = {
-    in?: Array<string>;
+    in?: (string | Array<string>);
     eq?: string;
 };
 

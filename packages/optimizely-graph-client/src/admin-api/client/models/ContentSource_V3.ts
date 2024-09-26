@@ -7,12 +7,13 @@ import type { LinkMap } from './LinkMap.js';
 import type { Optional_string_ } from './Optional_string_.js';
 import type { Preset } from './Preset.js';
 import type { PropertyTypeMap_V3 } from './PropertyTypeMap_V3.js';
-export type ContentTypeDefinition_V3 = {
+export type ContentSource_V3 = {
     languages?: Array<string>;
     contentTypes?: ContentTypeMap_V3;
     propertyTypes?: PropertyTypeMap_V3;
     links?: LinkMap;
     label?: Optional_string_;
+    description?: Optional_string_;
     useTypedFieldNames?: boolean;
     preset?: Preset;
 };

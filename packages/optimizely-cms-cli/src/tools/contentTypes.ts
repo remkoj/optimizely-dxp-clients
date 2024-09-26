@@ -1,6 +1,6 @@
 import type { OptiCmsArgs } from '../types.js'
 import type { Argv, ArgumentsCamelCase } from 'yargs'
-import { type ApiClient as CmsApiClient, type IntegrationApi } from '@remkoj/optimizely-cms-api'
+import { IntegrationApi, type ApiClient as CmsApiClient } from '@remkoj/optimizely-cms-api'
 import { parseArgs } from '../tools/parseArgs.js'
 import chalk from 'chalk'
 import figures from 'figures'
@@ -10,6 +10,7 @@ export type ContentTypesArgs = {
     excludeTypes: string[]
     baseTypes: string[]
     types: string[]
+    all: boolean
 }
 
 export const contentTypesBuilder : (yargs: Argv<OptiCmsArgs>) => Argv<OptiCmsArgs<ContentTypesArgs>> = yargs => 
@@ -18,14 +19,21 @@ export const contentTypesBuilder : (yargs: Argv<OptiCmsArgs>) => Argv<OptiCmsArg
     yargs.option('excludeBaseTypes', { alias: 'ebt', description: "Exclude these base types", string: true, type: 'array', demandOption: false, default: ['folder','media','image','video']})
     yargs.option("baseTypes", { alias: 'b', description: "Select only these base types", string: true, type: 'array', demandOption: false, default: []})
     yargs.option("types", { alias: 't', description: "Select only these types", string: true, type: 'array', demandOption: false, default: []})
+    yargs.option('all', { alias: 'a', description: "Include non-supported base types", boolean: true, type: 'boolean', demandOption: false, default: false })
     return yargs as Argv<OptiCmsArgs<ContentTypesArgs>>
 }
 
 export type GetContentTypesResult = {all: Array<IntegrationApi.ContentType>,contentTypes: Array<IntegrationApi.ContentType>}
 
+function getEnumOptions<T extends object>(enumObject: T) : Array<keyof T> {
+    return (Object.keys(enumObject) as Array<keyof T>).filter((item) => {
+        return isNaN(Number(item));
+    });
+}
+
 export async function getContentTypes(client: CmsApiClient, args: ArgumentsCamelCase<OptiCmsArgs<ContentTypesArgs>>, pageSize: number = 100, allowSystem: boolean = false) : Promise<GetContentTypesResult>
 {
-    const { _config: cfg, excludeBaseTypes, excludeTypes, baseTypes, types } = parseArgs(args)
+    const { _config: cfg, excludeBaseTypes, excludeTypes, baseTypes, types, all } = parseArgs(args)
 
     process.stdout.write(chalk.yellowBright(`${ figures.arrowRight } Pulling Content Types from Optimizely CMS\n`))
 
@@ -48,7 +56,25 @@ export async function getContentTypes(client: CmsApiClient, args: ArgumentsCamel
         process.stdout.write(chalk.gray(`${ figures.arrowRight } Filtering Content-Types based upon arguments\n`))
     }
 
-    const contentTypes = results.filter(data => {
+    const validBaseTypes = getEnumOptions(IntegrationApi.ContentBaseType).map(x => x.toLowerCase())
+    const allContentTypes = all ? 
+        // If we're returning all content types, including non-supported base types, make sure the base type is always set
+        results.map(contentType => {
+            return {
+                ...contentType,
+                baseType: contentType.baseType ?? 'default'
+            } as IntegrationApi.ContentType
+        }) : 
+        // Otherwise filter out any non supported content base type
+        results.filter(contentType => {
+            const baseType = (contentType.baseType ?? 'default').toLowerCase()
+            const isValid = validBaseTypes.includes(baseType)
+            if (!isValid && cfg.debug)
+                process.stdout.write(chalk.gray(`${ figures.arrowRight } Removing ${ contentType.key } as it has an unsupported base type: ${ baseType }\n`))
+            return isValid
+        })
+    const contentTypes = allContentTypes.filter(data => {
+
         // Remove items based upon filters
         const keepType = (!excludeBaseTypes.includes(data.baseType)) && 
             (!excludeTypes.includes(data.key)) && 
@@ -73,7 +99,7 @@ export async function getContentTypes(client: CmsApiClient, args: ArgumentsCamel
         process.stdout.write(chalk.gray(`${ figures.arrowRight } Applied content type filters, reduced from ${ results.length } to ${ contentTypes.length } items\n`))
 
     return {
-        all: results,
-        contentTypes
+        all: allContentTypes,
+        contentTypes: contentTypes
     }
 }

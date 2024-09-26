@@ -2,10 +2,8 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-export type SourceInfo = {
-    languages: Array<string>;
-    description: string;
+export type SourceMetadata = {
     label: string;
-    id: string;
+    description: string;
 };
 

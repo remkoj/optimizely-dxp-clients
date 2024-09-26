@@ -16,7 +16,7 @@ export const StylesListCommand : CliModule = {
             process.stdout.write(chalk.gray(`${ figures.cross } Styles are not supported on CMS12\n`))
             return
         }
-        const { all: results } = await getStyles(client, { ...args, excludeBaseTypes: [], excludeNodeTypes: [], excludeTemplates: [], excludeTypes: [], baseTypes: [], nodes: [], templates: [], types: [], templateTypes: []})
+        const { all: results } = await getStyles(client, { ...args, excludeBaseTypes: [], excludeNodeTypes: [], excludeTemplates: [], excludeTypes: [], baseTypes: [], nodes: [], templates: [], types: [], templateTypes: [], all: false})
         const styles = new Table({
             head: [
                 chalk.yellow(chalk.bold("Name")),

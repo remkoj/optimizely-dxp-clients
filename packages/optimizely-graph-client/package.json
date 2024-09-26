@@ -52,7 +52,7 @@
   },
   "devDependencies": {
     "@types/crypto-js": "^4.2.2",
-    "@types/node": "^22.5.5",
+    "@types/node": "^22.7.3",
     "graphql": "^16.9.0",
     "graphql-request": "^6.1.0",
     "openapi-typescript-codegen": "^0.29.0",

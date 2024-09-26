@@ -38,8 +38,8 @@ export const StylesCreateCommand : CliModule<StylesCreateParams> = {
         // Prepare
         process.stdout.write(chalk.yellowBright(chalk.bold(`Reading current information from Optimizely CMS\n`)))
         const [{ contentTypes },{ styles }] = await Promise.all([
-            getContentTypes(client, { ...args, excludeBaseTypes: [], excludeTypes: [], baseTypes: allowedBaseTypes, types: [] }),
-            getStyles(client, { ...args, excludeBaseTypes: [], excludeNodeTypes: [], excludeTemplates: [], excludeTypes: [], baseTypes: allowedBaseTypes, types: [], nodes: [], components: '', templates: [], templateTypes: []})
+            getContentTypes(client, { ...args, excludeBaseTypes: [], excludeTypes: [], baseTypes: allowedBaseTypes, types: [], all: false }),
+            getStyles(client, { ...args, excludeBaseTypes: [], excludeNodeTypes: [], excludeTemplates: [], excludeTypes: [], baseTypes: allowedBaseTypes, types: [], nodes: [], components: '', templates: [], templateTypes: [], all: false})
         ])
         const styleKeys = styles.map(x => x.key)
 

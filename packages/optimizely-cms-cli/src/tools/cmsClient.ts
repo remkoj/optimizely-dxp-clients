@@ -17,3 +17,5 @@ export function createCmsClient(args: Parameters<CliModule['handler']>[0]) : Cms
         process.stdout.write(chalk.gray(`${ figures.arrowRight } Connecting to ${ cfg.base.href } as ${ cfg.actAs ?? cfg.clientId }\n`))
     return client
 }
+
+export default createCmsClient
