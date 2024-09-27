@@ -1,9 +1,9 @@
 // Import GraphQL Client
-import createClient, { type IOptiGraphClient, isOptiGraphClient } from '../../client/index.js'
-import { type OptimizelyGraphConfig, OptiCmsSchema } from '../../types.js'
+import createClient, { type IOptiGraphClient, isOptiGraphClient, OptiCmsSchema } from '../../client/index.js'
+import { type OptimizelyGraphConfig } from '../../types.js'
 
 // Import Routing specific types
-import type { Route } from "./types.js"
+import type { Route, IRouteResolver } from "./types.js"
 import type { ContentLinkWithLocale } from '../types.js'
 
 import type { OptimizelyCmsRoutingApi } from './queries/types.js'
@@ -13,7 +13,7 @@ import type { OptimizelyCmsRoutingApi } from './queries/types.js'
 /**
  * 
  */
-export class RouteResolver {
+export class RouteResolver implements IRouteResolver {
     private _cgClient : IOptiGraphClient
     private _defaultUrlBase : string | URL
     private _resolverMode : OptiCmsSchema

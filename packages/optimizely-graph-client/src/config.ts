@@ -1,8 +1,8 @@
 import type * as Types from './types.js'
-import { OptiCmsSchema } from "./types.js"
+import { OptiCmsSchema } from "./client/types.js"
 
 export type { ContentGraphConfig, OptimizelyGraphConfigInternal, OptimizelyGraphConfig } from './types.js'
-export { OptiCmsSchema } from "./types.js"
+export { OptiCmsSchema } from "./client/types.js"
 
 export function readEnvironmentVariables() : Types.OptimizelyGraphConfig
 {

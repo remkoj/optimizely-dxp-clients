@@ -1,5 +1,4 @@
 import type { GraphQLClient } from "graphql-request"
-import type { OptiCmsSchema } from "../types.js"
 
 export type RequestMethod = InstanceType<typeof GraphQLClient>['request']
 export type ClientInstanceType = InstanceType<typeof GraphQLClient>
@@ -7,6 +6,11 @@ export type ClientInstanceType = InstanceType<typeof GraphQLClient>
 export type QueryParams = {
     query: Parameters<RequestMethod>[0]['document']
     variables: Parameters<RequestMethod>[0]['variables']
+}
+
+export enum OptiCmsSchema {
+    CMS12 = "OPTI-CMS-12",
+    CMS13 = "OPTI-CMS-13"
 }
 
 export enum AuthMode {

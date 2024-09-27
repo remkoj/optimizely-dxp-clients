@@ -1,6 +1,6 @@
 import type { ChannelDomain, ChannelLocale } from './types.js'
-import { type OptimizelyGraphConfig, OptiCmsSchema } from '../../types.js'
-import createClient, { isOptiGraphClient, type IOptiGraphClient } from '../../client/index.js'
+import { type OptimizelyGraphConfig } from '../../types.js'
+import createClient, { isOptiGraphClient, type IOptiGraphClient, OptiCmsSchema } from '../../client/index.js'
 import ChannelDefinition from './definition.js'
 import * as Queries from './queries.js'
 import { localeToGraphLocale } from '../utils.js'

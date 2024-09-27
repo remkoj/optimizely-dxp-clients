@@ -29,7 +29,7 @@
     "clean": "yarn node ./scripts/clean.js",
     "prepare": "yarn update-browserslist-db && yarn dedupe && yarn workspaces foreach -Apt --topological-dev --exclude optimizely-dxp-clients run prepare",
     "recompile": "yarn workspaces foreach -Apt --topological-dev --exclude optimizely-dxp-clients run recompile",
-    "watch": "yarn workspaces foreach -Api --exclude optimizely-dxp-clients run watch",
+    "watch": "yarn workspaces foreach -Api -j unlimited --exclude optimizely-dxp-clients run watch",
     "artefacts": "yarn clean && yarn run prepare && yarn run pack:all",
     "pack:all": "yarn run pack:version && yarn run pack:dev",
     "pack:version": "yarn workspaces foreach -Apt --topological-dev --exclude optimizely-dxp-clients pack --install-if-needed --out ../../artefacts/%s-%v.tgz",
@@ -43,5 +43,8 @@
     "update:all": "yarn run update:yarn && yarn run update:deps && yarn run artefacts",
     "update:license-info": "yarn node ./scripts/licenses.js",
     "publish": "yarn workspaces foreach -Apt --topological-dev --exclude optimizely-dxp-clients npm publish"
+  },
+  "resolutions": {
+    "picomatch": "^4"
   }
 }

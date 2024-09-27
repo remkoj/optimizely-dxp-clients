@@ -1,7 +1,4 @@
-export enum OptiCmsSchema {
-    CMS12 = "OPTI-CMS-12",
-    CMS13 = "OPTI-CMS-13"
-}
+import type { OptiCmsSchema } from "./client/types.js"
 
 export type OptimizelyGraphConfigInternal = {
     /**
