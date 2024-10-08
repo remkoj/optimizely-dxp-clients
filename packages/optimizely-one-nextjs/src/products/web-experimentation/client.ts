@@ -16,7 +16,7 @@ export class WebExperimenationService implements ClientApi.OptimizelyOneService<
         const webex = this.getBrowserApi()
         if (!webex) return
         webex.push({ type: 'activate' })
-        if (this.debug) console.log("Web Experimentation - Activating pages")
+        if (this.debug) console.log("🚀 Web Experimentation - Activating pages")
     }
 
     public trackEvent(event: ClientApi.OptimizelyOneEvent)
@@ -28,7 +28,7 @@ export class WebExperimenationService implements ClientApi.OptimizelyOneService<
         for (const prop_name of (Object.getOwnPropertyNames(event) as (keyof ClientApi.OptimizelyOneEvent)[])) {
             if (prop_name != 'event' && prop_name != 'action') eventTags[prop_name] = event[prop_name] 
         }
-        console.log("Web Experimentation - Tracking event:", { type: 'event', eventName, tags: eventTags })
+        if (this.debug) console.log("🚀 Web Experimentation - Tracking event:", { type: 'event', eventName, tags: eventTags })
         webex.push({ type: 'event', eventName, tags: eventTags })
     }
 
@@ -41,6 +41,17 @@ export class WebExperimenationService implements ClientApi.OptimizelyOneService<
         } catch {
             return undefined
         }
+    }
+
+    public updateProfile(profileData: ClientApi.OptimizelyOneProfileData)
+    {
+        const webex = this.getBrowserApi()
+        if (!webex) return
+        if (this.debug) console.log("🚀 Web Experimentation - Tracking attributes:", { type: 'user', attributes: profileData.custom })
+        webex.push({
+            type: "user",
+            attributes: profileData.custom
+        });
     }
 }
 

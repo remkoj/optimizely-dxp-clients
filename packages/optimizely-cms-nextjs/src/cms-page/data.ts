@@ -1,26 +1,26 @@
 import { gql, GraphQLClient } from "graphql-request"
 
-export type GetContentByPathVariables = {
+export type GetContentByPathVariables<LocaleType = string> = {
     path: string,
-    locale?: Array<string | null>[] | string | null,
+    locale?: Array<LocaleType | null> | LocaleType | null,
     siteId?: string | null
 }
 
-export type GetContentByPathResponse = {
-    Content?: {
-        items?: {
-            contentType?: Array<string|null> | null
-            id?: {
-                id?: number | null
-                workId?: number | null
-                guidValue?: string | null
-            } | null
-            locale?: {
-                name?: string | null
-            } | null
-            path?: string | null
-        }[]
-    }
+type MayBe<T> = T extends Array<infer R> ? Array<R | null> | null : T | null
+
+export type GetContentByPathResponse<LocaleType = string> = {
+    content?: MayBe<{
+        items?: MayBe<Array<{
+            _metadata?: MayBe<{
+                key?: MayBe<string>
+                locale?: MayBe<LocaleType>
+                types?: MayBe<Array<string>>
+                displayName?: MayBe<string>
+                version?: MayBe<string>
+            }>
+            _type?: MayBe<string>
+        }>>
+    }>
 }
 
 export type GetMetaDataByPathResponse = {
@@ -36,8 +36,8 @@ export type GetMetaDataByPathResponse = {
     }
 }
 
-export type GetContentByPathMethod = (client: GraphQLClient, variables: GetContentByPathVariables) => Promise<GetContentByPathResponse>
-export type GetMetaDataByPathMethod = (client: GraphQLClient, variables: GetContentByPathVariables) => Promise<GetMetaDataByPathResponse>
+export type GetContentByPathMethod<LocaleType = string> = (client: GraphQLClient, variables: GetContentByPathVariables<LocaleType>) => Promise<GetContentByPathResponse<LocaleType>>
+export type GetMetaDataByPathMethod<LocaleType = string> = (client: GraphQLClient, variables: GetContentByPathVariables<LocaleType>) => Promise<GetMetaDataByPathResponse>
 
 export const getMetaDataByPath: GetMetaDataByPathMethod = (client, variables) =>
 {
@@ -51,25 +51,24 @@ export const getContentByPath: GetContentByPathMethod = (client, variables) =>
 
 export default getContentByPath
 
-const contentQuery = gql`query getContentByPathBase($path: String!, $locale: [Locales], $siteId: String) {
-    Content(
-        where: { RelativePath: { eq: $path }, SiteId: { eq: $siteId } }
+const contentQuery = gql`query getContentByPathBase($path: String!, $domain: String, $locale: [Locales]) {
+    content: Content(
+        where: { _metadata: { url: { hierarchical: { eq: $path }, base: { eq: $domain } } } }
         locale: $locale
     ) {
+        total
         items {
-            contentType: ContentType
-            id: ContentLink {
-                id: Id
-                workId: WorkId
-                guidValue: GuidValue
+            _metadata {
+                key
+                locale
+                types
+                displayName
+                version
             }
-            locale: Language {
-                name: Name
-            }
-            path: RelativePath
+            _type: __typename
         }
     }
-}`
+  }`
 
 const metadataQuery = gql`query getGenericMetaData($path: String!, $locale: [Locales], $siteId: String) {
     getGenericMetaData: Content (

@@ -1,2 +1,4 @@
-export * from './cms-content'
-export * from './cms-content-area'
+export * from './cms-content.js'
+export * from './cms-content-area.js'
+export * from './cms-editable.js'
+export * from './visual-builder/index.js'

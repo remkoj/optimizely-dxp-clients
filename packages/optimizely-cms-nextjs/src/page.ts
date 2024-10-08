@@ -1,4 +1,4 @@
-import type { OptimizelyNextPage } from "./types";
+import type { OptimizelyNextPage } from "./types.js";
 
 export function isOptimizelyNextPageWithMetaData(toTest: any) : toTest is OptimizelyNextPage
 {

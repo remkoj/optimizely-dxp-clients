@@ -15,11 +15,11 @@ export class DataPlatformService implements ClientApi.OptimizelyOneService<Clien
     {
         const zaius = this.getBrowserApi()
         if (!zaius) return
-        if (this.debug) console.log("Data platform - Tracking page view")
+        if (this.debug) console.log("🏬 Data platform - Tracking page view")
         zaius.event('pageview')
         if (this.lastTrackedContentIntelligenceId != this.contentIntelligenceId && this.contentIntelligenceId != '')
         {
-            if (this.debug) console.log(`Data platform - Updating Content Intelligence ID to ${ this.contentIntelligenceId }`)
+            if (this.debug) console.log(`🏬 Data platform - Updating Content Intelligence ID to ${ this.contentIntelligenceId }`)
             zaius.customer({ content_intelligence_id: this.contentIntelligenceId })
             this.lastTrackedContentIntelligenceId = this.contentIntelligenceId
         }
@@ -34,7 +34,7 @@ export class DataPlatformService implements ClientApi.OptimizelyOneService<Clien
         for (const prop_name of (Object.getOwnPropertyNames(event) as (keyof ClientApi.OptimizelyOneEvent)[])) {
             if (prop_name != 'event') event_data[prop_name] = event[prop_name] 
         }
-        console.log("Data platform - Tracking event:", event_name, event_data)
+        if (this.debug) console.log("🏬 Data platform - Tracking event:", event_name, event_data)
         zaius.event(event_name, event_data)
     }
 
@@ -45,6 +45,17 @@ export class DataPlatformService implements ClientApi.OptimizelyOneService<Clien
         } catch {
             return undefined
         }
+    }
+
+    public updateProfile(profileData: ClientApi.OptimizelyOneProfileData)
+    {
+        const zaius = this.getBrowserApi()
+        if (!zaius) return
+        const ids : Record<string,string> = {}
+        if (profileData.content_intelligence_id)
+            ids.content_intelligence_id = profileData.content_intelligence_id
+        if (this.debug) console.log("🏬 Data platform - Updating profile (ids, attributes):", ids, profileData.custom)
+        zaius.customer(ids, profileData.custom)
     }
 
     private lastTrackedContentIntelligenceId : string | undefined = undefined

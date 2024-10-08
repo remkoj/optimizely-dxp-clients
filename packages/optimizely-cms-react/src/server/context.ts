@@ -1,36 +1,22 @@
 import 'server-only'
 import React from 'react'
-import { isDevelopment, isDebug } from "./is-debug"
-import { getFactory } from '../factory'
-import type { ComponentFactory } from '../types'
-import type { IOptiGraphClient } from "@remkoj/optimizely-graph-client"
+import { isDevelopment, isDebug } from "./is-debug.js"
+import { getFactory } from '../factory.js'
+import type { ComponentFactory, GenericContext } from '../types.js'
+import { contentLinkIsEqual, type IOptiGraphClient, type ContentLink } from "@remkoj/optimizely-graph-client"
 
-export type EditableContentId = {
-    id: number | null,
-    workId?: number | null,
-    guidValue?: string | null
-} | {
-    id?: number | null,
-    workId?: number | null,
-    guidValue: string | null
-}
-
-export interface ServerContext {
-    readonly inEditMode: Readonly<boolean>
-    readonly isDevelopment: boolean
-    readonly isDebug: boolean
-    readonly isDebugOrDevelopment: boolean
-    readonly client?: IOptiGraphClient 
-    readonly factory: ComponentFactory
+export interface ServerContext extends GenericContext {
     readonly forceEditorWarnings: boolean
-    readonly locale ?: string
     setInEditMode(newValue: boolean) : ServerContext
     setOptimizelyGraphClient(newValue: IOptiGraphClient) : ServerContext
     setComponentFactory(newValue: ComponentFactory) : ServerContext
     setForceEditorWarnings(newValue: boolean) : ServerContext
     setLocale(newValue: string | undefined): ServerContext
-    setEditableContentId(newId: EditableContentId) : ServerContext
-    isEditableContent(id: EditableContentId) : boolean
+    setEditableContentId(newId: ContentLink) : ServerContext
+    isEditableContent(id: ContentLink) : boolean
+    setLocale(newValue: string | undefined) : ServerContext
+    setOptimizelyGraphClient(newValue: IOptiGraphClient) : ServerContext
+    setComponentFactory(newValue: ComponentFactory) : ServerContext
 }
 
 class DefaultServerContext implements ServerContext {
@@ -39,7 +25,7 @@ class DefaultServerContext implements ServerContext {
     private _client : IOptiGraphClient | undefined = undefined
     private _factory : ComponentFactory | undefined = undefined
     private _locale : string | undefined = undefined
-    private _editableContent : EditableContentId | undefined = undefined
+    private _editableContent : ContentLink | undefined = undefined
     public get inEditMode() : boolean {
         return this._inEditMode
     }
@@ -85,17 +71,13 @@ class DefaultServerContext implements ServerContext {
         this._locale = newValue
         return this
     }
-    public setEditableContentId(newId: EditableContentId) {
+    public setEditableContentId(newId: ContentLink) {
         this._editableContent = newId
         return this;
     }
-    public isEditableContent(id: EditableContentId) : boolean {
+    public isEditableContent(id: ContentLink) : boolean {
         if (!this.inEditMode || !this._editableContent) return false // We can on be editable in edit mode and with an id set
-        if (id.id != this._editableContent.id && id.guidValue != this._editableContent.guidValue)
-            return false // Both ID and GUID don't match
-        if (this._editableContent.workId && this._editableContent.workId != id.workId)
-            return false // We know the work ID and it doesn't match
-        return true
+        return contentLinkIsEqual(this._editableContent, id)
     }
 }
 

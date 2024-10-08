@@ -1,122 +1,99 @@
 'use client'
 
-import React, { useState, useEffect, type FunctionComponent, type PropsWithChildren } from 'react'
-import { useRouter } from 'next/navigation'
+import { useState, useEffect, type FunctionComponent, type PropsWithChildren } from 'react'
+import { useRouter } from 'next/navigation.js'
 
-export type OnPageEditProps = PropsWithChildren<{
-    mode?: 'edit' | 'preview'
-    className?: string
-    timeout?: number
-}>
-
-export type OptimizelyCmsContext = {
-    ready: boolean
-    inEditMode: boolean
-    isEditable: boolean
-    subscribe: (event: string, handler: (...args: any) => void) => void
-}
-
-export type OptimizelyCmsContentSavedEvent = {
+type OptimizelyCmsContentSavedEvent = {
     contentLink: string,
     editUrl: string,
-    previewUrl: string
+    previewUrl: string,
+    previewToken: string
 }
 
-declare global {
-    interface Window { 
-        epi?: OptimizelyCmsContext
-    }
-}
-
-const DEV = process.env.NODE_ENV == 'development'
-
-export const OnPageEdit : FunctionComponent<OnPageEditProps> = ({ mode, children, className, timeout }) => 
-{
+export const OnPageEdit: FunctionComponent<PropsWithChildren> = ({ children }) => {
     const router = useRouter()
-    const [ optiCmsReady, setOptiCmsReady ] = useState<boolean>(false)
-    const [ showMask, setShowMask ] = useState<boolean>(false)
-    timeout = timeout ?? 1500
+    const [showMask, setShowMask] = useState<boolean>(false)
 
-    // Bind to the CMS & CMS Ready State
-    useEffect(() => {
-        console.log("Reading Opti CMS Context")
-        const fxCms = tryGetCms()
-        const cmsReady = fxCms?.ready ?? false
-        setOptiCmsReady(cmsReady)
-        if (!cmsReady) {
-            const cancelToken = setInterval(() => {
-                const updateCms = tryGetCms()
-                const updatedCmsReady = updateCms?.ready ?? false
-                if (updatedCmsReady) {
-                    clearInterval(cancelToken)
-                    setOptiCmsReady(updatedCmsReady)
-                }
-            }, 250)
-            return () => {
-                clearInterval(cancelToken)
-            }
+    function onContentSaved(eventData: OptimizelyCmsContentSavedEvent) {
+        const previewUrl = window.location.href
+
+        setShowMask(true)
+
+        // First: Use the updated preview URL if we have it
+        if (eventData?.previewUrl && previewUrl != eventData.previewUrl) {
+            const newUrl = new URL(eventData.previewUrl)
+            console.log(`Navigating to provided preview path: ${newUrl.pathname}${newUrl.search}`)
+            router.push(newUrl.pathname + newUrl.search)
+            // or refresh the page
+        } else {
+            console.log(`Refreshing preview: ${eventData.contentLink}`)
+            router.refresh()
         }
-    }, [])
+        setShowMask(false)
+    }
+
+    const listener = (event: any) => onContentSaved(event.detail);
 
     // Bind to the Saved event
     useEffect(() => {
-        if (!optiCmsReady)
-            return
+        console.log(`🟢 Enabling ContentSaved event handler`)
+        window.addEventListener("optimizely:cms:contentSaved", listener);
 
-        const previewUrl = window.location.href
-        let handlerEnabled = true
+        let unsub : (() => void) | undefined = undefined
+        let cancelled : boolean = false
 
-        // Define event handler
-        let maskTimer : NodeJS.Timeout  | false = false
-        function onContentSaved(eventData: OptimizelyCmsContentSavedEvent)
-        {
-            setShowMask(true)
-            if (maskTimer != false) clearTimeout(maskTimer)
-            console.log(`Delaying refresh with ${ timeout }ms to allow Optimizely Graph to update`)
-            maskTimer = setTimeout(() => {
-                const contentId = window.location.pathname.split(',,')[1]
-                const newContentId = eventData.contentLink
-                if (previewUrl == eventData.previewUrl) {
-                    console.log(`Refreshing preview: ${ contentId } => ${ newContentId }`)
-                    router.refresh()
-                    //setShowMask(false)
-                } else {
-                    const newUrl = new URL(eventData.previewUrl)
-                    console.log(`Navigating to new preview: ${ contentId } => ${ newContentId }`)
-                    router.push(newUrl.pathname + newUrl.search)
-                    setShowMask(false)
-                }
-            }, timeout)
-        }
-
-        // Subscribe to event
-        console.log(`Subscribing to ContentSaved Event`)
-        const opti = tryGetCms()
-        opti?.subscribe('contentSaved', (eventData: OptimizelyCmsContentSavedEvent) => {
-            if (!handlerEnabled)
-                return
-            onContentSaved(eventData)
+        waitFor(() => window.epi).then(epi => {
+            if (!cancelled) {
+                console.log(`⚪ Enabling ContentSaved event handler`)
+                let r = epi.subscribe('contentSaved', onContentSaved )
+                unsub = r.remove
+            }
+        }).catch(() => {
+            console.warn("Unable to bind to the contentSaved event")
         })
 
         // Unsubscribe when needed
         return () => {
+            cancelled = true
             console.log(`Navigating away, disabling ContentSaved event handler`)
-            handlerEnabled = false
+            window.removeEventListener("optimizely:cms:contentSaved", listener)
+            if (unsub)
+                unsub()
         }
-    }, [ optiCmsReady, router, timeout ])
+    }, [router])
 
-    return <>
-        { showMask && <div className={`loading-mask ${ className }`.trimEnd()}>{ children }</div>}
-    </>
-}
-
-function tryGetCms() : OptimizelyCmsContext | undefined
-{
-    try {
-        return window.epi
-    } catch {
-        return undefined
-    }
+    return showMask ? children : null
 }
 
 export default OnPageEdit
+
+
+function waitFor<T>(fn: () => T | undefined, timeOutSeconds: number = 10, intervalMs: number = 250) : Promise<T>
+{
+    return new Promise<T>((resolve, reject) => {
+        const iv = setInterval(() => {
+            try {
+                const cv = fn()
+                if (cv != undefined) {
+                    clearInterval(iv)
+                    clearTimeout(wt)
+                    resolve(cv)
+                }
+            } catch {
+                //Ignore errors
+            }
+        }, intervalMs)
+        const wt = setTimeout(() => {
+            clearInterval(iv)
+            reject(`The function has not yielded a value within ${ timeOutSeconds } seconds`)
+        }, timeOutSeconds * 1000)
+    })
+}
+
+declare global {
+    interface Window { epi?: {
+        subscribe: (eventName: string, handler: (data: OptimizelyCmsContentSavedEvent) => void) => {
+            remove: () => void
+        }
+    }; }
+}

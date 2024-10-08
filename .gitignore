@@ -1,14 +1,12 @@
+# Yarn artefacts
 .yarn/*
 !.yarn/patches
 !.yarn/plugins
 !.yarn/releases
 !.yarn/sdks
 !.yarn/versions
-
-# Swap the comments on the following lines if you don't wish to use zero-installs
-# Documentation here: https://yarnpkg.com/features/zero-installs
-!.yarn/cache
-#.pnp.*
+/.pnp.cjs
+/.pnp.loader.mjs
 
 # Typescript build artifacts
 .tsbuildinfo
@@ -17,3 +15,10 @@
 # NPM build artifacts
 artefacts/*.tgz
 !artefacts/*-dev.tgz
+
+# IDE Configuration
+.idea
+.vscode
+
+# Exclude local files
+*.local

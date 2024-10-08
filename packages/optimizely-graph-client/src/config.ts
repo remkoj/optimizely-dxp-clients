@@ -1,5 +1,8 @@
 import type * as Types from './types.js'
+import { OptiCmsSchema } from "./client/types.js"
+
 export type { ContentGraphConfig, OptimizelyGraphConfigInternal, OptimizelyGraphConfig } from './types.js'
+export { OptiCmsSchema } from "./client/types.js"
 
 export function readEnvironmentVariables() : Types.OptimizelyGraphConfig
 {
@@ -12,8 +15,11 @@ export function readEnvironmentVariables() : Types.OptimizelyGraphConfig
         dxp_url: getOptional('OPTIMIZELY_CMS_URL', () => getOptional('DXP_URL')),
         query_log: getBoolean('OPTIMIZELY_GRAPH_QUERY_LOG', () => getBoolean('OPTIMIZELY_CONTENTGRAPH_QUERY_LOG', false)),
         debug: getBoolean('OPTIMIZELY_DEBUG', () => getBoolean('DXP_DEBUG', false)),
-        publish: getOptional('OPTIMIZELY_PUBLISH_TOKEN')
+        publish: getOptional('OPTIMIZELY_PUBLISH_TOKEN'),
+        opti_cms_schema: getSelection<OptiCmsSchema>('OPTIMIZELY_CMS_SCHEMA', [OptiCmsSchema.CMS12,OptiCmsSchema.CMS13], OptiCmsSchema.CMS13)
     }
+    if (config.gateway && config.gateway?.endsWith("/"))
+        config.gateway = config.gateway.substring(0, config.gateway.length - 1)
     return config
 }
 
@@ -26,11 +32,15 @@ export function applyConfigDefaults(configuredValues: Types.OptimizelyGraphConfi
         deploy_domain: "",
         debug: false,
         query_log: false,
+        opti_cms_schema: OptiCmsSchema.CMS13
     }
-    return {
+    const config = {
         ...defaults,
         ...configuredValues
     }
+    if (config.gateway && config.gateway?.endsWith("/"))
+        config.gateway = config.gateway.substring(0, config.gateway.length - 1)
+    return config
 }
 
 /**
@@ -111,4 +121,14 @@ function getOptional(envVarName: string, defaultValue?: string | (() => string |
             return defaultValue()
         return defaultValue
     }
+}
+
+function getSelection<T>(envVarName: string, allowedValues: T[], defaultValue: T) : T
+{
+    const rawValue = getOptional(envVarName, defaultValue as string)
+    if (!rawValue)
+        return defaultValue
+    if (allowedValues.some(av => av == rawValue))
+        return rawValue as T
+    return defaultValue
 }

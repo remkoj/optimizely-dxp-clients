@@ -8,6 +8,11 @@ export type QueryParams = {
     variables: Parameters<RequestMethod>[0]['variables']
 }
 
+export enum OptiCmsSchema {
+    CMS12 = "OPTI-CMS-12",
+    CMS13 = "OPTI-CMS-13"
+}
+
 export enum AuthMode {
     Public = "epi-single",
     Basic = "use-basic",
@@ -22,9 +27,33 @@ export type OptiGraphSiteInfo = {
 }
 
 export type IOptiGraphClientFlags = {
+    /**
+     * Control support for caching the execution plan for a query, this ensures
+     * that the execution plan does not need to be rebuild after publishing content.
+     * 
+     * The following features do not work with query caching enabled:
+     * - @recursive
+     * - cursors
+     */
     queryCache: boolean
+
+    /**
+     * Control support for the recursive directive within Optimizely Graph
+     * 
+     * @see https://docs.developers.optimizely.com/platform-optimizely/v1.4.0-optimizely-graph/docs/recursive-directive-usage
+     */
     recursive: boolean
+
+    /**
+     * Cache the output of a query on the CDN edge, so subsequent requests for the
+     * same data will be handled completely at the CDN edge.
+     */
     cache: boolean
+
+    /**
+     * When set to true, empty object will be omitted from the result
+     */
+    omitEmpty: boolean
 }
 
 export interface IOptiGraphClient extends ClientInstanceType
@@ -43,6 +72,13 @@ export interface IOptiGraphClient extends ClientInstanceType
      * Retrieve the current authentication mode
      */
     readonly currentAuthMode : AuthMode
+
+    /**
+     * Retrieve the currently active CMS Schema. This doesn't affect the client
+     * itself, however it can be used by users of this client to determine which
+     * query format must be used.
+     */
+    readonly currentOptiCmsSchema : OptiCmsSchema
     
     /**
      * Update the authentication data for this client. 

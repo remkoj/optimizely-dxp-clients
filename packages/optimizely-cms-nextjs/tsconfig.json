@@ -1,12 +1,11 @@
 {
     "extends": "../../tsconfig.json",
     "compilerOptions": {
-        "target": "ESNext",
-        "lib": ["dom", "dom.iterable", "esnext"],
-        "module": "ESNext",
-        "moduleResolution": "node",
         "rootDir": "./src",
         "outDir": "./dist",
+        "esModuleInterop": true,
+        "allowSyntheticDefaultImports": true,
+        
     },
     "include": ["./src/**/*.ts","./src/**/*.tsx"],
     "exclude": ["./dist/**"],

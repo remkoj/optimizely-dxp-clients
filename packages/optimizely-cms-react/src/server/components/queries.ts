@@ -1,21 +1,21 @@
 import { gql } from 'graphql-request'
 
 export const CmsContentFragments = {
-    IContentDataProps: ["contentType","id","locale","path","__typename"],
+    IContentDataProps: ["_metadata","_type","__typename"],
     ContentLink: gql`fragment ContentLink on ContentModelReference {
-      id: Id,
-      workId: WorkId,
-      guidValue: GuidValue
+        id: Id,
+        workId: WorkId,
+        guidValue: GuidValue
     }`,
     ContentLinkSearch: gql`fragment ContentLinkSearch on ContentModelReferenceSearch {
-      id: Id,
-      workId: WorkId,
-      guidValue: GuidValue
+        id: Id,
+        workId: WorkId,
+        guidValue: GuidValue
     }`,
     IContentData: gql`fragment IContentData on IContent {
         contentType: ContentType
         id: ContentLink {
-          ...ContentLink
+            ...ContentLink
         }
         locale: Language {
             name: Name
@@ -26,7 +26,7 @@ export const CmsContentFragments = {
         item: ContentLink {
             ...ContentLinkSearch
             data: Expanded {
-            ...BlockData
+                ...BlockData
             }
         }
         displayOption:DisplayOption
@@ -35,7 +35,7 @@ export const CmsContentFragments = {
         item: ContentLink {
             ...ContentLinkSearch
             data: Expanded {
-            ...IContentData
+                ...IContentData
             }
         }
         displayOption:DisplayOption
@@ -44,7 +44,7 @@ export const CmsContentFragments = {
         item: ContentLink {
             ...ContentLink
             data: Expanded {
-            ...IContentData
+                ...IContentData
             }
         }
         displayOption:DisplayOption
@@ -105,7 +105,7 @@ export const ContentAreaFragments = {
 }
 
 export const getContentById = gql`query getContentById($id: Int, $workId: Int, $guidValue: String, $locale: [Locales!], $isCommonDraft: Boolean) {
-    Content(
+    content:_Content(
         where: {
             ContentLink: { 
                 Id: { eq: $id }, 
@@ -127,7 +127,7 @@ export const getContentById = gql`query getContentById($id: Int, $workId: Int, $
 
 export const getContentByPath = gql`query getContentByPath($path: String!, $locale: [Locales], $siteId: String)
 {
-  Content(
+  content: _Content(
     where: {
       RelativePath: {
         eq: $path

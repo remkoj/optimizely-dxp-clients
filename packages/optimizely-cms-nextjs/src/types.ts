@@ -4,5 +4,5 @@ import type { Metadata } from 'next'
 
 export type OptimizelyNextPage<T = {}> = CmsComponent<T> & 
 {
-    getMetaData?: (contentLink: ContentLink, locale: string, client: IOptiGraphClient) => Promise<Metadata>
+    getMetaData?: (contentLink: ContentLink, locale: string | null | undefined, client: IOptiGraphClient) => Promise<Metadata>
 }

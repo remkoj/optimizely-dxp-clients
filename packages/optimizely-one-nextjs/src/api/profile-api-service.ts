@@ -21,6 +21,7 @@ export const ProfileApiService : ApiService<ProfileApiResponse> = {
         const scopes = query.get('scope')?.toLowerCase()?.split(',')?.map(x => x.trim())
         const fetchContentTopics = !scopes || scopes.includes('topics')
         const fetchODPAudiences = !scopes || scopes.includes('audiences')
+        const fetchProfileCard = !scopes || scopes.includes('profile')
 
         // Read all IDs
         const odpId = DataPlatform.Tools.getVisitorID(cookies)
@@ -36,8 +37,8 @@ export const ProfileApiService : ApiService<ProfileApiResponse> = {
 
         // Determine audiences if needed
         let audiences : { id: string, name: string}[] = []
+        const odp = new DataPlatform.Client();
         if (fetchODPAudiences && odpId) {
-            const odp = new DataPlatform.Client();
             const allAudiences = await odp.getAllAudiences()
             audiencesCount = allAudiences.length
 
@@ -57,6 +58,9 @@ export const ProfileApiService : ApiService<ProfileApiResponse> = {
             audiences = allAudiences.filter(a => userAudienceIds.includes(a.id))
         }
 
+        // Fetch the profile if needed
+        const profile = fetchProfileCard && odpId ? await odp.getProfileInfo(odpId) : undefined
+
         // Determine topics if needed
         let topics : string[] = []
         if (fetchContentTopics && crId) {
@@ -64,21 +68,25 @@ export const ProfileApiService : ApiService<ProfileApiResponse> = {
             topics = await contentRecs.getContentTopics(crId)
         }
 
-        return [{
+        const responseData : ProfileApiResponse = {
             ids: {
                 dataPlatform: odpId || NO_ID,
                 frontend: frontendId || NO_ID,
                 contentIntelligence: crId || NO_ID,
                 webExperimentation: webExId || NO_ID
             },
-            pageSize,
-            pageNumber,
-            audiences: audiences,
-            audiencesPageCount,
-            audiencesCount,
+            rts: {
+                pageSize,
+                pageNumber,
+                audiences: audiences,
+                audiencesPageCount,
+                audiencesCount,
+            },
+            profile: profile ?? null,
             contentTopics: topics,
             duration: `${ Date.now() - start}ms`
-        }, 200]
+        }
+        return [responseData, 200]
     }
 }
 
@@ -94,11 +102,14 @@ export type ProfileApiResponse = {
         webExperimentation: string
     },
     contentTopics: string[]
-    audiences: { id: string, name: string }[]
-    audiencesPageCount: number
-    audiencesCount: number
-    pageSize: number
-    pageNumber: number
+    rts: {
+        audiences: { id: string, name: string }[]
+        audiencesPageCount: number
+        audiencesCount: number
+        pageSize: number
+        pageNumber: number
+    }
+    profile: DataPlatform.Profile | null
     duration?: string
 }
 

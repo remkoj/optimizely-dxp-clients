@@ -1,0 +1,31 @@
+{
+  "name": "@remkoj/optimizely-cms-api",
+  "displayName": "Optimizely CMS - Integration API Client",
+  "description": "A Javascript client for the Integration API provided by the Optimizely CMS.",
+  "version": "2.1.0",
+  "packageManager": "yarn@4.3.0",
+  "type": "commonjs",
+  "license": "Apache-2.0",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "files": [
+    "./dist"
+  ],
+  "devDependencies": {
+    "@types/node": "^22.7.4",
+    "dotenv": "^16.4.5",
+    "glob": "^11.0.0",
+    "openapi-typescript-codegen": "^0.29.0",
+    "tslib": "^2.7.0",
+    "typescript": "^5.6.2"
+  },
+  "scripts": {
+    "clean": "tsc --build --clean",
+    "prepare": "tsc --build",
+    "watch": "tsc --watch",
+    "rebuild": "yarn clean && yarn update-client && tsc --build --force",
+    "update-client": "yarn generate-spec && yarn generate-client",
+    "generate-client": "yarn openapi --input ./integrationapi.spec.json --output ./src/client --name CmsIntegrationApiClient",
+    "generate-spec": "yarn node scripts/update-spec.js"
+  }
+}

@@ -4,6 +4,9 @@ import { cookies } from 'next/headers'
 import type { ApiService } from './types'
 import ProfileApiService from './profile-api-service'
 import GraphInfoApiService from './graph-info-service'
+import ExperimentationApiService from './experimentation-api'
+import ContentRecsApiService from './content-recs'
+import ContentRecsGoalsService from './content-goals'
 
 type RequestContext = { params: Record<string, string | string[]> } 
 type OptimizelyOneApi = (req: NextRequest, ctx: RequestContext) => Promise<NextResponse>
@@ -27,7 +30,10 @@ export function createOptimizelyOneApi(config?: Partial<OptimizelyOneApiConfig>)
     const services = [
         ...(config?.services || []),
         ProfileApiService,
-        GraphInfoApiService
+        GraphInfoApiService,
+        ExperimentationApiService,
+        ContentRecsApiService,
+        ContentRecsGoalsService
     ]
 
     // Basic service matcher, but get's the job done for now
@@ -55,10 +61,16 @@ export function createOptimizelyOneApi(config?: Partial<OptimizelyOneApiConfig>)
 
         // Invoke the service
         const c = cookies()
-        const [ response, statusCode ] = await apiService.handler(request.nextUrl.searchParams, c)
+        const [ response, statusCode, contentType ] = await apiService.handler(request.nextUrl.searchParams, c)
+
+        const headers = new Headers();
+        if (contentType)
+            headers.set("Content-Type", contentType)
 
         // Return the outcome
-        return NextResponse.json(response, { status: statusCode })
+        if (typeof response == 'string')
+            return new NextResponse(response, { headers, status: statusCode })
+        return NextResponse.json(response, { headers, status: statusCode })
     }
     return handler
 }

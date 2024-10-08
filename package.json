@@ -1,18 +1,23 @@
 {
   "name": "optimizely-dxp-clients",
-  "version": "1.0.5",
-  "description": "Javascript client for Optimizely Products",
+  "version": "2.1.0",
+  "description": "Javascript clients for Optimizely Products",
   "repository": "https://github.com/remkoj/optimizely-dxp-clients.git",
   "author": "Remko Jantzen <693172+remkoj@users.noreply.github.com>",
   "homepage": "https://github.com/remkoj/optimizely-dxp-clients",
   "license": "Apache-2.0",
   "private": true,
   "devDependencies": {
-    "@yarnpkg/sdks": "^3.1.0",
-    "tslib": "^2.6.2",
-    "typescript": "^5.4.4"
+    "@types/node": "^22.7.4",
+    "@yarnpkg/sdks": "^3.2.0",
+    "browserslist": "^4.24.0",
+    "glob": "^11.0.0",
+    "tslib": "^2.7.0",
+    "typescript": "^5.6.2",
+    "update-browserslist-db": "^1.1.1",
+    "yaml": "^2.5.1"
   },
-  "packageManager": "yarn@4.1.1",
+  "packageManager": "yarn@4.5.0",
   "workspaces": [
     "packages/*"
   ],
@@ -21,16 +26,25 @@
     "vscode": "^1.22.0"
   },
   "scripts": {
-    "prepare": "yarn workspaces foreach -Wt --exclude optimizely-dxp-clients run prepare",
-    "recompile": "yarn workspaces foreach -Wt --exclude optimizely-dxp-clients run recompile",
-    "watch": "yarn workspaces foreach -Api --exclude optimizely-dxp-clients run watch",
-    "artefacts": "yarn run prepare && yarn workspaces foreach -Wt --exclude optimizely-dxp-clients pack --install-if-needed --out ../../artefacts/%s-%v.tgz && yarn workspaces foreach -Wt --exclude optimizely-dxp-clients pack --install-if-needed --out ../../artefacts/%s-dev.tgz",
-    "version-bump-patch": "yarn workspaces foreach -A version -d patch",
-    "version-apply": "yarn workspaces foreach -A version apply",
-    "versions": "yarn workspaces foreach -A version",
-    "update-sdks": "yarn sdks vscode",
-    "update-deps": "yarn upgrade-interactive && yarn dedupe && yarn sdks vscode",
-    "update-yarn": "yarn set version stable && yarn install && yarn dedupe && yarn sdks vscode",
-    "update-all": "yarn run update-yarn && yarn run update-deps"
+    "clean": "yarn node ./scripts/clean.js",
+    "prepare": "yarn update-browserslist-db && yarn dedupe && yarn workspaces foreach -Apt --topological-dev --exclude optimizely-dxp-clients run prepare",
+    "recompile": "yarn workspaces foreach -Apt --topological-dev --exclude optimizely-dxp-clients run recompile",
+    "watch": "yarn workspaces foreach -Api -j unlimited --exclude optimizely-dxp-clients run watch",
+    "artefacts": "yarn clean && yarn run prepare && yarn run pack:all",
+    "pack:all": "yarn run pack:version && yarn run pack:dev",
+    "pack:version": "yarn workspaces foreach -Apt --topological-dev --exclude optimizely-dxp-clients pack --install-if-needed --out ../../artefacts/%s-%v.tgz",
+    "pack:dev": "yarn workspaces foreach -Apt --topological-dev --exclude optimizely-dxp-clients pack --install-if-needed --out ../../artefacts/%s-dev.tgz",
+    "version-bump-patch": "yarn workspaces foreach -At --topological-dev version -d patch",
+    "version-apply": "yarn workspaces foreach -At --topological-dev version apply",
+    "versions": "yarn workspaces foreach -At --topological-dev version",
+    "update:sdks": "yarn sdks vscode",
+    "update:deps": "yarn upgrade-interactive && yarn dedupe && yarn update:sdks && yarn update:license-info",
+    "update:yarn": "yarn set version stable && yarn install && yarn dedupe && yarn run update:sdks",
+    "update:all": "yarn run update:yarn && yarn run update:deps && yarn run artefacts",
+    "update:license-info": "yarn node ./scripts/licenses.js",
+    "publish": "yarn workspaces foreach -Apt --topological-dev --exclude optimizely-dxp-clients npm publish"
+  },
+  "resolutions": {
+    "picomatch": "^4"
   }
 }

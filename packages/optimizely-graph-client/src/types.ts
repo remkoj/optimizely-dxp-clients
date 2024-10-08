@@ -1,3 +1,5 @@
+import type { OptiCmsSchema } from "./client/types.js"
+
 export type OptimizelyGraphConfigInternal = {
     /**
      * Optimizely Graph AppKey, it is recommended to not let this key leave the server side
@@ -43,6 +45,11 @@ export type OptimizelyGraphConfigInternal = {
      * Publishing token to validate webhooks - if implemented
      */
     publish?: string
+
+    /**
+     * The CMS Schema version that is used
+     */
+    opti_cms_schema: OptiCmsSchema
 }
 
 export type OptimizelyGraphConfig = Partial<Omit<OptimizelyGraphConfigInternal, 'single_key'>> & Pick<OptimizelyGraphConfigInternal, 'single_key'>

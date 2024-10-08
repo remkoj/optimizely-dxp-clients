@@ -2,5 +2,5 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-import type { Partial_Record_FieldKeys_OperationMap__ } from './Partial_Record_FieldKeys_OperationMap__.js';
-export type FilterMap = Partial_Record_FieldKeys_OperationMap__;
+import type { Partial_Record_string_OperationMap__ } from './Partial_Record_string_OperationMap__.js';
+export type FilterMap = Partial_Record_string_OperationMap__;

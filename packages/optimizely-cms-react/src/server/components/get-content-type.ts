@@ -1,7 +1,8 @@
 import type { IOptiGraphClient } from "@remkoj/optimizely-graph-client"
-import type { ContentType, ContentLinkWithLocale } from "../../types"
+import type { ContentType, ContentLinkWithLocale } from "../../types.js"
 import { gql } from 'graphql-request'
-import * as Utils from "../../utilities"
+import * as Utils from "../../utilities.js"
+import { isContentLink } from "@remkoj/optimizely-graph-client/utils"
 
 const DEBUG = false
 
@@ -14,7 +15,7 @@ const DEBUG = false
  */
 export async function getContentType(link: ContentLinkWithLocale, gqlClient: IOptiGraphClient) : Promise<ContentType | undefined>
 {
-    if ((!link.id || link.id < 1) && (!link.guidValue || link.guidValue == ""))
+    if (!isContentLink(link))
         throw new Error("Cannot dynamically determine the content type of an inline block")
     const gqlQueryVars = Utils.contentLinkToRequestVariables(link)
     const gqlResponse = await gqlClient.request<GetContentTypeResponse>(getContentTypeQuery, gqlQueryVars)
@@ -28,7 +29,7 @@ export async function getContentType(link: ContentLinkWithLocale, gqlClient: IOp
     if (!items || items.length == 0)
         throw new Error("The content item could not be found!")
 
-    const contentType = Utils.normalizeContentType(items[0]?.ContentType)
+    const contentType = Utils.normalizeContentType(items[0]?._metadata?.types)
     if (!contentType)
         throw new Error("The item did not contain type information")
 
@@ -39,34 +40,31 @@ export default getContentType
 
 type GetContentTypeResponse = {
     Content: {
-        items: {
-            ContentType: string[]
-        }[]
+        items: Partial<{
+            _metadata: Partial<{
+              types: string[]
+            }>
+        }>[]
         total: number
     }
 }
 
-export const getContentTypeQuery = gql`query getContentType($id: Int, $workId: Int, $guidValue: String, $locale: [Locales])
+export const getContentTypeQuery = gql`query getContentType($key: String!, $version: String, $locale: [Locales])
 {
-  Content(
+  _Content(
     where: {
-      ContentLink: {
-        GuidValue: {
-          eq: $guidValue
-        }
-        Id: {
-          eq: $id
-        },
-        WorkId: {
-          eq: $workId
-        }
+      _metadata: {
+        key: { eq: $key }
+        version: { eq: $version }
       }
     },
     locale: $locale
     limit: 1
   ) {
     items {
-    	ContentType
+    	_metadata {
+        types
+      }
     },
     total
   }

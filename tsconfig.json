@@ -28,5 +28,6 @@
         //"resolvePackageJsonImports": true,
         //"resolvePackageJsonExports": true,
     },
-    "exclude": ["node_modules", "tests", "dist", "cjs","bin","../../../node_modules"]
+    "include": ["src"],
+    "exclude": ["node_modules", "tests", "dist", "cjs","bin","../../../node_modules","./packages/*/dist","artefacts","build"]
 }

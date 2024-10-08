@@ -1,9 +1,9 @@
 import type { SuspenseProps, PropsWithChildren } from "react"
-import type { ContentLinkWithLocale, ComponentFactory, ContentType } from "../../types"
-import type { ElementChildrenProps, ElementProps, ElementType, PropTypeIfPropExists, MayBeArray, TypeIfPropExists } from '../type-utils'
-import type { IOptiGraphClient } from "@remkoj/optimizely-graph-client"
+import type { ComponentFactory, ContentType } from "../../types.js"
+import type { ElementChildrenProps, ElementProps, ElementType, PropTypeIfPropExists, MayBeArray, TypeIfPropExists } from '../type-utils.js'
+import type { IOptiGraphClient, ContentLinkWithLocale, InlineContentLinkWithLocale } from "@remkoj/optimizely-graph-client"
 
-export type CmsContentProps = PropsWithChildren<{
+export type CmsContentProps<LocalesType = string> = PropsWithChildren<{
     /**
      * The content type to render
      */
@@ -12,7 +12,7 @@ export type CmsContentProps = PropsWithChildren<{
     /**
      * The content link to render
      */
-    contentLink: ContentLinkWithLocale
+    contentLink: ContentLinkWithLocale<LocalesType> | InlineContentLinkWithLocale<LocalesType>
 
     /**
      * The initial, pre-loaded data. If set this will be used instead of having the
@@ -68,29 +68,51 @@ export type CmsContentProps = PropsWithChildren<{
      * it will not be applied.
      */
     contentTypePrefix?: string
+
+    /**
+     * Any layout properties inferred from the context
+     */
+    layoutProps?: Record<string, any>
+
+    /**
+     * When set to true, this will prevent the CmsContent component to try loading content from
+     * the store
+     */
+    noDataLoad?: boolean
 }>
 
-type RawContentLink = {
-    id?: number | null,
-    workId?: number | null,
-    guidValue?: string | null,
-}
-
-type RawLocale = { name?: string | null }
-
 export type ContentAreaItemDefinition = {
-    __typename?: "ContentAreaItemModelSearch" | "ContentAreaItemModel"
-    item?: (RawContentLink & {
-        data?: {
-            contentType?: (string | null)[] | null
-            id?: RawContentLink | null
-            locale?: RawLocale | null
-            [ property: string ]: any
+    __typename?:  string | null
+    _type?: string | null
+    _metadata?: {
+        key?: string | null
+        locale?: string | null
+        types?: Array<string | null> | null
+        displayName?: string | null
+        version?: string | null
+        url?: {
+            base?: string | null
+            hierarchical?: string | null
+            default?: string | null
         } | null
-    }) | null,
-    displayOption?: string | null,
-    tag?: string | null
-}
+    } | null
+} & Record<string, any>
+export type ValidContentAreaItemDefinition = {
+    __typename?:  string | null
+    _type?: string | null
+    _metadata: {
+        key?: string | null
+        locale?: string | null
+        types?: Array<string | null> | null
+        displayName?: string | null
+        version?: string | null
+        url?: {
+            base?: string | null
+            hierarchical?: string | null
+            default?: string | null
+        } | null
+    }
+} & Record<string, any>
 
 export type CmsContentAreaProps<T extends ElementType, CT extends ElementType> = {
     /**

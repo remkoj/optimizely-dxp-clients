@@ -10,7 +10,7 @@
       "baseUrl": "./",
       "outDir": "./dist",
       "declaration": false,
-      "sourceMap": false,
+      "sourceMap": true,
       "incremental": true,
       "skipLibCheck": true, // Prevent errors from .d.ts files
   

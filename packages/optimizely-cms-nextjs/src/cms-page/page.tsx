@@ -1,98 +1,214 @@
 import 'server-only'
 import type { Metadata, ResolvingMetadata } from 'next'
+import { cache } from 'react'
 import deepmerge from 'deepmerge'
-import { notFound } from 'next/navigation'
-import { RouteResolver, type ClientFactory, type ChannelDefinition } from '@remkoj/optimizely-graph-client'
+import { notFound } from 'next/navigation.js'
+
+// GraphQL Client & Services
+import { type ContentLinkWithLocale } from '@remkoj/optimizely-graph-client'
+import { RouteResolver, type IRouteResolver, type Route } from '@remkoj/optimizely-graph-client/router'
+import { type ChannelDefinition } from '@remkoj/optimizely-graph-client/channels'
+import { type ClientFactory, type IOptiGraphClient, OptiCmsSchema } from '@remkoj/optimizely-graph-client/client'
+import { normalizeContentLinkWithLocale } from '@remkoj/optimizely-graph-client/utils'
+
+// React Support
 import { CmsContent, isDebug, getServerContext, type ComponentFactory } from '@remkoj/optimizely-cms-react/rsc'
 import { Utils } from '@remkoj/optimizely-cms-react'
 
-import { MetaDataResolver } from '../metadata'
-import { urlToPath, localeToGraphLocale } from './utils'
-import getContentByPathBase, { type GetContentByPathMethod } from './data'
-import { getServerClient } from '../client'
+// Within package
+import { MetaDataResolver } from '../metadata.js'
+import { urlToPath, localeToGraphLocale } from './utils.js'
+import getContentByPathBase, { type GetContentByPathMethod } from './data.js'
+import { getServerClient } from '../client.js'
 
-export type Params = {
-    path: string[] | undefined,
-    lang: string | undefined
+export type DefaultCmsPageParams = {
+    path?: string[]
+}
+export type DefaultCmsPageSearchParams = {}
+
+export type DefaultCmsPageProps<
+    TParams extends Record<string, string | Array<string> | undefined> = DefaultCmsPageParams,
+    TSearchParams extends Record<string, string | Array<string> | undefined> = DefaultCmsPageSearchParams
+> = {
+    params: TParams
+    searchParams: TSearchParams
 }
 
-export type Props = {
-    params: Params
-    searchParams: {}
+export type OptiCmsNextJsPage<
+    TParams extends Record<string, string | Array<string> | undefined> = DefaultCmsPageParams,
+    TSearchParams extends Record<string, string | Array<string> | undefined> = DefaultCmsPageSearchParams
+> = {
+    /**
+     * Default implementation for the `generateStaticParams` export of a
+     * Next.JS Page.
+     * 
+     * @returns     The list of routes that should be pre-rendered by Next.JS
+     */
+    generateStaticParams: () => Promise<TParams[]>
+
+    /**
+     * Default implementation for the `generateMetadata` export, which builds 
+     * the metadata for the given route within the Next.JS app.
+     * 
+     * @param       props           The properties of the page
+     * @param       resolving       The metadata that is currently resolving
+     * @returns     Updated metadat
+     */
+    generateMetadata: (props: DefaultCmsPageProps<TParams, TSearchParams>, resolving: ResolvingMetadata) => Promise<Metadata>
+
+    /**
+     * The actual component that performs the page rendering
+     * 
+     * @param       props           The properties of the page
+     * @returns     The component to render the page
+     */
+    CmsPage: (props: DefaultCmsPageProps<TParams, TSearchParams>) => Promise<JSX.Element>
 }
 
-export type GenerateMetadataProps<TParams extends {} = {}, TSearch extends {} = {}> = {
-    params: Params
+export enum SystemLocales {
+    All = 'ALL',
+    Neutral = 'NEUTRAL'
 }
 
-export type NextJsPage = {
-    generateStaticParams: () => Promise<Params[]>
-    generateMetadata: (props: Props, resolving: ResolvingMetadata) => Promise<Metadata>
-    CmsPage: (props: Props) => Promise<JSX.Element>
-}
+export type CreatePageOptions<
+    LocaleEnum = SystemLocales, 
+    TParams extends Record<string, string | Array<string> | undefined> = DefaultCmsPageParams,
+    TSearchParams extends Record<string, string | Array<string> | undefined> = DefaultCmsPageSearchParams
+> = {
+    /**
+     * Main function used to retrieve the content by path
+     */
+    getContentByPath: GetContentByPathMethod<LocaleEnum>
 
-export type CreatePageOptions = {
-    defaultLocale: string
-    getContentByPath: GetContentByPathMethod
+    /**
+     * The factory that should yield the GraphQL Client to be used within this
+     * page.
+     */
     client: ClientFactory
+
+    /**
+     * The channel information used to resolve locales, domains and more
+     */
+    channel?: ChannelDefinition
+
+    /**
+     * Override the default RouteResolver that is used to discover the routes
+     * provided by the Optimizely CMS and to retrieve the content reference for
+     * each route.
+     * 
+     * @param       client      The Optimizely GraphQL Client to use
+     * @returns     The RouteResolver to use
+     */
+    routerFactory: (client?: IOptiGraphClient) => IRouteResolver
+
+    /**
+     * Take the props received by the CmsPage from Next.JS and tranform those
+     * into a path that will be understood by Optimizely CMS. The default 
+     * implementation works with both `/[lang]/[[...path]]` as well as
+     * `/[[...path]]`
+     * 
+     * @param       props       The Properties (slugs & search params) received 
+     *                          by Next.JS
+     * @return      The path to be retrieved from Router or getContentByPath 
+     *              function
+     */
+    propsToCmsPath: (props: DefaultCmsPageProps<TParams, TSearchParams>) => string | null
+
+    /**
+     * Take the route from the Routing Service and transform that to the route 
+     * params used by Next.JS. The default implementation assumes that the CMS
+     * routes will be handled by `/[[...path]]`
+     * 
+     * @param       route       The Route retrieved from Optimizely Graph
+     * @returns     The processed route
+     */
+    routeToParams: (route: Route) => TParams
 }
 
-const CreatePageOptionDefaults : CreatePageOptions = {
-    defaultLocale: "en",
+const CreatePageOptionDefaults : CreatePageOptions<string> = {
     getContentByPath: getContentByPathBase,
-    client: getServerClient
+    client: getServerClient,
+    routerFactory: (client) => new RouteResolver(client),
+    propsToCmsPath: ({ params }) => buildRequestPath(params),
+    routeToParams: (route) => { return { path: urlToPath(route.url), lang: route.locale }}
 }
 
-export function createPage(
+/**
+ * Generate the React Server Side component and Next.JS functions needed to render an 
+ * Optimizely CMS page. This component assumes that the routes are either defined as
+ * /[lang]/[[...path]] or /[[...path]]
+ * 
+ * @param       factory         The component factory to use for this page
+ * @param       options         The page component generation options
+ * @returns     The Optimizely CMS Page
+ */
+export function createPage<
+    LocaleEnum = SystemLocales, 
+    TParams extends Record<string, string | Array<string> | undefined> = DefaultCmsPageParams,
+    TSearchParams extends Record<string, string | Array<string> | undefined> = DefaultCmsPageSearchParams
+> (
     factory: ComponentFactory,
-    channel: ChannelDefinition,
-    options?: Partial<CreatePageOptions>
-) : NextJsPage {
-    const { defaultLocale, getContentByPath, client: clientFactory } = { 
-        ...CreatePageOptionDefaults, 
-        ...{ defaultLocale: channel.defaultLocale }, 
-        ...options 
-    }
+    options?: Partial<CreatePageOptions<LocaleEnum, TParams, TSearchParams>>
+) : OptiCmsNextJsPage<TParams, TSearchParams> {
 
-    const pageDefintion : NextJsPage = {
-        generateStaticParams : async () =>
+    // Build the global/shared configuration for the Optimizely CMS Page
+    const { getContentByPath, client: clientFactory, channel, propsToCmsPath, routeToParams, routerFactory } = { 
+        ...CreatePageOptionDefaults,
+        ...options 
+    } as CreatePageOptions<LocaleEnum, TParams, TSearchParams>
+
+    // Create the global Graph Client
+    const globalClient = clientFactory()
+
+    // Create the global Router instance
+    const router = routerFactory(globalClient)
+    const getInfoByPath = cache(async (requestPath: string, siteId?: string) => {
+        const route = await router.getContentInfoByPath(requestPath, siteId)
+        if (!route)
+            return undefined
+        const contentLink = router.routeToContentLink(route)
+        const contentType = route.contentType
+        const graphLocale = localeToGraphLocale(route.locale, channel)
+        return [route, contentLink, contentType, graphLocale] as [Route, ContentLinkWithLocale, string[], string]
+    })
+
+    const pageDefintion : OptiCmsNextJsPage<TParams, TSearchParams> = {
+        generateStaticParams : async () => (await router.getRoutes()).map(r => routeToParams(r)),
+        generateMetadata: async ( props, parent ) =>
         {
-            const client = clientFactory()
-            const resolver = new RouteResolver(client)
-            return (await resolver.getRoutes()).map(r => { 
-                return {
-                    lang: channel.localeToSlug(r.language),
-                    path: urlToPath(r.url, r.language)
-                }
-            })
-        },
-        generateMetadata: async ( { params: { lang, path } }, resolving ) =>
-        {
-            // Read variables from request            
-            const client = clientFactory()
-            const requestPath = buildRequestPath({ lang, path })
-            const routeResolver = new RouteResolver(client)
-            const metaResolver = new MetaDataResolver(client)
+            // Read variables from request    
+            const siteId = channel ? (globalClient.currentOptiCmsSchema == OptiCmsSchema.CMS12 ? channel.id : channel.defaultDomain) : undefined
+            const requestPath = propsToCmsPath(props)
+            if (!requestPath) return Promise.resolve({})
+            if (isDebug())
+                console.log(`⚪ [CmsPage.generateMetadata] Processed Next.JS route: ${ JSON.stringify(props) } => Optimizely CMS route: ${ JSON.stringify({ path: requestPath, siteId })}`)
 
             // Resolve the route to a content link
-            const route = await routeResolver.getContentInfoByPath(requestPath)
-            if (!route)
+            const routeInfo = await getInfoByPath(requestPath, siteId)
+            if (!routeInfo) {
+                if (isDebug())
+                    console.log('⚪ [CmsPage.generateMetadata] No data received')
                 return Promise.resolve({})
-            
-            // Set context
-            getServerContext().setLocale(localeToGraphLocale(channel, route.language))
-            getServerContext().setOptimizelyGraphClient(client)
+            }
+            const [ route, contentLink, contentType, graphLocale ] = routeInfo
+            if (isDebug())
+                console.log(`⚪ [CmsPage.generateMetadata] Retrieved content info:`, route)
 
-            // Prepare metadata fetching
-            const contentLink = routeResolver.routeToContentLink(route)
-            const contentType = route.contentType
-            const graphLocale = localeToGraphLocale(channel, route.language)
+            // Update context
+            const context = getServerContext()
+            context.setOptimizelyGraphClient(globalClient)
+            context.setComponentFactory(factory)
+            context.setLocale(route.locale)
 
             // Fetch the metadata based upon the actual content type and resolve parent
+            const metaResolver = new MetaDataResolver(globalClient)
             const [pageMetadata, baseMetadata] = await Promise.all([
                 metaResolver.resolve(factory, contentLink, contentType, graphLocale), 
-                resolving
+                parent
             ])
+            
+            if (isDebug())
+                console.log(`⚪ [CmsPage.generateMetadata] Component yielded metadata:`, pageMetadata)
 
             // Make sure merging of objects goes correctly
             for (const metaKey of (Object.getOwnPropertyNames(pageMetadata) as (keyof Metadata)[]))
@@ -109,39 +225,51 @@ export function createPage(
             }
             return pageMetadata
         },
-        CmsPage: async ({  params: { lang, path } }) =>
+        CmsPage: async (props) =>
         {
-            if (!lang || lang.length == 0)
-                return notFound()
-
             // Prepare the context
             const context = getServerContext()
-            const client = context.client ?? clientFactory()
-            if (!context.client)
-                context.setOptimizelyGraphClient(client)
+            context.setOptimizelyGraphClient(globalClient)
             context.setComponentFactory(factory)
 
-            // Resolve the content based upon the route
-            const requestPath = buildRequestPath({ lang, path })
-            const graphLocale = channel.slugToGraphLocale(lang)
-            const response = await getContentByPath(client, { path: requestPath, locale: graphLocale, siteId: channel.id })
-            const info = (response.Content?.items ?? [])[0]
-            context.setLocale(graphLocale)
+            // Analyze the Next.JS Request props
+            const requestPath = propsToCmsPath(props)
+            if (isDebug())
+                console.log(`⚪ [CmsPage] Processed Next.JS route: ${ JSON.stringify(props) } => Optimizely CMS route: ${ JSON.stringify({ path: requestPath })}`)
+
+            // If we don't have the path, or the path is an internal Next.JS route reject it.
+            if (!requestPath || requestPath.startsWith('/_next/'))
+                return notFound()
+
+            // Resolve the content based upon the path
+            const requestVars = {
+                path: requestPath,
+                siteId: channel ? (globalClient.currentOptiCmsSchema == OptiCmsSchema.CMS12 ? channel.id : getPrimaryURL(channel).href) : null
+            }
+            if (isDebug())
+                console.log(`⚪ [CmsPage] Processed Next.JS route: ${ JSON.stringify(props) } => getContentByPath Variables: ${ JSON.stringify(requestVars)}`)
+
+            const response = await getContentByPath(globalClient, requestVars)
+            const info = (response?.content?.items ?? [])[0]
 
             if (!info) {
                 if (isDebug()) {
                     console.error(`🔴 [CmsPage] Unable to load content for ${ requestPath }, data received: `, response)
                 }
                 return notFound()
+            } else if (isDebug() && (response?.content?.items ?? []).length > 1) {
+                console.warn(`🟠 [CmsPage] Resolving content for ${ requestPath }, yielded ${ (response?.content?.items ?? []).length } items, picked:`, info)
             }
 
             // Extract the type & link
-            const contentType = Utils.normalizeContentType(info.contentType)
-            const contentLink = Utils.normalizeContentLinkWithLocale({ ...info.id, locale: info.locale?.name })
+            const contentType = Utils.normalizeContentType(info._metadata?.types)
+            const contentLink = normalizeContentLinkWithLocale(info._metadata)
             if (!contentLink) {
                 console.error("🔴 [CmsPage] Unable to infer the contentLink from the retrieved content, this should not have happened!")
                 return notFound()
             }
+            if (contentLink?.locale)
+                context.setLocale(contentLink?.locale as string)
 
             // Render the content link
             return <CmsContent contentType={ contentType } contentLink={ contentLink } fragmentData={ info } />
@@ -151,9 +279,30 @@ export function createPage(
     return pageDefintion
 }
 
-function buildRequestPath({ lang, path }: Params ) : string
+/**
+ * 
+ * 
+ * @param   param0  The URL parameters
+ * @returns The request path as understood by Graph
+ */
+function buildRequestPath({ lang, path }: { lang?: string | null, path?: (string | null)[] | null } ) : string
 {
-    return (path?.length ?? 0) > 0 ?
-                `/${ lang ?? "" }/${ path?.join("/") ?? "" }` :
-                `/${ lang ?? "" }`
+    const slugs : string[] = []
+    if (path) slugs.push(...(path.filter(x=>x) as string[]))
+    if (lang) slugs.unshift(lang)
+    if (slugs.length == 0) return '/'
+    
+    const fullPath = '/'+slugs.filter(x => x && x.length > 0).map(x => decodeURIComponent(x)).join('/')
+    if (!slugs[slugs.length - 1].includes('.'))
+        return fullPath + '/'
+    return fullPath
+}
+
+function getPrimaryURL(chnl: ChannelDefinition) : URL
+{
+    const dd = chnl.domains.filter(x => x.isPrimary).at(0) ?? chnl.domains.at(0)
+    if (!dd)
+        return chnl.getPrimaryDomain()
+    const s = dd.name.startsWith('localhost') || dd.name.indexOf('.local') > 0 ? 'http:' : 'https:'
+    return new URL(`${s}//${dd.name}`)
 }

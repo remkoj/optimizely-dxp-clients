@@ -1,4 +1,3 @@
-import React from 'react'
 import { Services, type OptimizelyGraphConfig, type IOptiGraphClient } from '@remkoj/optimizely-graph-client'
 import { createContext, useContext, type FunctionComponent, type PropsWithChildren } from 'react'
 

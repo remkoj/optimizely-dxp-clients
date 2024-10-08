@@ -1,39 +1,18 @@
-import type { PropsWithChildren, ComponentType as ReactComponentType } from "react"
+import type { PropsWithChildren, ComponentType as ReactComponentType, ExoticComponent as ReactExoticComponent } from "react"
 import type { DocumentNode } from "graphql"
 import type { TypedDocumentNode } from '@graphql-typed-document-node/core'
 import type { IOptiGraphClient } from "@remkoj/optimizely-graph-client"
+import type { ContentLink, ContentLinkWithLocale, InlineContentLinkWithLocale } from "@remkoj/optimizely-graph-client"
 
+// Export reused content types
 export type ContentType = string[]
+export type { ContentLink, ContentLinkWithLocale } from "@remkoj/optimizely-graph-client"
 
-export type ContentLink = {
-    id: number, 
-    workId?: number | null, 
-    guidValue?: string | null
-} | {
-    id?: number | null, 
-    workId?: number | null, 
-    guidValue: string 
-}
-
-export type InlineContentLink = {
-    id : 0
-    workId ?: 0 | null
-    guidValue ?: null | ""
-} | {
-    id ?: 0 | null
-    workId ?: 0 | null
-    guidValue : ""
-}
-
-export type ContentLinkWithLocale = ContentLink & {
-    locale?: string
-}
-
-export type CmsComponentProps<T> = PropsWithChildren<{
+export type CmsComponentProps<T, L extends Record<string, any> = Record<string, any>> = PropsWithChildren<{
     /**
      * The identifier of the content item
      */
-    contentLink: ContentLinkWithLocale
+    contentLink: ContentLinkWithLocale | InlineContentLinkWithLocale
 
     /**
      * The data already pre-fetched for the this component
@@ -42,20 +21,19 @@ export type CmsComponentProps<T> = PropsWithChildren<{
 
     /**
      * Use the Server/Client context instead if you need this information
-     * 
-     * @deprecated
      */
     inEditMode?: boolean
 
     /**
-     * Use the Server/Client context instead if you need this information
-     * 
-     * @deprecated
+     * Contextual layout data, if any
      */
-    client?: IOptiGraphClient
+    layoutProps?: L
 }>
 
-export type ContentQueryProps = ContentLinkWithLocale
+export type ContentQueryProps<LocaleType = string> = ContentLinkWithLocale<LocaleType> & {
+    path?: string | null
+    domain?: string | null
+}
 
 /**
  * Extract the data type from a GraphQL Query
@@ -72,16 +50,16 @@ export type WithGqlFragment<BaseComponent, DataType> = BaseComponent & {
 export type WithGqlQuery<B,T> = B & {
     getDataQuery: GetDataQuery<T>
 }
-export type BaseCmsComponent<T = {}> = T extends never | TypedDocumentNode | DocumentNode ?
+export type BaseCmsComponent<T = {}, L extends Record<string, any> = Record<string, any>> = T extends never | TypedDocumentNode | DocumentNode ?
     DynamicCmsComponent<T> :
-    ReactComponentType<CmsComponentProps<T>>
+    ReactComponentType<CmsComponentProps<T, L>>
 
-export type DynamicCmsComponent<T extends TypedDocumentNode | DocumentNode = DocumentNode> = ReactComponentType<CmsComponentProps<ResponseDataType<T>>>
+export type DynamicCmsComponent<T extends TypedDocumentNode | DocumentNode = DocumentNode, L extends Record<string, any> = Record<string, any>> = ReactComponentType<CmsComponentProps<ResponseDataType<T>, L>>
 export type GraphQLFragmentBase = { ' $fragmentName'?: string }
 export type GraphQLQueryBase = { __typename?: 'Query' }
-export type CmsComponentWithFragment<T = DocumentNode> = BaseCmsComponent<T> & WithGqlFragment<{},T>
-export type CmsComponentWithQuery<T = DocumentNode> = BaseCmsComponent<T> & WithGqlQuery<{},T>
-export type CmsComponentWithOptionalQuery<T = DocumentNode> = BaseCmsComponent<T> & Partial<WithGqlQuery<{},T>>
+export type CmsComponentWithFragment<T = DocumentNode, L extends Record<string, any> = Record<string, any>> = BaseCmsComponent<T, L> & WithGqlFragment<{},T>
+export type CmsComponentWithQuery<T = DocumentNode, L extends Record<string, any> = Record<string, any>> = BaseCmsComponent<T, L> & WithGqlQuery<{},T>
+export type CmsComponentWithOptionalQuery<T = DocumentNode, L extends Record<string, any> = Record<string, any>> = BaseCmsComponent<T, L> & Partial<WithGqlQuery<{},T>>
 
 /**
  * A generic Optimizely CMS Component that will change the static surface based upon the 
@@ -92,22 +70,69 @@ export type CmsComponentWithOptionalQuery<T = DocumentNode> = BaseCmsComponent<T
  * When a type is provided that cannot be resolved to either the output of a Query or a Fragment,
  * it will assume an optional getDataQuery method.
  */
-export type CmsComponent<T = DocumentNode> = 
-        T extends TypedDocumentNode<infer R, any> ? CmsComponentWithQuery<R> : 
-        T extends DocumentNode ? CmsComponentWithQuery<{ [key: string]: any }> :
-        T extends GraphQLFragmentBase ? CmsComponentWithFragment<T> : 
-        T extends GraphQLQueryBase ? CmsComponentWithQuery<T> :
-        CmsComponentWithOptionalQuery<T>
-
+export type CmsComponent<T = DocumentNode, L extends Record<string, any> = Record<string, any>> = 
+        T extends TypedDocumentNode<infer R, any> ? CmsComponentWithQuery<R, L> : 
+        T extends DocumentNode ? CmsComponentWithQuery<{ [key: string]: any }, L> :
+        T extends GraphQLFragmentBase ? CmsComponentWithFragment<T, L> : 
+        T extends GraphQLQueryBase ? CmsComponentWithQuery<T, L> :
+        CmsComponentWithOptionalQuery<T, L>
+export type CmsLayoutComponent<L extends Record<string, any> = Record<string, any>, T = never> = ReactComponentType<CmsComponentProps<T, L>>
 
 //Factory
-import type { createElement } from 'react'
-export type ComponentType = Parameters<typeof createElement>[0]
+export type ComponentType = (ReactComponentType<any>) | (ReactExoticComponent<any>) | (keyof JSX.IntrinsicElements)
 export type ComponentTypeHandle = string | string[]
 export type ComponentTypeDictionary = {type: ComponentTypeHandle, component: ComponentType}[]
+
+/**
+ * Component Factory
+ */
 export interface ComponentFactory {
+    /**
+     * Check if the component type has been registered within the factory
+     * 
+     * @param       type            The component type to check for
+     * @returns     Whether or not the type exists within the factory
+     */
     has(type: ComponentTypeHandle) : boolean
+
+    /**
+     * Register an individual component
+     * @param       type            The component type to register
+     * @param       componentType   The component to bind to the type
+     */
     register(type: ComponentTypeHandle, componentType: ComponentType) : void
+
+    /**
+     * Register all components provided through the dictionary
+     * 
+     * @param       components  The components to register
+     */
     registerAll(components: ComponentTypeDictionary) : void
+
+    /**
+     * Resolve a component type
+     * 
+     * @param       type    The type to search the component for
+     * @returns     The component that was resolved for the provided type
+     */
     resolve(type: ComponentTypeHandle) : ComponentType | undefined
+
+    /**
+     * Retrieve the registered components as a dictionary that can be used to
+     * be imported in a new instance.
+     * 
+     * @returns     The dictionary
+     */
+    extract() : ComponentTypeDictionary
+}
+
+// Context
+export interface GenericContext {
+    readonly client?: IOptiGraphClient 
+    readonly factory?: ComponentFactory
+    readonly locale?: string
+    readonly inEditMode: Readonly<boolean>
+    readonly isDevelopment: boolean
+    readonly isDebug: boolean
+    readonly isDebugOrDevelopment: boolean
 }

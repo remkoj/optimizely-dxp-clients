@@ -1,15 +1,16 @@
 import 'server-only'
 import React from 'react'
-import CmsContent from './cms-content'
-import type { ElementType } from '../type-utils'
-import * as Utils from '../../utilities'
-import * as Errors from '../../errors'
+import CmsContent from './cms-content.js'
+import type { ElementType } from '../type-utils.js'
+import * as Utils from '../../utilities.js'
+import * as Errors from '../../errors.js'
 import createClient from '@remkoj/optimizely-graph-client'
-import getServerContext from '../context'
-import type { CmsContentAreaProps, ContentAreaItemDefinition } from './types'
+import { normalizeContentLinkWithLocale, contentLinkToString } from '@remkoj/optimizely-graph-client/utils'
+import getServerContext from '../context.js'
+import type { CmsContentAreaProps, ContentAreaItemDefinition, ValidContentAreaItemDefinition } from './types.js'
 
 //#region Export Type definitions
-export type { CmsContentAreaClassMapper, CmsContentAreaProps, ContentAreaItemDefinition } from './types'
+export type { CmsContentAreaClassMapper, CmsContentAreaProps, ContentAreaItemDefinition } from './types.js'
 //#endregion
 
 /**
@@ -42,11 +43,11 @@ export const CmsContentArea = async <T extends ElementType = "div", I extends El
     const actualItems = (items || []).filter(forValidContentAreaItems)
     const componentData = await Promise.all(actualItems.map(async (item, idx) : Promise<React.JSX.Element> => {
         // Prepare data from received content area format
-        const contentLink = Utils.normalizeContentLinkWithLocale({ ...item.item, locale: locale })
+        const contentLink = normalizeContentLinkWithLocale(item._metadata)
         if (!contentLink)
-            throw new Errors.InvalidContentLinkError({ ...item.item, locale: locale })
-        const contentType = Utils.normalizeContentType(item.item?.data?.contentType)
-        const fragmentData = item.item?.data || undefined
+            throw new Errors.InvalidContentLinkError(item._metadata)
+        const contentType = Utils.normalizeContentType(item._metadata.types)
+        const fragmentData = item
 
         // Read element wrapper configuration
         const { 
@@ -57,15 +58,15 @@ export const CmsContentArea = async <T extends ElementType = "div", I extends El
         } = itemWrapper ?? {}
 
         // Generate element wrapper properties
-        const contentAreaItemContainerKey = `ContentAreaItem-${idx}-${contentLink.guidValue}-${contentLink.id}-${contentLink.workId}`
+        const contentAreaItemContainerKey = `ContentAreaItem-${ idx }-${ contentLinkToString(contentLink) }`
         const contentAreaItemContainerProps : any = {
             className: `opti-content-area-item opti-content-area-item-${idx}${ contentItemBaseClassName ? ' ' + contentItemBaseClassName : '' } ${classMapper ? classMapper(item.displayOption ?? 'default', contentType ?? null, idx) : ""}`,
-            "data-epi-block-id": inEditMode && fieldName ? contentLink?.id || undefined : undefined,
+            "data-epi-block-id": inEditMode && fieldName ? Utils.getContentEditId(contentLink) || undefined : undefined,
             "data-displayoption": item.displayOption || undefined,
             "data-tag": item.tag || undefined,
             ...contentItemElementProps
         }
-        const contentAraeItemContent = await CmsContent({ contentLink, contentType, fragmentData, client: gqlClient, factory, outputEditorWarning: inEditMode, contentTypePrefix: "Block" })
+        const contentAraeItemContent = await CmsContent({ contentLink, contentType, fragmentData, client: gqlClient, factory, outputEditorWarning: inEditMode, contentTypePrefix: "Component" })
 
         // Inject the element into the wrapper
         const childrenTarget = contentItemTarget || "children"
@@ -96,18 +97,9 @@ export const CmsContentArea = async <T extends ElementType = "div", I extends El
     return <ContentAreaContainer { ...contentAreaContainerProps }>{ contentAreaContainerChildren }</ContentAreaContainer>
 }
 
-function forValidContentAreaItems(itm?: ContentAreaItemDefinition | null) : itm is ContentAreaItemDefinition
+function forValidContentAreaItems(itm?: ContentAreaItemDefinition | null) : itm is ValidContentAreaItemDefinition
 {
-    if (itm == undefined || itm == null)
-        return false
-
-    if (itm.item == undefined || itm.item == null)
-        return false
-
-    if (itm.item.data == undefined || itm.item.data == null)
-        return typeof(itm.item.guidValue) == 'string' && itm.item.guidValue.length > 0
-
-    return itm.item.guidValue == itm.item.data.id?.guidValue
+    return typeof(itm) == 'object' && itm != null && typeof (itm._metadata) == 'object' && itm._metadata != null
 }
 
 export async function processContentAreaItems( items?: (ContentAreaItemDefinition | null)[] | null, locale?: string) : Promise<JSX.Element[]>
@@ -115,7 +107,7 @@ export async function processContentAreaItems( items?: (ContentAreaItemDefinitio
     const actualItems = (items ?? []).filter(Utils.isNotNullOrUndefined)
     return Promise.all(actualItems.map(async (item, idx) : Promise<React.JSX.Element> => {
         // Prepare data from received content area format
-        const contentLink = Utils.normalizeContentLinkWithLocale({ ...item.item, locale: locale })
+        const contentLink = normalizeContentLinkWithLocale({ ...item.item, locale: locale })
         if (!contentLink)
             throw new Errors.InvalidContentLinkError({ ...item.item, locale: locale })
         const contentType = Utils.normalizeContentType(item.item?.data?.contentType)

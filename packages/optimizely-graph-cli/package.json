@@ -3,7 +3,7 @@
   "repository": "https://github.com/remkoj/optimizely-dxp-clients.git",
   "author": "Remko Jantzen <693172+remkoj@users.noreply.github.com>",
   "homepage": "https://github.com/remkoj/optimizely-dxp-clients",
-  "version": "1.0.5",
+  "version": "2.1.0",
   "license": "Apache-2.0",
   "packageManager": "yarn@4.1.1",
   "type": "module",
@@ -16,40 +16,35 @@
     "opti-graph": "bin/index.js"
   },
   "scripts": {
-    "watch": "yarn tsc --watch",
-    "clean": "yarn tsc --build --clean",
-    "compile": "yarn tsc --build",
-    "recompile": "yarn tsc --build --clean && yarn tsc --build && yarn rollup --config rollup.config.js",
-    "run-compiled": "yarn node dist/index.js",
-    "prepare": "yarn tsc --build --force && yarn rollup --config rollup.config.js",
-    "rebuild": "yarn tsc --build --clean && yarn tsc --build && yarn rollup --config rollup.config.js",
-    "run": "yarn node bin/index.js",
-    "bundle": "yarn rollup --config rollup.config.js"
+    "watch": "yarn rollup --config rollup.config.js --watch",
+    "prepare": "yarn rollup --config rollup.config.js",
+    "opti-graph": "yarn node bin/index.js"
   },
   "devDependencies": {
-    "@remkoj/optimizely-graph-client": "workspace:1.0.5",
-    "@rollup/plugin-commonjs": "^25.0.7",
+    "@remkoj/optimizely-graph-client": "workspace:2.1.0",
+    "@rollup/plugin-commonjs": "^28.0.0",
     "@rollup/plugin-json": "^6.1.0",
-    "@rollup/pluginutils": "^5.1.0",
+    "@rollup/plugin-typescript": "^12.1.0",
+    "@rollup/pluginutils": "^5.1.2",
     "@types/crypto-js": "^4.2.2",
     "@types/glob": "^8.1.0",
-    "@types/node": "^20.12.6",
+    "@types/node": "^22.7.4",
     "@types/source-map-support": "^0.5.10",
-    "@types/yargs": "^17.0.32",
-    "rollup": "^4.14.1",
+    "@types/yargs": "^17.0.33",
+    "rollup": "^4.24.0",
     "source-map-support": "^0.5.21",
-    "tslib": "^2.6.2",
-    "typescript": "^5.4.4"
+    "tslib": "^2.7.0",
+    "typescript": "^5.6.2"
   },
   "dependencies": {
     "chalk": "^5.3.0",
-    "cli-table3": "^0.6.4",
+    "cli-table3": "^0.6.5",
     "dotenv": "^16.4.5",
     "dotenv-expand": "^11.0.6",
     "figures": "^6.1.0",
     "yargs": "^17.7.2"
   },
   "peerDependencies": {
-    "@remkoj/optimizely-graph-client": "1.0.5"
+    "@remkoj/optimizely-graph-client": "2.1.0"
   }
 }

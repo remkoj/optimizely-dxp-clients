@@ -1,26 +1,7 @@
 import type { ComponentType } from 'react'
-import type * as Types from './types'
+import type * as Types from './types.js'
 import type { DocumentNode } from 'graphql'
-
-export function isContentLink(toTest: any) : toTest is Types.ContentLink
-{
-    // It must be an object
-    if (typeof(toTest) != 'object' || toTest == null)
-        return false
-
-    // The object must have an Id (numeric, >= 0) or GuidValue (string, minimum 1 character)
-    return (typeof((toTest as Types.ContentLink).id) == 'number' && ((toTest as Types.ContentLink).id as number) >= 0) ||
-        (typeof((toTest as Types.ContentLink).guidValue) == 'string' && ((toTest as Types.ContentLink).guidValue as string).length > 0)
-}
-
-export function isContentLinkWithLocale(toTest: any) : toTest is Types.ContentLinkWithLocale
-{
-    if (!isContentLink(toTest))
-        return false
-
-    const locale = (toTest as Types.ContentLinkWithLocale).locale
-    return locale == undefined || (typeof(locale) == 'string' && locale.length >= 2 && locale.length <= 5)
-}
+import { localeToGraphLocale } from '@remkoj/optimizely-graph-client/utils'
 
 export function isNonEmptyString(toTest: any) : toTest is string
 {
@@ -40,32 +21,47 @@ export function isContentType(toTest: any) : toTest is Types.ContentType
     return toTest.every(isNonEmptyString)
 }
 
-export function normalizeContentType(toNormalize: (string | null)[] | null | undefined) : Types.ContentType | undefined
+/**
+ * Normalizes the content type by:
+ *  - Converting strings to ContentType
+ *  - Stripping the leading underscore, if any
+ * 
+ * @param       toNormalize         The Content Type value to process
+ * @param       stripContent        When set to true, the global base type "Content" will be removed as well
+ * @returns 
+ */
+export function normalizeContentType(toNormalize: (string | null)[] | string | null | undefined, stripContent: boolean = false) : Types.ContentType | undefined
 {
-    if (!Array.isArray(toNormalize))
+    if (!toNormalize)
         return undefined
 
-    const filtered = toNormalize.filter(isNonEmptyString)
+    let filtered = (typeof(toNormalize) == 'string' ? toNormalize.split('/') : toNormalize).filter(isNonEmptyString).map(x => x.startsWith('_') ? x.substring(1) : x)
+    if (stripContent)
+        filtered = filtered.filter(x => x.toLowerCase() != 'content')
     return filtered.length > 0 ? filtered : undefined
 }
 
-export function normalizeContentLink(toNormalize?: {id?: null | number, workId?: null | number, guidValue?: null | string} | null) : Types.ContentLink | undefined
+/**
+ * Normalizes and prefixes the content type by:
+ *  - Converting strings to ContentType
+ *  - Stripping the leading underscore, if any
+ *  - Removing the global base type "Content"
+ *  - Ensuring that in the remaining type the least specific type is equal to the provided prefix
+ * 
+ * @param       contentType 
+ * @param       prefix 
+ * @returns 
+ */
+export function normalizeAndPrefixContentType(contentType: Array<string | null> | string | null | undefined, prefix: string) : Types.ContentType
 {
-    if (typeof(toNormalize) != 'object' || toNormalize == null)
-        return undefined
-    if (toNormalize.id == null) toNormalize.id = 0 // Change the 'null' identifier and turn it into a 'zero'
-    if (toNormalize.guidValue == null || toNormalize.guidValue == "") delete toNormalize.guidValue // Remove an empty or null guid value
-    if ((toNormalize.id ?? -1) >= 0 || (toNormalize.guidValue ?? "").length > 0)
-        return toNormalize as Types.ContentLink
-    return undefined
-}
+    if (!contentType)
+        return [ prefix ]
 
-export function normalizeContentLinkWithLocale(toNormalize?: {id?: null | number, workId?: null | number, guidValue?: null | string, locale?: string | null} | null) : Types.ContentLinkWithLocale | undefined
-{
-    const normalized = normalizeContentLink(toNormalize) as Types.ContentLinkWithLocale
-    if (normalized.locale != undefined && !(typeof(normalized.locale) == 'string' && normalized.locale.length >= 1 && normalized.locale.length <= 5))
-        delete normalized.locale
-    return normalized
+    const processedContentType = (typeof(contentType) == 'string' ? contentType.split('/') : contentType).filter(isNonEmptyString).map(x => x.startsWith('_') ? x.substring(1) : x).filter(x => x.toLowerCase() != 'content')
+    if (processedContentType[0] != prefix)
+        processedContentType.unshift(prefix)
+    
+    return processedContentType
 }
 
 export function isCmsComponentWithDataQuery<T = DocumentNode>(toTest?: Types.BaseCmsComponent<T>) : toTest is Types.CmsComponentWithQuery<T>
@@ -95,34 +91,16 @@ export function validatesFragment<T extends ComponentType<any>>(toTest?: T) : to
     return false
 }
 
-export function contentLocaleToGraphLocale<T>(contentLocale?: T) : T extends string ? string : undefined
-{
-    if (typeof(contentLocale) == 'string' && contentLocale.length >= 2 && contentLocale.length <= 5)
-        return contentLocale?.replaceAll('-','_') as T extends string ? string : undefined
-    return undefined as T extends string ? string : undefined
-}
-
 export function contentLinkToRequestVariables(contentLink: Types.ContentLinkWithLocale) : Types.ContentQueryProps
 {
     const variables : Types.ContentQueryProps = { 
-        id: contentLink.id ?? 0, 
-        workId: contentLink.workId,
-        guidValue: contentLink.guidValue ?? null,
-        locale: contentLocaleToGraphLocale(contentLink.locale) 
+        key: contentLink.key ?? '-no-content-selected-', 
+        locale: contentLink.locale ? localeToGraphLocale(contentLink.locale) : undefined,
+        version: contentLink.version
     }
-    if (variables.workId == undefined || variables.workId <= 0)
-        variables.workId = null
+    if (variables.version == undefined || variables.version == '')
+        variables.version = null
     return variables
-}
-
-export function isInlineContentLink(contentLink: Types.ContentLink) : contentLink is Types.InlineContentLink
-{
-    return !contentLink.id && !contentLink.guidValue
-}
-
-export function contentLinkToString(contentLink: Types.ContentLink) : string 
-{
-    return `${contentLink.id ?? 0}_${contentLink.workId ?? 0}#${ contentLink.guidValue ?? ''}\$${ (contentLink as Types.ContentLinkWithLocale).locale ?? ''}`
 }
 
 export function toUniqueValues<R extends any>(value: R, index: number, array: Array<R>) : value is R
@@ -135,4 +113,30 @@ export function trim<T extends string | null | undefined>(valueToTrim: T) : T
     if (typeof(valueToTrim) == 'string')
         return valueToTrim.trim() as T
     return valueToTrim
+}
+
+export function getContentEditId(contentLink: Types.ContentLink) : string 
+{
+    return contentLink.key
+}
+
+/**
+ * Generate a pseudo-random identifier usable to satisfy the unique key 
+ * requirement for children within a React node. However this effectively will
+ * tell React that the childrend will be unique for each render and thus cause
+ * them to update.
+ * 
+ * Only use this method to generate keys if there's no other way to test the
+ * uniqueness of the child
+ * 
+ * @param       prefix      The prefix to apply to the children
+ * @returns     The unique key
+ */
+export function getRandomKey(prefix: string = "rnd") : string
+{
+    try {
+        return `${prefix}::${crypto.randomUUID()}`
+    } catch {
+        return `${prefix}::${Math.round(Math.random() * 10000)}::${Math.round(Math.random() * 10000)}`
+    }
 }
