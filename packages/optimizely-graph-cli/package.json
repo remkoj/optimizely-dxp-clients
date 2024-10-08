@@ -3,7 +3,7 @@
   "repository": "https://github.com/remkoj/optimizely-dxp-clients.git",
   "author": "Remko Jantzen <693172+remkoj@users.noreply.github.com>",
   "homepage": "https://github.com/remkoj/optimizely-dxp-clients",
-  "version": "2.0.4",
+  "version": "2.1.0",
   "license": "Apache-2.0",
   "packageManager": "yarn@4.1.1",
   "type": "module",
@@ -21,20 +21,20 @@
     "opti-graph": "yarn node bin/index.js"
   },
   "devDependencies": {
-    "@remkoj/optimizely-graph-client": "workspace:2.0.4",
-    "@rollup/plugin-commonjs": "^26.0.1",
+    "@remkoj/optimizely-graph-client": "workspace:2.1.0",
+    "@rollup/plugin-commonjs": "^28.0.0",
     "@rollup/plugin-json": "^6.1.0",
-    "@rollup/plugin-typescript": "^11.1.6",
-    "@rollup/pluginutils": "^5.1.0",
+    "@rollup/plugin-typescript": "^12.1.0",
+    "@rollup/pluginutils": "^5.1.2",
     "@types/crypto-js": "^4.2.2",
     "@types/glob": "^8.1.0",
-    "@types/node": "^22.2.0",
+    "@types/node": "^22.7.4",
     "@types/source-map-support": "^0.5.10",
     "@types/yargs": "^17.0.33",
-    "rollup": "^4.20.0",
+    "rollup": "^4.24.0",
     "source-map-support": "^0.5.21",
-    "tslib": "^2.6.3",
-    "typescript": "^5.5.4"
+    "tslib": "^2.7.0",
+    "typescript": "^5.6.2"
   },
   "dependencies": {
     "chalk": "^5.3.0",
@@ -45,6 +45,6 @@
     "yargs": "^17.7.2"
   },
   "peerDependencies": {
-    "@remkoj/optimizely-graph-client": "2.0.4"
+    "@remkoj/optimizely-graph-client": "2.1.0"
   }
 }

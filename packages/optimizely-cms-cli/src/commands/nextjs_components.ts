@@ -103,7 +103,7 @@ type TemplateFn = (contentType: IntegrationApi.ContentType, varName: string, dis
 const Templates : Record<'default', TemplateFn> & Partial<Record<IntegrationApi.ContentBaseType, TemplateFn>> = 
 {
     // Default Template for all components without specifics
-    default: (contentType, varName, displayTemplate, baseDisplayTemplate) => `import { CmsComponent } from "@remkoj/optimizely-cms-react";
+    default: (contentType, varName, displayTemplate, baseDisplayTemplate) => `import { type CmsComponent } from "@remkoj/optimizely-cms-react";
 import { ${ contentType.key }DataFragmentDoc, type ${ contentType.key }DataFragment } from "@/gql/graphql";${ displayTemplate ? `
 import { ${ displayTemplate } } from "./displayTemplates";` : ''}${ baseDisplayTemplate ? `
 import { ${ baseDisplayTemplate } } from "../styles/displayTemplates";` : ''}
@@ -114,7 +114,7 @@ import { ${ baseDisplayTemplate } } from "../styles/displayTemplates";` : ''}
  */
 export const ${ varName } : CmsComponent<${ contentType.key }DataFragment${ (displayTemplate || baseDisplayTemplate) ? ', ' + [displayTemplate,baseDisplayTemplate].filter(x=>x).join(" | ") : '' }> = ({ data${ (displayTemplate || baseDisplayTemplate) ? ', layoutProps' : '' }, children }) => {
     const componentName = '${ contentType.displayName }'
-    const componentInfo = '${ contentType.description ?? '' }'
+    const componentInfo = '${ contentType.description?.replaceAll("'","\\'") ?? '' }'
     return <div className="w-full border-y border-y-solid border-y-slate-900 py-2 mb-4">
         <div className="font-bold italic">{ componentName }</div>
         <div>{ componentInfo }</div>
@@ -139,7 +139,7 @@ import { getSdk } from "@/gql"
  */
 export const ${ varName } : CmsComponent<${ contentType.key }DataFragment${ displayTemplate ? ', ' + displayTemplate : '' }> = ({ data${ displayTemplate ? ', layoutProps' : '' }, children }) => {
     const componentName = '${ contentType.displayName }'
-    const componentInfo = '${ contentType.description ?? '' }'
+    const componentInfo = '${ contentType.description?.replaceAll("'","\\'") ?? '' }'
     return <div className="mx-auto px-2 container">
         <div className="font-bold italic">{ componentName }</div>
         <div>{ componentInfo }</div>

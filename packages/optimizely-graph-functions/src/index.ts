@@ -1,7 +1,6 @@
 import type { CodegenPlugin, PluginFunction, PluginValidateFn } from '@graphql-codegen/plugin-helpers'
 import { concatAST, getOperationAST, visit, print, OperationTypeNode, type DefinitionNode, type DocumentNode, type FragmentDefinitionNode } from 'graphql'
 import { isNotNullOrUndefined } from './utils'
-import { DefaultFunctions } from './documents'
 
 export type PluginOptions = {
     functions?: string[],
@@ -9,9 +8,12 @@ export type PluginOptions = {
     clientPath?: string
 }
 
+export const DefaultFunctions = ['getContentType','getContentByPath','getContentById']
+
 export function pickPluginOptions(options: Record<string,any>) : PluginOptions
 {
     return {
+        ...(options.config ?? {}),
         functions: options.functions ?? DefaultFunctions,
         prettyPrintQuery: options.prettyPrintQuery ?? false,
         clientPath: options.clientPath ?? "./graphql"

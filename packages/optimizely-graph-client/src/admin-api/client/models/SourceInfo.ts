@@ -4,6 +4,7 @@
 /* eslint-disable */
 export type SourceInfo = {
     languages: Array<string>;
+    description: string;
     label: string;
     id: string;
 };

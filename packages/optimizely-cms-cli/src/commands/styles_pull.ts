@@ -1,6 +1,6 @@
 import type { CliModule } from '../types.js'
 import { parseArgs } from '../tools/parseArgs.js'
-import { type IntegrationApi } from '@remkoj/optimizely-cms-api'
+import { type IntegrationApi, OptiCmsVersion } from '@remkoj/optimizely-cms-api'
 import chalk from 'chalk'
 import figures from 'figures'
 import fs from 'node:fs'
@@ -26,6 +26,11 @@ export const StylesPullCommand : StylesPullModule = {
     handler: async (args) => {
         const { _config: cfg, components: basePath, force, definitions } = parseArgs(args)
         const client = createCmsClient(args)
+        if (client.runtimeCmsVersion == OptiCmsVersion.CMS12) {
+            process.stdout.write(chalk.gray(`${ figures.cross } Styles are not supported on CMS12\n`))
+            return
+        }
+
         const { styles: filteredResults } = await getStyles(client, args)
 
         //#region Create & Write opti-style.json files
@@ -124,7 +129,19 @@ export type ${ typeId }ComponentProps<DT extends Record<string, any> = Record<st
     layoutProps: LP | undefined
 } & JSX.IntrinsicElements['div']
 
-export type ${ typeId }Component<DT extends Record<string, any> = Record<string, any>, LP extends ${ typeId }LayoutProps = ${ typeId }LayoutProps> = (props: ${ typeId }ComponentProps<DT,LP>) => ReactNode`)
+export type ${ typeId }Component<DT extends Record<string, any> = Record<string, any>, LP extends ${ typeId }LayoutProps = ${ typeId }LayoutProps> = (props: ${ typeId }ComponentProps<DT,LP>) => ReactNode
+
+export function isDefaultProps(props?: ${ typeId }LayoutProps | null) : props is ${ templates.filter(t => t.data.isDefault).at(0)?.data?.key }Props
+{
+    return props?.template == "${ templates.filter(t => t.data.isDefault).at(0)?.data?.key }"
+}`)
+                    templates.forEach(t => {
+                        typeContents.push(`
+export function is${ t.data.key }Props(props?: ${ typeId }LayoutProps | null) : props is ${ t.data.key }Props
+{
+    return props?.template == "${ t.data.key }"
+}`)
+                    })
                 }
 
                 fs.writeFileSync(typeFilePath, imports.join("\n") + "\n\n" + typeContents.join("\n"))

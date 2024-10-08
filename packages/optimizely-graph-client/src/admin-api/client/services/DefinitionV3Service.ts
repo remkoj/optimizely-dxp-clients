@@ -2,16 +2,17 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-import type { ContentTypeDefinition_V3 } from '../models/ContentTypeDefinition_V3.js';
+import type { ContentSource_V3 } from '../models/ContentSource_V3.js';
 import type { DeleteMode } from '../models/DeleteMode.js';
 import type { SourceInfoMap } from '../models/SourceInfoMap.js';
+import type { SourceMetadata } from '../models/SourceMetadata.js';
 import type { CancelablePromise } from '../core/CancelablePromise.js';
 import type { BaseHttpRequest } from '../core/BaseHttpRequest.js';
 export class DefinitionV3Service {
     constructor(public readonly httpRequest: BaseHttpRequest) {}
     /**
      * Get source metadata
-     * Get `id`, `label` and `languages` fields of the source
+     * Get `id`, `label`, `description` and `languages` fields of the source
      * @param id The id of the source _(optional)_
      * - _(empty): all sources_
      * - _**default**: only default source_
@@ -65,15 +66,37 @@ export class DefinitionV3Service {
         });
     }
     /**
+     * Update source metadata
+     * Update `label`, `description` fields of the source
+     * @param id The id of the source
+     * @param requestBody The new metadata source
+     * @returns void
+     * @throws ApiError
+     */
+    public postContentV3SourceHandler(
+        id: string,
+        requestBody: SourceMetadata,
+    ): CancelablePromise<void> {
+        return this.httpRequest.request({
+            method: 'POST',
+            url: '/api/content/v3/sources',
+            query: {
+                'id': id,
+            },
+            body: requestBody,
+            mediaType: 'application/json',
+        });
+    }
+    /**
      * Get content types
      * Get content types of the source
      * @param id The id of the source
-     * @returns ContentTypeDefinition_V3 Ok
+     * @returns ContentSource_V3 Ok
      * @throws ApiError
      */
     public getContentV3TypeHandler(
         id: string = 'default',
-    ): CancelablePromise<ContentTypeDefinition_V3> {
+    ): CancelablePromise<ContentSource_V3> {
         return this.httpRequest.request({
             method: 'GET',
             url: '/api/content/v3/types',
@@ -91,7 +114,7 @@ export class DefinitionV3Service {
      * @throws ApiError
      */
     public postContentV3TypeHandler(
-        requestBody: ContentTypeDefinition_V3,
+        requestBody: ContentSource_V3,
         id: string = 'default',
     ): CancelablePromise<void> {
         return this.httpRequest.request({
@@ -113,7 +136,7 @@ export class DefinitionV3Service {
      * @throws ApiError
      */
     public putContentV3TypeHandler(
-        requestBody: ContentTypeDefinition_V3,
+        requestBody: ContentSource_V3,
         id: string = 'default',
     ): CancelablePromise<void> {
         return this.httpRequest.request({

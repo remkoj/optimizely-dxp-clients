@@ -4,6 +4,7 @@ import figures from 'figures'
 import path from 'node:path'
 import fs from 'node:fs'
 import { input, select, confirm  } from '@inquirer/prompts';
+import { OptiCmsVersion } from '@remkoj/optimizely-cms-api';
 
 // Within this package
 import type { CliModule } from '../types.js'
@@ -28,13 +29,17 @@ export const StylesCreateCommand : CliModule<StylesCreateParams> = {
     handler: async (args) => {
         const { components: basePath } = parseArgs(args)
         const client = createCmsClient(args)
+        if (client.runtimeCmsVersion == OptiCmsVersion.CMS12) {
+            process.stdout.write(chalk.gray(`${ figures.cross } Styles are not supported on CMS12\n`))
+            return
+        }
         const allowedBaseTypes : Array<string> = ['section','element']
 
         // Prepare
         process.stdout.write(chalk.yellowBright(chalk.bold(`Reading current information from Optimizely CMS\n`)))
         const [{ contentTypes },{ styles }] = await Promise.all([
-            getContentTypes(client, { ...args, excludeBaseTypes: [], excludeTypes: [], baseTypes: allowedBaseTypes, types: [] }),
-            getStyles(client, { ...args, excludeBaseTypes: [], excludeNodeTypes: [], excludeTemplates: [], excludeTypes: [], baseTypes: allowedBaseTypes, types: [], nodes: [], components: '', templates: [], templateTypes: []})
+            getContentTypes(client, { ...args, excludeBaseTypes: [], excludeTypes: [], baseTypes: allowedBaseTypes, types: [], all: false }),
+            getStyles(client, { ...args, excludeBaseTypes: [], excludeNodeTypes: [], excludeTemplates: [], excludeTypes: [], baseTypes: allowedBaseTypes, types: [], nodes: [], components: '', templates: [], templateTypes: [], all: false})
         ])
         const styleKeys = styles.map(x => x.key)
 

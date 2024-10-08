@@ -1,6 +1,7 @@
 import type { CliModule } from '../types.js'
 import { parseArgs } from '../tools/parseArgs.js'
-import { createClient, type IntegrationApi } from '@remkoj/optimizely-cms-api'
+import { OptiCmsVersion } from '@remkoj/optimizely-cms-api'
+import { createCmsClient } from '../tools/cmsClient.js'
 import { glob } from 'glob'
 import path from 'node:path'
 import fs from 'node:fs'
@@ -23,7 +24,11 @@ export const StylesPushCommand : StylesPushModule = {
     },
     handler: async (args) => {
         const { _config: cfg, excludeTemplates, templates, ...opts } = parseArgs(args)
-        const client = createClient(cfg)
+        const client = createCmsClient(args)
+        if (client.runtimeCmsVersion == OptiCmsVersion.CMS12) {
+            process.stdout.write(chalk.gray(`${ figures.cross } Styles are not supported on CMS12\n`))
+            return
+        }
         
         process.stdout.write(chalk.yellowBright(`${ figures.arrowRight } Pushing (create/replace) DisplayStyles into Optimizely CMS\n`))
 

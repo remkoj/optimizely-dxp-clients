@@ -3,6 +3,7 @@ import chalk from 'chalk'
 import figures from 'figures'
 import Table from 'cli-table3'
 
+import { OptiCmsVersion } from '@remkoj/optimizely-cms-api'
 import { createCmsClient } from '../tools/cmsClient.js'
 import { getStyles } from '../tools/styles.js'
 
@@ -10,7 +11,12 @@ export const StylesListCommand : CliModule = {
     command: "styles:list",
     describe: "List Visual Builder style definitions from the CMS",
     handler: async (args) => {
-        const { all: results } = await getStyles(createCmsClient(args), { ...args, excludeBaseTypes: [], excludeNodeTypes: [], excludeTemplates: [], excludeTypes: [], baseTypes: [], nodes: [], templates: [], types: [], templateTypes: []})
+        const client = createCmsClient(args)
+        if (client.runtimeCmsVersion == OptiCmsVersion.CMS12) {
+            process.stdout.write(chalk.gray(`${ figures.cross } Styles are not supported on CMS12\n`))
+            return
+        }
+        const { all: results } = await getStyles(client, { ...args, excludeBaseTypes: [], excludeNodeTypes: [], excludeTemplates: [], excludeTypes: [], baseTypes: [], nodes: [], templates: [], types: [], templateTypes: [], all: false})
         const styles = new Table({
             head: [
                 chalk.yellow(chalk.bold("Name")),

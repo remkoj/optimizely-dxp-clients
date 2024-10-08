@@ -58,12 +58,19 @@ export type EditViewOptions = {
     layout: ComponentType<PropsWithChildren<{locale: string}>>
 
     /**
-     * The base content loader to be used for the edit view
+     * The fourth step of the handling of a Preview/On-Page-Edit view,
+     * which actually loads the data of content to be shown to the 
+     * editor.
      */
     loader: GetContentByIdMethod
 
     /**
-     * The factory used to create a new Optimizely Graph Client
+     * The third step of the handling of a Preview/On-Page-Edit view,
+     * which gets the Optimizely Graph client for the token/auth method
+     * inferred by the contentResolver.
+     * 
+     * @param       token       The token to be used
+     * @returns     The Optimizely Graph Client
      */
     clientFactory: ClientFactory
 
@@ -72,6 +79,28 @@ export type EditViewOptions = {
      * path.
      */
     communicationInjectorPath: string
+
+    /**
+     * The second step of the handling of a Preview/On-Page-Edit view,
+     * this actually extracts the requested content identification info
+     * from the path and search params
+     * 
+     * @param       props       The page path props and search params
+     * @returns     The requested content information
+     */
+    contentResolver: (props: ValidatedEditPageProps) => ContentRequest | undefined
+
+    /**
+     * This is the first step of the handling of a Preview/On-Page-Edit view,
+     * where the parameters should be validated to ensure this is a correct
+     * preview/on-page-edit request.
+     * 
+     * @param       props               The page path props and search params
+     * @param       throwOnInvalid      Whether an error must thrown on invalid data
+     * @param       isDevelopment       Whether this request runs in development mode
+     * @returns     If the request is valid
+     */
+    requestValidator: (props: EditPageProps, throwOnInvalid?: boolean, isDevelopment?: boolean) => props is ValidatedEditPageProps
 }
 
 export type GetContentByIdData<LocaleType = string> = {

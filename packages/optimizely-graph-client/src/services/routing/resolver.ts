@@ -1,23 +1,38 @@
 // Import GraphQL Client
-import createClient, { type IOptiGraphClient, isContentGraphClient } from '../../client/index.js'
-import type { OptimizelyGraphConfig } from '../../types.js'
+import createClient, { type IOptiGraphClient, isOptiGraphClient, OptiCmsSchema } from '../../client/index.js'
+import { type OptimizelyGraphConfig } from '../../types.js'
 
 // Import Routing specific types
-import type { Route } from "./types.js"
+import type { Route, IRouteResolver } from "./types.js"
 import type { ContentLinkWithLocale } from '../types.js'
 
-// Import GraphQL Queries
-import * as GetRouteById from './queries/getRouteById.js'
-import * as GetAllRoutes from './queries/getAllRoutes.js'
-import * as GetRouteByPath from './queries/getRouteByPath.js'
+import type { OptimizelyCmsRoutingApi } from './queries/types.js'
+
 
 // Main router class
 /**
  * 
  */
-export class RouteResolver {
+export class RouteResolver implements IRouteResolver {
     private _cgClient : IOptiGraphClient
     private _defaultUrlBase : string | URL
+    private _resolverMode : OptiCmsSchema
+    private _resolver : OptimizelyCmsRoutingApi | undefined
+
+    protected get client() : IOptiGraphClient
+    {
+        return this._cgClient
+    }
+
+    protected get urlBase() : string | URL
+    {
+        return this._defaultUrlBase
+    }
+
+    protected get schema() : OptiCmsSchema
+    {
+        return this._resolverMode
+    }
 
     /**
      * Create a new Route Resolver
@@ -29,10 +44,24 @@ export class RouteResolver {
      *                          constructor when reading routes from Optimizely 
      *                          Graph
      */
-    public constructor (clientOrConfig?: IOptiGraphClient | OptimizelyGraphConfig, urlBase: string | URL = "https://example.com")
-    {
-        this._cgClient = isContentGraphClient(clientOrConfig) ? clientOrConfig : createClient(clientOrConfig)
+    public constructor (
+        clientOrConfig?: IOptiGraphClient | OptimizelyGraphConfig, 
+        urlBase: string | URL = "https://example.com",
+        resolverMode?: OptiCmsSchema
+    ) {
+        this._cgClient = isOptiGraphClient(clientOrConfig) ? clientOrConfig : createClient(clientOrConfig)
         this._defaultUrlBase = urlBase
+        this._resolverMode = resolverMode ?? this._cgClient.currentOptiCmsSchema
+    }
+
+    private async getResolver() : Promise<OptimizelyCmsRoutingApi> 
+    {
+        if (!this._resolver) {
+            if (this._resolverMode == OptiCmsSchema.CMS12)
+                return new (await import('./queries/cms12/index.js')).default
+            this._resolver = new (await import('./queries/cms13/index.js')).default
+        }
+        return this._resolver
     }
 
     /**
@@ -43,31 +72,7 @@ export class RouteResolver {
      */
     public async getRoutes(domain?: string) : Promise<Route[]>
     {
-        this._cgClient.updateFlags({ queryCache: false }, true)
-        let page = await this._cgClient.request<GetAllRoutes.Result, GetAllRoutes.Variables>(GetAllRoutes.query, { domain }).catch(e => {
-            if (this._cgClient.debug)
-                console.error("[RouteResolver] Error while fetching routes", e)
-            return undefined
-        })
-        let results = page?.Content?.items ?? []
-        const totalCount = page?.Content?.total ?? 0
-        const cursor = page?.Content?.cursor ?? ''
-
-        if (totalCount > 0 && cursor !== '' && totalCount > results.length)
-            while ((page?.Content?.items?.length ?? 0) > 0 && results.length < totalCount) 
-            {
-                page = await this._cgClient.request<GetAllRoutes.Result, GetAllRoutes.Variables>({ 
-                    document: GetAllRoutes.query, 
-                    variables: { 
-                        cursor,
-                        domain
-                    }
-                })
-                results = results.concat(page.Content?.items ?? [])
-            }
-
-        this._cgClient.restoreFlags()
-        return results.map(this.tryConvertResponse.bind(this)).filter(this.isNotNullOrUndefined)
+        return (await this.getResolver()).getRoutes(this._cgClient, domain)
     }
 
     /**
@@ -85,48 +90,12 @@ export class RouteResolver {
         const queryPath   = typeof path == 'object' && path != null ? path.pathname : path
         const queryDomain = typeof path == 'object' && path != null ? path.protocol + '//' + path.host : domain
 
-        if (this._cgClient.debug)
-            console.log(`⚪ [RouteResolver] Resolving content info for ${ path } on ${ domain ? domain : "all domains"}`)
-
-        const resultSet = await this._cgClient.request<GetRouteByPath.Result, GetRouteByPath.Variables>({
-            document: GetRouteByPath.query,
-            variables: { path: queryPath, domain: queryDomain }
-        })
-
-        if ((resultSet.getRouteByPath?.items?.length ?? 0) === 0) {
-            if (this._cgClient.debug) 
-                console.warn("🟠 [RouteResolver] No items in the resultset");
-            return undefined
-        }
-
-        if ((resultSet.getRouteByPath?.items?.length ?? 0) > 1)
-            throw new Error("🔴 [RouteResolver] Ambiguous URL provided, did you omit the domain in a multi-site setup?")
-
-        if (this._cgClient.debug)
-            console.log(`⚪ [RouteResolver] Resolved content info for ${ path } to: ${ JSON.stringify(resultSet.getRouteByPath.items[0]) }`)
-        
-        return this.convertResponse(resultSet.getRouteByPath.items[0])
+        return (await this.getResolver()).getRouteByPath(this._cgClient, queryPath, queryDomain)
     }
 
     public async getContentInfoById(key: string, locale?: string, version?: string | number) : Promise<undefined | Route>
     {
-        const variables : GetRouteById.Variables = { key, version: version?.toString(), locale: locale?.replaceAll('-','_') }
-
-        if (this._cgClient.debug)
-            console.log("Resolving content by id:", JSON.stringify(variables))
-
-        const resultSet = await this._cgClient.request<GetRouteById.Result, GetRouteById.Variables>({
-            document: GetRouteById.query,
-            variables
-        })
-
-        if (resultSet.Content?.total >= 1) {
-            if (this._cgClient.debug && resultSet.Content?.total > 1)
-                console.warn(`Received multiple entries with this ID, returning the first one from: ${ (resultSet.Content?.items || []).map(x => { return `${ x._metadata.key } (version: ${ x._metadata.version }, locale: ${ x._metadata.locale })`}).join('; ') }`)
-            return this.convertResponse(resultSet.Content.items[0])
-        }
-        
-        return undefined
+        return (await this.getResolver()).getRouteById(this._cgClient, key,locale,version)
     }
 
     /**
@@ -142,38 +111,6 @@ export class RouteResolver {
             version: route.version,
             locale: route.locale
         }
-    }
-
-    protected convertResponse(item: GetAllRoutes.Route) : Route
-    {
-        if (!item)
-            throw new Error("RouteResolver.convertResponse(): mandatory parameter \"item\" not provided!")
-        const itemUrl = new URL(item._metadata?.url?.path ?? '/', item._metadata?.url?.domain ?? this._defaultUrlBase)
-        return {
-            locale: item._metadata.locale,
-            path: item._metadata.url.path,
-            url: itemUrl,
-            slug: item._metadata?.slug ?? "",
-            changed: item.changed ? new Date(item.changed) : null,
-            contentType: item._metadata.types.reverse(),
-            version: item._metadata.version,
-            key: item._metadata.key
-        }
-    }
-
-    protected tryConvertResponse(item: GetAllRoutes.Route) : Route | undefined
-    {
-        try {
-            return this.convertResponse(item)
-        } catch (e) {
-            console.error(`Unable to convert ${ JSON.stringify(item) } to Route`, e)
-            return undefined
-        }
-    }
-
-    protected isNotNullOrUndefined<T>(input: T | null | undefined) : input is T
-    {
-        return input != null && input != undefined
     }
 }
 

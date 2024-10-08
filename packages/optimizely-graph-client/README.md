@@ -100,6 +100,7 @@ The following configuration options are available, the table lists both the envi
 | `OPTIMIZELY_GRAPH_APP_KEY` | app_key | no | The Optimizely Graph app_key for write access, this value must never be made available in a browser |
 | `SITE_DOMAIN` | deploy_domain | no | The domain of the frontend |
 | `OPTIMIZELY_CMS_URL` | dxp_url | yes | The domain where the CMS has been installed |
+| `OPTIMIZELY_CMS_SCHEMA` | opti_cms_schema | no | The marker for the CMS schema version, which can be used by services and the implementation. Valid values are: `OPTI-CMS-12` and `OPTI-CMS-13`. The default value is `OPTI-CMS-13` |
 | `OPTIMIZELY_GRAPH_QUERY_LOG` | query_log | no | Set to "true" to enable query output to the console |
 | `OPTIMIZELY_DEBUG` | debug | no | Set to "true" to enable verbose debug output to the console |
 

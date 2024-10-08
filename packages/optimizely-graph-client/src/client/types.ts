@@ -8,6 +8,11 @@ export type QueryParams = {
     variables: Parameters<RequestMethod>[0]['variables']
 }
 
+export enum OptiCmsSchema {
+    CMS12 = "OPTI-CMS-12",
+    CMS13 = "OPTI-CMS-13"
+}
+
 export enum AuthMode {
     Public = "epi-single",
     Basic = "use-basic",
@@ -67,6 +72,13 @@ export interface IOptiGraphClient extends ClientInstanceType
      * Retrieve the current authentication mode
      */
     readonly currentAuthMode : AuthMode
+
+    /**
+     * Retrieve the currently active CMS Schema. This doesn't affect the client
+     * itself, however it can be used by users of this client to determine which
+     * query format must be used.
+     */
+    readonly currentOptiCmsSchema : OptiCmsSchema
     
     /**
      * Update the authentication data for this client. 

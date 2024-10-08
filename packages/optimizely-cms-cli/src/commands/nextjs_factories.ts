@@ -27,6 +27,10 @@ export const NextJsFactoryCommand : NextJsModule = {
         entries.forEach((e,i) => {
             if (isImportInfoList(e) && typeof e.prefix == 'string')
                 switch (e.prefix) {
+                    case "Video":
+                    case "Image":
+                        (entries[i] as ImportInfoList).prefix = ["Media", e.prefix, "Component"]
+                        break;
                     case "Experience":
                         (entries[i] as ImportInfoList).prefix = [e.prefix,"Page"]
                         break;

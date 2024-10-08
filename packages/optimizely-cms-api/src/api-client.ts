@@ -1,7 +1,7 @@
 import { CmsIntegrationApiClient } from "./client";
 import { getAccessToken } from "./getaccesstoken";
 import { type CmsIntegrationApiOptions, getCmsIntegrationApiConfigFromEnvironment } from "./config";
-import type { InstanceApiVersionInfo } from "./types";
+import { type InstanceApiVersionInfo, OptiCmsVersion } from "./types";
 import type { CancelablePromise } from "./client";
 import buildInfo from "./version.json"
 import { OpenAPI } from "./client/core/OpenAPI"
@@ -19,6 +19,9 @@ export class ApiClient extends CmsIntegrationApiClient
     {
         const options = config ?? getCmsIntegrationApiConfigFromEnvironment()
         options.base = new URL(OpenAPI.BASE, options.base)
+        if (options.cmsVersion == OptiCmsVersion.CMS12)
+            options.base.pathname = options.base.pathname.replace('preview2','preview1')
+        const apiVersion = options.cmsVersion == OptiCmsVersion.CMS12 ? 'preview1' : OpenAPI.VERSION 
         let access_token : string | undefined = undefined
         super({
             BASE: options.base.href, 
@@ -37,9 +40,21 @@ export class ApiClient extends CmsIntegrationApiClient
                 Connection: "Close"
             },
             WITH_CREDENTIALS: true,
-            CREDENTIALS: "include"
+            CREDENTIALS: "include",
+            VERSION: apiVersion
         })
         this._config = options
+    }
+
+    /**
+     * Get the runtime configuration of the target CMS version. 
+     * 
+     * If this differs from the cmsVersion the client may not work fully or not
+     * at all.
+     */
+    public get runtimeCmsVersion() : OptiCmsVersion
+    {
+        return this._config.cmsVersion ?? OptiCmsVersion.CMS13
     }
 
     /**
@@ -60,7 +75,7 @@ export class ApiClient extends CmsIntegrationApiClient
 
     public get version() : string
     {
-        return OpenAPI.VERSION
+        return this._config.cmsVersion == OptiCmsVersion.CMS12 ? 'preview1' : OpenAPI.VERSION
     }
 
     /**

@@ -2,7 +2,7 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-import type { ContentTypeDefinition_V2 } from '../models/ContentTypeDefinition_V2.js';
+import type { ContentSource_V2 } from '../models/ContentSource_V2.js';
 import type { CancelablePromise } from '../core/CancelablePromise.js';
 import type { BaseHttpRequest } from '../core/BaseHttpRequest.js';
 export class DefinitionV2Service {
@@ -59,7 +59,7 @@ export class DefinitionV2Service {
      * @throws ApiError
      */
     public postContentV2TypeHandler(
-        requestBody: ContentTypeDefinition_V2,
+        requestBody: ContentSource_V2,
     ): CancelablePromise<any> {
         return this.httpRequest.request({
             method: 'POST',

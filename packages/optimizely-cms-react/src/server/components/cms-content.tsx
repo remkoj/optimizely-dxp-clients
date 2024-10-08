@@ -1,11 +1,11 @@
 import 'server-only'
 import type { ComponentType, ComponentProps } from 'react'
 import type {  } from 'react'
-import type { CmsComponent } from '../../types.js'
+import type { CmsComponent, CmsComponentWithFragment } from '../../types.js'
 import type { CmsContentProps } from './types.js'
 import getContentType from './get-content-type.js'
-import getServerContext from '../context.js'
-import createClient, { AuthMode, normalizeContentLink, contentLinkToString, isInlineContentLink, type ContentLink } from '@remkoj/optimizely-graph-client'
+import getServerContext, { type ServerContext } from '../context.js'
+import createClient, { AuthMode, normalizeContentLink, contentLinkToString, isInlineContentLink, isContentLink, type ContentLink, OptiCmsSchema } from '@remkoj/optimizely-graph-client'
 import { print } from 'graphql'
 import * as Utils from "../../utilities.js"
 import * as Queries from './queries.js'
@@ -128,24 +128,54 @@ export const CmsContent = async <LocalesType = string>({contentType, contentType
     
     // Render using included fragment
     if (Utils.isCmsComponentWithFragment(Component)) {
-        type FragmentQueryResponse = { contentById: { total: number, items: Array<any> }}
-        const [name, fragment]  = Component.getDataFragment()
-        if (context.isDebug) console.log(`⚪ [CmsContent] Component data fetching using fragment: ${ name }`)
-        const fragmentQuery = `query getContentFragmentById($key: String!, $version: String, $locale: [Locales!]) {contentById: _Content(where: {_metadata: {key: { eq: $key }, version: { eq: $version }}} locale: $locale) { total, items { _type: __typename, _metadata { key, version, locale } ...${ name } }}} ${ print(fragment) }`
-        const fragmentVariables = Utils.contentLinkToRequestVariables(contentLink as ContentLink)
-        if (context.isDebug) console.log(`⚪ [CmsContent] Component data fetching using variables: ${ JSON.stringify(fragmentVariables) }`)
-        const fragmentResponse = await client.request<FragmentQueryResponse, any>(fragmentQuery, fragmentVariables)
-        const totalItems = fragmentResponse.contentById.total || 0
-        if (totalItems < 1)
-            throw new Error(`CmsContent expected to load exactly one content item of type ${ name }, received ${ totalItems } from Optimizely Graph. Content Item: ${ JSON.stringify( fragmentVariables )}`)
-        if (totalItems > 1 && context.isDebug) console.warn(`🟠 [CmsContent] Resolved ${ totalItems } content items, expected only 1. Picked the first one`)
-        return <Component contentLink={ contentLink as ContentLink } data={ fragmentResponse.contentById.items[0] } inEditMode={ context.inEditMode } layoutProps={ layoutProps } >{children}</Component>
+        const fetchedData = await getComponentDataFromFragment(Component, context, contentLink as ContentLink)
+        return <Component contentLink={ contentLink as ContentLink } data={ fetchedData } inEditMode={ context.inEditMode } layoutProps={ layoutProps } >{children}</Component>
     }
     
     // Assume there's no server side prepared data needed for the component
     if (context.isDebug)
         console.log(`⚪ [CmsContent] Component of type "${ myContentType?.join('/') ?? Component.displayName ?? '?'}" did not request pre-loading of data`)
     return <Component contentLink={ contentLink as ContentLink } data={ fragmentData || {} } inEditMode={ context.inEditMode } layoutProps={ layoutProps } >{children}</Component>
+}
+
+async function getComponentDataFromFragment<T extends any = any>(Component: CmsComponentWithFragment<T, Record<string,any>>, context: ServerContext, contentLink: ContentLink)
+{
+    const { client, isDebug } = context
+    if (!client) {
+        if (isDebug)
+            console.warn(`🟠 [CmsContent] Cannot fetch component data with fragment, due to missing GraphQL Client`)
+        return
+    }
+    type FragmentQueryResponse = { contentById: { total: number, items: Array<{_metadata: { key: string, version: number|string, locale?: string }, _locale?: { name: string }} & T> }}
+    const [name, fragment]  = Component.getDataFragment()
+    if (context.isDebug) console.log(`⚪ [CmsContent] Component data fetching using fragment: ${ name }`)
+    const fragmentQuery = client.currentOptiCmsSchema == OptiCmsSchema.CMS12 ?
+        `query getContentFragmentById($key: String!, $version: Int, $locale: [Locales!]) { contentById: Content(where: { ContentLink: { GuidValue: { eq: $key }, WorkId: { eq: $version } } }, locale: $locale) { total, items { _type: __typename, _metadata: ContentLink { key: GuidValue, version: WorkId }, _locale: Language { name: Name } ...${ name } }}}\n ${ print(fragment) }` :
+        `query getContentFragmentById($key: String!, $version: String, $locale: [Locales!]) {contentById: _Content(where: {_metadata: {key: { eq: $key }, version: { eq: $version }}} locale: $locale) { total, items { _type: __typename, _metadata { key, version, locale } ...${ name } }}}\n ${ print(fragment) }`
+    const fragmentVariables = Utils.contentLinkToRequestVariables(contentLink as ContentLink)
+    if (client.currentOptiCmsSchema == OptiCmsSchema.CMS12) {
+        try {
+            const versionNr = fragmentVariables.version ? Number.parseInt(fragmentVariables.version) : 0
+            if (versionNr > 0) 
+                fragmentVariables.version = versionNr as unknown as string    
+            else
+                fragmentVariables.version = undefined
+        } catch {
+            fragmentVariables.version = undefined
+        }
+    }
+    if (context.isDebug) console.log(`⚪ [CmsContent] Component data fetching using variables: ${ JSON.stringify(fragmentVariables) }`)
+    const fragmentResponse = await client.request<FragmentQueryResponse, any>(fragmentQuery, fragmentVariables)
+    const totalItems = fragmentResponse.contentById.total || 0
+    if (totalItems < 1)
+        throw new Error(`CmsContent expected to load exactly one content item of type ${ name }, received ${ totalItems } from Optimizely Graph. Content Item: ${ JSON.stringify( fragmentVariables )}`)
+    if (totalItems > 1 && context.isDebug) console.warn(`🟠 [CmsContent] Resolved ${ totalItems } content items, expected only 1. Picked the first one`)
+    if (client.currentOptiCmsSchema == OptiCmsSchema.CMS12) {
+        fragmentResponse.contentById.items[0]._metadata.locale = fragmentResponse.contentById.items[0]._metadata.locale ?? fragmentResponse.contentById.items[0]._locale?.name
+        if (fragmentResponse.contentById.items[0]._locale)
+            delete fragmentResponse.contentById.items[0]._locale
+    }
+    return fragmentResponse.contentById.items[0]
 }
 
 export default CmsContent

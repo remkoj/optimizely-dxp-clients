@@ -1,6 +1,5 @@
 import type { CliModule } from '../types.js'
-import { parseArgs } from '../tools/parseArgs.js'
-import { createClient } from '@remkoj/optimizely-cms-api'
+import createClient from '../tools/cmsClient.js'
 import chalk from 'chalk'
 import figures from 'figures'
 import Table from 'cli-table3'
@@ -9,11 +8,8 @@ export const CmsVersionCommand : CliModule = {
     command: "cms:version",
     describe: "Get the CMS Version information",
     handler: async (args) => {
-        const { _config: cfg } = parseArgs(args)
-        const client = createClient(cfg)
-
+        const client = createClient(args)
         process.stdout.write(chalk.yellowBright(`${ figures.arrowRight } Reading version information Optimizely CMS\n`))
-
         const versionInfo = await client.getInstanceInfo()
 
         const info = new Table({

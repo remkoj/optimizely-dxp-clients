@@ -15,7 +15,7 @@ export type Result = {
 
 export const query = gql`query getRouteByPath($path: String!, $domain: String) {
     getRouteByPath: _Content(
-        where: { _metadata: { url: { default: { eq: $path }, base: { eq: $domain } } } }
+        where: { _metadata: { url: { default: { eq: $path }, base: { endsWith: $domain } } } }
     ) {
         total
         items {

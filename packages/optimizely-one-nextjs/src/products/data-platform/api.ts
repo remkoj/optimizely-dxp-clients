@@ -112,6 +112,64 @@ export class DataPlatformClient
         return terms
     }
 
+    public async getProfileInfo(vuid: string) : Promise<DataPlatformProfile | undefined>
+    {
+        const query = `query getProfileInfo($filter: String!) {
+  customers(filter: $filter) {
+    edges {
+      node {
+        name
+        first_name
+        last_name
+        city
+        country
+        dob_day
+        dob_month
+        dob_year
+        email
+        observations {
+          order_count
+          discount_usage
+          session_count
+          total_revenue
+          acquisition_source
+          computed_age_years
+          days_until_birthday
+        }
+        state
+        street1
+        street2
+        zip
+        insights {
+          order_likelihood
+          ttno_days
+          winback_type
+          winback_zone
+          engagement_rank
+          probability_alive
+        }
+        phone
+        timezone
+        image_url
+      }
+    }
+  }
+}`
+        const variables = { filter: `vuid='${ vuid }'` }
+        const responseData = await (await this.privateQuery(query, variables)).json() as DataPlatformProfileResponse
+        if (responseData.errors)
+        {
+            console.error("Error while fetching latest search terms, please check your keys")
+            console.error(responseData.errors.map((e : { message: string }) => e.message).join('; '))
+            return undefined
+        }
+
+        const profiles = responseData.data.customers.edges.map(customer => customer.node)
+        if (profiles.length == 1)
+            return profiles.at(0)
+        return undefined
+    }
+
     protected async privateQuery(graphQuery: string, variables?: Record<string,any>) : Promise<Response>
     {
         return fetch(new URL('/v3/graphql', this.config.endpoint), {
@@ -154,3 +212,57 @@ export class DataPlatformError extends Error
 }
 
 export default DataPlatformClient
+
+type DataPlatformProfileResponse = ({
+    data: {
+        customers: {
+            edges: {
+                node: DataPlatformProfile
+            }[]
+        }
+    },
+    errors: never
+} | {
+    data: never
+    errors: {
+        message: string
+        locations: { line: number, column: number }[]
+        extensions: { classification: string }
+    }[]
+})
+
+export type DataPlatformProfile = {
+    name: string | null
+    first_name: string | null
+    last_name: string | null
+    city: string | null
+    country: string | null
+    dob_day: number | null
+    dob_month: number | null
+    dob_year: number | null
+    email: string | null
+    observations: {
+        order_count: string | null
+        discount_usage: string | null
+        session_count: string | null
+        total_revenue: string | null
+        acquisition_source: string | null
+        computed_age_years: string | null
+        days_until_birthday: string | null
+    }
+    state: string | null
+    street1: string | null
+    street2: string | null
+    zip: string | null
+    insights: {
+        order_likelihood: string | null
+        ttno_days: string | null
+        winback_type: string | null
+        winback_zone: string | null
+        engagement_rank: number | null
+        probability_alive: number | null
+    }
+    phone: string | null
+    timezone: string | null
+    image_url: string | null
+}
