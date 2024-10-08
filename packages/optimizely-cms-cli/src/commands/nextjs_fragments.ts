@@ -156,14 +156,20 @@ function createInitialFragment(contentType : IntegrationApi.ContentType, forProp
                 break;
             case IntegrationApi.PropertyDataType.STRING: {
                 const propDetails = typeProps[propKey] as IntegrationApi.StringProperty
-                if (propDetails.format == "html" && !forCms12)
-                    fragmentFields.push(`${ propName } { json, html }`)
-                else if ((propDetails.format?.length ?? 0) > 0 && !['html','shortString'].includes(propDetails.format)) {
-                    if (!isConflict)
-                        console.warn(chalk.redBright(`❗ Unsupported string format "${ propDetails.format}" for ${ contentType.key }.${ propKey }; add it manually to the fragment if you need to access this field`))
+                switch (propDetails.format ?? "") {
+                    case 'html':
+                        fragmentFields.push(forCms12 ? propName : `${ propName } { json, html }`)
+                        break
+                    case 'shortString':
+                    case 'selectOne':
+                    case '':
+                        fragmentFields.push(propName)
+                        break
+                    default:
+                        if (!isConflict)
+                            console.warn(chalk.redBright(`❗ Unsupported string format "${ propDetails.format}" for ${ contentType.key }.${ propKey }; add it manually to the fragment if you need to access this field`))
+                        break
                 }
-                else
-                    fragmentFields.push(propName)
                 break;
             }
             case IntegrationApi.PropertyDataType.URL:

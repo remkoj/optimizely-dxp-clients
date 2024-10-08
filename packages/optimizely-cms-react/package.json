@@ -42,8 +42,8 @@
   "devDependencies": {
     "@remkoj/optimizely-graph-client": "workspace:2.1.0",
     "@types/crypto-js": "^4.2.2",
-    "@types/node": "^22.7.3",
-    "@types/react": "^18.3.9",
+    "@types/node": "^22.7.4",
+    "@types/react": "^18.3.11",
     "@types/react-dom": "18.3.0",
     "entities": "^5.0.0",
     "graphql": "^16.9.0",

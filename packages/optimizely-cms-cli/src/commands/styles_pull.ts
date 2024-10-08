@@ -129,7 +129,19 @@ export type ${ typeId }ComponentProps<DT extends Record<string, any> = Record<st
     layoutProps: LP | undefined
 } & JSX.IntrinsicElements['div']
 
-export type ${ typeId }Component<DT extends Record<string, any> = Record<string, any>, LP extends ${ typeId }LayoutProps = ${ typeId }LayoutProps> = (props: ${ typeId }ComponentProps<DT,LP>) => ReactNode`)
+export type ${ typeId }Component<DT extends Record<string, any> = Record<string, any>, LP extends ${ typeId }LayoutProps = ${ typeId }LayoutProps> = (props: ${ typeId }ComponentProps<DT,LP>) => ReactNode
+
+export function isDefaultProps(props?: ${ typeId }LayoutProps | null) : props is ${ templates.filter(t => t.data.isDefault).at(0)?.data?.key }Props
+{
+    return props?.template == "${ templates.filter(t => t.data.isDefault).at(0)?.data?.key }"
+}`)
+                    templates.forEach(t => {
+                        typeContents.push(`
+export function is${ t.data.key }Props(props?: ${ typeId }LayoutProps | null) : props is ${ t.data.key }Props
+{
+    return props?.template == "${ t.data.key }"
+}`)
+                    })
                 }
 
                 fs.writeFileSync(typeFilePath, imports.join("\n") + "\n\n" + typeContents.join("\n"))

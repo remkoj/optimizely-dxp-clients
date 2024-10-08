@@ -19,6 +19,21 @@ export class RouteResolver implements IRouteResolver {
     private _resolverMode : OptiCmsSchema
     private _resolver : OptimizelyCmsRoutingApi | undefined
 
+    protected get client() : IOptiGraphClient
+    {
+        return this._cgClient
+    }
+
+    protected get urlBase() : string | URL
+    {
+        return this._defaultUrlBase
+    }
+
+    protected get schema() : OptiCmsSchema
+    {
+        return this._resolverMode
+    }
+
     /**
      * Create a new Route Resolver
      * 

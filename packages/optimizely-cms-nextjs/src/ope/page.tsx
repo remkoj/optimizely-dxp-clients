@@ -17,15 +17,15 @@ const defaultOptions : EditViewOptions = {
     layout: props => <>{ props.children }</>,
     loader: getContentById,
     clientFactory: (token?: string) => getAuthorizedServerClient(token),
-    communicationInjectorPath: '/util/javascript/communicationinjector.js'
+    communicationInjectorPath: '/util/javascript/communicationinjector.js',
+    contentResolver: getContentRequest,
+    requestValidator: isValidRequest
 }
 
 /**
  * Create the EditPage component needed by Next.JS to render the "On Page
  * Editing" variant of the content item selected by the editor.
  *
- * @param   dxpUrl      The domain of the CMS instance
- * @param   client      The Apollo GraphQL client to use
  * @param   factory     The component factory to be used
  * @param   options     The optional options to use to control the edit page
  * @returns The React Component that can be used by Next.JS to render the page
@@ -40,7 +40,9 @@ export function createEditPageComponent(
         refreshNotice: RefreshNotice,
         loader: getContentById,
         clientFactory,
-        communicationInjectorPath
+        communicationInjectorPath,
+        contentResolver: resolveContent,
+        requestValidator: validateRequest
     } = { ...defaultOptions, ...options }
 
     async function EditPage(props: EditPageProps) : Promise<JSX.Element>
@@ -49,13 +51,13 @@ export function createEditPageComponent(
         const context = getServerContext()
 
         // Validate the search parameters
-        if (!isValidRequest(props, false, context.isDevelopment)) {
+        if (!validateRequest(props, false, context.isDevelopment)) {
             console.error("🔴 [OnPageEdit] Invalid edit mode request")
             return notFound()
         }
 
         // Get the requested content item
-        const contentRequestInfo = getContentRequest(props)
+        const contentRequestInfo = resolveContent(props)
         if (!contentRequestInfo) {
             console.error("🔴 [OnPageEdit] Unable to resolve requested content")
             return notFound()

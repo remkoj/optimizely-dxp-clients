@@ -8,7 +8,7 @@ import { type OptimizelyCmsRoutingApi } from '../types.js'
 export class OptimizelyCms13Client implements OptimizelyCmsRoutingApi
 {    
     async getRoutes(client: GraphQLClient, siteId?: string): Promise<Route[]> {
-        client.updateFlags({ queryCache: false }, true)
+        client.updateFlags({ queryCache: false/*, cache: false*/ }, true)
         let page = await client.request<GetAllRoutes.Result, GetAllRoutes.Variables>(GetAllRoutes.query, { domain: siteId }).catch(e => {
             if (client.debug)
                 console.error("[RouteResolver] Error while fetching routes", e)

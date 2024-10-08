@@ -11,7 +11,7 @@ export type AudiencesPanelProps = {
 const buildGetKey : (servicePrefix: string, pageSize: number) => SWRInfiniteKeyLoader<MeResponse> = (servicePrefix, pageSize) => {
     const serviceURL = `${ servicePrefix }?scope=audiences&limit=${ pageSize }`
     const getKey : SWRInfiniteKeyLoader<MeResponse> = (pageIndex, previousPageData) => {
-        if (previousPageData && previousPageData.audiencesPageCount < pageIndex) return null
+        if (previousPageData && previousPageData.rts.audiencesPageCount < pageIndex) return null
         return `${ serviceURL }&page=${ pageIndex }`
     }
     return getKey
@@ -41,13 +41,13 @@ export const AudiencesPanel : FunctionComponent<AudiencesPanelProps> = ({ servic
     const { data: profiles, isLoading, isValidating, error, size, setSize } = useSWRInfinite<MeResponse>(getKey, config)
 
     // Post-process the received values
-    const audiencePages = !profiles ? 1 : (profiles[0]?.audiencesPageCount || 1)
-    const audienceCount = !profiles ? 0 : (profiles[0]?.audiencesCount || 0)
+    const audiencePages = !profiles ? 1 : (profiles[0]?.rts.audiencesPageCount || 1)
+    const audienceCount = !profiles ? 0 : (profiles[0]?.rts.audiencesCount || 0)
     const hasMore = size < audiencePages
 
     // Automatically correct to the correct size, based upon the response
     useEffect(() => {
-        let newSize = !profiles ? -1 : (profiles[0]?.audiencesPageCount || -1)
+        let newSize = !profiles ? -1 : (profiles[0]?.rts.audiencesPageCount || -1)
         if (newSize >= 1 && size != newSize)
             setSize(newSize)
     }, [ size, profiles ])
@@ -60,7 +60,7 @@ export const AudiencesPanel : FunctionComponent<AudiencesPanelProps> = ({ servic
     return <>
         { hasMore && <p className='oo-text-[14px] oo-border oo-border-amber-800 oo-bg-amber-200 oo-text-amber-800 oo-p-1 oo-my-1 oo-rounded-md'>Showing results for the first { size * pageSize } audiences of { audienceCount }, <span onClick={() => setSize(size + 1)} className="oo-cursor-pointer oo-underline oo-text-blue-800">load more</span></p> }
         <ul className='oo-text-[14px] oo-grid oo-grid-cols-1 oo-divide-y oo-divide-slate-200'>
-            { (profiles || []).map(profile => (profile?.audiences ?? []).map(a => {
+            { (profiles || []).map(profile => (profile?.rts.audiences ?? []).map(a => {
                 return <li className='oo-py-1' key={"audience-"+a.id}><UserGroupIcon className='oo-inline-block oo-h-4 oo-w-4 oo-mr-2' />{ a.name }</li>
             })).flat() }
         </ul>
