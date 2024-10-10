@@ -1,7 +1,7 @@
 import 'server-only'
 
 import type { EditPageProps, EditPageComponent, EditViewOptions } from './types.js'
-import { contentLinkToString } from '@remkoj/optimizely-graph-client/utils'
+import { contentLinkToString, localeToGraphLocale } from '@remkoj/optimizely-graph-client/utils'
 import { Utils, type ContentLinkWithLocale } from '@remkoj/optimizely-cms-react'
 import { CmsContent, getServerContext, type ComponentFactory } from '@remkoj/optimizely-cms-react/rsc'
 import { notFound } from 'next/navigation.js'
@@ -78,7 +78,10 @@ export function createEditPageComponent(
         }
 
         try {
-            const contentInfo = await getContentById(client, contentRequest)
+            const contentInfo = await getContentById(client, {
+                ...contentRequest,
+                locale: localeToGraphLocale(contentRequest.locale)
+            })
             if ((contentInfo?.content?.total ?? 0) > 1) {
                 console.warn("🟠 [OnPageEdit] Content request " + JSON.stringify(contentRequest) + " yielded more then one item, picking first matching")
             }
