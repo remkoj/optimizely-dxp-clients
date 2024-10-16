@@ -11,6 +11,7 @@ export function readEnvironmentVariables() : Types.OptimizelyGraphConfig
         app_key: getOptional('OPTIMIZELY_GRAPH_APP_KEY', () => getOptional('OPTIMIZELY_CONTENTGRAPH_APP_KEY')),
         single_key: getOptional('OPTIMIZELY_GRAPH_SINGLE_KEY', () => getOptional('OPTIMIZELY_CONTENTGRAPH_SINGLE_KEY', '')) as string,
         gateway: getOptional('OPTIMIZELY_GRAPH_GATEWAY', () => getOptional('OPTIMIZELY_CONTENTGRAPH_GATEWAY')),
+        tenant_id: getOptional('OPTIMIZELY_GRAPH_TENANT_ID'),
         deploy_domain: getOptional('SITE_DOMAIN'),
         dxp_url: getOptional('OPTIMIZELY_CMS_URL', () => getOptional('DXP_URL')),
         query_log: getBoolean('OPTIMIZELY_GRAPH_QUERY_LOG', () => getBoolean('OPTIMIZELY_CONTENTGRAPH_QUERY_LOG', false)),

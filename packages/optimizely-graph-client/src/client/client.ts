@@ -263,6 +263,8 @@ export class ContentGraphClient extends GraphQLClient implements IOptiGraphClien
 
         // Update endpoint
         const serviceUrl = new URL("/content/v2", this._config.gateway)
+        if (typeof(this._config.tenant_id) == 'string' && this._config.tenant_id.length > 0)
+            serviceUrl.pathname = serviceUrl.pathname + '/tenant_id=' + this._config.tenant_id
         serviceUrl.searchParams.set('stored', this._flags.queryCache ? 'true' : 'false')
         serviceUrl.searchParams.set('cache', this._flags.cache ? 'true' : 'false')
         serviceUrl.searchParams.set('omit_empty', this._flags.omitEmpty ? 'true' : 'false')
