@@ -5,7 +5,12 @@ An extension of the [graphql-request](https://www.npmjs.com/package/graphql-requ
 - [1. Provided services](#1-provided-services)
 - [2. Usage example](#2-usage-example)
   - [2.1. GraphQL Client](#21-graphql-client)
-  - [2.2. Admin API](#22-admin-api)
+  - [2.2. GraphQL Client Authentication](#22-graphql-client-authentication)
+    - [2.2.1. Graph Keys](#221-graph-keys)
+    - [2.2.2. Token passthrough](#222-token-passthrough)
+    - [2.2.3. OpenID Connect](#223-openid-connect)
+    - [2.2.4. Token passthrough](#224-token-passthrough)
+  - [2.3. Admin API](#23-admin-api)
 - [3. Configuration](#3-configuration)
   - [3.1. Advanced Features](#31-advanced-features)
 
@@ -70,7 +75,60 @@ const channels = new ChannelRepository(client)
 const allChannels = await channels.getAll()
 ```
 
-### 2.2. Admin API
+### 2.2. GraphQL Client Authentication 
+Optimizely Graph allows restricted content to be queried, using either of the following patterns:
+
+* **Graph Keys**: Admin authentication using Graph Sercet Key and App Key
+* **Token passthrough**: Used by CMS preview/edit mode to provide a short lived access token to query the content to be previewed/edited. [Read more](https://docs.developers.optimizely.com/platform-optimizely/v1.4.0-optimizely-graph/docs/on-page-editing-using-content-graph)
+* **OpenID Connect**: Used by the frontend to pass through OpenID Connect based JWT to authorize content. [Read more](https://docs.developers.optimizely.com/platform-optimizely/v1.4.0-optimizely-graph/docs/opti-id)
+* **Generic Login**: Used by the fronend to pass through the username/roles from a trusted identity provider. [Read more](https://docs.developers.optimizely.com/platform-optimizely/v1.4.0-optimizely-graph/docs/basic-auth-from-backend)
+
+#### 2.2.1. Graph Keys
+The Graph Keys authentication mechanism can be enabled by providing the App Secret and App Key as part of the configuration. Then depending on your security policy, use either:
+
+- Basic Authentication: `client.updateAuthentication(AuthMode.Basic)`
+- HMAC Authentication: `client.updateAuthentication(AuthMode.HMAC)`
+
+HMAC provides slightly better security as it both ensures message integrity and never transmits the App Secret in a decryptable form.
+
+#### 2.2.2. Token passthrough
+This method of authentication is specific to Optimizely CMS, where the edit UI will provide a short-lived token that allows access to the content that is being edited. This only requires the Single Key to be known.
+
+```typescript
+const tokenValue: string = ''; //Your token value here
+client.updateAuthentication(tokenValue)
+```
+
+#### 2.2.3. OpenID Connect
+This method requires two steps, first, the client must be configured with the Turnstile Tenant ID, secondly the JWT Token of the OIDC provider must be added to the client.
+
+```typescript
+const client = createClient({
+  single_key: "your_single_key",
+  tenant_id: "your_turnstile_tenant_id"
+})
+const tokenValue: string = ''; //Your OIDC JWT Token
+client.updateAuthentication(tokenValue)
+```
+
+#### 2.2.4. Token passthrough
+This method works with non-OIDC compliant identity providers, but requires a trusted connection with Optimizely Graph. As such, it requires the Graph Keys to ensure that the client is authorized to pass in the username and roles directly.
+
+The roles must be provided as a comma separated list, without spaces around the values. Both the username and roles must exactly match the roles and usernames defined in Optimizely CMS.
+
+```typescript
+const client = createClient({
+  single_key: "your_single_key",
+  app_key: "your_app_key",
+  secret: "your_secret"
+})
+client.setFrontendUser({
+  username: "your_username",
+  roles: "list_of_roles"
+})
+```
+
+### 2.3. Admin API
 ***Warning***: The AdminAPI of Optimizely Graph requires your App Key & Secret as it allows full management of the service. When used in a browser, take all needed steps to prevent leaking of these credentials.
 
 ```typescript
@@ -98,6 +156,7 @@ The following configuration options are available, the table lists both the envi
 | `OPTIMIZELY_GRAPH_SINGLE_KEY` | single_key | yes | The key needed for public, read-only access |
 | `OPTIMIZELY_GRAPH_SECRET` | secret | no | The Optimizely Graph secret for write access, this value must never be made available in a browser |
 | `OPTIMIZELY_GRAPH_APP_KEY` | app_key | no | The Optimizely Graph app_key for write access, this value must never be made available in a browser |
+| `OPTIMIZELY_GRAPH_TENANT_ID` | tenant_id | no | The Optimizely Graph Tenant ID.<br/><br/>*Only required when using OIDC Authentication* |
 | `SITE_DOMAIN` | deploy_domain | no | The domain of the frontend |
 | `OPTIMIZELY_CMS_URL` | dxp_url | yes | The domain where the CMS has been installed |
 | `OPTIMIZELY_CMS_SCHEMA` | opti_cms_schema | no | The marker for the CMS schema version, which can be used by services and the implementation. Valid values are: `OPTI-CMS-12` and `OPTI-CMS-13`. The default value is `OPTI-CMS-13` |

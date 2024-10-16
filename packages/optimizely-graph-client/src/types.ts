@@ -50,6 +50,11 @@ export type OptimizelyGraphConfigInternal = {
      * The CMS Schema version that is used
      */
     opti_cms_schema: OptiCmsSchema
+
+    /**
+     * The Turnstile Tenant ID that must be used - if any
+     */
+    tenant_id?: string
 }
 
 export type OptimizelyGraphConfig = Partial<Omit<OptimizelyGraphConfigInternal, 'single_key'>> & Pick<OptimizelyGraphConfigInternal, 'single_key'>

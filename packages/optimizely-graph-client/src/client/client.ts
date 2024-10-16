@@ -1,8 +1,8 @@
 import { readEnvironmentVariables, applyConfigDefaults, validateConfig, type OptimizelyGraphConfigInternal, type OptimizelyGraphConfig } from "../config.js"
 import { GraphQLClient } from "graphql-request"
-import { AuthMode, type RequestMethod, type IOptiGraphClient, type OptiGraphSiteInfo, type IOptiGraphClientFlags, type OptiCmsSchema } from "./types.js"
+import { AuthMode, type RequestMethod, type IOptiGraphClient, type OptiGraphSiteInfo, type IOptiGraphClientFlags, type OptiCmsSchema, type FrontendUser } from "./types.js"
 import createHmacFetch, { type FetchAPI } from "../hmac-fetch.js"
-import { base64encode, isError, validateToken, getAuthMode } from "./utils.js"
+import { base64encode, isError, validateToken, getAuthMode, isValidFrontendUser } from "./utils.js"
 
 const defaultFlags : IOptiGraphClientFlags = {
     queryCache: true,
@@ -16,6 +16,7 @@ export class ContentGraphClient extends GraphQLClient implements IOptiGraphClien
     public static readonly ForceHmacToken : string = 'use-hmac'
     public static readonly ForceBasicAuth : string = 'use-basic'
     protected readonly _config : Readonly<OptimizelyGraphConfigInternal>
+    private _user : FrontendUser | undefined = undefined
     private _token : string | undefined
     private _hmacFetch : FetchAPI | undefined
     private _flags : IOptiGraphClientFlags
@@ -26,6 +27,10 @@ export class ContentGraphClient extends GraphQLClient implements IOptiGraphClien
     public get debug() : boolean 
     {
         return this._config.debug ?? false
+    }
+    public get frontendUser() : FrontendUser | undefined
+    {
+        return this._user
     }
     protected get token() : string | undefined
     {
@@ -64,7 +69,7 @@ export class ContentGraphClient extends GraphQLClient implements IOptiGraphClien
 
     public get currentAuthMode() : AuthMode
     {
-        return getAuthMode(this._token)
+        return this._user ? AuthMode.User : getAuthMode(this._token)
     }
 
     public constructor(config?: OptimizelyGraphConfig, token: AuthMode | string | undefined = undefined, flags?: Partial<IOptiGraphClientFlags>)
@@ -138,6 +143,8 @@ export class ContentGraphClient extends GraphQLClient implements IOptiGraphClien
     {
         if (tokenOrAuthmode == AuthMode.Token)
             throw new Error("❌ [Optimizely Graph] Provide the authentication token to switch to AuthMode.Token");
+        if (tokenOrAuthmode == AuthMode.User)
+            throw new Error("❌ [Optimizely Graph] User mode authentication automatically activated when setting user information");
         this.token = tokenOrAuthmode == AuthMode.Public ? undefined : tokenOrAuthmode
         this.updateRequestConfig()
         return this
@@ -184,6 +191,17 @@ export class ContentGraphClient extends GraphQLClient implements IOptiGraphClien
         return this
     }
 
+    public setFrontendUser(newUser: FrontendUser | null): boolean {
+        if (!(this._config.app_key && this._config.secret)) {
+            return false
+        }
+        if (!isValidFrontendUser(newUser))
+            return false
+        this._user = newUser ?? undefined
+        this.updateRequestConfig()
+        return true
+    }
+
     protected updateRequestConfig() : void
     {
         // Build headers that are shared across authentication modes
@@ -208,6 +226,18 @@ export class ContentGraphClient extends GraphQLClient implements IOptiGraphClien
                 this.requestConfig.cache = 'no-store'
                 this.requestConfig.fetch = fetch
                 break
+            case AuthMode.User:
+                if (!isValidFrontendUser(this._user))
+                    throw new Error('❌ [Optimizely Graph] Invalid frontend user configuration')
+                this.setHeaders({
+                    ...headers,
+                    'cg-username': this._user.username,
+                    'cg-roles': this._user.roles,
+                    Authorization: `Basic ${ base64encode(this._config.app_key + ":" + this._config.secret) }`
+                })
+                this.requestConfig.cache = 'no-store'
+                this.requestConfig.fetch = fetch
+                break;
             case AuthMode.Token: 
                 this.setHeaders({
                     ...headers,
@@ -233,13 +263,15 @@ export class ContentGraphClient extends GraphQLClient implements IOptiGraphClien
 
         // Update endpoint
         const serviceUrl = new URL("/content/v2", this._config.gateway)
+        if (typeof(this._config.tenant_id) == 'string' && this._config.tenant_id.length > 0)
+            serviceUrl.pathname = serviceUrl.pathname + '/tenant_id=' + this._config.tenant_id
         serviceUrl.searchParams.set('stored', this._flags.queryCache ? 'true' : 'false')
         serviceUrl.searchParams.set('cache', this._flags.cache ? 'true' : 'false')
         serviceUrl.searchParams.set('omit_empty', this._flags.omitEmpty ? 'true' : 'false')
         if (this.debug)
             console.log(`🔗 [Optimizely Graph] Setting service endpoint to: ${ serviceUrl.href }`)
         this.setEndpoint(serviceUrl.href)
-    } 
+    }
 }
 
 export const createClient: (config?: OptimizelyGraphConfig, token?: string | undefined) => IOptiGraphClient = (config, token = undefined) => new ContentGraphClient(config, token)

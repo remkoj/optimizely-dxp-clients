@@ -8,6 +8,22 @@ export type QueryParams = {
     variables: Parameters<RequestMethod>[0]['variables']
 }
 
+/**
+ * Frontend authentication data
+ */
+export type FrontendUser = {
+    /**
+     * The username of the authenticated frontend user
+     */
+    username: string
+
+    /**
+     * The role(s) of the authenticated frontend user, as a comma separated
+     * list, no whitespaces around the values
+     */
+    roles: string
+}
+
 export enum OptiCmsSchema {
     CMS12 = "OPTI-CMS-12",
     CMS13 = "OPTI-CMS-13"
@@ -17,7 +33,8 @@ export enum AuthMode {
     Public = "epi-single",
     Basic = "use-basic",
     HMAC = "use-hmac",
-    Token = "use-token"
+    Token = "use-token",
+    User = "use-user"
 }
 
 export type OptiGraphSiteInfo = { 
@@ -79,12 +96,20 @@ export interface IOptiGraphClient extends ClientInstanceType
      * query format must be used.
      */
     readonly currentOptiCmsSchema : OptiCmsSchema
+
+    /**
+     * Retrieve the currently used frontend user information - if any
+     */
+    readonly frontendUser : FrontendUser | undefined
     
     /**
      * Update the authentication data for this client. 
-     * - Set to AuthMode.HMAC or AuthMode.Basic to use that authentication scheme, this requires the AppKey and Secret to be part of the configuration
+     * - Set to AuthMode.HMAC or AuthMode.Basic to use that authentication 
+     *   scheme, this requires the AppKey and Secret to be part of the 
+     *   configuration
      * - Set to the actual token to be used to switch to AuthMode.Token
-     * - Set to undefined or AuthMode.Public to switch to public, read-only mode. (i.e. using the SingleKey)
+     * - Set to undefined or AuthMode.Public to switch to public, read-only 
+     *   mode. (i.e. using the SingleKey)
      * 
      * @param       tokenOrAuthmode     The authentication mode/token to be used
      * @returns     The client itself
@@ -101,18 +126,34 @@ export interface IOptiGraphClient extends ClientInstanceType
     /**
      * Set the client controllable service configuration
      * 
-     * @param   newFlags      The configuration values to override
-     * @param   temporary     Set to true to store the old configuration, please note that you cannot invoke this method again untill the configuration has been restored first
+     * @param   newFlags        The configuration values to override.
+     * @param   temporary       Set to true to store the old configuration, 
+     *                          please note that you cannot invoke this method
+     *                          again untill the configuration has been 
+     *                          restored first.
      * @returns Itself, so you chain it in a request
      */
     updateFlags(newFlags: Partial<IOptiGraphClientFlags>, temporary?: boolean) : IOptiGraphClient
 
     /**
-     * Restore client controllable service configuration, after it has been saved by a temporary update. If there's nothing to restore this method will do nothing
+     * Restore client controllable service configuration, after it has been 
+     * saved by a temporary update. If there's nothing to restore this method 
+     * will do nothing
      * 
      * @returns Itself, so you chain it in a request
      */
     restoreFlags() : IOptiGraphClient
+
+    /**
+     * Apply the frontend user configuration that must be used for this client
+     * 
+     * @param       newUser     The Frontend User to apply to the requests of
+     *                          this client instance. Provide the value `null`
+     *                          to remove the current user information.
+     * @returns     Whether or not the FrontendUser was applied correctly to 
+     *              the client configuration
+     */
+    setFrontendUser(newUser: FrontendUser | null) : boolean
 }
 
 // Factory service
