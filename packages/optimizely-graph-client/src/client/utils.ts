@@ -1,7 +1,24 @@
-import { AuthMode, type IOptiGraphClient } from "./types.js"
+import { AuthMode, type IOptiGraphClient, type FrontendUser } from "./types.js"
 import { type GraphQLClient } from "graphql-request"
 
 const TOKEN_MIN_LENGTH = 16
+
+/**
+ * Test if the provided value is a valid FrontendUser object
+ * 
+ * @param       toTest      The value to test
+ * @returns     `true` If toTest is a FrontendUser, `false` otherwise
+ */
+export function isValidFrontendUser(toTest ?: any) : toTest is FrontendUser
+{
+    // FrontendUser is an object with exactly two properties
+    if (typeof(toTest) != 'object' || toTest == null || Object.getOwnPropertyNames(toTest).length != 2)
+        return false
+
+    // FrontendUser has string property `username` and `roles`, each being non-empty
+    return typeof(toTest?.username) == 'string' && toTest.username.length > 0 && 
+            typeof(toTest?.roles) == 'string' && toTest.roles.length > 0
+}
 
 export function validateToken(newToken ?: string) : boolean
 {
