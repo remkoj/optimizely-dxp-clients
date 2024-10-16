@@ -51,7 +51,14 @@ export const TypesPushCommand : TypesPushModule = {
         // Output selected types
         const results : Array<{ key: string, type: IntegrationApi.ContentType, file: string, error?: any }> = await Promise.all(typeDefinitions.map(type => {
             process.stdout.write(chalk.yellowBright(`  ${ figures.arrowRight } Pushing ${ type.definition.displayName } from ${ type.file }\n`))
-            return client.contentTypes.contentTypesPut(type.definition.key, type.definition, force)
+            const outType = { ...type.definition }
+            if (outType.source || outType.source == "") delete outType.source
+            if (outType.created || outType.created == "") delete outType.created
+            if (outType.lastModified || outType.lastModified == "") delete outType.lastModified
+            if (outType.lastModifiedBy || outType.lastModifiedBy == "") delete outType.lastModifiedBy
+            if (outType.features) delete outType.features
+            if (outType.usage) delete outType.usage
+            return client.contentTypes.contentTypesPut(outType.key, outType, force)
                 .then(ct => { return { key: type.definition.key, type: ct, file: type.file }})
                 .catch(e => { return { key: type.definition.key, type: type.definition, file: type.file, error: e }})
         }))

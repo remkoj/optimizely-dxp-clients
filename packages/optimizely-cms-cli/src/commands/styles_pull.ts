@@ -34,6 +34,7 @@ export const StylesPullCommand : StylesPullModule = {
         const { styles: filteredResults } = await getStyles(client, args)
 
         //#region Create & Write opti-style.json files
+        process.stdout.write(chalk.gray(`${ figures.arrowRight } Start creating .opti-style.json files\n`))
         const typeFiles : Record<string, { templates: Array<{ file: string, data: IntegrationApi.DisplayTemplate }>, filePath: string }> = {}
         const updatedTemplates = (await Promise.all(filteredResults.map(async displayTemplate => {
             let itemPath : string | undefined = undefined
@@ -59,18 +60,23 @@ export const StylesPullCommand : StylesPullModule = {
 
             // Write Style JSON
             const filePath = path.join(itemPath,`${ displayTemplate.key }.opti-style.json`)
+            const outputTemplate = { ...displayTemplate }
+            if (outputTemplate.createdBy) delete outputTemplate.createdBy
+            if (outputTemplate.lastModifiedBy) delete outputTemplate.lastModifiedBy
             if (fs.existsSync(filePath)) {
                 if (!force) {
                     if (cfg.debug)
                         process.stdout.write(chalk.gray(`${ figures.cross } Skipping style file for ${ displayTemplate.key } - File already exists\n`))
-                    return
+                } else {
+                    if (cfg.debug) {
+                        process.stdout.write(chalk.gray(`${ figures.arrowRight } Overwriting style file for ${ displayTemplate.key }\n`))
+                    }
+                    fs.writeFileSync(filePath, JSON.stringify(outputTemplate, undefined, 2))
                 }
-                if (cfg.debug)
-                    process.stdout.write(chalk.gray(`${ figures.arrowRight } Overwriting style file for ${ displayTemplate.key }\n`))
-            } else if (cfg.debug)
+            } else if (cfg.debug) {
                 process.stdout.write(chalk.gray(`${ figures.arrowRight } Creating style file for ${ displayTemplate.key }\n`))
-            
-            fs.writeFileSync(filePath, JSON.stringify(displayTemplate, undefined, 2))
+                fs.writeFileSync(filePath, JSON.stringify(outputTemplate, undefined, 2))
+            }
 
             if (!typeFiles[targetType]) {
                 typeFiles[targetType] = {
@@ -86,6 +92,7 @@ export const StylesPullCommand : StylesPullModule = {
         
         //#region Create needed definition files
         if (definitions) {
+            process.stdout.write(chalk.gray(`${ figures.arrowRight } Start creating displayTemplates.ts files\n`))
             for (const targetId of Object.getOwnPropertyNames(typeFiles)) {
                 const { filePath: typeFilePath, templates } = typeFiles[targetId]
 
@@ -96,9 +103,9 @@ export const StylesPullCommand : StylesPullModule = {
                         continue
                     }
                     if (cfg.debug)
-                        process.stdout.write(chalk.gray(`${ figures.arrowRight } Overwriting definition file for ${ targetId }\n`))
+                        process.stdout.write(chalk.gray(`${ figures.arrowRight } Overwriting definition file for ${ targetId } - ${ typeFilePath }\n`))
                 } else if (cfg.debug)
-                    process.stdout.write(chalk.gray(`${ figures.arrowRight } Creating definition file for ${ targetId }\n`))
+                    process.stdout.write(chalk.gray(`${ figures.arrowRight } Creating definition file for ${ targetId } - ${ typeFilePath }\n`))
                 
                 // Write Style definition
                 const imports : string[] = ['import type { LayoutProps } from "@remkoj/optimizely-cms-react/components"','import type { ReactNode } from "react"']

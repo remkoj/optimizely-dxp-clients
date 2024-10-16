@@ -208,9 +208,9 @@ function createInitialFragment(contentType : IntegrationApi.ContentType, forProp
 
     if (fragmentFields.length == 0) {
         if (forCms12)
-            fragmentFields.push('_metadata: ContentLink { key: GuidValue }')
+            fragmentFields.push('empty: _metadata: ContentLink { key: GuidValue }')
         else
-            fragmentFields.push('_metadata { key }')
+            fragmentFields.push('empty: _metadata { key }')
     }
 
     const fragmentTarget = forProperty ? (forCms12 ? (forBaseType?.key ?? '')+contentType.key : contentType.key + 'Property') : contentType.key
