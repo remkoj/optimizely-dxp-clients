@@ -94,8 +94,10 @@ export class ContentGraphClient extends GraphQLClient implements IOptiGraphClien
             method: "post",
             requestMiddleware: request => {
                 if (QUERY_LOG) {
-                    console.log(`🔎 [Optimizely Graph] [Request Query] ${ request.body }`)
-                    console.log(`🔖 [Optimizely Graph] [Request Variables] ${ JSON.stringify(request.variables) }`)
+                    console.log(`🔎 [Optimizely Graph] [Request URL] ${ request.url }\n
+🔎 [Optimizely Graph] [Request Headers] ${ JSON.stringify(request.headers) }\n
+🔎 [Optimizely Graph] [Request Query] ${ request.body }\n
+🔖 [Optimizely Graph] [Request Variables] ${ JSON.stringify(request.variables) }`)
                 }
                 return request
             },
@@ -232,11 +234,10 @@ export class ContentGraphClient extends GraphQLClient implements IOptiGraphClien
                 this.setHeaders({
                     ...headers,
                     'cg-username': this._user.username,
-                    'cg-roles': this._user.roles,
-                    Authorization: `Basic ${ base64encode(this._config.app_key + ":" + this._config.secret) }`
+                    'cg-roles': this._user.roles
                 })
                 this.requestConfig.cache = 'no-store'
-                this.requestConfig.fetch = fetch
+                this.requestConfig.fetch = this.hmacFetch
                 break;
             case AuthMode.Token: 
                 this.setHeaders({
@@ -261,13 +262,14 @@ export class ContentGraphClient extends GraphQLClient implements IOptiGraphClien
             this.requestConfig.cache = 'no-store'
         }
 
-        // Update endpoint
+        // Build endpoint
         const serviceUrl = new URL("/content/v2", this._config.gateway)
         if (typeof(this._config.tenant_id) == 'string' && this._config.tenant_id.length > 0)
             serviceUrl.pathname = serviceUrl.pathname + '/tenant_id=' + this._config.tenant_id
         serviceUrl.searchParams.set('stored', this._flags.queryCache ? 'true' : 'false')
         serviceUrl.searchParams.set('cache', this._flags.cache ? 'true' : 'false')
         serviceUrl.searchParams.set('omit_empty', this._flags.omitEmpty ? 'true' : 'false')
+        serviceUrl.searchParams.set('authMode', this.currentAuthMode)
         if (this.debug)
             console.log(`🔗 [Optimizely Graph] Setting service endpoint to: ${ serviceUrl.href }`)
         this.setEndpoint(serviceUrl.href)
