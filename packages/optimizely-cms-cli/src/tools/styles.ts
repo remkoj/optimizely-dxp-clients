@@ -77,9 +77,19 @@ export async function getStyles(client: CmsApiClient, args: ArgumentsCamelCase<O
                 process.stdout.write(chalk.gray(`${ figures.arrowRight } Skipping Style-Defintion ${ data.key } - Style is defined at component type level and component type filtering is active\n`))
             return false
         }
+        if (templateType != 'component' && types.length > 0) {
+            if (cfg.debug)
+                process.stdout.write(chalk.gray(`${ figures.arrowRight } Skipping Style-Defintion ${ data.key } - Style is targeting the ${ templateType } level and component type selection is active\n`))
+            return false
+        }
         if (data.nodeType && isExcluded(data.nodeType, excludeNodeTypes, nodes)) {
             if (cfg.debug)
                 process.stdout.write(chalk.gray(`${ figures.arrowRight } Skipping Style-Defintion ${ data.key } - Style is defined at node type level and node type filtering is active\n`))
+            return false
+        }
+        if (templateType != 'node' && nodes.length > 0) {
+            if (cfg.debug)
+                process.stdout.write(chalk.gray(`${ figures.arrowRight } Skipping Style-Defintion ${ data.key } - Style is targeting the ${ templateType } level and node type selection is active\n`))
             return false
         }
         return true

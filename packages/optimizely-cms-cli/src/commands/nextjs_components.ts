@@ -128,7 +128,7 @@ ${ varName }.getDataFragment = () => ['${ contentType.key }Data', ${ contentType
 export default ${ varName }`,
 
     // Template for all page component types
-    page: (contentType, varName, displayTemplate) => `import { OptimizelyNextPage as CmsComponent } from "@remkoj/optimizely-cms-nextjs";
+    page: (contentType, varName, displayTemplate) => `import { type OptimizelyNextPage as CmsComponent } from "@remkoj/optimizely-cms-nextjs";
 import { ${ contentType.key }DataFragmentDoc, type ${ contentType.key }DataFragment } from "@/gql/graphql";${ displayTemplate ? `
 import { ${ displayTemplate } } from "./displayTemplates";` : ''}
 import { getSdk } from "@/gql"
@@ -158,9 +158,9 @@ ${ varName }.getMetaData = async (contentLink, locale, client) => {
 export default ${ varName }`,
 
     // Template for all experience component types
-    experience: (contentType, varName, displayTemplate) =>`import { OptimizelyNextPage as CmsComponent } from "@remkoj/optimizely-cms-nextjs";
-import { ${ contentType.key }DataFragmentDoc, type ${ contentType.key }DataFragment } from "@/gql/graphql";
-import { type Maybe, type ICompositionNode, type ExperienceDataFragment } from "@/gql/graphql";
+    experience: (contentType, varName, displayTemplate) =>`import { type OptimizelyNextPage as CmsComponent } from "@remkoj/optimizely-cms-nextjs";
+import { getFragmentData } from "@/gql/fragment-masking";
+import { ExperienceDataFragmentDoc, CompositionDataFragmentDoc, ${ contentType.key }DataFragmentDoc, type ${ contentType.key }DataFragment } from "@/gql/graphql";
 import { OptimizelyComposition, isNode, CmsEditable } from "@remkoj/optimizely-cms-react/rsc";${ displayTemplate ? `
 import { ${ displayTemplate } } from "./displayTemplates";` : ''}
 import { getSdk } from "@/gql"
@@ -170,7 +170,7 @@ import { getSdk } from "@/gql"
  * ${ contentType.description }
  */
 export const ${ varName } : CmsComponent<${ contentType.key }DataFragment${ displayTemplate ? ', ' + displayTemplate : '' }> = ({ data${ displayTemplate ? ', layoutProps' : '' } }) => {
-    const composition = (data as ExperienceDataFragment).composition as Maybe<ICompositionNode>
+    const composition = getFragmentData(CompositionDataFragmentDoc, getFragmentData(ExperienceDataFragmentDoc, data)?.composition)
     return <CmsEditable as="div" className="mx-auto px-2 container" cmsFieldName="unstructuredData">
         { composition && isNode(composition) && <OptimizelyComposition node={composition} /> }
     </CmsEditable>

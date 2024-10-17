@@ -38,9 +38,15 @@ export const TypesPullCommand : TypesPullModule = {
                 return contentType.key
             }
 
+            const outContentType = { ...contentType }
+            if (outContentType.source || outContentType.source == "") delete outContentType.source
+            if (outContentType.features) delete outContentType.features
+            if (outContentType.usage) delete outContentType.usage
+            if (outContentType.lastModifiedBy) delete outContentType.lastModifiedBy
+
             if (debug)
                 process.stdout.write(chalk.gray(`${ figures.arrowRight } Writing type definition for ${ contentType.displayName } (${ contentType.key })\n`))
-            fs.writeFileSync(typeFile, JSON.stringify(contentType, undefined, 2))
+            fs.writeFileSync(typeFile, JSON.stringify(outContentType, undefined, 2))
             return contentType.key
         }).filter(x => x)
 
