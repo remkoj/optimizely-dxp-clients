@@ -158,7 +158,7 @@ function createInitialFragment(contentType : IntegrationApi.ContentType, forProp
                 const propDetails = typeProps[propKey] as IntegrationApi.StringProperty
                 switch (propDetails.format ?? "") {
                     case 'html':
-                        fragmentFields.push(forCms12 ? propName : `${ propName } { json, html }`)
+                        fragmentFields.push(forCms12 ? `${ propName } { Structure, Html }` : `${ propName } { json, html }`)
                         break
                     case 'shortString':
                     case 'selectOne':
