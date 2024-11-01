@@ -70,7 +70,7 @@ export function getContentRequest({ params: { path, lang }, searchParams: { prev
                 key: searchParams.key,
                 locale: searchParams.loc,
                 version: searchParams.ver,
-                path: null
+                path: searchParams.path ?? null
             }
         }
 

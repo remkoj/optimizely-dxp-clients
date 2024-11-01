@@ -73,8 +73,9 @@ export const StylesPullCommand : StylesPullModule = {
                     }
                     fs.writeFileSync(filePath, JSON.stringify(outputTemplate, undefined, 2))
                 }
-            } else if (cfg.debug) {
-                process.stdout.write(chalk.gray(`${ figures.arrowRight } Creating style file for ${ displayTemplate.key }\n`))
+            } else {
+                if (cfg.debug)
+                    process.stdout.write(chalk.gray(`${ figures.arrowRight } Creating style file for ${ displayTemplate.key } in ${ filePath }\n`))
                 fs.writeFileSync(filePath, JSON.stringify(outputTemplate, undefined, 2))
             }
 
@@ -108,7 +109,10 @@ export const StylesPullCommand : StylesPullModule = {
                     process.stdout.write(chalk.gray(`${ figures.arrowRight } Creating definition file for ${ targetId } - ${ typeFilePath }\n`))
                 
                 // Write Style definition
-                const imports : string[] = ['import type { LayoutProps } from "@remkoj/optimizely-cms-react/components"','import type { ReactNode } from "react"']
+                const imports : string[] = [
+                    'import type { LayoutProps } from "@remkoj/optimizely-cms-react"',
+                    'import type { ReactNode } from "react"'
+                ]
                 const typeContents : string[] = []
                 const props : string[] = []
                 let typeId : string | undefined = targetId.split('/',2)[1]

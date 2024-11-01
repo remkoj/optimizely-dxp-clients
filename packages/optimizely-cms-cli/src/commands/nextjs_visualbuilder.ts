@@ -60,8 +60,7 @@ function createSpecificNode(template: IntegrationApi.DisplayTemplate, templatePa
 
     const displayTemplateName = getDisplayTemplateInfo(template, templatePath)
 
-    const component = `import { type CmsLayoutComponent } from "@remkoj/optimizely-cms-react";
-import { extractSettings } from "@remkoj/optimizely-cms-react/components";${ displayTemplateName ? `
+    const component = `import { extractSettings, type CmsLayoutComponent } from "@remkoj/optimizely-cms-react/rsc";${ displayTemplateName ? `
 import { ${ displayTemplateName } } from "../displayTemplates";` : ''}
 
 export const ${ template.key } : CmsLayoutComponent<${ displayTemplateName ?? '{}' }> = ({ contentLink, layoutProps, children }) => {
@@ -88,8 +87,7 @@ function createGenericNode(basePath: string, force: boolean, debug: boolean)
     } else if(debug)
         process.stdout.write(chalk.gray(`${ figures.arrowRight } Creating generic node component\n`))
 
-    const nodeContent = `import { type CmsLayoutComponent } from "@remkoj/optimizely-cms-react"
-import { CmsEditable } from '@remkoj/optimizely-cms-react/rsc'
+    const nodeContent = `import { CmsEditable, type CmsLayoutComponent } from '@remkoj/optimizely-cms-react/rsc'
 
 export const VisualBuilderNode : CmsLayoutComponent = ({ contentLink, layoutProps, children }) =>
 {

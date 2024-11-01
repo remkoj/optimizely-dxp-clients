@@ -1,5 +1,13 @@
 # Javascript SDKs for Optimizely Products
-This repository contains the SDKs created by [Remko Jantzen](https://github.com/remkoj) to use Optimizely products within Javascript. Though a few of these SDKs are generic, the focus is on Next.JS as framework.
+
+[![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](./LICENSE)
+
+> [!WARNING] V3.* Breaking changes
+> V3.* introduces a number of breaking changes in [`@remkoj/optimizely-cms-react`](./packages/optimizely-cms-react/README.md) that will make future implementations easier. Review the documentation prior to upgrading.
+
+This repository contains the SDKs created by [Remko Jantzen](https://github.com/remkoj) and maintained in collaboration [with the community](https://github.com/remkoj/optimizely-dxp-clients/graphs/contributors) to use Optimizely products within Javascript. Though a few of these SDKs are generic, the focus is on Next.JS as framework.
+
+If you find a bug, or have a feature request, please [report it as an issue](https://github.com/remkoj/optimizely-dxp-clients/issues) or contribute your fix/enhancement as a [Pull request](https://github.com/remkoj/optimizely-dxp-clients/pulls).
 
 ## Packages
 | Package | Purpose |

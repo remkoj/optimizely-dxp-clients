@@ -276,6 +276,4 @@ export class ContentGraphClient extends GraphQLClient implements IOptiGraphClien
     }
 }
 
-export const createClient: (config?: OptimizelyGraphConfig, token?: string | undefined) => IOptiGraphClient = (config, token = undefined) => new ContentGraphClient(config, token)
-
 export default ContentGraphClient

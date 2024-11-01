@@ -1,6 +1,8 @@
 import { type ComponentType, type PropsWithChildren } from "react"
-import { type ContentType } from "../../../types.js"
 import { type InlineContentLinkWithLocale, type ContentLinkWithLocale } from "@remkoj/optimizely-graph-client"
+import { type ContentType } from "../../types.js"
+import { type PropsWithContext } from "../../context/types.js"
+import { type PropsWithCmsContent } from "../cms-content/types.js"
 
 export enum StructureNodeTypes {
     Experience = "experience",
@@ -46,3 +48,9 @@ export type OptimizelyCompositionProps = JSX.IntrinsicAttributes & {
      */
     nodePropsFactory?: NodePropsFactory
 }
+
+export type BaseOptimizelyCompositionProps = PropsWithCmsContent<PropsWithContext<OptimizelyCompositionProps>>
+
+export type OptimizelyCompositionComponent = ComponentType<OptimizelyCompositionProps>
+
+export type OptimizelyCompositionBaseComponent = ComponentType<BaseOptimizelyCompositionProps>

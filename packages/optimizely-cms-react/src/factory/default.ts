@@ -1,4 +1,5 @@
 import type { ComponentFactory, ComponentType, ComponentTypeHandle, ComponentTypeDictionary } from './types.js'
+
 const MERGE_SYMBOL = '/'
 
 export const EmptyComponentHandle =  '$$fragment$$'
@@ -77,34 +78,3 @@ function processComponentTypeHandle(handle: ComponentTypeHandle) : string
             .join(MERGE_SYMBOL)                                 // Types are processed as a string
     throw new Error(`Invalid component type handle: ${ typeof(handle) }`)
 }
-
-const _static : { factory ?: ComponentFactory } = {}
-
-/**
- * Retrieve the currently staticly cached ComponentFactory instance, if there's no
- * currently staticly cached ComponentFactory, the default ComponentFactory will be
- * returned
- * 
- * @returns The ComponentFactory
- */
-export const getFactory : () => ComponentFactory = () => {
-    const DBG = process.env.OPTIMIZELY_DEBUG == '1'
-    if (!_static.factory) {
-        if (DBG) console.log("⚪ [ComponentFactory] Creating new Component Factory")
-        _static.factory = new DefaultComponentFactory()
-    } else {
-        if (DBG) console.log("⚪ [ComponentFactory] Reusing existing Component Factory")
-    }
-    return _static.factory
-}
-/**
- * Update the staticly cached Component Factory, which will be returned by all future 
- * "getFactory" calls
- * 
- * @param   newFactory    The ComponentFactory to set as staticly cached instance
- * @returns void
- */
-export const setFactory : (newFactory: ComponentFactory) => void = (newFactory: ComponentFactory) => {
-    _static.factory = newFactory
-}
-export default getFactory()

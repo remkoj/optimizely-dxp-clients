@@ -1,3 +1,4 @@
+import { OptimizelyGraphConfig } from "../types.js"
 import { AuthMode, type IOptiGraphClient, type FrontendUser } from "./types.js"
 import { type GraphQLClient } from "graphql-request"
 
@@ -78,4 +79,18 @@ export function isOptiGraphClient(client: GraphQLClient | Record<string,string|n
         return false
     return typeof(client as IOptiGraphClient).updateAuthentication == 'function' 
         && typeof(client as IOptiGraphClient).request == 'function'
+}
+
+/**
+ * Test if the provided Object can be understood to be an instance of the 
+ * Optimizely Graph configuration
+ * 
+ * @param       client      The value to test
+ * @returns     `true` when the value can be understood as a config object, `false` otherwise
+ */
+export function isOptiGraphConfig(client: any): client is OptimizelyGraphConfig
+{
+    if (typeof(client) != 'object' || client == null)
+        return false
+    return typeof(client as OptimizelyGraphConfig).single_key == 'string' && (client as OptimizelyGraphConfig).single_key.length > 0
 }

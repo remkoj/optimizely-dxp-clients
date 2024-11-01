@@ -1,7 +1,7 @@
 import { type ComponentType, type PropsWithChildren } from 'react'
 import { type ClientFactory } from '@remkoj/optimizely-graph-client'
 import { type GraphQLClient } from 'graphql-request'
-import { type ContentQueryProps } from '@remkoj/optimizely-cms-react'
+import { type ContentQueryProps } from '@remkoj/optimizely-cms-react/rsc'
 
 export type ContentRequest = (Omit<ContentQueryProps<string>, 'path'> & { path: string | null, token: string, ctx: 'edit' | 'preview' })
 
@@ -19,6 +19,7 @@ export type EditPageProps = {
         ver?: string
         loc?: string
         ctx?: 'edit' | 'preview'
+        path?: string
         epieditmode?: string
     }
 }
@@ -35,12 +36,14 @@ export type ValidatedEditPageProps = {
         ver: string
         loc: string
         ctx: 'edit' | 'preview'
-        epieditmode: undefined
+        path?: string
+        epieditmode: never
     } | {
-        key: undefined
-        ver: undefined
-        loc: undefined
-        ctx: undefined
+        key: never
+        ver: never
+        loc: never
+        ctx: never
+        path: never
         epieditmode: 'true' | 'false'
     })
 }

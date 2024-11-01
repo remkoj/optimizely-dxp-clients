@@ -9,7 +9,7 @@ import type { ContentLink, ContentLinkWithLocale, InlineContentLink, InlineConte
  */
 export function localeToGraphLocale<T>(locale: T) : T extends string ? string : never
 {
-    if (typeof(locale) != 'string' || (locale.length != 2 && locale.length != 5))
+    if (typeof(locale) != 'string' || (locale.length != 2 && locale.length != 5 && locale != 'ALL' && locale != 'NEUTRAL'))
         throw new Error(`The value ${ locale } is not a supported ISO locale`)
     return locale.replaceAll('-','_') as T extends string ? string : never
 }
@@ -22,7 +22,7 @@ export function localeToGraphLocale<T>(locale: T) : T extends string ? string : 
  */
 export function graphLocaleToLocale<T>(graphLocale: T) : T extends string ? string : never
 {
-    if (typeof(graphLocale) != 'string' || (graphLocale.length != 2 && graphLocale.length != 5))
+    if (typeof(graphLocale) != 'string' || (graphLocale.length != 2 && graphLocale.length != 5 && graphLocale != 'ALL' && graphLocale != 'NEUTRAL'))
         throw new Error(`The value ${ graphLocale } is not a supported ISO locale`)
     return graphLocale.replaceAll('_', '-') as T extends string ? string : never
 }
