@@ -1,85 +1,8 @@
-import type { SuspenseProps, PropsWithChildren } from "react"
-import type { ComponentFactory, ContentType } from "../../types.js"
+import type { ReactNode, SuspenseProps } from "react"
+import type { PropsWithContext } from "../../context/types.js"
+import type { PropsWithCmsContent } from "../cms-content/types.js"
+import type { ContentType } from "../../types.js"
 import type { ElementChildrenProps, ElementProps, ElementType, PropTypeIfPropExists, MayBeArray, TypeIfPropExists } from '../type-utils.js'
-import type { IOptiGraphClient, ContentLinkWithLocale, InlineContentLinkWithLocale } from "@remkoj/optimizely-graph-client"
-
-export type CmsContentProps<LocalesType = string> = PropsWithChildren<{
-    /**
-     * The content type to render
-     */
-    contentType?: string[]
-
-    /**
-     * The content link to render
-     */
-    contentLink: ContentLinkWithLocale<LocalesType> | InlineContentLinkWithLocale<LocalesType>
-
-    /**
-     * The initial, pre-loaded data. If set this will be used instead of having the
-     * component fetching its' own data. So be sure that this leverages the fragment
-     * specified by the component.
-     * 
-     * It will filter out the fiels from the IContentData fragment, to determine if
-     * data has been provided.
-     */
-    fragmentData?: {
-        [fieldname: string]: any
-    }
-
-    /**
-     * The native key to use when the element is part of an array
-     */
-    key?: string
-
-    /**
-     * If enabled, it will flag all rendering to be inclusive of the Optimizely Edit mode
-     * attributes for On Page Editing
-     * 
-     * @deprecated  Will be retrieved from the ServerContext
-     */
-    inEditMode?: boolean
-
-    /**
-     * The Optimizely Graph client to use, it will use a new instance if none is provided,
-     * the new instance will always use the SingleKey i.e. thus not load edit mode content
-     * 
-     * @deprecated  Will be retrieved from the ServerContext
-     */
-    client?: IOptiGraphClient
-
-    /**
-     * The component factory to use, it will use the default instance if not provided
-     * 
-     * @deprecated  Will be retrieved from the ServerContext
-     */
-    factory?: ComponentFactory
-
-    /**
-     * If enabled any warnings intended for an editor will be shown, even if "inEditMode"
-     * is false.
-     * 
-     * @deprecated  Will be retrieved from the ServerContext
-     */
-    outputEditorWarning?: boolean
-
-    /**
-     * The prefix to apply to the content type, to allow loading of different templates based
-     * upon location of usage. If set and the content type already starts with this prefix,
-     * it will not be applied.
-     */
-    contentTypePrefix?: string
-
-    /**
-     * Any layout properties inferred from the context
-     */
-    layoutProps?: Record<string, any>
-
-    /**
-     * When set to true, this will prevent the CmsContent component to try loading content from
-     * the store
-     */
-    noDataLoad?: boolean
-}>
 
 export type ContentAreaItemDefinition = {
     __typename?:  string | null
@@ -97,6 +20,7 @@ export type ContentAreaItemDefinition = {
         } | null
     } | null
 } & Record<string, any>
+
 export type ValidContentAreaItemDefinition = {
     __typename?:  string | null
     _type?: string | null
@@ -168,30 +92,6 @@ export type CmsContentAreaProps<T extends ElementType, CT extends ElementType> =
          */
         itemsProperty: ElementChildrenProps<CT>
     }) & Omit<Omit<ElementProps<CT>, "className" | "data-epi-block-id" | "data-displayoption" | "data-tag">, ElementChildrenProps<CT>>)
-    /**
-     * Ignored if provided
-     * 
-     * @deprecated  The ServerContext is used to access the current locale
-     */
-    locale?: string
-    /**
-     * Ignored if provided
-     * 
-     * @deprecated  The ServerContext is used to access the current edit mode status
-     */
-    inEditMode?: boolean
-    /**
-     * Ignored if provided
-     * 
-     * @deprecated  The ServerContext is used to access the current Optimizely Graph Client
-     */
-    client?: IOptiGraphClient
-    /**
-     * Ignored if provided
-     * 
-     * @deprecated  The ServerContext is used to access the current Component Factory
-     */
-    factory?: ComponentFactory
 } & Omit<Omit<ElementProps<T>, "className" | "data-epi-edit">, ElementChildrenProps<T>> & ("children" extends ElementChildrenProps<T> ? {
     /**
      * The property of the component set for the "as" property of the Content Area which
@@ -209,3 +109,8 @@ export type CmsContentAreaProps<T extends ElementType, CT extends ElementType> =
 })
 
 export type CmsContentAreaClassMapper = (displayOption: string, contentType: ContentType | null, index: number) => string
+
+export type BaseCmsContentAreaProps<T extends ElementType, CT extends ElementType> = PropsWithCmsContent<PropsWithContext<CmsContentAreaProps<T,CT>>>
+
+export type CmsContentAreaBaseComponent = <T extends ElementType, CT extends ElementType>(props: BaseCmsContentAreaProps<T,CT>) => ReactNode
+export type CmsContentAreaComponent = <T extends ElementType, CT extends ElementType>(props: CmsContentAreaProps<T,CT>) => ReactNode

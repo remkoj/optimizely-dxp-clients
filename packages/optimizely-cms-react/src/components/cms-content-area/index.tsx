@@ -1,16 +1,11 @@
-import 'server-only'
-import React from 'react'
-import CmsContent from './cms-content.js'
 import type { ElementType } from '../type-utils.js'
 import * as Utils from '../../utilities.js'
 import * as Errors from '../../errors.js'
-import createClient from '@remkoj/optimizely-graph-client'
 import { normalizeContentLinkWithLocale, contentLinkToString } from '@remkoj/optimizely-graph-client/utils'
-import getServerContext from '../context.js'
-import type { CmsContentAreaProps, ContentAreaItemDefinition, ValidContentAreaItemDefinition } from './types.js'
+import type { BaseCmsContentAreaProps, ContentAreaItemDefinition, ValidContentAreaItemDefinition } from './types.js'
 
 //#region Export Type definitions
-export type { CmsContentAreaClassMapper, CmsContentAreaProps, ContentAreaItemDefinition } from './types.js'
+export type { CmsContentAreaClassMapper, CmsContentAreaProps, ContentAreaItemDefinition, CmsContentAreaComponent } from './types.js'
 //#endregion
 
 /**
@@ -19,29 +14,25 @@ export type { CmsContentAreaClassMapper, CmsContentAreaProps, ContentAreaItemDef
  * @param       param0      The content area information for rendering
  * @returns 
  */
-export const CmsContentArea = async <T extends ElementType = "div", I extends ElementType = "div">({ items, classMapper, className, fieldName, as: elementType, itemsProperty, itemWrapper, locale: _locale, client: _client, factory: _factory, inEditMode:_inEditMode, ...additionalProps }: CmsContentAreaProps<T,I>) : Promise<JSX.Element> =>
-{
-    const context = getServerContext()
-    if (context.isDebugOrDevelopment && !context.client)
-        console.warn(`🟠 [CmsContentArea] No Content Graph client provided for ${ fieldName ?? 'CmsContentArea' }, this will cause problems with edit mode!`)
-
-    // Parse & prepare props
-    const { inEditMode, factory, locale: ctxLocale } = context
-    const gqlClient = context.client ?? createClient()
+export const CmsContentArea = <T extends ElementType = "div", I extends ElementType = "div">({ 
+    items, 
+    classMapper, 
+    className, 
+    fieldName, 
+    as: elementType, 
+    itemsProperty, 
+    itemWrapper, 
     
-    // Determine locale
-    const locale = _locale ?? ctxLocale
-    if (context.isDebug && locale == _locale && locale != ctxLocale) {
-        console.warn(`🟠 [CmsContentArea] The Context Locale for ContentArea ${ fieldName ?? 'CmsContentArea' }, was overridden. Context Locale ${ ctxLocale }, current locale ${ locale }`)
-    }
-    if (!locale) {
-        console.error(`🔴 [CmsContentArea] No locale set on the ServerContext, which is required to make the ContentArea${ fieldName ? ' '+fieldName: ''} render its content`)
-        return <></>
-    }
+    ctx,
+    cmsContent: CmsContent,
+
+    ...additionalProps
+}: BaseCmsContentAreaProps<T,I>) : JSX.Element => {
+    const { inEditMode = false } = ctx
 
     // Convert the items to a list of enriched content types and filter out items cannot be loaded
     const actualItems = (items || []).filter(forValidContentAreaItems)
-    const componentData = await Promise.all(actualItems.map(async (item, idx) : Promise<React.JSX.Element> => {
+    const componentData = actualItems.map((item, idx) => {
         // Prepare data from received content area format
         const contentLink = normalizeContentLinkWithLocale(item._metadata)
         if (!contentLink)
@@ -66,7 +57,7 @@ export const CmsContentArea = async <T extends ElementType = "div", I extends El
             "data-tag": item.tag || undefined,
             ...contentItemElementProps
         }
-        const contentAraeItemContent = await CmsContent({ contentLink, contentType, fragmentData, client: gqlClient, factory, outputEditorWarning: inEditMode, contentTypePrefix: "Component" })
+        const contentAraeItemContent : JSX.Element = <CmsContent contentLink={contentLink} contentType={ contentType } fragmentData={ fragmentData } contentTypePrefix="Component" />
 
         // Inject the element into the wrapper
         const childrenTarget = contentItemTarget || "children"
@@ -79,7 +70,7 @@ export const CmsContentArea = async <T extends ElementType = "div", I extends El
         const ContentAreaItemContainer = contentItemElement || "div"
 
         return <ContentAreaItemContainer key={ contentAreaItemContainerKey } {...contentAreaItemContainerProps}>{ contentAreaItemContainerChildren }</ContentAreaItemContainer>
-    }))
+    })
 
     // Build container element
     const contentAreaContainerProps : any = {
@@ -102,10 +93,16 @@ function forValidContentAreaItems(itm?: ContentAreaItemDefinition | null) : itm 
     return typeof(itm) == 'object' && itm != null && typeof (itm._metadata) == 'object' && itm._metadata != null
 }
 
-export async function processContentAreaItems( items?: (ContentAreaItemDefinition | null)[] | null, locale?: string) : Promise<JSX.Element[]>
+/**
+ * 
+ * @param items 
+ * @param locale 
+ * @returns 
+ */
+/*export function processContentAreaItems( items?: (ContentAreaItemDefinition | null)[] | null, locale?: string) : JSX.Element[]
 {
     const actualItems = (items ?? []).filter(Utils.isNotNullOrUndefined)
-    return Promise.all(actualItems.map(async (item, idx) : Promise<React.JSX.Element> => {
+    return actualItems.map((item, idx) => {
         // Prepare data from received content area format
         const contentLink = normalizeContentLinkWithLocale({ ...item.item, locale: locale })
         if (!contentLink)
@@ -115,8 +112,9 @@ export async function processContentAreaItems( items?: (ContentAreaItemDefinitio
         const guidValue = (item.item?.guidValue ?? "00000000-0000-0000-0000-000000000000")+"::"+idx
 
         // Build output
-        return await CmsContent({ contentLink, contentType, fragmentData, key: guidValue })
-    }))
-}
+        const content : JSX.Element = <CmsContent contentLink={ contentLink } contentType={ contentType } fragmentData={ fragmentData } key={ guidValue } />
+        return content
+    })
+}*/
 
 export default CmsContentArea

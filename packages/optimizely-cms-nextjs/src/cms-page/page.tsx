@@ -1,6 +1,5 @@
 import 'server-only'
 import type { Metadata, ResolvingMetadata } from 'next'
-import { cache } from 'react'
 import deepmerge from 'deepmerge'
 import { notFound } from 'next/navigation.js'
 
@@ -12,8 +11,7 @@ import { type ClientFactory, type IOptiGraphClient, OptiCmsSchema } from '@remko
 import { normalizeContentLinkWithLocale } from '@remkoj/optimizely-graph-client/utils'
 
 // React Support
-import { CmsContent, isDebug, getServerContext, type ComponentFactory } from '@remkoj/optimizely-cms-react/rsc'
-import { Utils } from '@remkoj/optimizely-cms-react'
+import { CmsContent, Utils, isDebug, getServerContext, type ComponentFactory } from '@remkoj/optimizely-cms-react/rsc'
 
 // Within package
 import { MetaDataResolver } from '../metadata.js'
@@ -162,7 +160,7 @@ export function createPage<
 
     // Create the global Router instance
     const router = routerFactory(globalClient)
-    const getInfoByPath = cache(async (requestPath: string, siteId?: string) => {
+    const getInfoByPath = async (requestPath: string, siteId?: string) => {
         const route = await router.getContentInfoByPath(requestPath, siteId)
         if (!route)
             return undefined
@@ -170,7 +168,7 @@ export function createPage<
         const contentType = route.contentType
         const graphLocale = localeToGraphLocale(route.locale, channel)
         return [route, contentLink, contentType, graphLocale] as [Route, ContentLinkWithLocale, string[], string]
-    })
+    }
 
     const pageDefintion : OptiCmsNextJsPage<TParams, TSearchParams> = {
         generateStaticParams : async () => (await router.getRoutes()).map(r => routeToParams(r)),

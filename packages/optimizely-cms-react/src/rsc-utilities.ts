@@ -16,5 +16,3 @@ export function isDevelopment() : boolean
         return false;
     }
 }
-
-export default isDebug

@@ -90,18 +90,21 @@ fs.readFile('yarn.lock', {
             if (!licenses.includes(licenseCode)) licenses.push(licenseCode)
         })
         let packageList = `# Dependency disclosure
-${ mainPkgName } has the following dependencies, which are software packages that are required to run this software. These packages are only referenced and will be resolved, downloaded and installed by your dependency manager.
+The package ${ mainPkgName } has the following dependencies, which are software packages that are required to run this software. These packages are only referenced and will be resolved, downloaded and installed by your dependency manager.
+
+This overview and list is automatically generated from the dependencies used in developing of these packages, not necessarily in running the packages.
+
+## Package listing
+| Package | Version | License | Author | Maintainers | Link |
+| --- | --- | --- | --- | --- | --- |
+${ enrichedInfo.data.map(item => `| ${ item.homepage ? `[${ item.name}](${item.homepage})` : item.name } | ${ item.version } | ${ item.license ?? '*unspecified*' } | ${ formatAuthor(item.author) } | ${ formatAuthor(item.maintainers) } | [npm](https://www.npmjs.com/package/${ item.name }) |`).join("\n") }
 
 ## License usage overview
 The dependencies make use of these licenses:
 | License | Package count |
 | --- | --- |
 ${ licenses.sort().map(l => `| ${ l } | ${ enrichedInfo.data.filter(x => (x.license ?? '*unspecified*') == l ).length } |`).join("\n")}
-
-## Package listing
-| Package | Version | License | Author | Maintainers | Link |
-| --- | --- | --- | --- | --- | --- |
-${ enrichedInfo.data.map(item => `| ${ item.homepage ? `[${ item.name}](${item.homepage})` : item.name } | ${ item.version } | ${ item.license ?? '*unspecified*' } | ${ formatAuthor(item.author) } | ${ formatAuthor(item.maintainers) } | [npm](https://www.npmjs.com/package/${ item.name }) |`).join("\n") }`
+`
         fs.writeFile('DEPENDENCIES.md', packageList, () => {
             process.stdout.write("✔ Created dependencies file\n")
         })

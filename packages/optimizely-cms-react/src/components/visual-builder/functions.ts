@@ -1,4 +1,4 @@
-import type { ContentType } from '../../../types.js'
+import { isContentType } from '../../utilities.js'
 import { isContentLink, ContentLinkWithLocale, isInlineContentLink } from '@remkoj/optimizely-graph-client'
 import type { CompositionNode, LeafPropsFactory, CompositionElementNode, NodePropsFactory, CompositionStructureNode } from './types.js'
 
@@ -19,6 +19,13 @@ export function isStructureNode(node: CompositionNode<Record<string,any>>) : nod
     return !isElementNode(node)
 }
 
+/**
+ * Test if the provided value is a Visual Builder node
+ * 
+ * @param       toTest      The value to test
+ * @returns     `true` when the value is a Visual Builder node, `false` 
+ *              otherwise
+ */
 export function isNode(toTest: any) : toTest is CompositionNode
 {
     if (typeof(toTest) != 'object' || toTest == null)
@@ -29,11 +36,6 @@ export function isNode(toTest: any) : toTest is CompositionNode
     const hasValidType = typeof (toTest as CompositionNode).layoutType == 'string' && nodeTypes.includes((toTest as CompositionNode).layoutType)
 
     return hasValidName && hasValidType
-}
-
-export function isContentType(toTest: any) : toTest is ContentType
-{
-    return Array.isArray(toTest) && toTest.every(x => typeof(x) == 'string' && x.length > 0)
 }
 
 export const defaultPropsFactory : LeafPropsFactory = <ET extends Record<string, any>, LT = string>(node: CompositionElementNode<ET>) => {

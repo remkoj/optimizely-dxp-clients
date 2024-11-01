@@ -2,8 +2,8 @@ import 'server-only'
 
 import type { EditPageProps, EditPageComponent, EditViewOptions } from './types.js'
 import { contentLinkToString, localeToGraphLocale } from '@remkoj/optimizely-graph-client/utils'
-import { Utils, type ContentLinkWithLocale } from '@remkoj/optimizely-cms-react'
-import { CmsContent, getServerContext, type ComponentFactory } from '@remkoj/optimizely-cms-react/rsc'
+import { type ContentLinkWithLocale } from '@remkoj/optimizely-graph-client'
+import { getServerContext, Utils, CmsContent, type ComponentFactory } from '@remkoj/optimizely-cms-react/rsc'
 import { notFound } from 'next/navigation.js'
 import OnPageEdit from '../components/on-page-edit.js'
 import { getAuthorizedServerClient } from '../client.js'
@@ -68,7 +68,7 @@ export function createEditPageComponent(
         const client = clientFactory(token)
         context.setOptimizelyGraphClient(client)
         context.setComponentFactory(factory)
-        context.setInEditMode(true)
+        context.setMode(ctx)
 
         // Get information from the Request URI
         if (context.isDebug) {

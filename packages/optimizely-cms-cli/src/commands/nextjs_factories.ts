@@ -218,7 +218,7 @@ function generateFactory(components: Array<ImportInfo>, typeName: string) : stri
 {
     const needsPrefixFunction = components.some(isPrefixedImportInfoList)
     const factoryContent = `// Auto generated dictionary
-import { ComponentTypeDictionary } from "@remkoj/optimizely-cms-react";
+import { type ComponentTypeDictionary } from "@remkoj/optimizely-cms-react";
 ${ components.map(x => `import ${ x.component } from "${ x.path }";`).join("\n") }
 
 ${ needsPrefixFunction ? `// Prefix entries - if needed
