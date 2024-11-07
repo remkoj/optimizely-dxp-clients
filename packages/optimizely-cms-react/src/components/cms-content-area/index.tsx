@@ -3,6 +3,7 @@ import * as Utils from '../../utilities.js'
 import * as Errors from '../../errors.js'
 import { normalizeContentLinkWithLocale, contentLinkToString } from '@remkoj/optimizely-graph-client/utils'
 import type { BaseCmsContentAreaProps, ContentAreaItemDefinition, ValidContentAreaItemDefinition } from './types.js'
+import { Suspense } from 'react'
 
 //#region Export Type definitions
 export type { CmsContentAreaClassMapper, CmsContentAreaProps, ContentAreaItemDefinition, CmsContentAreaComponent } from './types.js'
@@ -15,13 +16,17 @@ export type { CmsContentAreaClassMapper, CmsContentAreaProps, ContentAreaItemDef
  * @returns 
  */
 export const CmsContentArea = <T extends ElementType = "div", I extends ElementType = "div">({ 
-    items, 
+    items = [], 
     classMapper, 
     className, 
     fieldName, 
     as: elementType, 
-    itemsProperty, 
-    itemWrapper, 
+    itemsProperty,
+    itemWrapper,
+    useSuspense = false,
+    fallback,
+    noWrapper: noContentAreaContainer = false,
+    variant,
     
     ctx,
     cmsContent: CmsContent,
@@ -31,8 +36,8 @@ export const CmsContentArea = <T extends ElementType = "div", I extends ElementT
     const { inEditMode = false } = ctx
 
     // Convert the items to a list of enriched content types and filter out items cannot be loaded
-    const actualItems = (items || []).filter(forValidContentAreaItems)
-    const componentData = actualItems.map((item, idx) => {
+    const componentData = (items || []).filter(forValidContentAreaItems).map((item, idx) => {
+
         // Prepare data from received content area format
         const contentLink = normalizeContentLinkWithLocale(item._metadata)
         if (!contentLink)
@@ -42,40 +47,51 @@ export const CmsContentArea = <T extends ElementType = "div", I extends ElementT
 
         // Read element wrapper configuration
         const { 
-            as: contentItemElement, 
+            as: ContentAreaItemContainer = "div", 
             className: contentItemBaseClassName,
-            itemsProperty: contentItemTarget, 
+            itemsProperty: childrenTarget = "children", 
+            noWrapper: noContentAreaItemContainer = false,
             ...contentItemElementProps 
         } = itemWrapper ?? {}
-
-        // Generate element wrapper properties
-        const contentAreaItemContainerKey = `ContentAreaItem-${ idx }-${ contentLinkToString(contentLink) }`
+        const contentAreaItemKey = `ContentAreaItem-${ idx }-${ contentLinkToString(contentLink) }`
+        
+        // Output if no wrapper is required
+        if (noContentAreaItemContainer)
+            return useSuspense ?
+                <Suspense key={ contentAreaItemKey } fallback={ fallback }><CmsContent contentLink={contentLink} contentType={ contentType } fragmentData={ fragmentData } contentTypePrefix="Component" variant={ variant } /></Suspense> :
+                <CmsContent key={ contentAreaItemKey } contentLink={contentLink} contentType={ contentType } fragmentData={ fragmentData } contentTypePrefix="Component" variant={ variant } />
+                
+        // Buld wrapper configuration
         const contentAreaItemContainerProps : any = {
             className: `opti-content-area-item opti-content-area-item-${idx}${ contentItemBaseClassName ? ' ' + contentItemBaseClassName : '' } ${classMapper ? classMapper(item.displayOption ?? 'default', contentType ?? null, idx) : ""}`,
             "data-epi-block-id": inEditMode && fieldName ? Utils.getContentEditId(contentLink) || undefined : undefined,
             "data-displayoption": item.displayOption || undefined,
             "data-tag": item.tag || undefined,
+            "data-component": contentType?.at(0),
             ...contentItemElementProps
         }
-        const contentAraeItemContent : JSX.Element = <CmsContent contentLink={contentLink} contentType={ contentType } fragmentData={ fragmentData } contentTypePrefix="Component" />
+        const contentAraeItemContent : JSX.Element = useSuspense ?
+            <Suspense fallback={ fallback }><CmsContent contentLink={contentLink} contentType={ contentType } fragmentData={ fragmentData } contentTypePrefix="Component" variant={ variant } /></Suspense> :
+            <CmsContent contentLink={contentLink} contentType={ contentType } fragmentData={ fragmentData } contentTypePrefix="Component" variant={ variant } />
 
         // Inject the element into the wrapper
-        const childrenTarget = contentItemTarget || "children"
         let contentAreaItemContainerChildren = undefined
         if (childrenTarget == "children")
             contentAreaItemContainerChildren = contentAraeItemContent
         else
             contentAreaItemContainerProps[childrenTarget] = contentAraeItemContent
 
-        const ContentAreaItemContainer = contentItemElement || "div"
-
-        return <ContentAreaItemContainer key={ contentAreaItemContainerKey } {...contentAreaItemContainerProps}>{ contentAreaItemContainerChildren }</ContentAreaItemContainer>
+        return <ContentAreaItemContainer key={ contentAreaItemKey } {...contentAreaItemContainerProps}>{ contentAreaItemContainerChildren }</ContentAreaItemContainer>
     })
+
+    if (noContentAreaContainer)
+        return <>{ componentData }</>
 
     // Build container element
     const contentAreaContainerProps : any = {
         className: `opti-content-area ${ Array.isArray(className) ? className.join(' ') : ( className ?? '')}`.trim(),
         "data-epi-edit": inEditMode && fieldName ? fieldName : undefined,
+        "data-component": "ContentArea",
         ...additionalProps
     }
     const contentAreaContainerChildrenTarget = itemsProperty ?? "children"

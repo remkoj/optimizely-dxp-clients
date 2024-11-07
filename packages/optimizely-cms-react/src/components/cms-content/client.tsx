@@ -27,6 +27,7 @@ export function CmsContent<LocalesType = string>({
     fragmentData, 
     layoutProps, 
     noDataLoad,
+    variant,
     ctx
 } : BaseCmsContentProps<LocalesType>) : ReactNode
 {
@@ -34,7 +35,7 @@ export function CmsContent<LocalesType = string>({
     const graphClient = ctx.client
     const [myContentType, setMyContentType] = useState<ContentType | undefined>(resolveContentType(contentType, fragmentData))
     const contentLink = useMemo(() => normalizeContentLink(rawContentLink), [rawContentLink])
-    const Component = useMemo(() => resolveComponent(myContentType, contentTypePrefix, ctx), [myContentType, contentTypePrefix, ctx])
+    const Component = useMemo(() => resolveComponent(myContentType, contentTypePrefix, variant, ctx), [myContentType, variant, contentTypePrefix, ctx])
     const [data, setData] = useState<Record<string,any>>(getContent(graphClient, contentLink, Component, fragmentData, true))
     
     // Provide a bit of debugging context

@@ -1,6 +1,6 @@
 import type { ComponentFactory, ComponentType, ComponentTypeHandle, ComponentTypeDictionary } from './types.js'
 
-const MERGE_SYMBOL = '/'
+export const MERGE_SYMBOL = '/'
 
 export const EmptyComponentHandle =  '$$fragment$$'
 

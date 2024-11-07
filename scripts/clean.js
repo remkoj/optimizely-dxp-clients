@@ -5,7 +5,7 @@ const fs = require('node:fs')
 process.stdout.write('Cleaning package folders\n')
 
 process.stdout.write('\nRemoving TypeScript build info files\n')
-const tsBuildInfoFiles = globSync('./**/*.tsbuildinfo')
+const tsBuildInfoFiles = globSync(['./**/*.tsbuildinfo','./**/.tsbuildinfo'])
 if (tsBuildInfoFiles.length > 0)
     tsBuildInfoFiles.forEach(infoFile => {
         const file = path.resolve(path.join(process.cwd(), infoFile))
@@ -16,7 +16,7 @@ else
     process.stdout.write(` - No TypeScript build info files found\n`)
 
 process.stdout.write('\nRemoving build folders from within packages\n')
-const buildFolders = globSync('./**/{dist,bin}/')
+const buildFolders = globSync('./**/{build,dist,bin,.rollup.cache}/')
 if (buildFolders.length > 0)
     buildFolders.forEach(folderPath => {
         const fullFolderPath = path.resolve(path.join(process.cwd(), folderPath))
