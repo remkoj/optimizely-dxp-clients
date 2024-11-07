@@ -1,8 +1,14 @@
 import { type ComponentFactory } from "./types.js"
-import { DefaultComponentFactory } from "./default.js"
+import { DefaultComponentFactory, MERGE_SYMBOL } from "./default.js"
 
 export type * from "./types.js"
 export { DefaultComponentFactory } from "./default.js"
+
+/**
+ * The default merge symbol to use when converting between an array based
+ * ComponentTypeHandle and strig based ComponentTypeHandle
+ */
+export const TYPE_MERGE_SYMBOL = MERGE_SYMBOL
 
 /**
  * Create a new instance of the included DefaultComponentFactory, which should 

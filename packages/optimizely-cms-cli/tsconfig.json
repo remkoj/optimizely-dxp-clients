@@ -8,12 +8,13 @@
 
         "sourceMap": true,
         "sourceRoot": "./src",
-        "outDir": "./build",
+        "outDir": "./dist",
         "rootDir": "./src",
         "incremental": true,
         "composite": false,
         "tsBuildInfoFile": ".tsbuildinfo",
-        "resolveJsonModule": true
+        "resolveJsonModule": true,
+        "allowJs": true
     },
     "exclude": ["./build","./dist"],
     "include": ["./src"]

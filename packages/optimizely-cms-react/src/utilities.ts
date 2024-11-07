@@ -1,7 +1,11 @@
-import type { ComponentType } from 'react'
-import type * as Types from './types.js'
-import type { DocumentNode } from 'graphql'
-import { localeToGraphLocale } from '@remkoj/optimizely-graph-client/utils'
+import type { ComponentType } from 'react';
+import type { DocumentNode } from 'graphql';
+import type { ContentLinkWithLocale, ContentLink } from '@remkoj/optimizely-graph-client';
+import type { ContentType, BaseCmsComponent, CmsComponentWithQuery, CmsComponentWithFragment, WithGqlFragment, ContentQueryProps } from './types.js';
+import type { ComponentFactory, ComponentTypeHandle } from './factory/types.js';
+
+import { TYPE_MERGE_SYMBOL } from './factory/index.js';
+import { localeToGraphLocale } from '@remkoj/optimizely-graph-client/utils';
 
 export function isNonEmptyString(toTest: any) : toTest is string
 {
@@ -13,7 +17,7 @@ export function isNotNullOrUndefined<T>(toTest?: T | null) : toTest is T
     return !(toTest == null || toTest == undefined)
 }
 
-export function isContentType(toTest: any) : toTest is Types.ContentType
+export function isContentType(toTest: any) : toTest is ContentType
 {
     if (!Array.isArray(toTest))
         return false
@@ -30,7 +34,7 @@ export function isContentType(toTest: any) : toTest is Types.ContentType
  * @param       stripContent        When set to true, the global base type "Content" will be removed as well
  * @returns 
  */
-export function normalizeContentType(toNormalize: (string | null)[] | string | null | undefined, stripContent: boolean = false) : Types.ContentType | undefined
+export function normalizeContentType(toNormalize: (string | null)[] | string | null | undefined, stripContent: boolean = false) : ContentType | undefined
 {
     if (!toNormalize)
         return undefined
@@ -52,48 +56,70 @@ export function normalizeContentType(toNormalize: (string | null)[] | string | n
  * @param       prefix 
  * @returns 
  */
-export function normalizeAndPrefixContentType(contentType: Array<string | null> | string | null | undefined, prefix: string) : Types.ContentType
+export function normalizeAndPrefixContentType(contentType: Array<string | null> | string | null | undefined, prefix: string) : ContentType
 {
     if (!contentType)
         return [ prefix ]
 
-    const processedContentType = (typeof(contentType) == 'string' ? contentType.split('/') : contentType).filter(isNonEmptyString).map(x => x.startsWith('_') ? x.substring(1) : x).filter(x => x.toLowerCase() != 'content')
+    const processedContentType = normalizeContentType(contentType, true) ?? []
     if (processedContentType[0] != prefix)
         processedContentType.unshift(prefix)
     
     return processedContentType
 }
 
-export function isCmsComponentWithDataQuery<T = DocumentNode>(toTest?: Types.BaseCmsComponent<T>) : toTest is Types.CmsComponentWithQuery<T>
+/**
+ * Perform the resolution of the Component, based on the type and list of 
+ * variants. It will return the first matching variant, and fall back to
+ * the main component if none match.
+ * 
+ * @param       factory     The ComponentFactory to use for the resolution 
+ *                          process
+ * @param       type        The Component Type to resolve
+ * @param       variants    The variants to test
+ * @returns     The resolved Component or undefined if not found
+ */
+export function resolveComponentType(factory: ComponentFactory, type: ComponentTypeHandle, variants: Array<string> = []) : ReturnType<ComponentFactory['resolve']>
+{
+    for (const variant of variants) {
+        const variantType = Array.isArray(type) ? [ ...type, variant ] : type + TYPE_MERGE_SYMBOL + variant
+        const variantComponent = factory.resolve(variantType)
+        if (variantComponent)
+            return variantComponent
+    }
+    return factory.resolve(type)
+}
+
+export function isCmsComponentWithDataQuery<T = DocumentNode>(toTest?: BaseCmsComponent<T>) : toTest is CmsComponentWithQuery<T>
 {
     const toTestType = typeof(toTest)
     if ((toTestType == 'function' || toTestType == 'object') && toTest != null)
     {
-        return (toTest as Types.CmsComponentWithQuery).getDataQuery && typeof((toTest as Types.CmsComponentWithQuery).getDataQuery) == 'function' ? true : false
+        return (toTest as CmsComponentWithQuery).getDataQuery && typeof((toTest as CmsComponentWithQuery).getDataQuery) == 'function' ? true : false
     }
     return false
 }
 
-export function isCmsComponentWithFragment<T = DocumentNode>(toTest?: Types.BaseCmsComponent<T>) : toTest is Types.CmsComponentWithFragment<T>
+export function isCmsComponentWithFragment<T = DocumentNode>(toTest?: BaseCmsComponent<T>) : toTest is CmsComponentWithFragment<T>
 {
     const toTestType = typeof(toTest)
     if ((toTestType == 'function' || toTestType == 'object') && toTest != null)
-        return (toTest as Types.CmsComponentWithFragment).getDataFragment && typeof((toTest as Types.CmsComponentWithFragment).getDataFragment) == 'function' ? true : false
+        return (toTest as CmsComponentWithFragment).getDataFragment && typeof((toTest as CmsComponentWithFragment).getDataFragment) == 'function' ? true : false
     return false
 }
 
-export function validatesFragment<T extends ComponentType<any>>(toTest?: T) : toTest is T & Pick<Required<Types.WithGqlFragment<T, any>>,"validateFragment">
+export function validatesFragment<T extends ComponentType<any>>(toTest?: T) : toTest is T & Pick<Required<WithGqlFragment<T, any>>,"validateFragment">
 {
-    type ToTestFor = T & Pick<Required<Types.WithGqlFragment<T, any>>,"validateFragment">
+    type ToTestFor = T & Pick<Required<WithGqlFragment<T, any>>,"validateFragment">
     const toTestType = typeof(toTest)
     if ((toTestType == 'function' || toTestType == 'object') && toTest != null)
         return (toTest as ToTestFor).validateFragment && typeof((toTest as ToTestFor).validateFragment) == 'function' ? true : false
     return false
 }
 
-export function contentLinkToRequestVariables(contentLink: Types.ContentLinkWithLocale) : Types.ContentQueryProps
+export function contentLinkToRequestVariables(contentLink: ContentLinkWithLocale) : ContentQueryProps
 {
-    const variables : Types.ContentQueryProps = { 
+    const variables : ContentQueryProps = { 
         key: contentLink.key ?? '-no-content-selected-', 
         locale: contentLink.locale ? localeToGraphLocale(contentLink.locale) : undefined,
         version: contentLink.version
@@ -115,7 +141,7 @@ export function trim<T extends string | null | undefined>(valueToTrim: T) : T
     return valueToTrim
 }
 
-export function getContentEditId(contentLink: Types.ContentLink) : string 
+export function getContentEditId(contentLink: ContentLink) : string 
 {
     return contentLink.key
 }

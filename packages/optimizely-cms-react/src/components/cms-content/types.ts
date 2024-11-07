@@ -39,6 +39,12 @@ export type CmsContentProps<LocalesType = string> = PropsWithChildren<{
     contentTypePrefix?: string
 
     /**
+     * The content type variant to load. This allows the loading of a variant (e.g. postfix) of
+     * the content type
+     */
+    variant?: string
+
+    /**
      * Any layout properties inferred from the context
      */
     layoutProps?: Record<string, any>

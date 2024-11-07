@@ -23,6 +23,7 @@ export async function CmsContent<LocalesType = string>({
     fragmentData, 
     layoutProps, 
     noDataLoad,
+    variant,
     ctx
 } : BaseCmsContentProps<LocalesType>) : Promise<ReactNode>
 {
@@ -55,7 +56,7 @@ export async function CmsContent<LocalesType = string>({
     }
 
     // Retrieve the Component used to render this item
-    const Component = resolveComponent(myContentType, contentTypePrefix, ctx)
+    const Component = resolveComponent(myContentType, contentTypePrefix, variant, ctx)
     if (isComponentMissingComponent(Component))
         return <Component />
 

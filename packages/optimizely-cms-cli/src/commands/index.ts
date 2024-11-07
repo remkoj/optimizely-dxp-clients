@@ -1,4 +1,4 @@
-import type { CliModuleList } from '../types.js'
+import { type CliModuleList } from '../types.js'
 
 // Style processing
 import StylesPushCommand from './styles_push.js'

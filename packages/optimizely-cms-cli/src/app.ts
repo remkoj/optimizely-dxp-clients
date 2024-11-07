@@ -1,6 +1,6 @@
 import { CmsIntegrationApiOptions, getCmsIntegrationApiConfigFromEnvironment } from '@remkoj/optimizely-cms-api'
 import yargs from 'yargs'
-import { OptiCmsApp } from './types.js'
+import { type OptiCmsApp } from './types.js'
 
 export function createOptiCmsApp(scriptName: string, version?: string, epilogue?: string) : OptiCmsApp
 {

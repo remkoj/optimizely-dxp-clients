@@ -13,17 +13,18 @@
   "scripts": {
     "update-cfg": "node ./script/update-cfg.js",
     "prepare": "node ./script/update-cfg.js && rollup -c",
-    "watch": "rollup -c -w",
-    "compile": "rollup -c"
+    "watch": "rollup -c ./rollup.config.js -w",
+    "compile": "rollup -c ./rollup.config.js",
+    "opti-cms": "yarn node ./dist/index.js"
   },
   "devDependencies": {
     "@remkoj/optimizely-cms-api": "workspace:3.0.0",
     "@rollup/plugin-json": "^6.1.0",
     "@rollup/plugin-typescript": "^12.1.1",
-    "@types/node": "^22.8.4",
+    "@types/node": "^22.9.0",
     "@types/yargs": "^17.0.33",
-    "rollup": "^4.24.3",
-    "tslib": "^2.8.0",
+    "rollup": "^4.24.4",
+    "tslib": "^2.8.1",
     "typescript": "^5.6.3"
   },
   "peerDependencies": {

@@ -12,7 +12,7 @@ import { type FunctionComponent, type PropsWithChildren, type ComponentType } fr
  * @param   ctx             The context in which to operate
  * @returns The component required for rendering
  */
-export function resolveComponent(contentType: ComponentTypeHandle | null | undefined, prefix: string | null | undefined, ctx: GenericContext)
+export function resolveComponent(contentType: ComponentTypeHandle | null | undefined, prefix: string | null | undefined, variant: string | null | undefined, ctx: GenericContext)
 {
     const { factory, isDebug, inEditMode } = ctx
 
@@ -23,9 +23,9 @@ export function resolveComponent(contentType: ComponentTypeHandle | null | undef
     }
 
     // Optimizely Graph stores the type in Most Significant first order, we need least significant first, also we're stripping out the common "Content" item from it
-    const myContentType = Array.isArray(contentType) ? (prefix ?
-            Utils.normalizeAndPrefixContentType(contentType.reverse(), prefix) :
-            Utils.normalizeContentType(contentType.reverse(), true)) : contentType
+    const myContentType = prefix ?
+            Utils.normalizeAndPrefixContentType(Array.isArray(contentType) ? [...contentType].reverse() : contentType, prefix) :
+            Utils.normalizeContentType(Array.isArray(contentType) ? [...contentType].reverse() : contentType, true)
     
     // Validate that we have a value to ask the factory a component for
     if (!myContentType || myContentType.length == 0) {
@@ -35,7 +35,7 @@ export function resolveComponent(contentType: ComponentTypeHandle | null | undef
     }
 
     // Resolve component
-    const Component = factory.resolve(myContentType) as EnhancedCmsComponent | undefined
+    const Component = Utils.resolveComponentType(factory, myContentType, variant ? [variant] : []) as EnhancedCmsComponent | undefined
 
     // Handle component not found in factory
     if (!Component) {

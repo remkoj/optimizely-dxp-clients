@@ -5,6 +5,25 @@ import figures from 'figures'
 import { parseArgs } from '../tools/parseArgs.js'
 import { type NextJsModule, builder } from './_nextjs_base.js'
 import { ucFirst } from '../tools/string.js'
+import { globSync } from 'glob'
+
+const ROOT_FACTORY_KEY = "."
+const FACTORY_FILE_NAME = "index.ts"
+
+type ComponentFactoryDefintion = {
+    file: string
+    entries: Array<{
+        key: string
+        import: string
+        variable: string
+    }>
+    subfactories: Array<{
+        key: string
+        import: string
+        prefix: string | string[]
+        variable: string
+    }>
+}
 
 export const NextJsFactoryCommand : NextJsModule = {
     command: "nextjs:factory",
@@ -12,232 +31,195 @@ export const NextJsFactoryCommand : NextJsModule = {
     builder,
     handler: async (args) => {
         const { components: basePath, force, _config: { debug } } = parseArgs(args)
+
         if (debug)
             process.stdout.write(chalk.gray(`${ figures.arrowRight } Start generating component factories\n`))
 
-        const baseDirEntries = fs.readdirSync(basePath)
-        const entries = baseDirEntries
-            .filter(entry => fs.statSync(path.join(basePath, entry)).isDirectory())
-            .map(entry => entry == "nodes" ? processSubGroupFolder(entry, path.join(basePath, entry), force, debug) : processTypeListFolder(entry, path.join(basePath, entry), force, debug))
-            .filter(x => x)
+        const components = globSync(["./**/*.jsx","./**/*.tsx"], {
+            cwd: basePath
+        }).map(p => p.split(path.sep)).filter(p => {
+            // Consider components in a file starting with "_" as a partial
+            if (p.at(p.length - 1)?.startsWith('_') == true)
+                return false
 
-        // Post process the entries
-        if (debug)
-            process.stdout.write(chalk.gray(`${ figures.arrowRight } Post processing resolved top-level factory entries\n`))
-        entries.forEach((e,i) => {
-            if (isImportInfoList(e) && typeof e.prefix == 'string')
-                switch (e.prefix) {
-                    case "Video":
-                    case "Image":
-                        (entries[i] as ImportInfoList).prefix = ["Media", e.prefix, "Component"]
-                        break;
-                    case "Experience":
-                        (entries[i] as ImportInfoList).prefix = [e.prefix,"Page"]
-                        break;
-                    case "Element":
-                        (entries[i] as ImportInfoList).prefix = [e.prefix,"Component"]
-                        break;
-                }
-        })
-
-        // Add any global components
-        if (debug)
-            process.stdout.write(chalk.gray(`${ figures.arrowRight } Adding global components\n`))
-        baseDirEntries.filter(x => x.endsWith('.tsx') && fs.statSync(path.join(basePath, x)).isFile()).forEach(entry => {
-            const entryName = entry.substring(0,entry.length - 4).replaceAll('.','').split('-').map(p => ucFirst(p)).join('')
-            const importPath = './'+entry.substring(0,entry.length - 4)
-            entries.push({
-                isList: false,
-                component: (entryName[0].toLowerCase() + entryName.substring(1))+"Component",
-                path: importPath,
-                type: entryName
-            })
-        })
-
-        // We're always overwriting the main factory
-        if (debug)
-            process.stdout.write(chalk.gray(`${ figures.arrowRight } Creating/overwriting main factory\n`))
-        const mainFactoryFile = path.join(basePath, "index.ts")
-        fs.writeFileSync(mainFactoryFile, generateFactory(entries, "cms"))
-        process.stdout.write(chalk.yellow(`${ figures.arrowRight } Generated main factory in: ${ mainFactoryFile }.\n`))
-    }
-}
-
-function processSubGroupFolder(groupName: string, groupTypePath: string, force: boolean = false, debug: boolean = false) : ImportInfoList
-{
-    const subgroupInfo : Array<ImportInfo | null> = fs
-        .readdirSync(groupTypePath)
-        .filter(entry => {
-            return fs.statSync(path.join(groupTypePath, entry)).isDirectory()
-        }).map(entry => processTypeListFolder(entry, path.join(groupTypePath, entry), force, debug))
-        .filter(x => x)
-    
-    if (subgroupInfo.length == 0)
-        return null
-    const baseTypeIndex = path.join(groupTypePath, "index.ts")
-
-    /* Check file existence and determine if we can continue */
-    if (debug)
-        process.stdout.write(chalk.gray(`${ figures.arrowRight } Identified base type ${ groupName }\n`))
-    if (fs.existsSync(baseTypeIndex)) {
-        if (!force) {
-            if (debug)
-                process.stdout.write(chalk.gray(`${ figures.arrowRight } Skipping factory for ${ groupName } - file already exists\n`))
-            return {
-                isList: true,
-                component: groupName+'Dictionary',
-                prefix: groupName[0].toUpperCase() + groupName.substring(1),
-                path: './'+groupName
-            }
-        }
-        if (debug)
-            process.stdout.write(chalk.gray(`${ figures.arrowRight } Overwriting factory for ${ groupName }\n`))
-    } else if (debug)
-        process.stdout.write(chalk.gray(`${ figures.arrowRight } Generating new factory for ${ groupName }\n`))
-
-    fs.writeFileSync(baseTypeIndex, generateFactory(subgroupInfo, groupName))
-    process.stdout.write(chalk.yellow(`${ figures.arrowRight } Generated partial factory in: ${ baseTypeIndex }.\n`))
-
-    return {
-        isList: true,
-        component: groupName+'Dictionary',
-        prefix: groupName[0].toUpperCase() + groupName.substring(1),
-        path: './'+groupName
-    }
-}
-
-type ImportInfoComponent = {
-    isList?: false | undefined
-    type: string
-    path: string
-    component: string
-}
-type ImportInfoList = {
-    isList: true
-    path: string
-    component: string
-    prefix?: string | Array<string>
-}
-type ImportInfo = ImportInfoComponent | ImportInfoList
-
-function isImportInfoList(toTest: ImportInfo) : toTest is ImportInfoList
-{
-    return (toTest as ImportInfoList).isList == true
-}
-function isPrefixedImportInfoList(toTest: ImportInfo): toTest is Required<ImportInfoList>
-{
-    return isImportInfoList(toTest) && ((typeof toTest.prefix == 'string' && toTest.prefix.length > 0) || (Array.isArray(toTest.prefix) && toTest.prefix.length > 0 && toTest.prefix.every(x => typeof x == 'string' && x.length > 0)))
-}
-
-function processTypeListFolder(baseType: string, baseTypePath: string, force: boolean = false, debug: boolean = false) : ImportInfo | null
-{
-    const baseTypeIndex = path.join(baseTypePath, "index.ts")
-
-    /* Check file existence and determine if we can continue */
-    if (debug)
-        process.stdout.write(chalk.gray(`${ figures.arrowRight } Identified base type ${ baseType }\n`))
-    if (fs.existsSync(baseTypeIndex)) {
-        if (!force) {
-            if (debug)
-                process.stdout.write(chalk.gray(`${ figures.arrowRight } Skipping factory for ${ baseType } - file already exists\n`))
-            return {
-                isList: true,
-                component: baseType+'Dictionary',
-                prefix: baseType[0].toUpperCase() + baseType.substring(1),
-                path: './'+baseType
-            }
-        }
-        if (debug)
-            process.stdout.write(chalk.gray(`${ figures.arrowRight } Overwriting factory for ${ baseType }\n`))
-    } else if (debug)
-        process.stdout.write(chalk.gray(`${ figures.arrowRight } Generating new factory for ${ baseType }\n`))
-    
-    // Get the components to import
-    let hasStyles = false
-    const components = fs
-        .readdirSync(baseTypePath)
-        .filter(entry => {
-            if (entry == 'styles') {
-                hasStyles = true
+            // Consider components in a folder named "partials" as a partial
+            if (p.at(p.length - 2)?.toLowerCase() == 'partials')
+                return false
+            
+            // Check if the file has a default export
+            const fileBuffer = fs.readFileSync(path.join(basePath, p.join(path.sep)))
+            const hasDefaultExport = fileBuffer.includes('export default')
+            if (!hasDefaultExport) {
+                process.stdout.write(chalk.redBright(`${ figures.warning } No default export in ${ p.join(path.sep ) } - ignoring file\n`))
                 return false
             }
-            return fs.statSync(path.join(baseTypePath, entry)).isDirectory() &&
-                fs.existsSync(path.join(baseTypePath, entry, "index.tsx"))
-        })
-        .map(entry => {
-            return {
-                component: entry + 'Component',
-                path: './' + entry,
-                type: entry
-            } as ImportInfo
+            return true
+        })        
+
+        if (debug)
+            process.stdout.write(chalk.gray(`${ figures.arrowRight } Identified ${ components.length } components in ${ basePath }\n`))
+
+        const componentFactoryDefintions = new Map<string, ComponentFactoryDefintion>()
+
+        components.forEach(component => {
+            const factorySegments = component.length > 2 ? component.slice(0, -2) : [ROOT_FACTORY_KEY]
+            const factoryKey = factorySegments.join(path.sep)
+            const factoryFile = path.join(factoryKey, FACTORY_FILE_NAME)
+
+            // Add component to factory
+            const factory : ComponentFactoryDefintion = componentFactoryDefintions.get(factoryKey) || { file: factoryFile, entries: [], subfactories: [] }
+            const componentSegments = component.slice(-2).map(p => {
+                const entry = p.substring(0, p.length - path.extname(p).length)
+                return entry.toLowerCase() == "index" ? null : entry
+            }).filter(x=>x)
+            const componentImport = "./" + componentSegments.join('/')
+            factory.entries.push({
+                import: componentImport,
+                variable: [ ...componentSegments.map(processName), 'Component'].join(''),
+                key: componentSegments.join('/') == "node" ? "Node" : componentSegments.join('/')
+            })
+            componentFactoryDefintions.set(factoryKey, factory);
+
+            // Register with all appropriate parents
+            const parentSegements = factoryKey == ROOT_FACTORY_KEY ? factorySegments.slice(0,-1) : [ ROOT_FACTORY_KEY, ...factorySegments.slice(0,-1) ]
+            let currentFactory = {
+                key: factoryKey,
+                import: './'+factorySegments.slice(-1).join('/'),
+                prefix: processName(factorySegments.slice(-1).at(0)),
+                variable: factorySegments.map(processName).join("") + "Factory"
+            }
+            for (let i = parentSegements.length; i > 0; i--) {
+                const parentFactoryKey = parentSegements.slice(0, i).filter(x => x != ROOT_FACTORY_KEY).join(path.sep) || ROOT_FACTORY_KEY
+                const parentFactory = componentFactoryDefintions.get(parentFactoryKey) ?? { file: path.join(parentFactoryKey, FACTORY_FILE_NAME), entries: [], subfactories: [] }
+                if (!parentFactory.subfactories.some(x => x.key == currentFactory.key))
+                    parentFactory.subfactories.push(currentFactory)
+                componentFactoryDefintions.set(parentFactoryKey, parentFactory)
+
+                if (i > 1) {
+                    currentFactory = {
+                        key: parentFactoryKey,
+                        import: './'+parentFactoryKey.split(path.sep).slice(-1).at(0),
+                        prefix: processName(parentFactoryKey.split(path.sep).slice(-1).at(0)),
+                        variable: parentFactoryKey.split(path.sep).map(processName).join("") + "Factory"
+                    }
+                }
+            }
         })
 
-    // Handle styles folder
-    if (hasStyles) {
-        const styles = processTypeListFolder("styles", path.join(baseTypePath,'styles'), force, debug)
-        if (styles) {
-            components.push({
-                path: "./styles",
-                component: "styleDictionary",
-                isList: true,
-                prefix: "Styles"
+        const mainFactory = componentFactoryDefintions.get(ROOT_FACTORY_KEY)
+        if (mainFactory) {
+            if (debug)
+                process.stdout.write(chalk.gray(`${ figures.arrowRight } Updating prefixes within RootFactory\n`))
+            mainFactory.subfactories = mainFactory.subfactories.map(subFactory => {
+                if (typeof(subFactory.prefix == 'string'))
+                    switch(subFactory.prefix) {
+                        case "Video":
+                        case "Image":
+                            subFactory.prefix = ["Media", subFactory.prefix, "Component"]
+                            break;
+                        case "Experience":
+                            subFactory.prefix = [subFactory.prefix,"Page"]
+                            break;
+                        case "Element":
+                            subFactory.prefix = [subFactory.prefix,"Component"]
+                            break;
+
+                    }
+                return subFactory
             })
         }
-    }
 
-    components.sort((a,b) => {
-        if (isImportInfoList(a) && !isImportInfoList(b))
-            return -1
-        if (!isImportInfoList(a) && isImportInfoList(b))
-            return 1
-        return 0
-    })
-    if (components.length == 0) {
         if (debug)
-            process.stdout.write(chalk.gray(`${ figures.arrowRight } The base type ${ baseType } has no components.\n`))
-        return null
-    }
-    if (debug)
-        process.stdout.write(chalk.gray(`${ figures.arrowRight } Generating factory for ${ baseType } with the components: ${ components.map(x => x.isList == true ? x.component : x.type).join(", " )}.\n`))
+            process.stdout.write(chalk.gray(`${ figures.arrowRight } Finished preparing ${ componentFactoryDefintions.size } factories, start writing\n`))
 
-    // Create the file
-    const factoryContent = generateFactory(components, baseType)
-    fs.writeFileSync(baseTypeIndex, factoryContent)
-    process.stdout.write(chalk.yellow(`${ figures.arrowRight } Generated partial factory in: ${ baseTypeIndex }.\n`))
-    
-    // Build the result
-    return {
-        isList: true,
-        component: baseType+'Dictionary',
-        prefix: baseType[0].toUpperCase() + baseType.substring(1),
-        path: './'+baseType
+        let updateCounter = 0
+        for (const key of componentFactoryDefintions.keys()) {
+            const factory = componentFactoryDefintions.get(key)
+            const factoryFile = path.normalize(path.join(basePath, factory.file))
+            if (debug)
+                process.stdout.write(chalk.gray(`${ figures.arrowRight } Writing factory ${ key == ROOT_FACTORY_KEY ? "cms" : key } to ${ factoryFile }\n`))
+
+            if (shouldWriteFactory(factoryFile, force, debug)) {
+                if (debug)
+                    process.stdout.write(chalk.gray(`${ figures.arrowRight } Generating factory contents for: ${ factoryFile }\n`))
+                const factoryFileContents = generateFactory(factory, key == ROOT_FACTORY_KEY ? "cms" : key)
+                if (debug)
+                    process.stdout.write(chalk.gray(`${ figures.arrowRight } Generated factory contents for: ${ factoryFile }\n`))
+                fs.writeFileSync(factoryFile, factoryFileContents)
+                if (debug)
+                    process.stdout.write(chalk.gray(`${ figures.arrowRight } Written factory contents for: ${ factoryFile }\n`))
+                updateCounter++
+            }
+        }
+
+        process.stdout.write("\n")
+        process.stdout.write(chalk.bold(chalk.greenBright(`${ figures.tick } Generated/updated ${ updateCounter } factories, of ${ componentFactoryDefintions.size } factories in project.`)))
+        process.stdout.write("\n")
     }
 }
 
-function generateFactory(components: Array<ImportInfo>, typeName: string) : string
+export default NextJsFactoryCommand
+
+function shouldWriteFactory(factoryFile: string, force: boolean = false, debug: boolean = false) : boolean
 {
-    const needsPrefixFunction = components.some(isPrefixedImportInfoList)
+    if (!fs.existsSync(factoryFile)) {
+        process.stdout.write(chalk.green(`${ figures.tick } Creating new factory file: ${ factoryFile }\n`))
+        return true
+    }
+    
+    if (force) {
+        process.stdout.write(chalk.yellowBright(`${ figures.warning } [Force Enabled] Overwriting existing factory file: ${ factoryFile }\n`))
+        return true
+    }
+    
+    const b = fs.readFileSync(factoryFile)
+    if (b.includes('@not-modified')) {
+        process.stdout.write(chalk.green(`${ figures.tick } Updating existing factory file: ${ factoryFile }\n`))
+        return true
+    }
+
+    if (debug)
+        process.stdout.write(chalk.gray(`${ figures.arrowRight } Skipping factory as it already exists: ${ factoryFile }\n`))
+    return false
+}
+
+function processName(input: string) : string {
+    if (input == ROOT_FACTORY_KEY)
+        return "Cms"
+    const nameSegements = input.split(/[-\_]/g)
+    return nameSegements.map(ucFirst).join('')
+}
+
+function generateFactory(factoryInfo: ComponentFactoryDefintion, factoryKey: string) : string
+{
+    const needsPrefixFunction = factoryInfo.subfactories.length > 0
+    const factoryName = factoryKey.split(path.sep).map(processName).join("") + "Factory"
+    const components = factoryInfo.entries
+    const subFactories = factoryInfo.subfactories
     const factoryContent = `// Auto generated dictionary
+// @not-modified => When this line is removed, the "force" parameter of the CLI tool is required to overwrite this file
 import { type ComponentTypeDictionary } from "@remkoj/optimizely-cms-react";
-${ components.map(x => `import ${ x.component } from "${ x.path }";`).join("\n") }
+${ [...components,...subFactories].map(x => `import ${ x.variable } from "${ x.import }";`).join("\n") }
 
 ${ needsPrefixFunction ? `// Prefix entries - if needed
-${ components.filter(isPrefixedImportInfoList).map(x => Array.isArray(x.prefix) ?
-    x.prefix.map(z => `prefixDictionaryEntries(${ x.component }, "${ z }");`).join("\n") :
-    `prefixDictionaryEntries(${ x.component }, "${ x.prefix }");`
+${ subFactories.map(subFactory => Array.isArray(subFactory.prefix) ?
+    subFactory.prefix.map(z => `prefixDictionaryEntries(${ subFactory.variable }, "${ z }");`).join("\n") :
+    `prefixDictionaryEntries(${ subFactory.variable }, "${ subFactory.prefix }");`
 ).join("\n")}
 
 ` : ''}// Build dictionary
-export const ${typeName}Dictionary : ComponentTypeDictionary = [
-    ${ components.map(x => x.isList == true ? `...${ x.component }` : `{ 
-        type: "${x.type}", 
-        component: ${x.component} 
-    }`).join(",\n    ")}
+export const ${factoryName} : ComponentTypeDictionary = [
+    ${ [...components.map(x => `{ 
+        type: "${x.key}", 
+        component: ${x.variable} 
+    }`), ...subFactories.map(x => 
+        `...${ x.variable }`
+    )].join(",\n    ")}
 ];
 
 // Export dictionary
-export default ${typeName}Dictionary;${ needsPrefixFunction ? `
-
+export default ${factoryName};
+${ needsPrefixFunction ? `
 // Helper functions
 function prefixDictionaryEntries(list: ComponentTypeDictionary, prefix: string) : ComponentTypeDictionary
 {
@@ -245,9 +227,7 @@ function prefixDictionaryEntries(list: ComponentTypeDictionary, prefix: string) 
         dictionary[idx].type = typeof component.type == 'string' ? prefix + "/" + component.type : [ prefix, ...component.type ]
     });
     return list;
-}` : ''}
-`
+}
+` : ''}`
     return factoryContent
 }
-
-export default NextJsFactoryCommand
