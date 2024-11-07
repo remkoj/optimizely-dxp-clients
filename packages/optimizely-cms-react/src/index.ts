@@ -1,7 +1,7 @@
 /**
  * The version of the current Optimizely DXP React SDK
  */
-export const Version = '3.0.0'
+export const Version = '3.1.0'
 
 // Export library
 export * from './types.js'
