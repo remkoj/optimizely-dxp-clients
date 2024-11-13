@@ -1,7 +1,7 @@
 {
   "name": "@remkoj/optimizely-cms-nextjs",
   "license": "Apache-2.0",
-  "version": "3.1.0",
+  "version": "3.1.1",
   "packageManager": "yarn@4.5.0",
   "repository": "https://github.com/remkoj/optimizely-dxp-clients.git",
   "author": "Remko Jantzen <693172+remkoj@users.noreply.github.com>",
@@ -40,8 +40,8 @@
     }
   },
   "devDependencies": {
-    "@remkoj/optimizely-cms-react": "workspace:3.1.0",
-    "@remkoj/optimizely-graph-client": "workspace:3.1.0",
+    "@remkoj/optimizely-cms-react": "workspace:3.1.1",
+    "@remkoj/optimizely-graph-client": "workspace:3.1.1",
     "@types/node": "^22.9.0",
     "@types/react": "^18.3.12",
     "@types/react-dom": "18.3.1",
