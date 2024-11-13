@@ -64,6 +64,7 @@ export const DefaultComponents : ComponentTypeDictionary = [
     { type: 'RichText/br', component: createHtmlComponent("br", true)},
     { type: 'RichText/bulleted-list', component: createHtmlComponent("ul")},
     { type: 'RichText/numbered-list', component: createHtmlComponent("ol")},
-    { type: 'RichText/list-item', component: createHtmlComponent("li")}
+    { type: 'RichText/list-item', component: createHtmlComponent("li")},
+    { type: 'RichText/address', component: createHtmlComponent("address")}
 ]
 //#endregion
