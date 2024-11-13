@@ -71,6 +71,23 @@ export type IOptiGraphClientFlags = {
      * When set to true, empty object will be omitted from the result
      */
     omitEmpty: boolean
+
+    /**
+     * **Warning:** Experimental feature, only enable when instructed to do so by 
+     * Optimizely Support
+     * 
+     * When enabled, the service will use another cache strategy, and create a
+     * cache-tag for the query using format {tentantId}_{ReturnedContentId}, 
+     * when "unique" parameter is being used. The normal cache-tag is {tenantId}
+     *
+     * Our purge cache (cache invalidation) functionality will do purge cache 
+     * for both the tags {tenantId} and {tentantId}_UpdatedContentId} when a 
+     * content is created/updated/deleted
+     *
+     * So in practise: this will keep result cache for a query - until the specific 
+     * content has been updated / deleted
+     */
+    cache_uniq: boolean
 }
 
 export interface IOptiGraphClient extends ClientInstanceType
