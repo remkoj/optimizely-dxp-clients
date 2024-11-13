@@ -29,6 +29,12 @@ export type RichTextProps = {
      * Control the debugging output
      */
     debug?: boolean
+
+    /**
+     * If set to true, the output will be wrapped in a Fragment and no properties
+     * will be set on the Fragment to prevent React errors.
+     */
+    noWrapper?: boolean
 } & ({
     /**
      * The fieldname of this Rich Text, when it is used as part of a block

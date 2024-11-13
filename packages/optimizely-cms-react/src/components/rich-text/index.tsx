@@ -8,22 +8,23 @@ export * from "./types.js"
 
 export const RichText : FunctionComponent<RichTextProps> = ({ 
     factory, 
-    text, 
+    text = "{ \"type\": \"richText\" }", 
     className = 'rich-text', 
     as : Wrapper = "div", 
-    debug,
+    debug = false,
+    noWrapper = false,
     ...props 
 }) => {
     const id = Utils.getRandomId("rich-text")
     const richTextFactory = factory ?? new DefaultComponentFactory(DefaultComponents)
     try {
         const data = Utils.processNodeInput(text)
-        return <Wrapper className={ className } {...props}>
-            { (data?.children || []).map((child, idx) => {
-                const elementId = id+'::'+idx;
-                return <RichTextElement key={ elementId } factory={ richTextFactory } node={ child } idPrefix={ elementId + '::' } />
-            })}
-        </Wrapper>
+        const textContent = (data?.children || []).map((child, idx) => {
+            const elementId = id+'::'+idx;
+            return <RichTextElement key={ elementId } factory={ richTextFactory } node={ child } idPrefix={ elementId + '::' } />
+        })
+        
+        return noWrapper ? <>{ textContent }</> : <Wrapper className={ className } {...props}>{textContent}</Wrapper>
     } catch {
         if (debug) console.warn('🟠 [Rich Text] Invalid rich text received: ', text);
         return Object.getOwnPropertyNames(props).length > 0 ? <div className={ className } {...props}></div> : null;
