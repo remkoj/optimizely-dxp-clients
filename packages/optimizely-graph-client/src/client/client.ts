@@ -8,7 +8,8 @@ const defaultFlags : IOptiGraphClientFlags = {
     queryCache: true,
     cache: true,
     recursive: false,
-    omitEmpty: false
+    omitEmpty: false,
+    cache_uniq: false
 }
 
 export class ContentGraphClient extends GraphQLClient implements IOptiGraphClient
@@ -270,6 +271,8 @@ export class ContentGraphClient extends GraphQLClient implements IOptiGraphClien
         serviceUrl.searchParams.set('cache', this._flags.cache ? 'true' : 'false')
         serviceUrl.searchParams.set('omit_empty', this._flags.omitEmpty ? 'true' : 'false')
         serviceUrl.searchParams.set('authMode', this.currentAuthMode)
+        if (this._flags.cache_uniq)
+            serviceUrl.searchParams.set('unique', 'true')
         if (this.debug)
             console.log(`🔗 [Optimizely Graph] Setting service endpoint to: ${ serviceUrl.href }`)
         this.setEndpoint(serviceUrl.href)
