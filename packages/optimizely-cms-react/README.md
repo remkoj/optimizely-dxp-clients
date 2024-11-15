@@ -19,6 +19,8 @@ Regardless of which export you're using, the following components are available.
 | `<CmsEditable {...props} />` | This is a basic wrapper that performs the logic needed to inject the appropriate attributes into the HTML. <br/>It will use a `div` element by default for that, but you can set any React component to be used on the `as` property. The only requirement is that the property set for this accepts the `data-*` attributes injected and outputs these into the page. Any additional attributes will be passed to the output component. |
 | `<RichText {...props} />` | This is a renderer for the structured HTML output of Optimizely CMS, leveraging the `ComponentFactory` to resolve the actual React components used for the output. It prefixes all types with `RichText`<br/>The library exports a `DefaultComponents` constant, which can be used to populate the ComponentFactory with the basic HTML elements |
 | `<OptimizelyComposition {...props} />` | This is the renderer for a Visual Builder Experience. This will render the composition using the `ComponentFactory` from the context and `<CmsContent />` component.<br/><br/>The style definitions of Visual Builder will be provided to the `layoutProps` property of your CmsComponent |
+| `getFactory()` | Create an instance of the `DefaultComponentFactory` and return it. See below for more information on using the Component Factory. |
+| `DefaultComponentFactory` | Default implementation of the `ComponentFactory` interface. See below for more information on using the Component Factory. |
 
 ### Server Side components & functions
 In addition to the components above, the following methods are available in the `@remkoj/optimizely-cms-react/rsc` export only:
@@ -36,3 +38,12 @@ In addition to the components above, the following methods are available in the 
 | --- | --- |
 | `<OptimizelyCms {...props} />` | React context to be used client side, without defaults. This needs to be initialized completely by your code. |
 | `useOptimizelyCms()` | React Hook to retrieve the current Optimizely CMS Context in your client-side component. |
+
+### Component Factory
+The component factory allows resolution from the content type reported by Optimizely CMS into a React component that will be used to render that content. Each component must be registered through the `register()` or `registerAll()` methods. After registration, the components can be retrieved using `resolve()` and resolvability can be checked through `has()`. The JSDoc annotation has more details on the usage of each of these methods.
+
+An entry within the factory consists of the following fields:
+- ***type:*** The identifier of the content type, can either be an array of strings or a string. The implementation *should* normalize the type. The `DefaultComponentFactory` normalized to a string, using `/` as item separator.
+- ***component:*** The component to do the actual rendering of the data. *The factory is indifferent to the actual type, so this could be the output of `next/dynamic` to trigger bundle splitting in Next.js.*
+- ***useSuspense:*** When set to `true` the component will be wrapped in the `<Suspense></Suspense>` from React. Optional, the default value is `false`.
+- ***loader:*** The component to show while Suspense is awaiting the actual component. This component is given to the `fallback` property of `<Suspense>`. Optional, the default value is `undefined`.
