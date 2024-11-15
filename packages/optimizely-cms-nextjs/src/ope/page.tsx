@@ -12,7 +12,7 @@ import Script from 'next/script.js'
 import { getContentById } from './data.js'
 import { getContentRequest, isValidRequest } from './tools.js'
 
-const defaultOptions : EditViewOptions = {
+const defaultOptions : EditViewOptions<string> = {
     refreshNotice: () => <></>,
     layout: props => <>{ props.children }</>,
     loader: getContentById,
@@ -30,9 +30,9 @@ const defaultOptions : EditViewOptions = {
  * @param   options     The optional options to use to control the edit page
  * @returns The React Component that can be used by Next.JS to render the page
  */
-export function createEditPageComponent(
+export function createEditPageComponent<LocaleType = string>(
     factory: ComponentFactory,
-    options?: Partial<EditViewOptions>
+    options?: Partial<EditViewOptions<LocaleType>>
 ) : EditPageComponent
 {
     const {
@@ -43,7 +43,7 @@ export function createEditPageComponent(
         communicationInjectorPath,
         contentResolver: resolveContent,
         requestValidator: validateRequest
-    } = { ...defaultOptions, ...options }
+    } = { ...defaultOptions, ...options } as EditViewOptions<string>
 
     async function EditPage(props: EditPageProps) : Promise<JSX.Element>
     {

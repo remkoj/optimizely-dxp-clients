@@ -48,7 +48,7 @@ export type ValidatedEditPageProps = {
     })
 }
 
-export type EditViewOptions = {
+export type EditViewOptions<LocaleType = string> = {
     /**
      * The message to show to the editor when awaiting the data to be updated
      * in ContentGraph
@@ -65,7 +65,7 @@ export type EditViewOptions = {
      * which actually loads the data of content to be shown to the 
      * editor.
      */
-    loader: GetContentByIdMethod
+    loader: GetContentByIdMethod<LocaleType>
 
     /**
      * The third step of the handling of a Preview/On-Page-Edit view,
@@ -106,25 +106,14 @@ export type EditViewOptions = {
     requestValidator: (props: EditPageProps, throwOnInvalid?: boolean, isDevelopment?: boolean) => props is ValidatedEditPageProps
 }
 
-export type GetContentByIdData<LocaleType = string> = {
-    content: {
-        total: number,
-        items: Array<{
-            _metadata: {
-                key: string,
-                locale: LocaleType
-                types: Array<string>
-                displayName: string
-                version?: string | null
-                url?: {
-                    base?: string | null
-                    hierarchical?: string | null
-                    default?: string | null
-                } | null
-            },
-            _type: string
-            [fieldName: string]: any
-        }>
-    }
+type MayBe<T> = T extends Array<infer R> ? Array<R | null> | null : T | null
+export type GetContentByIdData = {
+    content?: MayBe<{
+        items?: MayBe<Array<{
+            __typename?: MayBe<string>
+            _type?: MayBe<string>
+        } & Record<string,any>>>
+        total?: MayBe<number>
+    }>
 }
-export type GetContentByIdMethod = <LocaleType = string>(client: GraphQLClient, variables: ContentQueryProps<LocaleType>) => Promise<GetContentByIdData<LocaleType>>
+export type GetContentByIdMethod<LocaleType = string> = (client: GraphQLClient, variables: ContentQueryProps<LocaleType>) => Promise<GetContentByIdData>

@@ -16,15 +16,16 @@ export default [
             }
         }
     }`,
-    `query getContentByPath($path: String!, $version: String, $locale: [Locales!], $domain: String) {
+    `query getContentByPath($path: [String!]!, $locale: [Locales!], $siteId: String) {
         content: _Content(
             where: {
-                _metadata: { url: { default: { eq: $path }, base: { eq: $domain } }, version: { eq: $version }}
+                _metadata: { url: { default: { in: $path }, base: { eq: $siteId } }}
             }
             locale: $locale
         ) {
             total
             items {
+                ...IContentData
                 ...PageData
             }
         }
