@@ -19,11 +19,11 @@ export default [
             }
         }
     }`,
-    `query getContentByPath($path: String!, $locale: [Locales], $siteId: String) {
+    `query getContentByPath($path: [String!]!, $locale: [Locales], $siteId: String) {
         content: Content(
             where: {
                 RelativePath: {
-                    eq: $path
+                    in: $path
                 }
                 SiteId: {
                     eq: $siteId
@@ -32,6 +32,7 @@ export default [
             locale: $locale
         ) {
             items {
+                ...IContentData
                 ...PageData
             }
         }

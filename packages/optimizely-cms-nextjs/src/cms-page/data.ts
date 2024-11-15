@@ -1,25 +1,19 @@
 import { gql, GraphQLClient } from "graphql-request"
 
 export type GetContentByPathVariables<LocaleType = string> = {
-    path: string,
-    locale?: Array<LocaleType | null> | LocaleType | null,
-    siteId?: string | null
+    path: string | string[],
+    locale?: Array<LocaleType> | LocaleType,
+    siteId?: string
 }
 
 type MayBe<T> = T extends Array<infer R> ? Array<R | null> | null : T | null
 
-export type GetContentByPathResponse<LocaleType = string> = {
+export type GetContentByPathResponse = {
     content?: MayBe<{
         items?: MayBe<Array<{
-            _metadata?: MayBe<{
-                key?: MayBe<string>
-                locale?: MayBe<LocaleType>
-                types?: MayBe<Array<string>>
-                displayName?: MayBe<string>
-                version?: MayBe<string>
-            }>
+            __typename?: MayBe<string>
             _type?: MayBe<string>
-        }>>
+        } & Record<string,any>>>
     }>
 }
 
@@ -36,7 +30,7 @@ export type GetMetaDataByPathResponse = {
     }
 }
 
-export type GetContentByPathMethod<LocaleType = string> = (client: GraphQLClient, variables: GetContentByPathVariables<LocaleType>) => Promise<GetContentByPathResponse<LocaleType>>
+export type GetContentByPathMethod<LocaleType = string> = (client: GraphQLClient, variables: GetContentByPathVariables<LocaleType>) => Promise<GetContentByPathResponse>
 export type GetMetaDataByPathMethod<LocaleType = string> = (client: GraphQLClient, variables: GetContentByPathVariables<LocaleType>) => Promise<GetMetaDataByPathResponse>
 
 export const getMetaDataByPath: GetMetaDataByPathMethod = (client, variables) =>
