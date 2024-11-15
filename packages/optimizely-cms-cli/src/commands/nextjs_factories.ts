@@ -51,7 +51,7 @@ export const NextJsFactoryCommand : NextJsModule = {
                 return false
 
             // Skip the special loader component
-            if (p.at(p.length - 1) == "loader.tsx")
+            if (p.at(p.length - 1) == "loading.tsx" || p.at(p.length - 1) == "loading.jsx")
                 return false
             
             // Check if the file has a default export
@@ -76,7 +76,7 @@ export const NextJsFactoryCommand : NextJsModule = {
 
             // Add component to factory
             const factory : ComponentFactoryDefintion = componentFactoryDefintions.get(factoryKey) || { file: factoryFile, entries: [], subfactories: [] }
-            const useSuspense = fs.existsSync(path.join(basePath, component.slice(0,-1).join(path.sep), 'loader.tsx'))
+            const useSuspense = fs.existsSync(path.join(basePath, component.slice(0,-1).join(path.sep), 'loading.tsx')) || fs.existsSync(path.join(basePath, component.slice(0,-1).join(path.sep), 'loading.jsx'))
             if (useSuspense && debug)
                 process.stdout.write(chalk.gray(`${ figures.arrowRight } Components in ${component.slice(0,-1).join(path.sep) } will use suspense\n`))
 
@@ -88,7 +88,7 @@ export const NextJsFactoryCommand : NextJsModule = {
             const loaderImport = useSuspense ? "./" + component.slice(-2).map((p,i,a) => {
                 const entry = p.substring(0, p.length - path.extname(p).length)
                 if (i == a.length - 1)
-                    return 'loader'
+                    return 'loading'
                 return entry.toLowerCase() == "index" ? null : entry
             }).join('/') : undefined
             factory.entries.push({
