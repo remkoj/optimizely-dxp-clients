@@ -10,8 +10,29 @@ export type ComponentType = (ReactComponentType<any>) | (ReactExoticComponent<an
  */
 export type ComponentTypeHandle = string | string[]
 
+export type ComponentTypeDictionary = Array<ComponentTypeDictionaryEntry>
 
-export type ComponentTypeDictionary = {type: ComponentTypeHandle, component: ComponentType}[]
+export type ComponentTypeDictionaryEntry = {
+    /**
+     * The component type to register
+     */
+    type: ComponentTypeHandle, 
+
+    /**
+     * The component to bind to the type
+     */
+    component: ComponentType,
+
+    /**
+     * If set to 'true' the registered component will be wrapped in <Suspense />
+     */
+    useSuspense?: boolean
+
+    /**
+     * The component to use as "loading" state by the <Suspense />
+     */
+    loader?: ComponentType
+}
 
 /**
  * Component Factory
@@ -27,10 +48,13 @@ export interface ComponentFactory {
 
     /**
      * Register an individual component
+     * 
      * @param       type            The component type to register
-     * @param       componentType   The component to bind to the type
+     * @param       component       The component to bind to the type
+     * @param       useSuspense     If set to 'true' the registered component will be wrapped in <Suspense />
+     * @param       loader          The component to use as "loading" state by the <Suspense />
      */
-    register(type: ComponentTypeHandle, componentType: ComponentType) : void
+    register(type: ComponentTypeHandle, component: ComponentType, useSuspense?: boolean, loader?: ComponentType) : void
 
     /**
      * Register all components provided through the dictionary

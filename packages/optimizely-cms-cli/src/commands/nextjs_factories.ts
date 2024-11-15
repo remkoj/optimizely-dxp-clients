@@ -16,12 +16,16 @@ type ComponentFactoryDefintion = {
         key: string
         import: string
         variable: string
+        loaderImport?: string
+        loaderVariable?: string
     }>
     subfactories: Array<{
         key: string
         import: string
         prefix: string | string[]
         variable: string
+        loaderImport?: never
+        loaderVariable?: never
     }>
 }
 
@@ -44,6 +48,10 @@ export const NextJsFactoryCommand : NextJsModule = {
 
             // Consider components in a folder named "partials" as a partial
             if (p.at(p.length - 2)?.toLowerCase() == 'partials')
+                return false
+
+            // Skip the special loader component
+            if (p.at(p.length - 1) == "loader.tsx")
                 return false
             
             // Check if the file has a default export
@@ -68,15 +76,27 @@ export const NextJsFactoryCommand : NextJsModule = {
 
             // Add component to factory
             const factory : ComponentFactoryDefintion = componentFactoryDefintions.get(factoryKey) || { file: factoryFile, entries: [], subfactories: [] }
+            const useSuspense = fs.existsSync(path.join(basePath, component.slice(0,-1).join(path.sep), 'loader.tsx'))
+            if (useSuspense && debug)
+                process.stdout.write(chalk.gray(`${ figures.arrowRight } Components in ${component.slice(0,-1).join(path.sep) } will use suspense\n`))
+
             const componentSegments = component.slice(-2).map(p => {
                 const entry = p.substring(0, p.length - path.extname(p).length)
                 return entry.toLowerCase() == "index" ? null : entry
             }).filter(x=>x)
             const componentImport = "./" + componentSegments.join('/')
+            const loaderImport = useSuspense ? "./" + component.slice(-2).map((p,i,a) => {
+                const entry = p.substring(0, p.length - path.extname(p).length)
+                if (i == a.length - 1)
+                    return 'loader'
+                return entry.toLowerCase() == "index" ? null : entry
+            }).join('/') : undefined
             factory.entries.push({
                 import: componentImport,
                 variable: [ ...componentSegments.map(processName), 'Component'].join(''),
-                key: componentSegments.join('/') == "node" ? "Node" : componentSegments.join('/')
+                key: componentSegments.join('/') == "node" ? "Node" : componentSegments.join('/'),
+                loaderImport,
+                loaderVariable: useSuspense ? [ ...componentSegments.map(processName), 'Loader'].join('') : undefined,
             })
             componentFactoryDefintions.set(factoryKey, factory);
 
@@ -199,7 +219,13 @@ function generateFactory(factoryInfo: ComponentFactoryDefintion, factoryKey: str
     const factoryContent = `// Auto generated dictionary
 // @not-modified => When this line is removed, the "force" parameter of the CLI tool is required to overwrite this file
 import { type ComponentTypeDictionary } from "@remkoj/optimizely-cms-react";
-${ [...components,...subFactories].map(x => `import ${ x.variable } from "${ x.import }";`).join("\n") }
+${ [...components,...subFactories].map(x => {
+    let importLine = `import ${ x.variable } from "${ x.import }";`
+    if (x.loaderImport && x.loaderVariable) {
+        importLine += `\nimport ${ x.loaderVariable } from "${ x.loaderImport }";`
+    }
+    return importLine
+}).join("\n") }
 
 ${ needsPrefixFunction ? `// Prefix entries - if needed
 ${ subFactories.map(subFactory => Array.isArray(subFactory.prefix) ?
@@ -209,10 +235,21 @@ ${ subFactories.map(subFactory => Array.isArray(subFactory.prefix) ?
 
 ` : ''}// Build dictionary
 export const ${factoryName} : ComponentTypeDictionary = [
-    ${ [...components.map(x => `{ 
+    ${ [...components.map(x => {
+        if (x.loaderVariable) {
+            return `{ 
+        type: "${x.key}", 
+        component: ${x.variable},
+        useSuspense: true,
+        loader: ${x.loaderVariable}
+    }`
+        } else {
+            return `{ 
         type: "${x.key}", 
         component: ${x.variable} 
-    }`), ...subFactories.map(x => 
+    }`
+        }
+    }), ...subFactories.map(x => 
         `...${ x.variable }`
     )].join(",\n    ")}
 ];
