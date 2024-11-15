@@ -235,14 +235,15 @@ export function createPage<
             if (isDebug())
                 console.log(`⚪ [CmsPage] Processed Next.JS route: ${ JSON.stringify(props) } => Optimizely CMS route: ${ JSON.stringify({ path: requestPath })}`)
 
-            // If we don't have the path, or the path is an internal Next.JS route reject it.
+            // If we don't have the path, or the path is an internal Next.js route reject it.
             if (!requestPath || requestPath.startsWith('/_next/'))
                 return notFound()
 
             // Resolve the content based upon the path
+            const pathForRequest = requestPath.endsWith("/") ? [ requestPath.substring(0, requestPath.length - 1), requestPath ] : [ requestPath, requestPath + '/' ]
             const requestVars = {
-                path: requestPath,
-                siteId: channel ? (globalClient.currentOptiCmsSchema == OptiCmsSchema.CMS12 ? channel.id : getPrimaryURL(channel).href) : null
+                path: pathForRequest,
+                siteId: channel ? (globalClient.currentOptiCmsSchema == OptiCmsSchema.CMS12 ? channel.id : getPrimaryURL(channel).href) : undefined
             }
             if (isDebug())
                 console.log(`⚪ [CmsPage] Processed Next.JS route: ${ JSON.stringify(props) } => getContentByPath Variables: ${ JSON.stringify(requestVars)}`)

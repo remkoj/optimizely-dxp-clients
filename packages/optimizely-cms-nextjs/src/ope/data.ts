@@ -4,7 +4,7 @@ import { type GraphQLClient , gql } from 'graphql-request'
 
 export const getContentById : GetContentByIdMethod = async <LocaleType = string>(client: GraphQLClient, variables: ContentQueryProps<LocaleType>) =>
 {
-    return await client.request<GetContentByIdData<LocaleType>, ContentQueryProps<LocaleType>>(gqlQuery, variables)
+    return await client.request<GetContentByIdData, ContentQueryProps<LocaleType>>(gqlQuery, variables)
 }
 
 const gqlQuery = gql`query getContentByIdBase($key: String!, $version: String, $locale: [Locales!], $path: String, $domain: String) {

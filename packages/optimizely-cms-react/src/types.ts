@@ -1,7 +1,7 @@
 import type { PropsWithChildren, ComponentType as ReactComponentType } from "react"
 import type { DocumentNode } from "graphql"
 import type { TypedDocumentNode } from '@graphql-typed-document-node/core'
-import type { ContentLinkWithLocale, InlineContentLinkWithLocale } from "@remkoj/optimizely-graph-client"
+import type { ContentLinkWithLocale, ContentLink, InlineContentLinkWithLocale } from "@remkoj/optimizely-graph-client"
 
 // Export reused content types
 export type ContentType = string[]
@@ -38,7 +38,8 @@ export type CmsComponentProps<T, L extends Record<string, any> = Record<string, 
     layoutProps?: L
 }>
 
-export type ContentQueryProps<LocaleType = string> = ContentLinkWithLocale<LocaleType> & {
+export type ContentQueryProps<LocaleType = string> = ContentLink & {
+    locale?: Array<LocaleType> | LocaleType | null
     path?: string | null
     domain?: string | null
 }
