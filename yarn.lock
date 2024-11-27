@@ -1528,7 +1528,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@remkoj/optimizely-cms-api@workspace:3.2.1, @remkoj/optimizely-cms-api@workspace:packages/optimizely-cms-api":
+"@remkoj/optimizely-cms-api@workspace:3.2.2, @remkoj/optimizely-cms-api@workspace:packages/optimizely-cms-api":
   version: 0.0.0-use.local
   resolution: "@remkoj/optimizely-cms-api@workspace:packages/optimizely-cms-api"
   dependencies:
@@ -1546,7 +1546,7 @@ __metadata:
   resolution: "@remkoj/optimizely-cms-cli@workspace:packages/optimizely-cms-cli"
   dependencies:
     "@inquirer/prompts": "npm:^7.1.0"
-    "@remkoj/optimizely-cms-api": "workspace:3.2.1"
+    "@remkoj/optimizely-cms-api": "workspace:3.2.2"
     "@rollup/plugin-json": "npm:^6.1.0"
     "@rollup/plugin-typescript": "npm:^12.1.1"
     "@types/node": "npm:^22.10.0"
@@ -1562,7 +1562,7 @@ __metadata:
     typescript: "npm:^5.7.2"
     yargs: "npm:^17.7.2"
   peerDependencies:
-    "@remkoj/optimizely-cms-api": ^3.2.1
+    "@remkoj/optimizely-cms-api": ^3.2.2
     "@types/node": "*"
   bin:
     opti-cms: ./dist/index.js
@@ -1573,8 +1573,8 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@remkoj/optimizely-cms-nextjs@workspace:packages/optimizely-cms-nextjs"
   dependencies:
-    "@remkoj/optimizely-cms-react": "workspace:3.2.1"
-    "@remkoj/optimizely-graph-client": "workspace:3.2.1"
+    "@remkoj/optimizely-cms-react": "workspace:3.2.2"
+    "@remkoj/optimizely-graph-client": "workspace:3.2.2"
     "@types/node": "npm:^22.10.0"
     "@types/react": "npm:^18.3.12"
     "@types/react-dom": "npm:18.3.1"
@@ -1597,12 +1597,12 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@remkoj/optimizely-cms-react@workspace:3.2.1, @remkoj/optimizely-cms-react@workspace:packages/optimizely-cms-react":
+"@remkoj/optimizely-cms-react@workspace:3.2.2, @remkoj/optimizely-cms-react@workspace:packages/optimizely-cms-react":
   version: 0.0.0-use.local
   resolution: "@remkoj/optimizely-cms-react@workspace:packages/optimizely-cms-react"
   dependencies:
     "@graphql-typed-document-node/core": "npm:^3.2.0"
-    "@remkoj/optimizely-graph-client": "workspace:3.2.1"
+    "@remkoj/optimizely-graph-client": "workspace:3.2.2"
     "@types/crypto-js": "npm:^4.2.2"
     "@types/node": "npm:^22.10.0"
     "@types/react": "npm:^18.3.12"
@@ -1630,7 +1630,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@remkoj/optimizely-graph-cli@workspace:packages/optimizely-graph-cli"
   dependencies:
-    "@remkoj/optimizely-graph-client": "workspace:3.2.1"
+    "@remkoj/optimizely-graph-client": "workspace:3.2.2"
     "@rollup/plugin-commonjs": "npm:^28.0.1"
     "@rollup/plugin-json": "npm:^6.1.0"
     "@rollup/plugin-typescript": "npm:^12.1.1"
@@ -1657,7 +1657,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@remkoj/optimizely-graph-client@workspace:3.2.1, @remkoj/optimizely-graph-client@workspace:^3.2.1, @remkoj/optimizely-graph-client@workspace:packages/optimizely-graph-client":
+"@remkoj/optimizely-graph-client@workspace:3.2.2, @remkoj/optimizely-graph-client@workspace:^3.2.2, @remkoj/optimizely-graph-client@workspace:packages/optimizely-graph-client":
   version: 0.0.0-use.local
   resolution: "@remkoj/optimizely-graph-client@workspace:packages/optimizely-graph-client"
   dependencies:
@@ -1693,7 +1693,7 @@ __metadata:
     typescript: "npm:^5.7.2"
   peerDependencies:
     "@graphql-typed-document-node/core": "*"
-    "@remkoj/optimizely-graph-client": 3.2.1
+    "@remkoj/optimizely-graph-client": 3.2.2
     graphql: "*"
     graphql-request: ^6.1.0
     graphql-tag: "*"
@@ -1707,7 +1707,7 @@ __metadata:
     "@headlessui/react": "npm:^2.2.0"
     "@headlessui/tailwindcss": "npm:^0.2.1"
     "@heroicons/react": "npm:^2.2.0"
-    "@remkoj/optimizely-graph-client": "workspace:^3.2.1"
+    "@remkoj/optimizely-graph-client": "workspace:^3.2.2"
     "@types/node": "npm:^22.10.0"
     "@types/react": "npm:^18.3.12"
     "@types/react-dom": "npm:18.3.1"
@@ -1726,7 +1726,7 @@ __metadata:
   peerDependencies:
     "@headlessui/react": "*"
     "@heroicons/react": "*"
-    "@remkoj/optimizely-graph-client": ^3.2.1
+    "@remkoj/optimizely-graph-client": ^3.2.2
     next: "*"
     react: "*"
     react-dom: "*"

@@ -46,12 +46,14 @@ export const CmsEditable = clientContextAware(BaseEditable) as CmsEditableCompon
  * content type and content data when needed
  */
 export const CmsContent = clientContextAware(BaseCmsContent) as CmsContentComponent
+export type { CmsContentComponent, CmsContentProps } from "./cms-content/client.js"
 
 /**
  * Client side Optimizely CMS Content Area, leveraging the CMS Context to infer
  * the connection to Optimizely Graph and component dictionary.
  */
 export const CmsContentArea = cmsContentAware(clientContextAware(BaseContentArea), CmsContent) as CmsContentAreaComponent
+export type { CmsContentAreaClassMapper, CmsContentAreaComponent, CmsContentAreaProps, ContentAreaItemDefinition } from "./cms-content-area/index.js"
 
 /**
  * Client side Optimizely Composition (e.g. Visual Builder), leveraging the CMS

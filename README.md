@@ -31,6 +31,9 @@ If you find a bug, or have a feature request, please [report it as an issue](htt
 These SDKs rely on - but don't include or bundle - work from others. These dependencies, including their license, are disclosed in [the dependency overview](./DEPENDENCIES.md).
 
 ## Release Notes
+### v3.2.2
+- Restored some of type exports of [@remkoj/optimizely-cms-react/rsc](./packages/optimizely-cms-react/), used by the CMS 12 compatibility script.
+
 ### v3.2.1
 - Fixed generation of GraphQL Fragments for Array properties with subtype "Component"
 - Updated dependencies to latest versions
