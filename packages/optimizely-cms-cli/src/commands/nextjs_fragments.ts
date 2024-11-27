@@ -119,34 +119,40 @@ function createInitialFragment(contentType : IntegrationApi.ContentType, forProp
         // Write the property
         switch (propType) {
             case IntegrationApi.PropertyDataType.ARRAY:
-                switch ((typeProps[propKey] as IntegrationApi.ListProperty).items.type) {
-                    case "integer":
-                        if ((typeProps[propKey] as IntegrationApi.ListProperty).format == 'categorization')
+            {
+                const typeData = typeProps[propKey] as IntegrationApi.ListProperty
+                switch (typeData.items.type) {
+                    case IntegrationApi.PropertyDataType.INTEGER:
+                        if (typeData.format == 'categorization')
                             fragmentFields.push(`${ propName } { Id, Name, Description }`)
                         else
                             fragmentFields.push(propName)
                         break
-                    case "string":
+                    case IntegrationApi.PropertyDataType.STRING:
                         fragmentFields.push(propName)
                         break;
-                    case "content":
+                    case IntegrationApi.PropertyDataType.CONTENT:
                         if (contentType.baseType == 'page' || (contentType.baseType as string) == 'experience')
                             fragmentFields.push(`${ propName } { ...${ forCms12 ? 'PageIContentListItem' : 'BlockData' } }`)
                         else
                             fragmentFields.push(`${ propName } { ...IContentListItem }`)
                         break;
-                    case "component":
-                        const componentType = ((typeProps[propKey] as IntegrationApi.ListProperty).items  as IntegrationApi.ComponentProperty).contentType
+                    case IntegrationApi.PropertyDataType.COMPONENT:
+                        const componentType = (typeData.items as IntegrationApi.ComponentListItem).contentType
                         switch (componentType) {
                             case 'link':
                                 fragmentFields.push(`${ propName } { ...LinkItemData }`)
                                 break;
-                            default:
-                                fragmentFields.push(`${ propName } { ...${ componentType }Data }`)
+                            default: 
+                            {
+                                const componentFragmentName = forCms12 ? contentType.key + componentType : componentType + 'Property'
+                                fragmentFields.push(`${ propName } { ...${ componentFragmentName }Data }`)
+                                propertyTypes.push([componentType, true])
                                 break;
+                            }
                         }
                         break;
-                    case "contentReference":
+                    case IntegrationApi.PropertyDataType.CONTENT_REFERENCE:
                         fragmentFields.push(`${ propName } { ...ReferenceData }`)
                         break;
                     default:
@@ -154,6 +160,7 @@ function createInitialFragment(contentType : IntegrationApi.ContentType, forProp
                         break;
                 }
                 break;
+            }
             case IntegrationApi.PropertyDataType.STRING: {
                 const propDetails = typeProps[propKey] as IntegrationApi.StringProperty
                 switch (propDetails.format ?? "") {
