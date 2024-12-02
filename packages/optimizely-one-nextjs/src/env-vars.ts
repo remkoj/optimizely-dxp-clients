@@ -11,4 +11,5 @@ export const enum EnvVars {
     WebExperimentationProject = 'OPTIMIZELY_WEB_EXPERIMENTATION_PROJECT',
     OptimizelyDebug = 'OPTIMIZELY_DEBUG'
 }
+
 export default EnvVars

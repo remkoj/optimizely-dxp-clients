@@ -1,7 +1,8 @@
 import { type FunctionComponent } from 'react'
-import { TagIcon, ArrowPathIcon } from '@heroicons/react/20/solid'
+import { TagIcon } from '@heroicons/react/20/solid'
 import useSWR from 'swr'
 import type { ProfileApiResponse as MeResponse } from '../../api/profile-api-service'
+import Notice from './_notice'
 
 export type InterestsPanelProps = {
     servicePrefix?: string
@@ -23,19 +24,19 @@ export const InterestsPanel : FunctionComponent<InterestsPanelProps> = ({ servic
     })
 
     if (error)
-        return <p className='oo-m-2 md:oo-m-4 oo-rounded-md oo-bg-amber-200 oo-border oo-border-amber-800 oo-text-amber-800 oo-p-1 md:oo-p-2'>There was an error loading your profile information</p>
+        return <Notice>There was an error loading your profile information</Notice>
 
-    const contentTopics : JSX.Element[] = (profile?.contentTopics ?? []).map(t => <li className='oo-py-1' key={"topic-"+t}><TagIcon className='oo-inline-block oo-h-[16px] oo-w-[16px] oo-mr-2' />{ t }</li>)
+    const contentTopics : JSX.Element[] = (profile?.contentTopics ?? []).map(t => <li className='oo-list-item' key={"topic-"+t}><TagIcon className='oo-list-item-icon' />{ t }</li>)
     if (contentTopics.length == 0)
-        contentTopics.push(<li className='oo-py-1' key="no-topics"><div className="oo-m-2 md:oo-m-4 oo-rounded-md oo-bg-amber-200 oo-border oo-border-amber-800 oo-text-amber-800 oo-p-1 md:oo-p-2">No topics inferred from behaviour</div></li>)
+        contentTopics.push(<li className='oo-list-item' key="no-topics"><Notice>No topics inferred from behaviour</Notice></li>)
 
     return <>
-        <ul className='oo-text-[14px] oo-grid oo-grid-cols-1 oo-divide-y oo-divide-slate-200'>
+        <ul className='oo-list'>
             { contentTopics }
         </ul>
-        <p className='oo-text-[12px]'>Powered by: Optimizely Content Recommendations</p>
-        { (isValidating && !isLoading) && <p className='oo-text-[14px] oo-m-2 md:oo-m-4 oo-rounded-md oo-bg-amber-200 oo-border oo-border-amber-800 oo-text-amber-800 oo-p-1 md:oo-p-2'><ArrowPathIcon className='oo-inline-block oo-h-4 oo-w-4 oo-ml-2 oo-animate-spin' /> Refreshing interests</p> }
-        { isLoading && <p className='oo-m-2 md:oo-m-4 oo-rounded-md oo-bg-amber-200 oo-border oo-border-amber-800 oo-text-amber-800 oo-p-1 md:oo-p-2'><ArrowPathIcon className='oo-inline-block oo-h-4 oo-w-4 oo-mr-2 oo-animate-spin' /> Loading interests</p> }
+        <p className='oo-small'>Powered by: Optimizely Content Recommendations</p>
+        { (isValidating && !isLoading) && <Notice isLoading> Refreshing interests</Notice> }
+        { isLoading && <Notice isLoading> Loading interests</Notice> }
     </>
 }
 
