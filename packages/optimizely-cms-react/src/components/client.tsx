@@ -13,10 +13,9 @@ import { RichText as BaseRichText, type RichTextComponent } from './rich-text/in
 
 // Pass through Style functions types
 export type { BaseStyleDefinition, ElementStyleDefinition, LayoutProps, LayoutPropsSetting, LayoutPropsSettingChoices, LayoutPropsSettingKeys, LayoutPropsSettingValues, NodeStyleDefinition, StyleDefinition, StyleSetting } from "./cms-styles/index.js"
+export { isNode, isElementNode, isElementNodeOfType, isStructureNode } from "./visual-builder/functions.js"
 export { extractSettings, readSetting } from "./cms-styles/index.js"
 
-// Export dictionary
-export { DefaultComponents as RichTextComponentDictionary } from './rich-text/components.js' 
 
 /**
  * Wrapper function to turn context dependant components into easy to use 
@@ -65,4 +64,7 @@ export const OptimizelyComposition = cmsContentAware(clientContextAware(BaseOpti
 /**
  * Client side renderer for Rich Text
  */
-export const RichText = BaseRichText as RichTextComponent
+export const RichText = clientContextAware(BaseRichText) as RichTextComponent
+export type { RichTextComponent, RichTextProps, RichTextNode, StringNode, TypedNode, NodeInput } from "./rich-text/index.js"
+export { DefaultComponents as RichTextComponentDictionary, createHtmlComponent } from './rich-text/components.js'
+export { isNodeInput, isNonEmptyString, isRichTextNode, isStringNode, isText, isTypedNode  } from "./rich-text/utils.js"

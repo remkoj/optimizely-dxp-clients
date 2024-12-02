@@ -11,11 +11,9 @@ import { OptimizelyComposition as BaseOptimizelyComposition, type OptimizelyComp
 import { RichText as BaseRichText, type RichTextComponent } from './rich-text/index.js'
 
 // Pass through Style functions types
-export * from "./cms-styles/index.js"
+export type { BaseStyleDefinition, ElementStyleDefinition, LayoutProps, LayoutPropsSetting, LayoutPropsSettingChoices, LayoutPropsSettingKeys, LayoutPropsSettingValues, NodeStyleDefinition, StyleDefinition, StyleSetting } from "./cms-styles/index.js"
 export { isNode, isElementNode, isElementNodeOfType, isStructureNode } from "./visual-builder/functions.js"
-
-// Export dictionary
-export { DefaultComponents as RichTextComponentDictionary } from './rich-text/components.js' 
+export { extractSettings, readSetting } from "./cms-styles/index.js"
 
 /**
  *  Fallback while RSC hasn't been moved from Canary to Main
@@ -34,6 +32,8 @@ export function serverContextAware<P = any>(component: ReactServerComponentType<
     const BaseComponent = component as ComponentType<PropsWithContext<P>>
     const ServerContextInjector : ComponentType<P> = (props: P) => {
         const ctx = getServerContext()
+        if (!ctx)
+            console.log(`🔴 [ServerContextAware] Context for context aware component ${ BaseComponent.displayName ?? BaseComponent.name ?? '[ANONYMOUS]'} is not defined!`, ctx)
         return <BaseComponent ctx={ctx} { ...props } />
     }
     ServerContextInjector.displayName = "Server Context Injector"
@@ -70,4 +70,7 @@ export const OptimizelyComposition = cmsContentAware(serverContextAware(BaseOpti
 /**
  * Client side renderer for Rich Text
  */
-export const RichText = BaseRichText as RichTextComponent
+export const RichText = serverContextAware(BaseRichText) as RichTextComponent
+export type { RichTextComponent, RichTextProps, RichTextNode, StringNode, TypedNode, NodeInput } from "./rich-text/index.js"
+export { DefaultComponents as RichTextComponentDictionary, createHtmlComponent } from './rich-text/components.js'
+export { isNodeInput, isNonEmptyString, isRichTextNode, isStringNode, isText, isTypedNode  } from "./rich-text/utils.js"

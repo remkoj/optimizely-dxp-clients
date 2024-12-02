@@ -77,12 +77,18 @@ export class DefaultComponentFactory implements ComponentFactory {
 
     extract() : ComponentTypeDictionary
     {
-        return Array.from(this.registry.entries()).map(e => {
-            return {
-                ...e[1],
-                type: e[0]
-            }
+        return Array.from(this.registry.entries()).map(([key, entry]) => {
+            return { ...entry, type: key }
         })
+    }
+
+    remove(type: ComponentTypeHandle)
+    {
+        const registryKey = processComponentTypeHandle(type)
+        if (this.dbg) console.log(`🔎 [DefaultComponentFactory] Removing ${ registryKey }`)
+        if (!this.registry.has(registryKey))
+            return true
+        return this.registry.delete(registryKey)
     }
 }
 
