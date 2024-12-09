@@ -25,11 +25,12 @@ export function getCmsIntegrationApiConfigFromEnvironment() : CmsIntegrationApiO
 
     let baseUrl : URL
     try {
-        baseUrl = new URL(OpenAPI.BASE, cmsUrl)
+        const cmsUrlAdjusted = cmsUrl.includes("://") ? cmsUrl : 'https://'+cmsUrl
+        baseUrl = new URL(OpenAPI.BASE, cmsUrlAdjusted)
         if (cmsVersion == OptiCmsVersion.CMS12)
             baseUrl.pathname = baseUrl.pathname.replace('preview2', 'preview1')
     } catch (e) {
-        throw new Error("Invalid URL provided")
+        throw new Error("Invalid Optimizely CMS URL provided")
     }
 
     if (debug)
