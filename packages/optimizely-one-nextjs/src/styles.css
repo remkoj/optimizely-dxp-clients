@@ -25,7 +25,7 @@
         @apply oo-inline-block oo-h-[1.5em] oo-w-[1.5em] oo-mr-[0.5em] oo-text-blue-500
     }
     .oo-gadget-tab-list {
-        @apply oo-flex-none oo-flex oo-justify-between md:oo-justify-start oo-gap-2 oo-p-1 md:oo-p-2 oo-pb-0 md:oo-pb-0 oo-border-b oo-border-slate-300
+        @apply oo-flex-none oo-flex oo-justify-between md:oo-justify-start oo-gap-[0.25em] oo-px-[0.25em] oo-pt-[0.5em] oo-border-b oo-border-slate-300
     }
     .oo-gadget-tab-label {
         @apply oo-text-center oo-inline-block oo-cursor-pointer oo-px-2 oo-py-1 oo-border oo-border-b-0 oo-border-slate-300 oo-rounded-t-md oo-ui-selected:oo-bg-blue-500 oo-ui-selected:oo-text-white
