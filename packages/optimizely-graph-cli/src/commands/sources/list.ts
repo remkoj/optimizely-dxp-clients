@@ -17,8 +17,11 @@ type CommandProps = { }
  * exports.deprecated: a boolean (or string) to show deprecation notice.
  */
 export const GraphSourceListCommand : CliModule<CommandProps> = {
-    command: ['source:list','sl'],
+    command: ['source:list','sl',"$0"],
     handler: async (args) => {
+        if (args._[0])
+            throw new Error(`Unknown command ${ chalk.bold(args._[0]) }, supported usage:`)
+
         // Read configuration
         const cgConfig = getArgsConfig(args)
 

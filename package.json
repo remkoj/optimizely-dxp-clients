@@ -1,6 +1,6 @@
 {
   "name": "optimizely-dxp-clients",
-  "version": "3.2.2",
+  "version": "3.2.3",
   "description": "Javascript clients for Optimizely Products",
   "repository": "https://github.com/remkoj/optimizely-dxp-clients.git",
   "author": "Remko Jantzen <693172+remkoj@users.noreply.github.com>",
@@ -8,7 +8,7 @@
   "license": "Apache-2.0",
   "private": true,
   "devDependencies": {
-    "@types/node": "^22.10.0",
+    "@types/node": "^22.10.1",
     "@yarnpkg/sdks": "^3.2.0",
     "browserslist": "^4.24.2",
     "glob": "^11.0.0",

@@ -1,24 +1,12 @@
-import * as dotenv from 'dotenv'
-import * as dotenvExpand from 'dotenv-expand'
-import * as path from 'node:path'
+import { globSync as glob } from 'glob'
+import dotenv from 'dotenv'
+import { expand } from 'dotenv-expand'
 
-function processEnvFile(suffix: string = "")
+export function buildEnvironment() : Array<string>
 {
-    const envVars = dotenv.config({
-        path: path.resolve(process.cwd(), `.env${ suffix }`)
-    });
-    dotenvExpand.expand(envVars);
-}
-
-const envName = process.env.OPTI_BUILD_ENV ?? process.env.NODE_ENV ?? 'development'
-processEnvFile(`.${ envName }.local`)
-processEnvFile(`.${ envName }`)
-processEnvFile('.local')
-processEnvFile();
-
-export function buildEnvironment() : void
-{
-    //Do nothing here for now
+    const envFiles = glob(".env*").sort((a, b) => b.length - a.length).filter(n => n == ".env" || n == ".env.local" || (process.env.NODE_ENV && n == `.env.${ process.env.NODE_ENV }.local`));
+    expand(dotenv.config({ path: envFiles }));
+    return envFiles;
 }
 
 export default buildEnvironment
