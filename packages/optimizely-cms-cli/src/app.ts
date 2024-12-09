@@ -1,16 +1,19 @@
 import { CmsIntegrationApiOptions, getCmsIntegrationApiConfigFromEnvironment } from '@remkoj/optimizely-cms-api'
 import yargs from 'yargs'
 import { type OptiCmsApp } from './types.js'
+import chalk from 'chalk';
 
-export function createOptiCmsApp(scriptName: string, version?: string, epilogue?: string) : OptiCmsApp
+export function createOptiCmsApp(scriptName: string, version?: string, epilogue?: string, envFiles?: Array<string>) : OptiCmsApp
 {
+    let configError = ""
     let config : CmsIntegrationApiOptions;
     try {
         config = getCmsIntegrationApiConfigFromEnvironment()
-    } catch {
-        config = {
-            base: new URL('https://example.cms.optimizely.com')
-        }
+    } catch (e) {
+        if (envFiles)
+            console.error(chalk.gray(`Included environment files: ${ envFiles.join(', ') }`))
+        console.error(chalk.redBright(`${ chalk.bold("[ERROR]:") } Error processing environment variables: ${ e.message }`))
+        process.exit(1)
     }
     return yargs(process.argv)
         .scriptName(scriptName)
@@ -23,10 +26,24 @@ export function createOptiCmsApp(scriptName: string, version?: string, epilogue?
         .option('client_secret', { alias: "cs", description: "API Client Secrent", string: true, type: "string", demandOption: isDemanded(config.clientSecret), default: config.clientSecret })
         .option('user_id', { alias: "u", description: "Impersonate user id", string: true, type: "string", demandOption: false, default: config.actAs })
         .option('verbose', { description: "Enable logging", boolean: true, type: 'boolean', demandOption: false, default: config.debug })
+        .group(['path','components'], "Frontend:")
+        .group(['cms_url','client_id','client_secret','user_id'], "Optimizely CMS Instance:")
+        .group(['verbose','help','version'], "Debugging:")
         .demandCommand(1,1)
-        .showHelpOnFail(true)
         .epilogue(epilogue ?? `Copyright Remko Jantzen - 2023-${ (new Date(Date.now())).getFullYear() }`)
         .help()
+        .fail((msg, error, args) => {
+            if (envFiles)
+                console.error(chalk.gray(`Included environment files: ${ envFiles.join(', ') }\n`))
+
+            if (msg)
+                console.error(msg+"\n")
+
+            if (error)
+                console.error(`[${ chalk.bold(error.name ?? 'Error') }]: ${ error.message ?? ''}\n`)
+
+            args.showHelp("error")
+        })
 }
 
 export default createOptiCmsApp

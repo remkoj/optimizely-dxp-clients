@@ -19,8 +19,22 @@ export function readEnvironmentVariables() : Types.OptimizelyGraphConfig
         publish: getOptional('OPTIMIZELY_PUBLISH_TOKEN'),
         opti_cms_schema: getSelection<OptiCmsSchema>('OPTIMIZELY_CMS_SCHEMA', [OptiCmsSchema.CMS12,OptiCmsSchema.CMS13], OptiCmsSchema.CMS13)
     }
+    // Make sure that the Gateway is normalized
     if (config.gateway && config.gateway?.endsWith("/"))
         config.gateway = config.gateway.substring(0, config.gateway.length - 1)
+
+    // Make sure that the Optimizely CMS Domain is adjusted correctly
+    if (config.dxp_url &&  config.dxp_url != "" && !config.dxp_url.includes("://"))
+        config.dxp_url = "https://"+config.dxp_url
+
+    if (config.deploy_domain && config.deploy_domain != "" && config.deploy_domain.includes("://"))
+        try {
+            const nd = new URL(config.deploy_domain)
+            config.deploy_domain = nd.host
+        } catch {
+            config.deploy_domain = config.deploy_domain.substring(config.deploy_domain.indexOf("://") + 3)
+        }
+
     return config
 }
 
