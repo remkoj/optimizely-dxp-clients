@@ -240,7 +240,7 @@ export function createPage<
                 return notFound()
 
             // Resolve the content based upon the path
-            const pathForRequest = requestPath.endsWith("/") ? [ requestPath.substring(0, requestPath.length - 1), requestPath ] : [ requestPath, requestPath + '/' ]
+            const pathForRequest = (requestPath.endsWith("/") ? [ requestPath.substring(0, requestPath.length - 1), requestPath ] : [ requestPath, requestPath + '/' ]).filter(x => x.length >= 1)
             const requestVars = {
                 path: pathForRequest,
                 siteId: channel ? (globalClient.currentOptiCmsSchema == OptiCmsSchema.CMS12 ? channel.id : getPrimaryURL(channel).href) : undefined
