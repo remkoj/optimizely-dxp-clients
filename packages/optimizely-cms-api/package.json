@@ -3,7 +3,6 @@
   "displayName": "Optimizely CMS - Integration API Client",
   "description": "A Javascript client for the Integration API provided by the Optimizely CMS.",
   "version": "4.0.0-rc1",
-  "packageManager": "yarn@4.3.0",
   "type": "commonjs",
   "license": "Apache-2.0",
   "main": "./dist/index.js",

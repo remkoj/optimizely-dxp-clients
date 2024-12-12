@@ -1,7 +1,6 @@
 {
   "name": "@remkoj/optimizely-cms-cli",
   "description": "Optimizely CMS CLI Tools",
-  "packageManager": "yarn@4.2.2",
   "type": "module",
   "version": "4.0.0-rc1",
   "bin": {
