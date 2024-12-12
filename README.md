@@ -31,6 +31,9 @@ If you find a bug, or have a feature request, please [report it as an issue](htt
 These SDKs rely on - but don't include or bundle - work from others. These dependencies, including their license, are disclosed in [the dependency overview](./DEPENDENCIES.md).
 
 ## Release Notes
+### v4.0.0
+- Updates to support for the December 16th release of Optimizely SaaS CMS
+
 ### v3.2.3
 - Enhanced the error handling and parsing of `.env` files by [@remkoj/optimizely-cms-cli](./packages/optimizely-cms-cli/) and [@remkoj/optimizely-graph-cli](./packages/optimizely-graph-cli/).
 

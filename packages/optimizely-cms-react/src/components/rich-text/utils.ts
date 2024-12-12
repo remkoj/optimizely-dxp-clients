@@ -34,3 +34,25 @@ export function getRandomId(scope: string = "richText") : string
 {
     return `${scope}::${ Math.round(Math.random() * 100000) }`
 }
+
+export function isRichTextNode(toTest: any) : toTest is RichTextNode
+{
+    return isTypedNode(toTest) && toTest.type == 'richText'
+}
+
+export function isStringNode(toTest: any) : toTest is StringNode
+{
+    return isTypedNode(toTest) && toTest.type == 'string'
+}
+
+/**
+ * Test if the provided value is a valid output of the XHTML field-type within
+ * Optimizely CMS
+ * 
+ * @param       toTest 
+ * @returns 
+ */
+export function isNodeInput(toTest: any) : toTest is NodeInput
+{
+    return isRichTextNode(toTest) || isStringNode(toTest)
+}

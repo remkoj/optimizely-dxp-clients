@@ -7,6 +7,9 @@ import type { ComponentFactory, ComponentTypeHandle } from './factory/types.js';
 import { TYPE_MERGE_SYMBOL } from './factory/index.js';
 import { localeToGraphLocale } from '@remkoj/optimizely-graph-client/utils';
 
+//Export the Rich-Text utilities
+export * from './components/rich-text/utils.js'
+
 export function isNonEmptyString(toTest: any) : toTest is string
 {
     return typeof(toTest) == 'string' && toTest.length > 0
