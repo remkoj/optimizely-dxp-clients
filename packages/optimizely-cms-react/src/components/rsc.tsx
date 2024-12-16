@@ -12,10 +12,11 @@ import { RichText as BaseRichText, type RichTextComponent } from './rich-text/in
 
 // Pass through Style functions types
 export * from "./cms-styles/index.js"
-export { isNode, isElementNode, isElementNodeOfType, isStructureNode } from "./visual-builder/functions.js"
+export { isNode, isComponentNode, isComponentNodeOfType, isStructureNode, isElementNode } from "./visual-builder/functions.js"
 
-// Export dictionary
-export { DefaultComponents as RichTextComponentDictionary } from './rich-text/components.js' 
+// Export dictionary & pass through RichText Types
+export { DefaultComponents as RichTextComponentDictionary } from './rich-text/components.js'  
+export type { TypedNode, RichTextNode, StringNode, NodeInput } from "./rich-text/index.js"
 
 /**
  *  Fallback while RSC hasn't been moved from Canary to Main

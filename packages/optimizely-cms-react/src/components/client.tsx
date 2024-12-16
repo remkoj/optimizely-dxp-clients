@@ -15,8 +15,9 @@ import { RichText as BaseRichText, type RichTextComponent } from './rich-text/in
 export type { BaseStyleDefinition, ElementStyleDefinition, LayoutProps, LayoutPropsSetting, LayoutPropsSettingChoices, LayoutPropsSettingKeys, LayoutPropsSettingValues, NodeStyleDefinition, StyleDefinition, StyleSetting } from "./cms-styles/index.js"
 export { extractSettings, readSetting } from "./cms-styles/index.js"
 
-// Export dictionary
+// Export dictionary & pass through RichText Types
 export { DefaultComponents as RichTextComponentDictionary } from './rich-text/components.js' 
+export type { TypedNode, RichTextNode, StringNode, NodeInput } from "./rich-text/index.js"
 
 /**
  * Wrapper function to turn context dependant components into easy to use 
