@@ -32,7 +32,7 @@ These SDKs rely on - but don't include or bundle - work from others. These depen
 
 ## Release Notes
 ### v4.0.0
-- Updates to support for the December 16th release of Optimizely SaaS CMS
+- Updates to support for the December 16th release of Optimizely SaaS CMS. There are no changes in the exposed APIs from these packages.
 
 ### v3.2.3
 - Enhanced the error handling and parsing of `.env` files by [@remkoj/optimizely-cms-cli](./packages/optimizely-cms-cli/) and [@remkoj/optimizely-graph-cli](./packages/optimizely-graph-cli/).
