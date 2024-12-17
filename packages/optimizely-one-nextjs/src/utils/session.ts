@@ -1,25 +1,21 @@
-import { v4 as createGuid } from 'uuid'
-import * as EnvTools from './env'
-import EnvVars from '../env-vars'
-
 import type { NextRequest, NextResponse } from 'next/server'
-import type { ReadonlyRequestCookies } from '../products/types'
+import type { cookies  } from "next/headers"
+import { v4 as createGuid } from 'uuid'
+import getConfig from '../config'
 
 export function getOrCreateVisitorId(request: NextRequest) : string
 {
-    const cookieName = EnvTools.readValue(EnvVars.FrontendCookie, 'visitorId')
-    return request.cookies.get(cookieName)?.value ?? createGuid()
+    return request.cookies.get(getConfig().FrontendCookie)?.value ?? createGuid().replaceAll('-','')
 }
 
-export function getVisitorId(c: ReadonlyRequestCookies) : string | undefined
+export function getVisitorId(c: ReturnType<typeof cookies>) : string | undefined
 {
-    const cookieName = EnvTools.readValue(EnvVars.FrontendCookie, 'visitorId')
-    return c.get(cookieName)?.value
+    return c.get(getConfig().FrontendCookie)?.value
 }
 
 export function addVisitorId<T = unknown>(response: NextResponse<T>, visitorId: string) : NextResponse<T>
 {
-    const DEBUG = process.env.NODE_ENV == 'development'
+    const DEBUG = getConfig().RuntimeEnv == 'development'
     response.cookies.set({
         name: 'visitorId',
         value: visitorId,

@@ -1,15 +1,15 @@
 import type { ApiService } from './types'
-import * as EnvTools from '../utils/env'
-import EnvVars from '../env-vars'
 import * as Responses from './responses'
 import createAdminApi from '@remkoj/optimizely-graph-client/admin'
+import getConfig from '../config'
 
 
 export const GraphInfoApiService : ApiService<GraphInfoApiResponse> = {
     for: { path: '/graph', verb: 'get' },
     handler: async (query, cookies) => {
+        const config = getConfig()
         // Check if the toolkit is enabled
-        if (!EnvTools.readValueAsBoolean(EnvVars.HelperEnabled, false))
+        if (!config.HelperEnabled)
             return Responses.NotFound
 
         const adminApi = createAdminApi()

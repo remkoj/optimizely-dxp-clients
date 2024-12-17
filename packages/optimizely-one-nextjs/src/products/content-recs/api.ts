@@ -1,5 +1,4 @@
-import * as EnvTools from '../../utils/env'
-import EnvVars from '../../env-vars'
+import getConfig from '../../config'
 
 export type ContentRecsOptions = {
     clientId: string
@@ -14,12 +13,14 @@ export class ContentRecsClient
 
     protected get defaultConfig() : ContentRecsOptions
     {
-        return {
-            clientId: EnvTools.readValue(EnvVars.ContentRecsClient, ''),
-            deliveryId: EnvTools.readValueAsInt(EnvVars.ContentRecsDelivery, 0),
-            deliveryKey: EnvTools.readValue(EnvVars.ContentRecsDeliveryKey, ''),
-            host: EnvTools.readValue(EnvVars.ContentRecsHost, 'idio.co')
+        const config = getConfig()
+        const crConfig = {
+            clientId: config.ContentRecsClient ?? '',
+            deliveryId: config.ContentRecsDelivery,
+            deliveryKey: config.ContentRecsDeliveryKey ?? '',
+            host: config.ContentRecsHost
         }
+        return crConfig
     }
 
     public get client() : string

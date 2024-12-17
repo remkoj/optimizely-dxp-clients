@@ -7,6 +7,8 @@ export type OptimizelyDataPlatformProps = {
 
 export const OptimizelyDataPlatformScript = (props: OptimizelyDataPlatformProps) => {
     const odp_id = props.trackerId.split('.').shift() ?? ''
+    if (odp_id == '')
+        return null
     return <Script id='data-platform-script' strategy='beforeInteractive'>{`
     var zaius = window['zaius'] || (window['zaius'] = []);
     zaius.methods = ['initialize', 'onload', 'customer', 'entity', 'event', 'subscribe', 'unsubscribe', 'consent', 'identify', 'anonymize', 'dispatch'];

@@ -1,6 +1,4 @@
 import type { ApiService } from './types'
-import * as EnvTools from '../utils/env'
-import EnvVars from '../env-vars'
 
 import { ContentRecs } from '../products'
 

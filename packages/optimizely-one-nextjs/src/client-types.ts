@@ -135,4 +135,17 @@ export type OptlyWebGet = {
         accountId: string
         revision: string
     }
+    visitor_id: {
+        [strategy: string]: string
+    }
+    visitor: {
+        visitorId: string
+        source_type: string
+        referrer: string | null
+        first_session: boolean
+        device_type: string
+        device: string
+        browser: string
+        browserVersion: string
+    }
 }

@@ -1,7 +1,10 @@
+'use client'
 import { type FunctionComponent } from 'react'
 import { usePathname } from 'next/navigation'
 import useSWR from 'swr'
+import { useOptimizelyOne } from '../context'
 import type { ProfileApiResponse as MeResponse } from '../../api/profile-api-service'
+import Notice from './_notice'
 
 export type IdsPanelProps = {
     servicePrefix?: string
@@ -11,6 +14,8 @@ export type IdsPanelProps = {
 export const IdsPanel : FunctionComponent<IdsPanelProps> = ({ servicePrefix = '/api/me', refreshInterval = 2000}) => 
 {
     const currentPath = usePathname()
+    const opti = useOptimizelyOne()
+    const webEx = opti.getService('webex')?.getBrowserApi()
 
     const ids = `${ servicePrefix }?scope=ids`
     const { data: profile, isLoading, error } = useSWR<MeResponse>(ids, {
@@ -24,23 +29,23 @@ export const IdsPanel : FunctionComponent<IdsPanelProps> = ({ servicePrefix = '/
     })
 
     if (isLoading)
-        return <p className='oo-m-2 md:oo-m-4 oo-rounded-md oo-bg-amber-200 oo-border oo-border-amber-800 oo-text-amber-800 oo-p-1 md:oo-p-2'>Loading your profile information...</p>
+        return <Notice message='Loading your profile information...' />
 
     if (error)
-        return <p className='oo-m-2 md:oo-m-4 oo-rounded-md oo-bg-amber-200 oo-border oo-border-amber-800 oo-text-amber-800 oo-p-1 md:oo-p-2'>There was an error loading your profile information</p>
+        return <Notice message='There was an error loading your profile information' />
 
     return <>
-        <dl className='oo-text-[14px]'>
-            <dt className='oo-font-bold'>Frontend:</dt>
-            <dd>{ profile?.ids.frontend ?? 'n/a' }</dd>
-            <dt className='oo-font-bold oo-pt-1'>Web Experimentation:</dt>
-            <dd>{ profile?.ids.webExperimentation ?? 'n/a' }</dd>
-            <dt className='oo-font-bold oo-pt-1'>Content Intelligence:</dt>
-            <dd>{ profile?.ids.contentIntelligence ?? 'n/a' }</dd>
-            <dt className='oo-font-bold oo-pt-1'>Data Platform:</dt>
-            <dd>{ profile?.ids.dataPlatform ?? 'n/a' }</dd>
-            <dt className='oo-font-bold oo-pt-1'>Current path:</dt>
-            <dd>{ currentPath }</dd>
+        <dl className='oo-definitions'>
+            <dt className='oo-definitions-term'>Frontend (Feature Experimentation):</dt>
+            <dd className='oo-definitions-data'>{ profile?.ids.frontend ?? 'n/a' }</dd>
+            <dt className='oo-definitions-term'>Web Experimentation:</dt>
+            <dd className='oo-definitions-data'>{ webEx && webEx.get ? webEx.get('visitor').visitorId : 'n/a' }</dd>
+            <dt className='oo-definitions-term'>Content Intelligence:</dt>
+            <dd className='oo-definitions-data'>{ profile?.ids.contentIntelligence ?? 'n/a' }</dd>
+            <dt className='oo-definitions-term'>Data Platform:</dt>
+            <dd className='oo-definitions-data'>{ profile?.ids.dataPlatform ?? 'n/a' }</dd>
+            <dt className='oo-definitions-term'>Current path:</dt>
+            <dd className='oo-definitions-data'>{ currentPath }</dd>
         </dl>
     </>
 }

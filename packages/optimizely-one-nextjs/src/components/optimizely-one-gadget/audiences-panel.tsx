@@ -1,7 +1,8 @@
 import { useEffect, type FunctionComponent } from 'react'
-import { ArrowPathIcon, UserGroupIcon } from '@heroicons/react/20/solid'
+import { UserGroupIcon } from '@heroicons/react/20/solid'
 import useSWRInfinite, { type SWRInfiniteKeyLoader, type SWRInfiniteConfiguration } from 'swr/infinite'
 import type { ProfileApiResponse as MeResponse } from '../../api/profile-api-service'
+import Notice from './_notice'
 
 export type AudiencesPanelProps = {
     servicePrefix?: string
@@ -54,21 +55,21 @@ export const AudiencesPanel : FunctionComponent<AudiencesPanelProps> = ({ servic
 
     // Handle error
     if (error)
-        return <p className='oo-m-2 md:oo-m-4 oo-rounded-md oo-bg-amber-200 oo-border oo-border-amber-800 oo-text-amber-800 oo-p-1 md:oo-p-2'>There was an error loading your profile information</p>
+        return <Notice message='There was an error loading your profile information'/>
 
     // Show list
     return <>
-        { hasMore && <p className='oo-text-[14px] oo-border oo-border-amber-800 oo-bg-amber-200 oo-text-amber-800 oo-p-1 oo-my-1 oo-rounded-md'>Showing results for the first { size * pageSize } audiences of { audienceCount }, <span onClick={() => setSize(size + 1)} className="oo-cursor-pointer oo-underline oo-text-blue-800">load more</span></p> }
-        <ul className='oo-text-[14px] oo-grid oo-grid-cols-1 oo-divide-y oo-divide-slate-200'>
+        { hasMore && <Notice prefix='Please note:' message={<>Showing results for the first { size * pageSize } audiences of { audienceCount }, <span onClick={() => setSize(size + 1)} className="oo-link">load more</span></>} /> }
+        <ul className='oo-list'>
             { (profiles || []).map(profile => (profile?.rts.audiences ?? []).map(a => {
-                return <li className='oo-py-1' key={"audience-"+a.id}><UserGroupIcon className='oo-inline-block oo-h-4 oo-w-4 oo-mr-2' />{ a.name }</li>
+                return <li className='oo-list-item' key={"audience-"+a.id}><UserGroupIcon className='oo-list-item-icon' />{ a.name }</li>
             })).flat() }
         </ul>
-        <p className='oo-text-[12px]'>Powered by: Optimizely Data Platform</p>
-        { hasMore && <p onClick={() => setSize(size + 1)} className='oo-text-center oo-inline-block oo-cursor-pointer oo-px-2 oo-py-1 oo-border oo-border-b-0 oo-border-slate-300 oo-rounded-md oo-bg-blue-500 oo-text-white'>Load more</p>}
-        { isLoading && <p className='oo-m-2 md:oo-m-4 oo-rounded-md oo-bg-amber-200 oo-border oo-border-amber-800 oo-text-amber-800 oo-p-1 md:oo-p-2'><ArrowPathIcon className='oo-inline-block oo-h-4 oo-w-4 oo-mr-2 oo-animate-spin' />Loading the audiences...</p> }
-        { (isValidating && !isLoading) && <p className='oo-text-[14px] oo-m-2 md:oo-m-4 oo-rounded-md oo-bg-amber-200 oo-border oo-border-amber-800 oo-text-amber-800 oo-p-1 md:oo-p-2'><ArrowPathIcon className='oo-inline-block oo-h-4 oo-w-4 oo-ml-2 oo-animate-spin' /> Refreshing audiences</p> }
-        <p className='oo-text-[12px] oo-m-2 oo-mt-3 oo-p-1 md:oo-p-2 oo-rounded-md oo-bg-amber-200 oo-border oo-border-amber-800 oo-text-amber-800'><span className='oo-font-bold'>Please note:</span> Interest based audiences are updated once per hour</p>
+        <p className='oo-small'>Powered by: Optimizely Data Platform</p>
+        { hasMore && <p onClick={() => setSize(size + 1)} className='oo-btn'>Load more</p>}
+        { isLoading && <Notice isLoading message='Loading the audiences...'/> }
+        { (isValidating && !isLoading) && <Notice isLoading message='Refreshing audiences'/> }
+        <Notice prefix='Please note:' message='Interest based audiences are updated once per hour' />
     </>
 }
 

@@ -1,8 +1,7 @@
 import type { ApiService } from './types'
-import * as EnvTools from '../utils/env'
-import EnvVars from '../env-vars'
 import * as Responses from './responses'
 import Session from '../utils/session'
+import getConfig, { checkProductStatus } from '../config'
 
 import { DataPlatform, ContentRecs, WebExperimentation } from '../products'
 
@@ -10,8 +9,10 @@ const NO_ID = 'n/a'
 export const ProfileApiService : ApiService<ProfileApiResponse> = {
     for: { path: '/', verb: 'get' },
     handler: async (query, cookies) => {
+        const config = getConfig()
+        const products = checkProductStatus(config)
         // Check if the toolkit is enabled
-        if (!EnvTools.readValueAsBoolean(EnvVars.HelperEnabled, false))
+        if (!config.HelperEnabled)
             return Responses.NotFound
         
         // Start timer
@@ -30,22 +31,22 @@ export const ProfileApiService : ApiService<ProfileApiResponse> = {
         const frontendId = Session.getVisitorId(cookies)
 
         // Read parameters & set values
-        const pageSize = Math.max(stringToInt(query.get('limit'), 10), 1)
+        const pageSize = config.OdpAudienceBatchSize
         const pageNumber = Math.max(stringToInt(query.get('page'), 0), 0)
         let audiencesPageCount = 0
         let audiencesCount = 0
 
         // Determine audiences if needed
         let audiences : { id: string, name: string}[] = []
-        const odp = new DataPlatform.Client();
-        if (fetchODPAudiences && odpId) {
+        const odp = products.dataPlatform ? new DataPlatform.Client() : undefined;
+        if (odp && fetchODPAudiences && odpId) {
             const allAudiences = await odp.getAllAudiences()
             audiencesCount = allAudiences.length
 
             // Split the list into manageable groups
             const chunks : string[][] = []
             allAudiences.forEach((item, idx) => {
-                const chunkId = Math.floor(idx/EnvTools.readValueAsInt(EnvVars.OdpAudienceBatchSize, pageSize));
+                const chunkId = Math.floor(idx/config.OdpAudienceBatchSize);
                 chunks[chunkId] = chunks[chunkId] || []; 
                 chunks[chunkId].push(item.id)
             });
@@ -59,7 +60,7 @@ export const ProfileApiService : ApiService<ProfileApiResponse> = {
         }
 
         // Fetch the profile if needed
-        const profile = fetchProfileCard && odpId ? await odp.getProfileInfo(odpId) : undefined
+        const profile = odp && fetchProfileCard && odpId ? await odp.getProfileInfo(odpId) : undefined
 
         // Determine topics if needed
         let topics : string[] = []
@@ -78,7 +79,7 @@ export const ProfileApiService : ApiService<ProfileApiResponse> = {
             rts: {
                 pageSize,
                 pageNumber,
-                audiences: audiences,
+                audiences,
                 audiencesPageCount,
                 audiencesCount,
             },

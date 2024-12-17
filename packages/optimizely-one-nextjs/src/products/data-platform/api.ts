@@ -1,6 +1,5 @@
-import * as EnvTools from '../../utils/env'
 import * as Helpers from './helpers'
-import EnvVars from '../../env-vars'
+import getConfig from '../../config'
 
 export type DataPlatformClientOptions = {
     privateApiKey: string,
@@ -33,17 +32,14 @@ export class DataPlatformClient
 
     public constructor(options?: Partial<DataPlatformClientOptions>)
     {
-        const defaults : DataPlatformClientOptions = {
-            endpoint: EnvTools.readValue(EnvVars.OdpService, "https://api.zaius.com/"),
-            privateApiKey: EnvTools.readValue(EnvVars.OdpApiKey, ""),
-            membershipTestChunkSize: 25
-        }
+        const { OdpService: endpoint, OdpApiKey: privateApiKey, OdpAudienceBatchSize: membershipTestChunkSize, OptimizelyDebug: debug } = getConfig()
+        const defaults : DataPlatformClientOptions = { endpoint, privateApiKey: privateApiKey || "", membershipTestChunkSize }
         this.config = { ...defaults, ...options };
         [ this._publicKey, this._privateKey ] = Helpers.parseApiKey(this.config.privateApiKey)
         if (!this._publicKey)
             throw new DataPlatformError("The Optimizely Data Platform configuration doesn't contain a tracker id", this.trackerId)
-        if (!this._privateKey)
-            throw new DataPlatformError("The Optimizely Data Platform configuration doesn't contain private key information", this.trackerId)
+        if (!this._privateKey && debug)
+            console.warn('[Optimizely Data Platform]: No Private Key provided, authorized queries are not available')
     }
 
     /**
@@ -57,8 +53,8 @@ export class DataPlatformClient
     public async getAllAudiences(throwOnError: boolean = false) : Promise<DataPlatformAudienceList>
     {
         const listAudiencesQuery = 'query GetAllAudiences { audiences { edges { node { name, description } } } }'
-        const listResponse = await this.privateQuery(listAudiencesQuery)
-        if (!listResponse.ok) {
+        const listResponse = await this.privateQuery(listAudiencesQuery).catch(() => undefined)
+        if (!listResponse?.ok) {
             if (throwOnError)
                 throw new DataPlatformError("Error listing all audiences within ODP", this.trackerId)
             console.error("Error listing all audiences within ODP")
@@ -79,12 +75,12 @@ export class DataPlatformClient
 
         type GQLResponse = { data: { customer: { audiences: { edges: { node: { name: string }}[]} }} }
 
-        const response = await this.privateQuery(query,variables)
-        if (response.ok)
+        const response = await this.privateQuery(query,variables).catch(() => undefined)
+        if (response?.ok)
             return (response.json() as Promise<GQLResponse>)
             .then(ds => (ds?.data?.customer?.audiences?.edges ?? []).map(e => e.node.name))
         
-        throw new DataPlatformError(`Error response from Optimizely Data Platform: ${ response.status }: ${ response.statusText }`, this.trackerId)
+        throw new DataPlatformError(`Error response from Optimizely Data Platform: ${ response?.status }: ${ response?.statusText }`, this.trackerId)
     }
 
     public async getLastSearchTerms(vuid: string) : Promise<string[]>
@@ -99,7 +95,7 @@ export class DataPlatformClient
             }
         }`
         const variables = { vuid }
-        const responseData = await (await this.privateQuery(query, variables)).json()
+        const responseData = await this.privateQuery(query, variables).then(response => response.json() as Promise<{ data: any, errors: never }>).catch(() => { return { errors: [{message: "Uncaught error"}]} as { data: never, errors: Array<any>}} )
         if (responseData.errors)
         {
             console.error("Error while fetching latest search terms, please check your keys")
@@ -156,7 +152,7 @@ export class DataPlatformClient
   }
 }`
         const variables = { filter: `vuid='${ vuid }'` }
-        const responseData = await (await this.privateQuery(query, variables)).json() as DataPlatformProfileResponse
+        const responseData = await this.privateQuery(query, variables).then(response => response.json() as Promise<DataPlatformProfileResponse>).catch(() => { return { errors: [{message: "Uncaught error"}]} as DataPlatformProfileResponse} )
         if (responseData.errors)
         {
             console.error("Error while fetching latest search terms, please check your keys")
@@ -172,6 +168,8 @@ export class DataPlatformClient
 
     protected async privateQuery(graphQuery: string, variables?: Record<string,any>) : Promise<Response>
     {
+        if (!this.privateKey)
+            throw new Error("Private key not set")
         return fetch(new URL('/v3/graphql', this.config.endpoint), {
             method: "POST",
             body: JSON.stringify({ query: graphQuery, variables }),

@@ -12,3 +12,4 @@ export function isOptimizelyOneEnabled() : boolean
 }
 
 export * from './server-components'
+export * from './components/rsc'

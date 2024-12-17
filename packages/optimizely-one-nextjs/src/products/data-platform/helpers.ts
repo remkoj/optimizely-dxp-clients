@@ -1,6 +1,5 @@
 import type { ReadonlyRequestCookies } from '../types'
-import EnvTools from '../../utils/env'
-import EnvVars from '../../env-vars'
+import { checkProductStatus, type OptiOneConfig } from "../../config"
 
 /**
  * Process the provided API key
@@ -26,10 +25,9 @@ export function getVisitorID(cookies: ReadonlyRequestCookies) : string | undefin
     return cookies.get('vuid')?.value?.split("|")?.shift()?.replaceAll('-','')
 }
 
-export function isEnabled()
+export function isEnabled(config?: OptiOneConfig)
 {
-    const apiKey = EnvTools.readValue(EnvVars.OdpApiKey, "")
-    return apiKey.length > 8
+    return checkProductStatus(config).dataPlatform
 }
 
 export default {
