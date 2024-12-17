@@ -1,6 +1,6 @@
 {
   "name": "optimizely-dxp-clients",
-  "version": "3.2.3",
+  "version": "4.0.0",
   "description": "Javascript clients for Optimizely Products",
   "repository": "https://github.com/remkoj/optimizely-dxp-clients.git",
   "author": "Remko Jantzen <693172+remkoj@users.noreply.github.com>",
@@ -30,7 +30,7 @@
     "prepare": "yarn update-browserslist-db && yarn workspaces foreach -Apt --topological-dev --exclude optimizely-dxp-clients run prepare",
     "recompile": "yarn workspaces foreach -Apt --topological-dev --exclude optimizely-dxp-clients run recompile",
     "watch": "yarn workspaces foreach -Api -j unlimited --exclude optimizely-dxp-clients run watch",
-    "artefacts": "yarn install && yarn dedupe && yarn clean && yarn run prepare && yarn run pack:all",
+    "artefacts": "yarn install && yarn dedupe && yarn clean && yarn run prepare && yarn run pack:all && yarn update:license-info",
     "artefacts:fast": "yarn workspaces foreach -Apt --topological-dev --exclude optimizely-dxp-clients run prepare && yarn run pack:all",
     "pack:all": "yarn run pack:version && yarn run pack:dev",
     "pack:version": "yarn workspaces foreach -Apt --topological-dev --exclude optimizely-dxp-clients pack --install-if-needed --out ../../artefacts/%s-%v.tgz",

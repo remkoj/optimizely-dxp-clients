@@ -141,7 +141,7 @@ export const NextJsFactoryCommand : NextJsModule = {
                             subFactory.prefix = [subFactory.prefix,"Page"]
                             break;
                         case "Element":
-                            subFactory.prefix = [subFactory.prefix,"Component"]
+                            subFactory.prefix = ["Component"]
                             break;
 
                     }

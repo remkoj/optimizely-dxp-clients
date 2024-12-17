@@ -31,6 +31,12 @@ If you find a bug, or have a feature request, please [report it as an issue](htt
 These SDKs rely on - but don't include or bundle - work from others. These dependencies, including their license, are disclosed in [the dependency overview](./DEPENDENCIES.md).
 
 ## Release Notes
+### v4.0.0
+- Updates to support for the December 16th release of Optimizely SaaS CMS. There are no changes in the exposed APIs from these packages.
+
+### v3.2.3
+- Enhanced the error handling and parsing of `.env` files by [@remkoj/optimizely-cms-cli](./packages/optimizely-cms-cli/) and [@remkoj/optimizely-graph-cli](./packages/optimizely-graph-cli/).
+
 ### v3.2.2
 - Restored some of type exports of [@remkoj/optimizely-cms-react/rsc](./packages/optimizely-cms-react/), used by the CMS 12 compatibility script.
 

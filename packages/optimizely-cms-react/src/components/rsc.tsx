@@ -12,8 +12,11 @@ import { RichText as BaseRichText, type RichTextComponent } from './rich-text/in
 
 // Pass through Style functions types
 export type { BaseStyleDefinition, ElementStyleDefinition, LayoutProps, LayoutPropsSetting, LayoutPropsSettingChoices, LayoutPropsSettingKeys, LayoutPropsSettingValues, NodeStyleDefinition, StyleDefinition, StyleSetting } from "./cms-styles/index.js"
-export { isNode, isElementNode, isElementNodeOfType, isStructureNode } from "./visual-builder/functions.js"
 export { extractSettings, readSetting } from "./cms-styles/index.js"
+export * from "./cms-styles/index.js"
+
+// Visual Builder items
+export { isNode, isComponentNode, isComponentNodeOfType, isStructureNode, isElementNode } from "./visual-builder/functions.js"
 
 /**
  *  Fallback while RSC hasn't been moved from Canary to Main
