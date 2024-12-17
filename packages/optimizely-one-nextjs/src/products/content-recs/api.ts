@@ -20,7 +20,6 @@ export class ContentRecsClient
             deliveryKey: config.ContentRecsDeliveryKey ?? '',
             host: config.ContentRecsHost
         }
-        console.log(crConfig)
         return crConfig
     }
 
