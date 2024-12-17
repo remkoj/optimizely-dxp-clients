@@ -47,7 +47,8 @@ export interface ComponentFactory {
     has(type: ComponentTypeHandle) : boolean
 
     /**
-     * Register an individual component
+     * Register an individual component. When the component type has already
+     * been registered it will be updated.
      * 
      * @param       type            The component type to register
      * @param       component       The component to bind to the type
@@ -57,11 +58,22 @@ export interface ComponentFactory {
     register(type: ComponentTypeHandle, component: ComponentType, useSuspense?: boolean, loader?: ComponentType) : void
 
     /**
-     * Register all components provided through the dictionary
+     * Register all components provided through the dictionary. When the 
+     * component type has already been registered it will be updated.
      * 
      * @param       components  The components to register
      */
     registerAll(components: ComponentTypeDictionary) : void
+
+    /**
+     * Allows removing of a component type from the factory, but only when
+     * the implemenation supports it.
+     * 
+     * @param       type            The component type to remove
+     * @returns     `true` If the component was not found or removed, `false`
+     *              otherwise
+     */
+    remove?: (type: ComponentTypeHandle) => boolean
 
     /**
      * Resolve a component type

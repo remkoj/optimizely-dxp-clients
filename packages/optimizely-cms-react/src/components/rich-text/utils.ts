@@ -20,6 +20,21 @@ export function isTypedNode(toTest: Node | null | undefined) : toTest is TypedNo
     )
 }
 
+export function isRichTextNode(toTest: any) : toTest is RichTextNode
+{
+    return isTypedNode(toTest) && toTest.type == 'richText'
+}
+
+export function isStringNode(toTest: any) : toTest is StringNode
+{
+    return isTypedNode(toTest) && toTest.type == 'string'
+}
+
+export function isNonEmptyString(toTest: any) : toTest is string
+{
+    return typeof(toTest) == 'string' && toTest.length > 0
+}
+
 export function processNodeInput(input: NodeInput | null | undefined) : RichTextNode | StringNode | undefined
 {
     if (!input)
@@ -33,16 +48,6 @@ export function processNodeInput(input: NodeInput | null | undefined) : RichText
 export function getRandomId(scope: string = "richText") : string
 {
     return `${scope}::${ Math.round(Math.random() * 100000) }`
-}
-
-export function isRichTextNode(toTest: any) : toTest is RichTextNode
-{
-    return isTypedNode(toTest) && toTest.type == 'richText'
-}
-
-export function isStringNode(toTest: any) : toTest is StringNode
-{
-    return isTypedNode(toTest) && toTest.type == 'string'
 }
 
 /**

@@ -13,11 +13,16 @@ import { RichText as BaseRichText, type RichTextComponent } from './rich-text/in
 
 // Pass through Style functions types
 export type { BaseStyleDefinition, ElementStyleDefinition, LayoutProps, LayoutPropsSetting, LayoutPropsSettingChoices, LayoutPropsSettingKeys, LayoutPropsSettingValues, NodeStyleDefinition, StyleDefinition, StyleSetting } from "./cms-styles/index.js"
+export { isNode, isElementNode, isComponentNode, isComponentNodeOfType, isStructureNode } from "./visual-builder/functions.js"
 export { extractSettings, readSetting } from "./cms-styles/index.js"
 
-// Export dictionary & pass through RichText Types
-export { DefaultComponents as RichTextComponentDictionary } from './rich-text/components.js' 
-export type { TypedNode, RichTextNode, StringNode, NodeInput } from "./rich-text/index.js"
+/**
+ * Client side renderer for Rich Text
+ */
+export const RichText = clientContextAware(BaseRichText) as RichTextComponent
+export type { RichTextComponent, RichTextProps, RichTextNode, StringNode, TypedNode, NodeInput } from "./rich-text/index.js"
+export { DefaultComponents as RichTextComponentDictionary, createHtmlComponent } from './rich-text/components.js'
+export { isNodeInput, isNonEmptyString, isRichTextNode, isStringNode, isText, isTypedNode  } from "./rich-text/utils.js"
 
 /**
  * Wrapper function to turn context dependant components into easy to use 
@@ -62,8 +67,3 @@ export type { CmsContentAreaClassMapper, CmsContentAreaComponent, CmsContentArea
  * dictionary.
  */
 export const OptimizelyComposition = cmsContentAware(clientContextAware(BaseOptimizelyComposition), CmsContent) as OptimizelyCompositionComponent
-
-/**
- * Client side renderer for Rich Text
- */
-export const RichText = BaseRichText as RichTextComponent

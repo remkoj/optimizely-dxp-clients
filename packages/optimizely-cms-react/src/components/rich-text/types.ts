@@ -5,6 +5,8 @@ import type { ComponentFactory, ComponentType } from "../../factory/types.js";
 export type RichTextProps = {
     /**
      * The component factory used for this rich text content
+     * 
+     * @deprecated  The factory from the context will be used
      */
     factory?: ComponentFactory
 
@@ -68,21 +70,33 @@ export type RichTextElementProps = Readonly<{
 
 export type Node = {}
 
+/**
+ * Structured HTML node type for text data
+ */
 export type TextNode = Node & {
     text: string
 } & Record<string, string | number | boolean>
 
+/**
+ * Structured HTML root node
+ */
 export type RichTextNode = Node & {
     type: "richText"
     children: Array<Node>
 }
+
+/**
+ * Structured HTML node for structured
+ * text
+ */
 export type StringNode = Node & {
     type: "string"
     children: Array<Node>
 }
 
 /**
- * Node within Optimizely CMS Rich content field
+ * Structured HTML node type with a specific
+ * type defined
  */
 export type TypedNode = NodeWithChildren<Node & {
     type: string
@@ -92,4 +106,8 @@ export type NodeWithChildren<T extends Node> = T & {
     children?: Array<Node>
 }
 
+/**
+ * Allowable data type to provide to the RichText
+ * component
+ */
 export type NodeInput = string | RichTextNode | StringNode

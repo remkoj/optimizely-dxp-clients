@@ -3,10 +3,14 @@
  */
 
 
+import { RichText as BaseRichText } from "./components/rich-text/index.js"
+import { serverContextAware } from "./rsc.js"
 /**
- * @deprecated The `@remkoj/optimizely-cms-react/components` export has been deprecated
+ * @deprecated The `@remkoj/optimizely-cms-react/components` export has been
+ *             deprecated, use either `@remkoj/optimizely-cms-react` or
+ *             `@remkoj/optimizely-cms-react/rsc`, dependingn on your context
  */
-export { RichText } from "./components/rich-text/index.js"
+export const RichText = serverContextAware(BaseRichText)
 /**
  * @deprecated The `@remkoj/optimizely-cms-react/components` export has been deprecated
  */
