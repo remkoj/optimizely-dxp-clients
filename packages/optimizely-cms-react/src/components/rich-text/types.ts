@@ -81,6 +81,9 @@ export type StringNode = Node & {
     children: Array<Node>
 }
 
+/**
+ * Node within Optimizely CMS Rich content field
+ */
 export type TypedNode = NodeWithChildren<Node & {
     type: string
 } & Record<string, string | number | boolean>>

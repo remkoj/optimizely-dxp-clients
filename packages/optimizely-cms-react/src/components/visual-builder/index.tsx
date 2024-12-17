@@ -1,6 +1,6 @@
 
 import { ReactNode } from 'react'
-import { isElementNode, defaultNodePropsFactory, defaultPropsFactory } from './functions.js'
+import { isComponentNode, defaultNodePropsFactory, defaultPropsFactory } from './functions.js'
 import type { BaseOptimizelyCompositionProps } from './types.js'
 export type * from './types.js'
 
@@ -15,7 +15,7 @@ export function OptimizelyComposition({ node, leafPropsFactory = defaultPropsFac
     const { factory, isDebug } = ctx
 
     // Render the element
-    if (isElementNode(node)) {
+    if (isComponentNode(node)) {
         if (isDebug)
             console.log(`⚪ [VisualBuilder] Rendering element node ${ JSON.stringify(node) }`)
         const [ contentLink, contentType, fragmentData, layoutProps ] = leafPropsFactory(node)

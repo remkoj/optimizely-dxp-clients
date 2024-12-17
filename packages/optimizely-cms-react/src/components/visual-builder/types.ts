@@ -21,13 +21,13 @@ export type CompositionStructureNode = CompositionNodeBase & {
     layoutType: "experience" | "section" | "row" | "column"
     nodes?: Array<CompositionNode>
 }
-export type CompositionElementNode<E extends Record<string,any> = Record<string,any>> = CompositionNodeBase & {
-    layoutType: "element"
-    element: E
+export type CompositionComponentNode<E extends Record<string,any> = Record<string,any>> = CompositionNodeBase & {
+    layoutType: "component"
+    component: E
 }
-export type CompositionNode<E extends Record<string,any> = Record<string,any>> = CompositionStructureNode | CompositionElementNode<E>
-export type CompositionComponentType<NT extends CompositionNode> = ComponentType<NT extends CompositionElementNode<infer DT> ? { node: Omit<NT, 'element'>, element: DT } : PropsWithChildren<{ node: Omit<NT, 'nodes'>}>>
-export type LeafPropsFactory = <ET extends Record<string,any>, LT = string>(node: CompositionElementNode<ET>) => [ ContentLinkWithLocale<LT> | InlineContentLinkWithLocale<LT>, ContentType, ET ] | [ ContentLinkWithLocale<LT> | InlineContentLinkWithLocale<LT>, ContentType, ET, Record<string, any> ]
+export type CompositionNode<E extends Record<string,any> = Record<string,any>> = CompositionStructureNode | CompositionComponentNode<E>
+export type CompositionComponentType<NT extends CompositionNode> = ComponentType<NT extends CompositionComponentNode<infer DT> ? { node: Omit<NT, 'element'>, element: DT } : PropsWithChildren<{ node: Omit<NT, 'nodes'>}>>
+export type LeafPropsFactory = <ET extends Record<string,any>, LT = string>(node: CompositionComponentNode<ET>) => [ ContentLinkWithLocale<LT> | InlineContentLinkWithLocale<LT>, ContentType, ET ] | [ ContentLinkWithLocale<LT> | InlineContentLinkWithLocale<LT>, ContentType, ET, Record<string, any> ]
 export type NodePropsFactory = <ET extends Record<string,any>, LT = string>(node: CompositionStructureNode) => [ ContentLinkWithLocale<LT> | InlineContentLinkWithLocale<LT>, Array<ContentType>, ET ] | [ ContentLinkWithLocale<LT> | InlineContentLinkWithLocale<LT>, Array<ContentType>, ET, Record<string, any> ]
 
 export type OptimizelyCompositionProps = JSX.IntrinsicAttributes & {

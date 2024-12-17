@@ -1,8 +1,7 @@
 {
   "name": "@remkoj/optimizely-one-nextjs",
   "license": "Apache-2.0",
-  "version": "3.2.3",
-  "packageManager": "yarn@4.1.1",
+  "version": "4.0.0",
   "repository": "https://github.com/remkoj/optimizely-dxp-clients.git",
   "author": "Remko Jantzen <693172+remkoj@users.noreply.github.com>",
   "homepage": "https://github.com/remkoj/optimizely-dxp-clients",
@@ -43,7 +42,7 @@
     "@headlessui/react": "^2.2.0",
     "@headlessui/tailwindcss": "^0.2.1",
     "@heroicons/react": "^2.2.0",
-    "@remkoj/optimizely-graph-client": "workspace:^3.2.3",
+    "@remkoj/optimizely-graph-client": "workspace:^4.0.0",
     "@types/node": "^22.10.1",
     "@types/react": "^18.3.14",
     "@types/react-dom": "18.3.2",
@@ -63,7 +62,7 @@
   "peerDependencies": {
     "@headlessui/react": "*",
     "@heroicons/react": "*",
-    "@remkoj/optimizely-graph-client": "^3.2.3",
+    "@remkoj/optimizely-graph-client": "^4.0.0",
     "next": "*",
     "react": "*",
     "react-dom": "*",
