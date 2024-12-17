@@ -14,7 +14,6 @@
 
 # NPM build artifacts
 artefacts/*.tgz
-!artefacts/*-dev.tgz
 
 # IDE Configuration
 .idea
