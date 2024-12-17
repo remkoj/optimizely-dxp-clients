@@ -1,22 +1,40 @@
 import { isContentType } from '../../utilities.js'
 import { isContentLink, ContentLinkWithLocale, isInlineContentLink } from '@remkoj/optimizely-graph-client'
-import type { CompositionNode, LeafPropsFactory, CompositionElementNode, NodePropsFactory, CompositionStructureNode } from './types.js'
+import type { CompositionNode, LeafPropsFactory, CompositionComponentNode, NodePropsFactory, CompositionStructureNode } from './types.js'
 
-export function isElementNode(node: CompositionNode<Record<string,any>>) : node is CompositionElementNode<Record<string,any>>
+/**
+ * Test if the Node within VisualBuilder is an Element
+ * 
+ * @deprecated      Visual Builder has been updated to favour components over Elements
+ * @param           node        The Node to test
+ * @returns         `true` if the Node is an element, `false` otherwise.
+ */
+export function isElementNode(node: CompositionNode<Record<string,any>>) : node is CompositionComponentNode<Record<string,any>>
 {
-    return node.layoutType == "element"
+    return isComponentNode(node)
 }
 
-export function isElementNodeOfType<ET extends Record<string,any>>(node: CompositionNode<Record<string,any>>, test: (data: Record<string,any>) => data is ET) : node is CompositionElementNode<ET>
+/**
+ * Test if the Node within VisualBuilder is a Component
+ * 
+ * @param           node        The Node to test
+ * @returns         `true` if the Node is an element, `false` otherwise.
+ */
+export function isComponentNode(node: CompositionNode<Record<string,any>>) : node is CompositionComponentNode<Record<string,any>>
 {
-    if (!isElementNode(node))
+    return node.layoutType == "component"
+}
+
+export function isComponentNodeOfType<ET extends Record<string,any>>(node: CompositionNode<Record<string,any>>, test: (data: Record<string,any>) => data is ET) : node is CompositionComponentNode<ET>
+{
+    if (!isComponentNode(node))
         return false
-    return test(node.element)
+    return test(node.component)
 }
 
 export function isStructureNode(node: CompositionNode<Record<string,any>>) : node is CompositionStructureNode
 {
-    return !isElementNode(node)
+    return !isComponentNode(node)
 }
 
 /**
@@ -31,22 +49,22 @@ export function isNode(toTest: any) : toTest is CompositionNode
     if (typeof(toTest) != 'object' || toTest == null)
         return false
 
-    const nodeTypes = ["experience", "section", "row", "column", "element"]
+    const nodeTypes = ["experience", "section", "row", "column", "component"]
     const hasValidName = (typeof (toTest as CompositionNode).name == 'string' && ((toTest as CompositionNode).name?.length ?? 0) > 0) || (toTest as CompositionNode).name == null
     const hasValidType = typeof (toTest as CompositionNode).layoutType == 'string' && nodeTypes.includes((toTest as CompositionNode).layoutType)
 
     return hasValidName && hasValidType
 }
 
-export const defaultPropsFactory : LeafPropsFactory = <ET extends Record<string, any>, LT = string>(node: CompositionElementNode<ET>) => {
-    const contentType = node.element?._metadata?.types
+export const defaultPropsFactory : LeafPropsFactory = <ET extends Record<string, any>, LT = string>(node: CompositionComponentNode<ET>) => {
+    const contentType = node.component?._metadata?.types
     if (!isContentType(contentType))
         throw new Error("Invalid content type: "+JSON.stringify(contentType))
 
     const contentLink : Partial<ContentLinkWithLocale<LT>> = {
-        key: node.element?._metadata?.key || node.key || undefined,
-        version: node.element?._metadata?.version,
-        locale: node.element?._metadata?.locale
+        key: node.component?._metadata?.key || node.key || undefined,
+        version: node.component?._metadata?.version,
+        locale: node.component?._metadata?.locale
     }
     if (!(isContentLink(contentLink) || isInlineContentLink(contentLink)))
         throw new Error("Invalid content link: "+JSON.stringify(contentLink))
@@ -58,7 +76,7 @@ export const defaultPropsFactory : LeafPropsFactory = <ET extends Record<string,
         settings: node.settings
     }
 
-    return [ contentLink, contentType, node.element, layoutData ]
+    return [ contentLink, contentType, node.component, layoutData ]
 }
 
 export const defaultNodePropsFactory : NodePropsFactory = <ET extends Record<string, any>, LT = string>(node: CompositionStructureNode) => {
