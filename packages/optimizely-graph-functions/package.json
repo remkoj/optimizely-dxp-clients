@@ -8,6 +8,9 @@
   "files": [
     "./dist"
   ],
+  "bin": {
+    "patch-codegen": "./dist/patch.js"
+  },
   "type": "commonjs",
   "main": "./dist/index.js",
   "exports": {
@@ -57,7 +60,8 @@
     "clean": "tsc --build --clean",
     "prepare": "tsc --build",
     "recompile": "tsc --build --clean && tsc --build --force",
-    "watch": "yarn tsc --watch"
+    "watch": "yarn tsc --watch",
+    "test-patch": "node ./dist/patch.js"
   },
   "peerDependencies": {
     "@graphql-typed-document-node/core": "*",

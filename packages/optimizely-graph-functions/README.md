@@ -1,12 +1,18 @@
 # Optimizely GraphQL Codegen Plugin
 GraphQL Codegen plugin and preset which generate both the GraphQL type definitions and a few convenienece methods for useage with [Optimizely Graph Client](../optimizely-graph-client/README.md).
 
+> [!WARNING]
+> **Version 4.1** Requires a new build of the patched Visitor Plugin Common package from GraphQL Codegen. See instructions below on updating/installing this patched version.
+
 ## Install package
 To install using Yarn, use the following command:
 
 ```bash
 yarn add --dev @remkoj/optimizely-graph-functions
+yarn patch-codegen
 ```
+
+Some updates will include a newer version of the patched Visitor Plugin Common package from GraphQL Codegen. After applying the update to this package, rerun `yarn patch-codegen` to download and apply the latest version.
 
 ## Configure package
 Create a codegen.ts within your application root folder (e.g. apps/frontend/codegen.ts within the example site). Within the codegen.ts create the following configuration:
@@ -87,7 +93,7 @@ The presetConfig of the `OptimizelyGraphPreset` is an extension of the configura
 
 | Configuration option | Usage |
 | --- | --- |
-| recursion | Set to `true` to automatically generate recursive queries to iterate down the result.<br><br>The default logic of GraphQL Codegen contains an infite loop when disabling the recursion check. To patch this, a custom resolution must be added to the root `package.json`. This resolution must set the resolution for `@graphql-codegen/visitor-plugin-common` to the patched file [provided within this repository](../../dependencies/graphql-codegen-visitor-plugin-common-v5.3.1-patched.tgz) |
+| recursion | Set to `true` to automatically generate recursive queries to iterate down the result.<br><br>The default logic of GraphQL Codegen contains an infite loop when disabling the recursion check. To patch this, a custom resolution must be added to the root `package.json`. This resolution must set the resolution for `@graphql-codegen/visitor-plugin-common` to the patched file [provided within this repository](../../dependencies/graphql-codegen-visitor-plugin-common-v5.6.0-patched.tgz)<br/><br/>A Convenience script: `yarn patch-codegen` is available to apply these transformations automatically |
 | injections | A set of rules to define how individual fragments will be used to construct the master queries. Each rule has the following options: <br/>- `into`:  The name of the Fragment to inject into<br/>- `pathRegex`: The regular expression to be applied ot the file name to see if the fragment should be included with the `into` Fragment<br/>- `nameRegex`: The regular expression to be applied to the name of the Fragment
 | documents | The standard rules for preset specific documents, however there are four standard documents available:<br/>- `opti-cms:/queries/13` (included by default)<br/>- `opti-cms:/queries/12`<br/>- `opti-cms:/fragments/13` (included by default)<br/>- `opti-cms:/fragments/12`<br/>*The defaults are only applied when there's no document starting with `opti-cms:` defined*
 | functions | The list of GraphQL Functions that should be made available in the `functions.ts` file. When specified, this overrides the default list.<br/>*Default value: `['getContentType','getContentByPath','getContentById']`*
