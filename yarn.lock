@@ -1697,6 +1697,8 @@ __metadata:
     graphql: "*"
     graphql-request: ^6.1.0
     graphql-tag: "*"
+  bin:
+    patch-codegen: ./dist/patch.js
   languageName: unknown
   linkType: soft
 
