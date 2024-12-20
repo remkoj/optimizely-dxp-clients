@@ -21,6 +21,9 @@ export type PropertyFormat = {
      * Editor used for managing properties with this format.
      */
     editor?: string | null;
+    /**
+     * Indicates if this property format has been deleted.
+     */
     deleted?: boolean;
     /**
      * Settings for the editor.

@@ -3,7 +3,7 @@
 /* tslint:disable */
 /* eslint-disable */
 /**
- * Represent the indexing type of a ContentTypeProperty.
+ * Represents the indexing type of a content type property.
  */
 export enum IndexingType {
     DISABLED = 'disabled',

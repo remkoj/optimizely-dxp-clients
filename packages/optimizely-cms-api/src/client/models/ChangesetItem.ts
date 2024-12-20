@@ -4,12 +4,12 @@
 /* eslint-disable */
 import type { ContentReference } from './ContentReference';
 /**
- * A writable implementation of an ChangesetItem.
+ * Items in an changeset that contains a link to the specific content version.
  */
 export type ChangesetItem = {
     reference: ContentReference;
     /**
-     * Gets/sets item category.
+     * Gets/sets the changeset item category.
      */
     category?: string;
 };

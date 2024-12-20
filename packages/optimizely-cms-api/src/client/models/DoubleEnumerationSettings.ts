@@ -4,7 +4,7 @@
 /* eslint-disable */
 import type { DoubleEnumerationValue } from './DoubleEnumerationValue';
 /**
- * A writable implementation of an EnumerationSettings`1.
+ * Enumeration settings for a property or format.
  */
 export type DoubleEnumerationSettings = {
     /**

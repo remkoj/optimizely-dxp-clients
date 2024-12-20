@@ -63,6 +63,9 @@ export const StylesPullCommand : StylesPullModule = {
             const outputTemplate = { ...displayTemplate }
             if (outputTemplate.createdBy) delete outputTemplate.createdBy
             if (outputTemplate.lastModifiedBy) delete outputTemplate.lastModifiedBy
+            if (outputTemplate.created) delete outputTemplate.created
+            if (outputTemplate.lastModified) delete outputTemplate.lastModified
+            
             if (fs.existsSync(filePath)) {
                 if (!force) {
                     if (cfg.debug)

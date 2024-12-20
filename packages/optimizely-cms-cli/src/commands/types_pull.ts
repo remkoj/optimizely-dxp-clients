@@ -43,6 +43,8 @@ export const TypesPullCommand : TypesPullModule = {
             if (outContentType.features) delete outContentType.features
             if (outContentType.usage) delete outContentType.usage
             if (outContentType.lastModifiedBy) delete outContentType.lastModifiedBy
+            if (outContentType.lastModified) delete outContentType.lastModified
+            if (outContentType.created) delete outContentType.created
 
             if (debug)
                 process.stdout.write(chalk.gray(`${ figures.arrowRight } Writing type definition for ${ contentType.displayName } (${ contentType.key })\n`))
