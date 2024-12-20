@@ -24,13 +24,24 @@ If you find a bug, or have a feature request, please [report it as an issue](htt
 ## Structure
 | Path | Contents |
 | --- | --- |
-| [artefacts](./artefacts/) | Contains the tgz bundled dev-versions of the packages |
+| [artefacts](./artefacts/) | Target folder for local builds of the packages |
+| [dependencies](./dependencies/) | Custom builds of 3rd party packages with Optimizely CMS/Graph specific enhancements applied. These should be installed through [resolutions or dependency overrides](https://yarnpkg.com/configuration/manifest#resolutions) in the root `package.json` of your project. |
 | [packages](./packages/) | Contains the source code of each of the packages |
+| [scripts](./scripts/) | Support scripts for the packaging & releasing process of these packages |
 
 ## Dependencies
 These SDKs rely on - but don't include or bundle - work from others. These dependencies, including their license, are disclosed in [the dependency overview](./DEPENDENCIES.md).
 
 ## Release Notes
+### v4.1.0
+- **Patches:** Dependencies have been updated to resolve vulnerabilities
+- **Bug fix:** Multiple pages returned when resolving content for the homepage.
+- **Bug fix:** Fragments for Blocks that contain a content area cause errors due to incorrect recursion handling. <br/>*This includes an updated version of [@graphql-codegen/visitor-plugin-common](https://www.npmjs.com/package/@graphql-codegen/visitor-plugin-common) v5.6.0 in [./dependencies/](./dependencies/)*
+- **Enhancement:** JSON Files for styles (`*.opti-style.json`) and types (`*.opti-type.json`) no longer have created and modified dates to reduce merge errors.
+- **Enhancement:** Handling of rich-text to auto-create missing components in the Factory to build the HTML
+- **Enhancement:** Allowed more granular cache invalidation
+- **Enhancement:** Improvements to Optimizely One Gadget
+
 ### v4.0.0
 - Updates to support for the December 16th release of Optimizely SaaS CMS. There are no changes in the exposed APIs from these packages.
 
