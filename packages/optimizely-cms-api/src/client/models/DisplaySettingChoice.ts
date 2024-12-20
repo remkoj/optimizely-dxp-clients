@@ -7,7 +7,7 @@
  */
 export type DisplaySettingChoice = {
     /**
-     * The display name of this display setting.
+     * The display name of this display setting choice.
      */
     displayName: string;
     /**

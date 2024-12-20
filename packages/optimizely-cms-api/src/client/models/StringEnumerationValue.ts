@@ -7,11 +7,11 @@
  */
 export type StringEnumerationValue = {
     /**
-     * The display name of the enumeration.
+     * The display name of the value.
      */
     displayName?: string;
     /**
-     * The value of the enumeration.
+     * The underlying enumeration value.
      */
     value?: string;
 };

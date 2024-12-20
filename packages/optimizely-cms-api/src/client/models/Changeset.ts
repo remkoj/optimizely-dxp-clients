@@ -3,11 +3,11 @@
 /* tslint:disable */
 /* eslint-disable */
 /**
- * A writable implementation of an Changeset.
+ * Changesets are used to group work on several content items together.
  */
 export type Changeset = {
     /**
-     * The unique key of this Changeset
+     * The unique key of this Changeset.
      */
     key: string;
     /**
@@ -26,6 +26,6 @@ export type Changeset = {
      * The username of the user that created this changeset.
      */
     readonly createdBy?: string;
-    readonly lastModified?: string;
+    lastModified?: string;
 };
 

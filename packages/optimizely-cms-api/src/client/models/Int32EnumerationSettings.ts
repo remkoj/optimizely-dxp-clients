@@ -4,7 +4,7 @@
 /* eslint-disable */
 import type { Int32EnumerationValue } from './Int32EnumerationValue';
 /**
- * A writable implementation of an EnumerationSettings`1.
+ * Enumeration settings for a property or format.
  */
 export type Int32EnumerationSettings = {
     /**

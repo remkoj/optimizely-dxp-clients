@@ -16,6 +16,10 @@ export type ContentMetadata = {
      */
     contentType?: string;
     /**
+     * Set of locales that this content has been created for.
+     */
+    readonly locales?: Record<string, ContentLocaleInfo>;
+    /**
      * The key that identifies the container content that this content belongs to.
      */
     container?: string | null;
@@ -27,10 +31,6 @@ export type ContentMetadata = {
      * The key that identifies the owner of this content. Content that is own by another content is also known as an asset.
      */
     owner?: string | null;
-    /**
-     * Set of locales that the content item has been created for.
-     */
-    readonly locales?: Record<string, ContentLocaleInfo>;
     /**
      * A timestamp, which if provided, indicates when this content was deleted.
      */

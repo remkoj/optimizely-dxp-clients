@@ -1722,8 +1722,7 @@
                         "in": "query",
                         "description": "Only include types that are available for creation under the provided container type",
                         "schema": {
-                            "type": "string",
-                            "example": ""
+                            "type": "string"
                         }
                     },
                     {
@@ -3081,7 +3080,7 @@
                         "maxLength": 255,
                         "minLength": 1,
                         "type": "string",
-                        "description": "The unique key of this Changeset"
+                        "description": "The unique key of this Changeset."
                     },
                     "source": {
                         "maxLength": 255,
@@ -3107,12 +3106,11 @@
                     },
                     "lastModified": {
                         "type": "string",
-                        "format": "date-time",
-                        "readOnly": true
+                        "format": "date-time"
                     }
                 },
                 "additionalProperties": false,
-                "description": "A writable implementation of an Changeset."
+                "description": "Changesets are used to group work on several content items together."
             },
             "ChangesetItem": {
                 "required": [
@@ -3125,11 +3123,11 @@
                     },
                     "category": {
                         "type": "string",
-                        "description": "Gets/sets item category."
+                        "description": "Gets/sets the changeset item category."
                     }
                 },
                 "additionalProperties": false,
-                "description": "A writable implementation of an ChangesetItem."
+                "description": "Items in an changeset that contains a link to the specific content version."
             },
             "ChangesetItemPage": {
                 "type": "object",
@@ -3209,7 +3207,8 @@
                             "contentType": {
                                 "maxLength": 50,
                                 "minLength": 1,
-                                "type": "string"
+                                "type": "string",
+                                "description": "The key of the ContentType that this ComponentListItem can contain."
                             }
                         },
                         "additionalProperties": false
@@ -3231,13 +3230,22 @@
                             "contentType": {
                                 "maxLength": 50,
                                 "minLength": 1,
-                                "type": "string"
+                                "type": "string",
+                                "description": "The key of the ContentType that this ComponentProperty can contain."
                             }
                         },
                         "additionalProperties": false
                     }
                 ],
                 "description": "Describes a property that can contain a component instance of a specific type."
+            },
+            "CompositionBehavior": {
+                "enum": [
+                    "sectionEnabled",
+                    "elementEnabled"
+                ],
+                "type": "string",
+                "description": "Represent a Composition behavior for a ContentType."
             },
             "ContentBaseType": {
                 "enum": [
@@ -3254,46 +3262,6 @@
                 "type": "string",
                 "description": "Represent the base type of a ContentType."
             },
-            "ContentComponent": {
-                "type": "object",
-                "properties": {
-                    "name": {
-                        "type": "string",
-                        "description": "The name of the content component. If Reference is set, the name is automatically set to the name of the referenced content."
-                    },
-                    "displayOption": {
-                        "type": "string",
-                        "description": "An optional display option for the content component."
-                    },
-                    "segmentationGroup": {
-                        "type": "string",
-                        "description": "An optional group for the personalizable component."
-                    },
-                    "segments": {
-                        "type": "array",
-                        "items": {
-                            "type": "string"
-                        },
-                        "description": "Specifies the settings for the content component."
-                    },
-                    "reference": {
-                        "type": "string",
-                        "description": "A reference to the content of this component.\r\nCannot be assigned together with Content."
-                    },
-                    "contentType": {
-                        "type": "string",
-                        "description": "The key of the content type that this is an embedded instance of."
-                    },
-                    "content": {
-                        "additionalProperties": {
-                            "type": "object"
-                        },
-                        "description": "Dictionary with all custom properties as specified by associated ContentType"
-                    }
-                },
-                "additionalProperties": false,
-                "description": "Represents a content component."
-            },
             "ContentItem": {
                 "required": [
                     "displayName",
@@ -3304,7 +3272,7 @@
                     "properties": {
                         "type": "object",
                         "additionalProperties": {},
-                        "description": "Set of content type properties."
+                        "description": "Properties as they are defined by corresponding component or content type."
                     },
                     "key": {
                         "minLength": 1,
@@ -3354,16 +3322,6 @@
                         "format": "date-time",
                         "nullable": true
                     },
-                    "lastModified": {
-                        "type": "string",
-                        "format": "date-time",
-                        "readOnly": true
-                    },
-                    "lastModifiedBy": {
-                        "type": "string",
-                        "description": "The username of the user that made the latest modification to this content instance.",
-                        "readOnly": true
-                    },
                     "container": {
                         "type": "string",
                         "description": "The key that identifies the container content that this content item belongs to.",
@@ -3379,6 +3337,15 @@
                         "type": "string",
                         "description": "A string that represents the segment that should be used when routing or generate routes to the current content instance.",
                         "nullable": true
+                    },
+                    "lastModified": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "lastModifiedBy": {
+                        "type": "string",
+                        "description": "The username of the user that made the latest modification to this content instance.",
+                        "readOnly": true
                     }
                 },
                 "additionalProperties": false,
@@ -3487,13 +3454,15 @@
                                 "type": "array",
                                 "items": {
                                     "type": "string"
-                                }
+                                },
+                                "description": "Specifies which content types and base types these property items are allowed to contain."
                             },
                             "restrictedTypes": {
                                 "type": "array",
                                 "items": {
                                     "type": "string"
-                                }
+                                },
+                                "description": "Specifies which content types and base types these property items cannot contain."
                             }
                         },
                         "additionalProperties": false
@@ -3507,21 +3476,18 @@
                     "displayName": {
                         "type": "string",
                         "description": "The display name of the content.",
-                        "readOnly": true,
-                        "example": ""
+                        "readOnly": true
                     },
                     "created": {
                         "type": "string",
                         "description": "The date and time when the first locale version for the content was created.",
                         "format": "date-time",
-                        "readOnly": true,
-                        "example": ""
+                        "readOnly": true
                     },
                     "createdBy": {
                         "type": "string",
                         "description": "The username of the user that created this locale version of content.",
-                        "readOnly": true,
-                        "example": ""
+                        "readOnly": true
                     },
                     "status": {
                         "$ref": "#/components/schemas/LocaleStatus"
@@ -3541,6 +3507,14 @@
                         "type": "string",
                         "description": "The content type of this content."
                     },
+                    "locales": {
+                        "type": "object",
+                        "additionalProperties": {
+                            "$ref": "#/components/schemas/ContentLocaleInfo"
+                        },
+                        "description": "Set of locales that this content has been created for.",
+                        "readOnly": true
+                    },
                     "container": {
                         "type": "string",
                         "description": "The key that identifies the container content that this content belongs to.",
@@ -3555,14 +3529,6 @@
                         "type": "string",
                         "description": "The key that identifies the owner of this content. Content that is own by another content is also known as an asset.",
                         "nullable": true
-                    },
-                    "locales": {
-                        "type": "object",
-                        "additionalProperties": {
-                            "$ref": "#/components/schemas/ContentLocaleInfo"
-                        },
-                        "description": "Set of locales that the content item has been created for.",
-                        "readOnly": true
                     },
                     "deleted": {
                         "type": "string",
@@ -3625,13 +3591,15 @@
                                 "type": "array",
                                 "items": {
                                     "type": "string"
-                                }
+                                },
+                                "description": "Specifies which content types and base types this property is allowed to contain."
                             },
                             "restrictedTypes": {
                                 "type": "array",
                                 "items": {
                                     "type": "string"
-                                }
+                                },
+                                "description": "Specifies which content types and base types this property cannot contain."
                             }
                         },
                         "additionalProperties": false
@@ -3673,13 +3641,15 @@
                                 "type": "array",
                                 "items": {
                                     "type": "string"
-                                }
+                                },
+                                "description": "Specifies which content types and base types these list items are allowed to reference."
                             },
                             "restrictedTypes": {
                                 "type": "array",
                                 "items": {
                                     "type": "string"
-                                }
+                                },
+                                "description": "Specifies which content types and base types these list items cannot contain."
                             }
                         },
                         "additionalProperties": false
@@ -3699,13 +3669,15 @@
                                 "type": "array",
                                 "items": {
                                     "type": "string"
-                                }
+                                },
+                                "description": "Specifies which content types and base types this property is allowed to reference."
                             },
                             "restrictedTypes": {
                                 "type": "array",
                                 "items": {
                                     "type": "string"
-                                }
+                                },
+                                "description": "Specifies which content types and base types this property is restricted from referencing."
                             }
                         },
                         "additionalProperties": false
@@ -3778,21 +3750,28 @@
                         },
                         "description": "Provides a set of media file extensions that this content type can handle."
                     },
+                    "compositionBehaviors": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/CompositionBehavior"
+                        },
+                        "description": "Provides a set of composition behaviors specifying how this content type can be used within compositions."
+                    },
                     "created": {
                         "type": "string",
                         "description": "A timestamp indicating when this ContentType was first created.",
                         "format": "date-time",
                         "readOnly": true
                     },
-                    "lastModifiedBy": {
-                        "type": "string",
-                        "description": "The username of the user that made the latest modification to this ContentType.",
-                        "readOnly": true
-                    },
                     "lastModified": {
                         "type": "string",
                         "description": "Indicates the last time this content type was modified.",
                         "format": "date-time",
+                        "readOnly": true
+                    },
+                    "lastModifiedBy": {
+                        "type": "string",
+                        "description": "The username of the user that made the latest modification to this ContentType.",
                         "readOnly": true
                     },
                     "properties": {
@@ -3849,7 +3828,7 @@
                                     "nullable": true
                                 }
                             },
-                            "description": "A writable implementation of an ContentTypeProperty.",
+                            "description": "Describes a property of a ContentType in the CMS.",
                             "discriminator": {
                                 "propertyName": "type"
                             }
@@ -3930,13 +3909,13 @@
                         "type": "string",
                         "description": "A description of this ContentTypeProperty."
                     },
-                    "required": {
-                        "type": "boolean",
-                        "description": "Indicates if a property instance of this type must always be assigned a value."
-                    },
                     "localized": {
                         "type": "boolean",
                         "description": "Indicates if a property instance of this type should be localized for each locale\r\nor if values are shared between all locales."
+                    },
+                    "required": {
+                        "type": "boolean",
+                        "description": "Indicates if a property instance of this type must always be assigned a value."
                     },
                     "group": {
                         "type": "string",
@@ -3965,7 +3944,7 @@
                     }
                 },
                 "additionalProperties": false,
-                "description": "A writable implementation of an ContentTypeProperty.",
+                "description": "Describes a property of a ContentType in the CMS.",
                 "discriminator": {
                     "propertyName": "type"
                 }
@@ -4013,11 +3992,13 @@
                         "properties": {
                             "minimum": {
                                 "type": "string",
+                                "description": "The earliest timestamp that list items of this type should be able to contain.",
                                 "format": "date-time",
                                 "nullable": true
                             },
                             "maximum": {
                                 "type": "string",
+                                "description": "The latest timestamp that list items of this type should be able to contain.",
                                 "format": "date-time",
                                 "nullable": true
                             }
@@ -4037,11 +4018,13 @@
                         "properties": {
                             "minimum": {
                                 "type": "string",
+                                "description": "The earliest timestamp that properties of this type should be able to contain.",
                                 "format": "date-time",
                                 "nullable": true
                             },
                             "maximum": {
                                 "type": "string",
+                                "description": "The latest timestamp that properties of this type should be able to contain.",
                                 "format": "date-time",
                                 "nullable": true
                             }
@@ -4094,7 +4077,7 @@
                         "maxLength": 255,
                         "minLength": 1,
                         "type": "string",
-                        "description": "The display name of this display setting."
+                        "description": "The display name of this display setting choice."
                     },
                     "sortOrder": {
                         "type": "integer",
@@ -4226,18 +4209,18 @@
                     }
                 },
                 "additionalProperties": false,
-                "description": "A writable implementation of an EnumerationSettings`1."
+                "description": "Enumeration settings for a property or format."
             },
             "DoubleEnumerationValue": {
                 "type": "object",
                 "properties": {
                     "displayName": {
                         "type": "string",
-                        "description": "The display name of the enumeration."
+                        "description": "The display name of the value."
                     },
                     "value": {
                         "type": "number",
-                        "description": "The value of the enumeration.",
+                        "description": "The underlying enumeration value.",
                         "format": "double"
                     }
                 },
@@ -4254,11 +4237,13 @@
                         "properties": {
                             "minimum": {
                                 "type": "number",
+                                "description": "The minimum value that list items of this type should be able to contain.",
                                 "format": "double",
                                 "nullable": true
                             },
                             "maximum": {
                                 "type": "number",
+                                "description": "The maximum value that list items of this type should be able to contain.",
                                 "format": "double",
                                 "nullable": true
                             },
@@ -4281,11 +4266,13 @@
                         "properties": {
                             "minimum": {
                                 "type": "number",
+                                "description": "The minimum value that properties of this type should be able to contain.",
                                 "format": "double",
                                 "nullable": true
                             },
                             "maximum": {
                                 "type": "number",
+                                "description": "The maximum value that properties of this type should be able to contain.",
                                 "format": "double",
                                 "nullable": true
                             },
@@ -4387,7 +4374,7 @@
                     "searchable"
                 ],
                 "type": "string",
-                "description": "Represent the indexing type of a ContentTypeProperty."
+                "description": "Represents the indexing type of a content type property."
             },
             "Int32EnumerationSettings": {
                 "type": "object",
@@ -4401,18 +4388,18 @@
                     }
                 },
                 "additionalProperties": false,
-                "description": "A writable implementation of an EnumerationSettings`1."
+                "description": "Enumeration settings for a property or format."
             },
             "Int32EnumerationValue": {
                 "type": "object",
                 "properties": {
                     "displayName": {
                         "type": "string",
-                        "description": "The display name of the enumeration."
+                        "description": "The display name of the value."
                     },
                     "value": {
                         "type": "integer",
-                        "description": "The value of the enumeration.",
+                        "description": "The underlying enumeration value.",
                         "format": "int32"
                     }
                 },
@@ -4429,11 +4416,13 @@
                         "properties": {
                             "minimum": {
                                 "type": "integer",
+                                "description": "The minimum value that list items of this type should be able to contain.",
                                 "format": "int32",
                                 "nullable": true
                             },
                             "maximum": {
                                 "type": "integer",
+                                "description": "The maximum value that list items of this type should be able to contain.",
                                 "format": "int32",
                                 "nullable": true
                             },
@@ -4456,11 +4445,13 @@
                         "properties": {
                             "minimum": {
                                 "type": "integer",
+                                "description": "The minimum value that properties of this type should be able to contain.",
                                 "format": "int32",
                                 "nullable": true
                             },
                             "maximum": {
                                 "type": "integer",
+                                "description": "The maximum value that properties of this type should be able to contain.",
                                 "format": "int32",
                                 "nullable": true
                             },
@@ -4586,21 +4577,21 @@
                         "items": {
                             "$ref": "#/components/schemas/PropertyGroup"
                         },
-                        "description": "List of content type property groups."
+                        "description": "List of content type property groups that are part of this manifest."
                     },
                     "contentTypes": {
                         "type": "array",
                         "items": {
                             "$ref": "#/components/schemas/ContentType"
                         },
-                        "description": "List of content types."
+                        "description": "List of content types that are part of this manifest."
                     },
                     "displayTemplates": {
                         "type": "array",
                         "items": {
                             "$ref": "#/components/schemas/DisplayTemplate"
                         },
-                        "description": "List of display templates."
+                        "description": "List of display templates that are part of this manifest."
                     },
                     "lastModified": {
                         "type": "string",
@@ -4610,7 +4601,7 @@
                     }
                 },
                 "additionalProperties": false,
-                "description": "Manifest that describest CMS definitions."
+                "description": "Manifest that describe CMS definitions."
             },
             "OauthToken": {
                 "type": "object",
@@ -4725,21 +4716,18 @@
                     "section": {
                         "type": "string",
                         "description": "The section where the message originated from.",
-                        "readOnly": true,
-                        "example": ""
+                        "readOnly": true
                     },
                     "message": {
                         "type": "string",
                         "description": "The message describing an outcome.",
-                        "readOnly": true,
-                        "example": ""
+                        "readOnly": true
                     },
                     "identifier": {
                         "type": "string",
                         "description": "The identifier of the resource that was the reason for this message to be created.",
                         "nullable": true,
-                        "readOnly": true,
-                        "example": ""
+                        "readOnly": true
                     }
                 },
                 "additionalProperties": false,
@@ -4835,7 +4823,8 @@
                         "nullable": true
                     },
                     "deleted": {
-                        "type": "boolean"
+                        "type": "boolean",
+                        "description": "Indicates if this property format has been deleted."
                     },
                     "editorSettings": {
                         "type": "object",
@@ -4991,18 +4980,18 @@
                     }
                 },
                 "additionalProperties": false,
-                "description": "A writable implementation of an EnumerationSettings`1."
+                "description": "Enumeration settings for a property or format."
             },
             "StringEnumerationValue": {
                 "type": "object",
                 "properties": {
                     "displayName": {
                         "type": "string",
-                        "description": "The display name of the enumeration."
+                        "description": "The display name of the value."
                     },
                     "value": {
                         "type": "string",
-                        "description": "The value of the enumeration."
+                        "description": "The underlying enumeration value."
                     }
                 },
                 "additionalProperties": false,
@@ -5018,16 +5007,19 @@
                         "properties": {
                             "minLength": {
                                 "type": "integer",
+                                "description": "The minimum string length that list items of this type should be able to contain.",
                                 "format": "int32",
                                 "nullable": true
                             },
                             "maxLength": {
                                 "type": "integer",
+                                "description": "The maximum string length that list items of this type should be able to contain.",
                                 "format": "int32",
                                 "nullable": true
                             },
                             "pattern": {
                                 "type": "string",
+                                "description": "Regular expression pattern that limits what strings that list items of this type should be able to contain.",
                                 "nullable": true
                             },
                             "enum": {
@@ -5049,16 +5041,19 @@
                         "properties": {
                             "minLength": {
                                 "type": "integer",
+                                "description": "The minimum string length that properties of this type should be able to contain.",
                                 "format": "int32",
                                 "nullable": true
                             },
                             "maxLength": {
                                 "type": "integer",
+                                "description": "The maximum string length that properties of this type should be able to contain.",
                                 "format": "int32",
                                 "nullable": true
                             },
                             "pattern": {
                                 "type": "string",
+                                "description": "Regular expression pattern that limits what strings that properties of this type should be able to contain.",
                                 "nullable": true
                             },
                             "enum": {

@@ -4,7 +4,7 @@
 /* eslint-disable */
 import type { StringEnumerationValue } from './StringEnumerationValue';
 /**
- * A writable implementation of an EnumerationSettings`1.
+ * Enumeration settings for a property or format.
  */
 export type StringEnumerationSettings = {
     /**

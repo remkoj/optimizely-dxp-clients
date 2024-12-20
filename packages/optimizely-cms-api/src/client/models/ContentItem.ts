@@ -8,7 +8,7 @@ import type { VersionStatus } from './VersionStatus';
  */
 export type ContentItem = {
     /**
-     * Set of content type properties.
+     * Properties as they are defined by corresponding component or content type.
      */
     properties?: Record<string, any>;
     /**
@@ -44,11 +44,6 @@ export type ContentItem = {
      * Indicates a time when this content version should transition to published status. Must only be assigned when Status is set to Scheduled.
      */
     delayPublishUntil?: string | null;
-    readonly lastModified?: string;
-    /**
-     * The username of the user that made the latest modification to this content instance.
-     */
-    readonly lastModifiedBy?: string;
     /**
      * The key that identifies the container content that this content item belongs to.
      */
@@ -61,5 +56,10 @@ export type ContentItem = {
      * A string that represents the segment that should be used when routing or generate routes to the current content instance.
      */
     routeSegment?: string | null;
+    lastModified?: string;
+    /**
+     * The username of the user that made the latest modification to this content instance.
+     */
+    readonly lastModifiedBy?: string;
 };
 

@@ -5,6 +5,7 @@
 import type { BinaryProperty } from './BinaryProperty';
 import type { BooleanProperty } from './BooleanProperty';
 import type { ComponentProperty } from './ComponentProperty';
+import type { CompositionBehavior } from './CompositionBehavior';
 import type { ContentBaseType } from './ContentBaseType';
 import type { ContentProperty } from './ContentProperty';
 import type { ContentReferenceProperty } from './ContentReferenceProperty';
@@ -60,17 +61,21 @@ export type ContentType = {
      */
     mediaFileExtensions?: Array<string>;
     /**
+     * Provides a set of composition behaviors specifying how this content type can be used within compositions.
+     */
+    compositionBehaviors?: Array<CompositionBehavior>;
+    /**
      * A timestamp indicating when this ContentType was first created.
      */
     readonly created?: string;
     /**
-     * The username of the user that made the latest modification to this ContentType.
-     */
-    readonly lastModifiedBy?: string;
-    /**
      * Indicates the last time this content type was modified.
      */
     readonly lastModified?: string;
+    /**
+     * The username of the user that made the latest modification to this ContentType.
+     */
+    readonly lastModifiedBy?: string;
     /**
      * Dictionary with all custom properties of this ContentType.
      */

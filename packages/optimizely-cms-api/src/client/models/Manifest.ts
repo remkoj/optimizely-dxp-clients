@@ -6,19 +6,19 @@ import type { ContentType } from './ContentType';
 import type { DisplayTemplate } from './DisplayTemplate';
 import type { PropertyGroup } from './PropertyGroup';
 /**
- * Manifest that describest CMS definitions.
+ * Manifest that describe CMS definitions.
  */
 export type Manifest = {
     /**
-     * List of content type property groups.
+     * List of content type property groups that are part of this manifest.
      */
     propertyGroups?: Array<PropertyGroup>;
     /**
-     * List of content types.
+     * List of content types that are part of this manifest.
      */
     contentTypes?: Array<ContentType>;
     /**
-     * List of display templates.
+     * List of display templates that are part of this manifest.
      */
     displayTemplates?: Array<DisplayTemplate>;
     /**
