@@ -2,5 +2,5 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-import type { LinkProperty } from './LinkProperty.js';
-export type LinkMap = Record<string, LinkProperty>;
+import type { LinkConfig } from './LinkConfig.js';
+export type LinkMap = Record<string, LinkConfig>;

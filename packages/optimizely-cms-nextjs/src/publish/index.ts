@@ -171,7 +171,7 @@ export function createPublishApi(options?: Partial<PublishApiOptions>) : Publish
 
         try {
             // Get the webhook data
-            const webhookData = await req.json() as PublishHookData | null | undefined
+            const webhookData = await req.json().catch(() => undefined) as PublishHookData | null | undefined
             console.debug('[Publish-API] Webhook data', webhookData)
 
             // Purge everything if not known (e.g. for a GET request)

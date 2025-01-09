@@ -74,7 +74,7 @@ type GetContentTypeResponse = {
 
 const getContentTypeQuery = gql`query getContentType($key: String!, $version: String, $locale: [Locales])
 {
-  _Content(
+  Content: _Content(
     where: {
       _metadata: {
         key: { eq: $key }

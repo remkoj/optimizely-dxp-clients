@@ -10,7 +10,7 @@ export const CmsVersionCommand : CliModule = {
     aliases: "$0",
     describe: "Get the CMS Version information",
     handler: async (args) => {
-        if (args._[0]) // We're being used as fall-back with a defined function name
+        if (args._[0] && args._[0] != "cms:version") // We're being used as fall-back with a defined function name
             throw new Error("Unknown command "+args._[0]+", usage information:")
 
         const client = createClient(args)

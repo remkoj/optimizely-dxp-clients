@@ -41,7 +41,7 @@
     }
   },
   "devDependencies": {
-    "@types/node": "^22.10.2",
+    "@types/node": "^22.10.5",
     "graphql": "^16.10.0",
     "graphql-request": "^6.1.0",
     "graphql-tag": "^2.12.6",
@@ -64,10 +64,10 @@
     "test-patch": "node ./dist/patch.js"
   },
   "peerDependencies": {
-    "@graphql-typed-document-node/core": "*",
-    "@remkoj/optimizely-graph-client": "4.1.0",
-    "graphql": "*",
-    "graphql-request": "^6.1.0",
-    "graphql-tag": "*"
+    "@graphql-typed-document-node/core": "^3",
+    "@remkoj/optimizely-graph-client": "^4",
+    "graphql": "^16",
+    "graphql-request": "^6",
+    "graphql-tag": "^2"
   }
 }

@@ -41,12 +41,12 @@
   "devDependencies": {
     "@remkoj/optimizely-cms-react": "workspace:4.1.0",
     "@remkoj/optimizely-graph-client": "workspace:4.1.0",
-    "@types/node": "^22.10.2",
-    "@types/react": "^18.3.17",
+    "@types/node": "^22.10.5",
+    "@types/react": "^18.3.18",
     "@types/react-dom": "18.3.5",
     "graphql": "^16.10.0",
     "graphql-request": "^6.1.0",
-    "next": "^14.2.20",
+    "next": "^14.2.23",
     "prop-types": "^15.8.1",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
@@ -57,8 +57,8 @@
     "deepmerge": "^4.3.1"
   },
   "peerDependencies": {
-    "@remkoj/optimizely-cms-react": "*",
-    "@remkoj/optimizely-graph-client": "*",
+    "@remkoj/optimizely-cms-react": "^4",
+    "@remkoj/optimizely-graph-client": "^4",
     "graphql": "^16",
     "graphql-request": "^6",
     "next": "^14",
