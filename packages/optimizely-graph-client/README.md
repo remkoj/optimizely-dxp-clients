@@ -157,6 +157,7 @@ The following configuration options are available, the table lists both the envi
 | `OPTIMIZELY_GRAPH_SECRET` | secret | no | The Optimizely Graph secret for write access, this value must never be made available in a browser |
 | `OPTIMIZELY_GRAPH_APP_KEY` | app_key | no | The Optimizely Graph app_key for write access, this value must never be made available in a browser |
 | `OPTIMIZELY_GRAPH_TENANT_ID` | tenant_id | no | The Optimizely Graph Tenant ID.<br/><br/>*Only required when using OIDC Authentication* |
+| `OPTIMIZELY_GRAPH_SCHEMA` | graph_schema | no | The Schema version of Optimizely Graph to use. This defaults to the current version, but can be set to `"new"` (`SchemaVersion.Next`) to use a next version if it has been created by Optimizely CMS. |
 | `SITE_DOMAIN` | deploy_domain | no | The domain of the frontend |
 | `OPTIMIZELY_CMS_URL` | dxp_url | yes | The domain where the CMS has been installed |
 | `OPTIMIZELY_CMS_SCHEMA` | opti_cms_schema | no | The marker for the CMS schema version, which can be used by services and the implementation. Valid values are: `OPTI-CMS-12` and `OPTI-CMS-13`. The default value is `OPTI-CMS-13` |

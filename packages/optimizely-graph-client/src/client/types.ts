@@ -24,6 +24,21 @@ export type FrontendUser = {
     roles: string
 }
 
+/**
+ * The supported content schema's by Optimizely Graph
+ */
+export enum SchemaVersion {
+    /**
+     * This is the default (current) schema of Optimizely Graph.
+     */
+    Default = "current",
+    /**
+     * This is a future schema, which has been staged to to be released in the
+     * future.
+     */
+    Next = "new"
+}
+
 export enum OptiCmsSchema {
     CMS12 = "OPTI-CMS-12",
     CMS13 = "OPTI-CMS-13"
@@ -118,6 +133,11 @@ export interface IOptiGraphClient extends ClientInstanceType
      * Retrieve the currently used frontend user information - if any
      */
     readonly frontendUser : FrontendUser | undefined
+
+    /**
+     * Retrieve the graph schema version used by this client
+     */
+    readonly graphSchemaVersion: SchemaVersion
     
     /**
      * Update the authentication data for this client. 

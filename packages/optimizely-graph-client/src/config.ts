@@ -1,8 +1,8 @@
 import type * as Types from './types.js'
-import { OptiCmsSchema } from "./client/types.js"
+import { OptiCmsSchema, SchemaVersion } from "./client/types.js"
 
 export type { ContentGraphConfig, OptimizelyGraphConfigInternal, OptimizelyGraphConfig } from './types.js'
-export { OptiCmsSchema } from "./client/types.js"
+export { OptiCmsSchema, SchemaVersion } from "./client/types.js"
 
 export function readEnvironmentVariables() : Types.OptimizelyGraphConfig
 {
@@ -10,14 +10,15 @@ export function readEnvironmentVariables() : Types.OptimizelyGraphConfig
         secret: getOptional('OPTIMIZELY_GRAPH_SECRET', () => getOptional('OPTIMIZELY_CONTENTGRAPH_SECRET')),
         app_key: getOptional('OPTIMIZELY_GRAPH_APP_KEY', () => getOptional('OPTIMIZELY_CONTENTGRAPH_APP_KEY')),
         single_key: getOptional('OPTIMIZELY_GRAPH_SINGLE_KEY', () => getOptional('OPTIMIZELY_CONTENTGRAPH_SINGLE_KEY', '')) as string,
-        gateway: getOptional('OPTIMIZELY_GRAPH_GATEWAY', () => getOptional('OPTIMIZELY_CONTENTGRAPH_GATEWAY')),
+        gateway: getOptional('OPTIMIZELY_GRAPH_GATEWAY', () => getOptional('OPTIMIZELY_CONTENTGRAPH_GATEWAY', 'https://cg.optimizely.com')),
         tenant_id: getOptional('OPTIMIZELY_GRAPH_TENANT_ID'),
         deploy_domain: getOptional('SITE_DOMAIN'),
         dxp_url: getOptional('OPTIMIZELY_CMS_URL', () => getOptional('DXP_URL')),
         query_log: getBoolean('OPTIMIZELY_GRAPH_QUERY_LOG', () => getBoolean('OPTIMIZELY_CONTENTGRAPH_QUERY_LOG', false)),
         debug: getBoolean('OPTIMIZELY_DEBUG', () => getBoolean('DXP_DEBUG', false)),
         publish: getOptional('OPTIMIZELY_PUBLISH_TOKEN'),
-        opti_cms_schema: getSelection<OptiCmsSchema>('OPTIMIZELY_CMS_SCHEMA', [OptiCmsSchema.CMS12,OptiCmsSchema.CMS13], OptiCmsSchema.CMS13)
+        opti_cms_schema: getSelection<OptiCmsSchema>('OPTIMIZELY_CMS_SCHEMA', [OptiCmsSchema.CMS12,OptiCmsSchema.CMS13], OptiCmsSchema.CMS13),
+        graph_schema: getSelection<SchemaVersion>('OPTIMIZELY_GRAPH_SCHEMA', [SchemaVersion.Default, SchemaVersion.Next], SchemaVersion.Default)
     }
     // Make sure that the Gateway is normalized
     if (config.gateway && config.gateway?.endsWith("/"))
@@ -47,7 +48,8 @@ export function applyConfigDefaults(configuredValues: Types.OptimizelyGraphConfi
         deploy_domain: "",
         debug: false,
         query_log: false,
-        opti_cms_schema: OptiCmsSchema.CMS13
+        opti_cms_schema: OptiCmsSchema.CMS13,
+        graph_schema: SchemaVersion.Default
     }
     const config = {
         ...defaults,
