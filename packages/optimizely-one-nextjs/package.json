@@ -43,7 +43,7 @@
     "@headlessui/tailwindcss": "^0.2.1",
     "@heroicons/react": "^2.2.0",
     "@remkoj/optimizely-graph-client": "workspace:^4.1.0",
-    "@types/node": "^22.10.6",
+    "@types/node": "^22.10.7",
     "@types/react": "^18.3.18",
     "@types/react-dom": "18.3.5",
     "@types/uuid": "^10.0.0",
