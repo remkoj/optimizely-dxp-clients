@@ -19,6 +19,7 @@ import NextJsFactoryCommand from './nextjs_factories.js'
 
 // Generic
 import CmsVersionCommand from './cms_info.js'
+import CmsResetCommand from './cms_reset.js'
 
 export const commands : CliModuleList = [
     StylesCreateCommand,
@@ -32,6 +33,7 @@ export const commands : CliModuleList = [
     NextJsComponentsCommand,
     NextJsVisualBuilderCommand,
     NextJsFactoryCommand,
+    CmsResetCommand,
     CmsVersionCommand
 ]
 
