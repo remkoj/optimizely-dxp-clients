@@ -19,6 +19,7 @@ export class ChannelDefinition implements Readonly<ChannelDefinitionData> {
     public get defaultLocale() : string {
         return (this.locales.filter(x => x.isDefault)[0] || this.locales[0])?.code ?? "en"
     }
+
     public get defaultDomain() : string {
         const primaryDomain : ChannelDomain | undefined = this.isDev ? this.domains.filter(x => x.name.includes("localhost"))[0] : this.domains.filter(x => x.isPrimary)[0]
         return primaryDomain?.name ?? "localhost:3000"

@@ -68,7 +68,7 @@ export function getArgsConfig(args: CliArgs) : OptimizelyGraphConfigInternal
 
 export function getFrontendURL(config: OptimizelyGraphConfigInternal) : URL
 {
-    const host = config.deploy_domain ?? 'http://localhost:3000'
+    const host = config.deploy_domain ?? 'localhost:3000'
     const hostname = host.split(":")[0]
     const scheme = hostname == 'localhost' || hostname.endsWith(".local") ? 'http:' : 'https:'
     return new URL(`${ scheme }//${ host }/`)

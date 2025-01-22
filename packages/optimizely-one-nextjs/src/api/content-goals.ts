@@ -1,5 +1,7 @@
 import type { ApiService } from './types'
 import { ContentRecs } from '../products'
+import getConfig, { checkProductStatus } from '../config'
+import * as Responses from './responses'
 
 export type GoalsReponse = {
     goals: Array<{
@@ -15,15 +17,21 @@ export type GoalsReponse = {
     }>
 }
 
-export const ContentRecsGoalsService : ApiService<GoalsReponse> = {
+export const ContentRecsGoalsService: ApiService<GoalsReponse> = {
     for: { path: '/cgoals', verb: 'get' },
     handler: async (query, cookies) => {
+        const config = getConfig()
+        if (!config.HelperEnabled) return Responses.NotFound
+
+        const products = checkProductStatus(config)
+        if (!products.contentRecsApi) return Responses.NotFound
+
         const crId = ContentRecs.Tools.getVisitorID(cookies)
         if (!crId)
-            return [{goals: []},200]
+            return [{ goals: [] }, 200]
         const contentRecs = new ContentRecs.Client();
-        const nextBestGoals = await contentRecs.getNextBestGoals(crId)
-        return [{goals: nextBestGoals},200]
+        const nextBestGoals = await contentRecs.getNextBestGoals(crId).catch(() => [])
+        return [{ goals: nextBestGoals }, 200]
     }
 }
 

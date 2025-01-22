@@ -1,4 +1,4 @@
-import type { OptiCmsSchema } from "./client/types.js"
+import type { OptiCmsSchema, SchemaVersion } from "./client/types.js"
 
 export type OptimizelyGraphConfigInternal = {
     /**
@@ -55,6 +55,11 @@ export type OptimizelyGraphConfigInternal = {
      * The Turnstile Tenant ID that must be used - if any
      */
     tenant_id?: string
+
+    /**
+     * The Graph Schema version to use for the queries
+     */
+    graph_schema: SchemaVersion
 }
 
 export type OptimizelyGraphConfig = Partial<Omit<OptimizelyGraphConfigInternal, 'single_key'>> & Pick<OptimizelyGraphConfigInternal, 'single_key'>

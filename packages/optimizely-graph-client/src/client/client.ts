@@ -1,11 +1,11 @@
 import { readEnvironmentVariables, applyConfigDefaults, validateConfig, type OptimizelyGraphConfigInternal, type OptimizelyGraphConfig } from "../config.js"
 import { GraphQLClient } from "graphql-request"
-import { AuthMode, type RequestMethod, type IOptiGraphClient, type OptiGraphSiteInfo, type IOptiGraphClientFlags, type OptiCmsSchema, type FrontendUser } from "./types.js"
+import { AuthMode, type RequestMethod, type IOptiGraphClient, type OptiGraphSiteInfo, type IOptiGraphClientFlags, type OptiCmsSchema, type FrontendUser, SchemaVersion } from "./types.js"
 import createHmacFetch, { type FetchAPI } from "../hmac-fetch.js"
 import { base64encode, isError, validateToken, getAuthMode, isValidFrontendUser } from "./utils.js"
 
 const defaultFlags : IOptiGraphClientFlags = {
-    queryCache: true,
+    queryCache: false,
     cache: true,
     recursive: false,
     omitEmpty: false,
@@ -14,8 +14,8 @@ const defaultFlags : IOptiGraphClientFlags = {
 
 export class ContentGraphClient extends GraphQLClient implements IOptiGraphClient
 {
-    public static readonly ForceHmacToken : string = 'use-hmac'
-    public static readonly ForceBasicAuth : string = 'use-basic'
+    public static readonly ForceHmacToken : string = AuthMode.HMAC
+    public static readonly ForceBasicAuth : string = AuthMode.Basic
     protected readonly _config : Readonly<OptimizelyGraphConfigInternal>
     private _user : FrontendUser | undefined = undefined
     private _token : string | undefined
@@ -71,6 +71,11 @@ export class ContentGraphClient extends GraphQLClient implements IOptiGraphClien
     public get currentAuthMode() : AuthMode
     {
         return this._user ? AuthMode.User : getAuthMode(this._token)
+    }
+
+    public get graphSchemaVersion() : SchemaVersion
+    {
+        return this._config.graph_schema || SchemaVersion.Default
     }
 
     public constructor(config?: OptimizelyGraphConfig, token: AuthMode | string | undefined = undefined, flags?: Partial<IOptiGraphClientFlags>)
@@ -209,7 +214,8 @@ export class ContentGraphClient extends GraphQLClient implements IOptiGraphClien
     {
         // Build headers that are shared across authentication modes
         const headers : Record<string, string> = {
-            "X-Client": "@RemkoJ/OptimizelyGraphClient"
+            "X-Client": "@RemkoJ/OptimizelyGraphClient",
+            "cg-query-new": this.graphSchemaVersion == SchemaVersion.Next ? "true" : "false"
         }
         if (this._flags.recursive)
             headers["cg-recursive-enabled"] = "true"

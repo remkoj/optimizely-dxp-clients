@@ -19,7 +19,7 @@ type CommandProps = { }
 export const GraphSourceListCommand : CliModule<CommandProps> = {
     command: ['source:list','sl',"$0"],
     handler: async (args) => {
-        if (args._[0])
+        if (args._[0] && args._[0] != 'source:list' && args._[0] != 'sl')
             throw new Error(`Unknown command ${ chalk.bold(args._[0]) }, supported usage:`)
 
         // Read configuration

@@ -2,7 +2,7 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-export type LinkProperty = {
+export type LinkConfig = {
     to: string;
     from: string;
 };
