@@ -1561,9 +1561,6 @@ __metadata:
     tslib: "npm:^2.8.1"
     typescript: "npm:^5.7.3"
     yargs: "npm:^17.7.2"
-  peerDependencies:
-    "@remkoj/optimizely-cms-api": ^4.2.0
-    "@types/node": "*"
   bin:
     opti-cms: ./dist/index.js
   languageName: unknown
@@ -1650,8 +1647,6 @@ __metadata:
     tslib: "npm:^2.8.1"
     typescript: "npm:^5.7.3"
     yargs: "npm:^17.7.2"
-  peerDependencies:
-    "@remkoj/optimizely-graph-client": ^4
   bin:
     opti-graph: bin/index.js
   languageName: unknown
