@@ -1,18 +1,23 @@
 # Optimizely GraphQL Codegen Plugin
 GraphQL Codegen plugin and preset which generate both the GraphQL type definitions and a few convenienece methods for useage with [Optimizely Graph Client](../optimizely-graph-client/README.md).
 
+[Release notes](https://github.com/remkoj/optimizely-dxp-clients/releases)
+
 > [!WARNING]
-> **Version 4.2.1** Requires a new build of the patched Visitor Plugin Common package from GraphQL Codegen. See instructions below on updating/installing this patched version.
+> The GraphQL Codegen preset requires a patch to enable it to work with recursive queries. Make sure to run this command after every update to ensure you're using the latest patches: `yarn opti-graph patches:apply`. Adjust when used in a mono-repo to patch the correct package.json, for example: `yarn workspace frontend opti-graph patches:apply -p ../../`
 
 ## Install package
 To install using Yarn, use the following command:
 
 ```bash
 yarn add --dev @remkoj/optimizely-graph-functions
-yarn patch-codegen
 ```
 
-Some updates will include a newer version of the patched Visitor Plugin Common package from GraphQL Codegen. After applying the update to this package, rerun `yarn patch-codegen` to download and apply the latest version.
+To add support for automatic applying of patches and apply them.
+```bash
+yarn add --dev @remkoj/optimizely-graph-cli
+yarn opti-graph patches:apply
+```
 
 ## Configure package
 Create a codegen.ts within your application root folder (e.g. apps/frontend/codegen.ts within the example site). Within the codegen.ts create the following configuration:

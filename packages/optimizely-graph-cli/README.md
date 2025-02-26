@@ -1,6 +1,8 @@
 # Optimizely Content Graph CLI
 Command line utitilities to work with Optimizely Content Graph.
 
+[Release notes](https://github.com/remkoj/optimizely-dxp-clients/releases)
+
 ## Installation
 Use your package manager of choice to install this package as development dependency. 
 
@@ -23,6 +25,7 @@ This package installs the command `opti-graph` into the project, which can be us
 | source:clear [sourceId] | Remove all data for the specified source | sc |
 | source:list | List all content sources in Optimizely Graph | [default], sl |
 | source:delete [sourceId] | Remove all data for the specified source | sd |
+| patches:apply | Apply patches to the package.json in the working directory (use the `-p` parameter to change). Validate before running with the `-t` parameter |  |
 
 ### Arguments
 #### Frontend:

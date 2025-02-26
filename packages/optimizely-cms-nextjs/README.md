@@ -6,6 +6,8 @@
 
 This package provides the needed components to implement a Next.js based frontedn for Optimizely SaaS CMS, with full support for the preview capabilities of Optimizely CMS.
 
+[Release notes](https://github.com/remkoj/optimizely-dxp-clients/releases)
+
 ## Features
 ### Catch-all route rendering
 Default implementation of the Catch-All route in Next.js to allow rendering any page created and managed by editors.
