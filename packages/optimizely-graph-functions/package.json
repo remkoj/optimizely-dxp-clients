@@ -1,18 +1,19 @@
 {
   "name": "@remkoj/optimizely-graph-functions",
-  "license": "Apache-2.0",
-  "version": "4.2.0",
   "repository": "https://github.com/remkoj/optimizely-dxp-clients.git",
   "author": "Remko Jantzen <693172+remkoj@users.noreply.github.com>",
   "homepage": "https://github.com/remkoj/optimizely-dxp-clients",
+  "version": "4.3.0",
+  "license": "Apache-2.0",
+  "type": "commonjs",
+  "description": "GraphQL Codegen preset for Optimizely Graph",
+  "main": "./dist/index.js",
   "files": [
     "./dist"
   ],
   "bin": {
-    "patch-codegen": "./dist/patch.js"
+    "opti-patch": "dist/patch.js"
   },
-  "type": "commonjs",
-  "main": "./dist/index.js",
   "exports": {
     ".": "./dist/index.js",
     "./plugin": "./dist/index.js",
@@ -41,7 +42,7 @@
     }
   },
   "devDependencies": {
-    "@types/node": "^22.10.7",
+    "@types/node": "^22.13.5",
     "graphql": "^16.10.0",
     "graphql-request": "^6.1.0",
     "graphql-tag": "^2.12.6",
@@ -49,11 +50,11 @@
   },
   "dependencies": {
     "@graphql-codegen/add": "^5.0.3",
-    "@graphql-codegen/client-preset": "^4.5.1",
+    "@graphql-codegen/client-preset": "^4.6.4",
     "@graphql-codegen/plugin-helpers": "^5.1.0",
-    "@graphql-codegen/typescript": "^4.1.2",
+    "@graphql-codegen/typescript": "^4.1.5",
     "@graphql-codegen/typescript-graphql-request": "^6.2.0",
-    "@graphql-codegen/typescript-operations": "^4.4.0",
+    "@graphql-codegen/typescript-operations": "^4.5.1",
     "tslib": "^2.8.1"
   },
   "scripts": {
@@ -61,7 +62,7 @@
     "prepare": "tsc --build",
     "recompile": "tsc --build --clean && tsc --build --force",
     "watch": "yarn tsc --watch",
-    "test-patch": "node ./dist/patch.js"
+    "opti-patch": "yarn node dist/patch.js"
   },
   "peerDependencies": {
     "@graphql-typed-document-node/core": "^3",
