@@ -2,7 +2,7 @@
 GraphQL Codegen plugin and preset which generate both the GraphQL type definitions and a few convenienece methods for useage with [Optimizely Graph Client](../optimizely-graph-client/README.md).
 
 > [!WARNING]
-> **Version 4.1** Requires a new build of the patched Visitor Plugin Common package from GraphQL Codegen. See instructions below on updating/installing this patched version.
+> **Version 4.2.1** Requires a new build of the patched Visitor Plugin Common package from GraphQL Codegen. See instructions below on updating/installing this patched version.
 
 ## Install package
 To install using Yarn, use the following command:

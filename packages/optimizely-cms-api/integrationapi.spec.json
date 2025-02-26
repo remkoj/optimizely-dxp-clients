@@ -3262,6 +3262,45 @@
                 "type": "string",
                 "description": "Represent the base type of a ContentType."
             },
+            "ContentComponent": {
+                "type": "object",
+                "properties": {
+                    "name": {
+                        "type": "string",
+                        "description": "The name of the content component. If Reference is set, the name is automatically set to the name of the referenced content."
+                    },
+                    "displayOption": {
+                        "type": "string",
+                        "description": "An optional display option for the content component."
+                    },
+                    "segmentationGroup": {
+                        "type": "string",
+                        "description": "An optional group for the personalizable component."
+                    },
+                    "segments": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        },
+                        "description": "Specifies the settings for the content component."
+                    },
+                    "reference": {
+                        "type": "string"
+                    },
+                    "contentType": {
+                        "type": "string",
+                        "description": "The key of the content type that this is an embedded instance of."
+                    },
+                    "content": {
+                        "additionalProperties": {
+                            "type": "object"
+                        },
+                        "description": "Dictionary with all custom properties as specified by associated ContentType"
+                    }
+                },
+                "additionalProperties": false,
+                "description": "Represents a content component."
+            },
             "ContentItem": {
                 "required": [
                     "displayName",

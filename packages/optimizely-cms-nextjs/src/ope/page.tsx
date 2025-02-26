@@ -125,7 +125,7 @@ export function createEditPageComponent<LocaleType = string>(
                     <OnPageEdit><RefreshNotice /></OnPageEdit>
                     <CmsContent contentType={ contentType } contentLink={ contentLink } fragmentData={ contentItem } />
                 </Layout>
-                <div className='optly-contentLink'>ContentItem: { contentLink ? contentLinkToString(contentLink) : "Invalid content link returned from Optimizely Graph" }</div>
+                { context.isDebug && <div className='optly-contentLink'>ContentItem: { contentLink ? contentLinkToString(contentLink) : "Invalid content link returned from Optimizely Graph" }</div> }
             </>
             return output
         } catch (e) {

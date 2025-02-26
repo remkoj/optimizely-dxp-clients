@@ -77,6 +77,7 @@ export function getFrontendURL(config: OptimizelyGraphConfigInternal) : URL
 export type CliApp = ReturnType<typeof createCliApp>
 export type CliArgs = CliApp extends Argv<infer R> ? R : never
 type CliModuleBase<P> = CommandModule<CliArgs, CliArgs & Partial<P>>
+export type CliModuleArgs<P = {}> = Argv<CliArgs & Partial<P>>
 export type CliModule<P = {}> = Pick<Required<CliModuleBase<P>>, 'command' | 'describe'> & Omit<CliModuleBase<P>, 'command' | 'describe'>
 export type CliModuleList = CliModuleBase<any>[]
 

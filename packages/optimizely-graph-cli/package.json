@@ -3,11 +3,11 @@
   "repository": "https://github.com/remkoj/optimizely-dxp-clients.git",
   "author": "Remko Jantzen <693172+remkoj@users.noreply.github.com>",
   "homepage": "https://github.com/remkoj/optimizely-dxp-clients",
-  "version": "4.2.0",
+  "version": "4.2.1",
   "license": "Apache-2.0",
   "type": "module",
   "description": "CLI Utilities for Optimizely DXP",
-  "main": "dist/index.js",
+  "main": "bin/index.js",
   "files": [
     "./bin"
   ],
@@ -20,16 +20,16 @@
     "opti-graph": "yarn node bin/index.js"
   },
   "devDependencies": {
-    "@remkoj/optimizely-graph-client": "workspace:4.2.0",
+    "@remkoj/optimizely-graph-client": "workspace:4.2.1",
     "@rollup/plugin-commonjs": "^28.0.2",
     "@rollup/plugin-json": "^6.1.0",
     "@rollup/plugin-typescript": "^12.1.2",
     "@rollup/pluginutils": "^5.1.4",
     "@types/crypto-js": "^4.2.2",
-    "@types/node": "^22.10.7",
+    "@types/node": "^22.13.5",
     "@types/source-map-support": "^0.5.10",
     "@types/yargs": "^17.0.33",
-    "rollup": "^4.31.0",
+    "rollup": "^4.34.8",
     "source-map-support": "^0.5.21",
     "tslib": "^2.8.1",
     "typescript": "^5.7.3"
@@ -37,6 +37,7 @@
   "dependencies": {
     "chalk": "^5.4.1",
     "cli-table3": "^0.6.5",
+    "compare-versions": "^6.1.1",
     "dotenv": "^16.4.7",
     "dotenv-expand": "^12.0.1",
     "figures": "^6.1.0",

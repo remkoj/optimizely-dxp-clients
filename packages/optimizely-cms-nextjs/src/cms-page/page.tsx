@@ -190,8 +190,14 @@ export function createPage<
         return [route, contentLink, contentType, graphLocale] as [Route, ContentLinkWithLocale, string[], string]
     }
 
+    // Create channelId
+    /**
+     * The Channel Identifier to be used for this page
+     */
+    const channelId = channel ? globalClient.currentOptiCmsSchema == OptiCmsSchema.CMS12 ? channel.id : getPrimaryURL(channel).origin : undefined;
+
     const pageDefintion : OptiCmsNextJsPage<TParams, TSearchParams> = {
-        generateStaticParams : async () => (await router.getRoutes()).map(r => routeToParams(r)),
+        generateStaticParams : async () => (await router.getRoutes(channelId)).map(r => routeToParams(r)),
         generateMetadata: async ( { params, searchParams }, parent ) =>
         {
             // Get context
@@ -200,7 +206,6 @@ export function createPage<
             context.setComponentFactory(factory)
 
             // Read variables from request   
-            const siteId = channel ? (globalClient.currentOptiCmsSchema == OptiCmsSchema.CMS12 ? channel.id : channel.defaultDomain) : undefined
             const requestPath = propsToCmsPath({ params, searchParams })
             if (!requestPath) return Promise.resolve({})
             const initialLocale = paramsToLocale(params, channel)
@@ -208,10 +213,10 @@ export function createPage<
             
             // Debug output
             if (context.isDebug)
-                console.log(`⚪ [CmsPage.generateMetadata] Processed Next.JS route: ${ JSON.stringify(params) } => Optimizely CMS route: ${ JSON.stringify({ path: requestPath, siteId })}`)
+                console.log(`⚪ [CmsPage.generateMetadata] Processed Next.JS route: ${ JSON.stringify(params) } => Optimizely CMS route: ${ JSON.stringify({ path: requestPath, siteId: channelId })}`)
 
             // Resolve the route to a content link
-            const routeInfo = await getInfoByPath(requestPath, siteId)
+            const routeInfo = await getInfoByPath(requestPath, channelId)
             if (!routeInfo) {
                 if (context.isDebug)
                     console.log('⚪ [CmsPage.generateMetadata] No data received')
@@ -273,7 +278,7 @@ export function createPage<
             const pathForRequest = (requestPath.endsWith("/") ? [ requestPath.substring(0, requestPath.length - 1), requestPath ] : [ requestPath, requestPath + '/' ]).filter(x => x.length >= 1)
             const requestVars = {
                 path: pathForRequest,
-                siteId: channel ? (globalClient.currentOptiCmsSchema == OptiCmsSchema.CMS12 ? channel.id : getPrimaryURL(channel).href) : undefined
+                siteId: channelId
             }
             if (context.isDebug)
                 console.log(`⚪ [CmsPage] Processed Next.JS route: ${ JSON.stringify( params) } => getContentByPath Variables: ${ JSON.stringify(requestVars)}`)

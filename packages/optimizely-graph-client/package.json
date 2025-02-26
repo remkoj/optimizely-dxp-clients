@@ -1,7 +1,7 @@
 {
   "name": "@remkoj/optimizely-graph-client",
   "license": "Apache-2.0",
-  "version": "4.2.0",
+  "version": "4.2.1",
   "repository": "https://github.com/remkoj/optimizely-dxp-clients.git",
   "author": "Remko Jantzen <693172+remkoj@users.noreply.github.com>",
   "homepage": "https://github.com/remkoj/optimizely-dxp-clients",
@@ -51,7 +51,7 @@
   },
   "devDependencies": {
     "@types/crypto-js": "^4.2.2",
-    "@types/node": "^22.10.7",
+    "@types/node": "^22.13.5",
     "graphql": "^16.10.0",
     "graphql-request": "^6.1.0",
     "openapi-typescript-codegen": "^0.29.0",
