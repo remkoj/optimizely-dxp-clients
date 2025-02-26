@@ -4,8 +4,8 @@ import commands from './commands/index.js'
 
 // Define the package constants
 const enum APP {
-    Script = "opti-graph",
-    Version = "1.0.3"
+  Script = "opti-graph",
+  Version = "1.0.3"
 }
 
 // Make sure the environment variables are correctly processed
