@@ -2,7 +2,7 @@
   "name": "@remkoj/optimizely-cms-nextjs",
   "description": "Next.JS integration for Optimizely SaaS CMS",
   "license": "Apache-2.0",
-  "version": "4.3.1",
+  "version": "5.0.0-pre1",
   "repository": "https://github.com/remkoj/optimizely-dxp-clients.git",
   "author": "Remko Jantzen <693172+remkoj@users.noreply.github.com>",
   "homepage": "https://github.com/remkoj/optimizely-dxp-clients",
@@ -44,20 +44,18 @@
     }
   },
   "devDependencies": {
-    "@remkoj/optimizely-cms-react": "workspace:4.3.1",
-    "@remkoj/optimizely-graph-client": "workspace:4.3.1",
+    "@remkoj/optimizely-cms-react": "workspace:5.0.0-pre1",
+    "@remkoj/optimizely-graph-client": "workspace:5.0.0-pre1",
     "@types/negotiator": "^0.6.3",
-    "@types/node": "^22.13.5",
-    "@types/react": "^18.3.18",
-    "@types/react-dom": "18.3.5",
-    "graphql": "^16.10.0",
-    "graphql-request": "^6.1.0",
-    "next": "^14.2.24",
+    "@types/node": "^22.13.9",
+    "@types/react": "^19.0.10",
+    "@types/react-dom": "19.0.4",
+    "next": "^15.2.1",
     "prop-types": "^15.8.1",
-    "react": "^18.3.1",
-    "react-dom": "^18.3.1",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
     "scheduler": "^0.25.0",
-    "typescript": "^5.7.3"
+    "typescript": "^5.8.2"
   },
   "dependencies": {
     "@formatjs/intl-localematcher": "^0.6.0",
@@ -65,17 +63,16 @@
     "negotiator": "^1.0.0"
   },
   "peerDependencies": {
-    "@remkoj/optimizely-cms-react": "^4",
-    "@remkoj/optimizely-graph-client": "^4",
-    "graphql": "^16",
-    "graphql-request": "^6",
-    "next": "^14",
-    "react": "^18"
+    "@remkoj/optimizely-cms-react": "^5",
+    "@remkoj/optimizely-graph-client": "^5",
+    "next": "^15",
+    "react": "^19"
   },
   "scripts": {
     "clean": "yarn tsc --build --clean",
     "prepare": "yarn tsc --build --force",
     "watch": "yarn tsc --watch",
     "recompile": "yarn tsc --build --clean && yarn tsc --build --force"
-  }
+  },
+  "stableVersion": "4.3.1"
 }

@@ -2,7 +2,7 @@
   "name": "@remkoj/optimizely-cms-api",
   "displayName": "Optimizely CMS - Integration API Client",
   "description": "A Javascript client for the Integration API provided by the Optimizely CMS.",
-  "version": "4.3.1",
+  "version": "5.0.0-pre1",
   "type": "commonjs",
   "license": "Apache-2.0",
   "main": "./dist/index.js",
@@ -11,20 +11,24 @@
     "./dist"
   ],
   "devDependencies": {
-    "@types/node": "^22.13.5",
+    "@hey-api/client-fetch": "^0.8.3",
+    "@hey-api/openapi-ts": "^0.64.10",
+    "@types/node": "^22.13.9",
     "dotenv": "^16.4.7",
+    "dotenv-expand": "^12.0.1",
     "glob": "^11.0.1",
-    "openapi-typescript-codegen": "^0.29.0",
-    "tslib": "^2.8.1",
-    "typescript": "^5.7.3"
+    "rimraf": "^6.0.1",
+    "typescript": "^5.8.2"
+  },
+  "dependencies": {
+    "tslib": "^2.8.1"
   },
   "scripts": {
-    "clean": "tsc --build --clean",
-    "prepare": "tsc --build",
-    "watch": "tsc --watch",
+    "clean": "rimraf -g ./dist ./*.tsbuildinfo && rimraf -g ./openapi-ts*log",
+    "prepare": "tsc --build && yarn node scripts/copy-client.mjs",
+    "watch": "yarn prepare && tsc --watch",
     "rebuild": "yarn clean && yarn update-client && tsc --build --force",
-    "update-client": "yarn generate-spec && yarn generate-client",
-    "generate-client": "yarn openapi --input ./integrationapi.spec.json --output ./src/client --name CmsIntegrationApiClient",
-    "generate-spec": "yarn node scripts/update-spec.js"
-  }
+    "update-client": "yarn node scripts/create-client.mjs"
+  },
+  "stableVersion": "4.3.1"
 }
