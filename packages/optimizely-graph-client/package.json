@@ -52,8 +52,6 @@
   "devDependencies": {
     "@types/crypto-js": "^4.2.2",
     "@types/node": "^22.13.9",
-    "graphql": "^16.10.0",
-    "graphql-request": "^7.1.2",
     "openapi-typescript-codegen": "^0.29.0",
     "prop-types": "^15.8.1",
     "scheduler": "^0.25.0",
@@ -61,6 +59,7 @@
   },
   "dependencies": {
     "crypto-js": "^4.2.0",
+    "graphql": "^16.10.0",
     "graphql-request": "^7.1.2"
   },
   "scripts": {
