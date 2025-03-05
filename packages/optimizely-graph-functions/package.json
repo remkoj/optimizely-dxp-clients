@@ -42,11 +42,11 @@
     }
   },
   "devDependencies": {
-    "@types/node": "^22.13.5",
+    "@types/node": "^22.13.9",
     "graphql": "^16.10.0",
     "graphql-request": "^6.1.0",
     "graphql-tag": "^2.12.6",
-    "typescript": "^5.7.3"
+    "typescript": "^5.8.2"
   },
   "dependencies": {
     "@graphql-codegen/add": "^5.0.3",

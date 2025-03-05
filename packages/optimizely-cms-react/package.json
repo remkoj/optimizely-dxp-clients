@@ -29,7 +29,7 @@
   "devDependencies": {
     "@remkoj/optimizely-graph-client": "workspace:4.3.1",
     "@types/crypto-js": "^4.2.2",
-    "@types/node": "^22.13.5",
+    "@types/node": "^22.13.9",
     "@types/react": "^18.3.18",
     "@types/react-dom": "18.3.5",
     "entities": "^6.0.0",
@@ -39,7 +39,7 @@
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "scheduler": "^0.25.0",
-    "typescript": "^5.7.3"
+    "typescript": "^5.8.2"
   },
   "dependencies": {
     "@graphql-typed-document-node/core": "^3.2.0",
