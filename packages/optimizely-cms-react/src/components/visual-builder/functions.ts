@@ -62,7 +62,7 @@ export const defaultPropsFactory : LeafPropsFactory = <ET extends Record<string,
         throw new Error("Invalid content type: "+JSON.stringify(contentType))
 
     const contentLink : Partial<ContentLinkWithLocale<LT>> = {
-        key: node.component?._metadata?.key || node.key || undefined,
+        key: node.key || node.component?._metadata?.key || undefined,
         version: node.component?._metadata?.version,
         locale: node.component?._metadata?.locale
     }
