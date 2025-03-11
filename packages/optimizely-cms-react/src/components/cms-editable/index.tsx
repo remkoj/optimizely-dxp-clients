@@ -5,13 +5,10 @@ export type EditableComponentType = (ReactComponentType<any>) | (ReactExoticComp
 export type EditableComponentProps<FT extends EditableComponentType> = FT extends keyof JSX.IntrinsicElements ? JSX.IntrinsicElements[FT] : ComponentProps<FT>
 export type CmsEditableProps<FT extends EditableComponentType> = {
     as?: FT
-} & ({
+} & {
     cmsId?: string | null
-    cmsFieldName?: never
-} | {
-    cmsId?: never
     cmsFieldName?: string | null
-}) & EditableComponentProps<FT>
+} & EditableComponentProps<FT>
 export type CmsEditableComponent = <CT extends EditableComponentType>(props: CmsEditableProps<CT>) => ReactNode
 export type CmsEditableBaseComponent = <CT extends EditableComponentType>(props: PropsWithContext<CmsEditableProps<CT>>) => ReactNode
 
@@ -22,7 +19,6 @@ export type CmsEditableBaseComponent = <CT extends EditableComponentType>(props:
  * @param   param0      The HTML element with the simple properties
  * @returns 
  */
-//@ts-expect-error Typescript doesn't understand the property type :'(
 export const CmsEditable : CmsEditableBaseComponent = <CT extends EditableComponentType = 'div'>({ ctx, as: DefaultElement = 'div', cmsId, cmsFieldName, children, key, ...props }: PropsWithContext<CmsEditableProps<CT>>) =>
 {
     const { inEditMode } = ctx
