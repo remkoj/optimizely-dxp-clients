@@ -27,7 +27,7 @@ export class OptimizelyGraphAdminApi {
     constructor(config?: Partial<OpenAPIConfig>, HttpRequest: HttpRequestConstructor = FetchHttpRequest) {
         this.request = new HttpRequest({
             BASE: config?.BASE ?? 'https://prod.cg.optimizely.com',
-            VERSION: config?.VERSION ?? '3.16.0',
+            VERSION: config?.VERSION ?? '3.17.0',
             WITH_CREDENTIALS: config?.WITH_CREDENTIALS ?? false,
             CREDENTIALS: config?.CREDENTIALS ?? 'include',
             TOKEN: config?.TOKEN,

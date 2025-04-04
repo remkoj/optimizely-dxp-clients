@@ -1,7 +1,9 @@
-import type { GraphQLClient } from "graphql-request"
+import type { GraphQLClient, RequestMiddleware } from "graphql-request"
+import type { OptimizelyGraphConfig } from "../types.js"
 
-export type RequestMethod = InstanceType<typeof GraphQLClient>['request']
 export type ClientInstanceType = InstanceType<typeof GraphQLClient>
+export type RequestMethod = InstanceType<typeof GraphQLClient>['request']
+export type { RequestMiddleware, Variables } from "graphql-request"
 
 export type QueryParams = {
   query: Parameters<RequestMethod>[0]['document']
@@ -64,14 +66,17 @@ export type IOptiGraphClientFlags = {
    * that the execution plan does not need to be rebuild after publishing content.
    * 
    * The following features do not work with query caching enabled:
-   * - @recursive
+   * - `@recursive`
    * - cursors
+   * 
+   * @see https://docs.developers.optimizely.com/platform-optimizely/v1.4.0-optimizely-graph/docs/cached-templates
    */
   queryCache: boolean
 
   /**
    * Control support for the recursive directive within Optimizely Graph
    * 
+   * @deprecated  This feature is no longer controlled by flags
    * @see https://docs.developers.optimizely.com/platform-optimizely/v1.4.0-optimizely-graph/docs/recursive-directive-usage
    */
   recursive: boolean
@@ -101,6 +106,9 @@ export type IOptiGraphClientFlags = {
    *
    * So in practise: this will keep result cache for a query - until the specific 
    * content has been updated / deleted
+   * 
+   * @deprecated  Use `item` instead of `items` in your query
+   * @see https://docs.developers.optimizely.com/platform-optimizely/v1.4.0-optimizely-graph/docs/item-queries
    */
   cache_uniq: boolean
 
@@ -110,8 +118,8 @@ export type IOptiGraphClientFlags = {
    * When enabled, the request will be updated with Next.JS specific fetch parameters
    * to control the Next.JS data cache. When enabled, the following directives are set:
    * - Cache
-   * - Revalidate
-   * - Tags
+   * - Next.Revalidate
+   * - Next.Tags
    * 
    * The following tags are used: 
    * - opti-graph: On all requests
@@ -120,6 +128,15 @@ export type IOptiGraphClientFlags = {
    * - opti-graph-operation-[operationName]: On all requests that have an operationName set
    */
   nextJsFetchDirectives: boolean
+
+  /**
+   * Enable querying for deleted documents. This does require an authenticated connections,
+   * so make sure to also switch to HMAC authentication when enabling this for the results
+   * to be as expected.
+   * 
+   * @see https://docs.developers.optimizely.com/platform-optimizely/v1.4.0-optimizely-graph/docs/modified-and-deleted-documents#deleted-documents
+   */
+  includeDeleted: boolean
 }
 
 export interface IOptiGraphClient extends ClientInstanceType {
@@ -207,6 +224,22 @@ export interface IOptiGraphClient extends ClientInstanceType {
    *              the client configuration
    */
   setFrontendUser(newUser: FrontendUser | null): boolean
+
+  /**
+   * Get the configuration that can be used to construct a similar client
+   * at the other side of the React boundary. The config only contains the
+   * part that is safe to cross.
+   * 
+   * @param key The key for which this serialization to JSON occurs
+   */
+  toJSON(key?: string): OptimizelyGraphConfig
+
+  /**
+   * 
+   * @param additionalMiddleware 
+   * @returns 
+   */
+  setRequestMiddleware: (additionalMiddleware: RequestMiddleware) => IOptiGraphClient
 }
 
 // Factory service

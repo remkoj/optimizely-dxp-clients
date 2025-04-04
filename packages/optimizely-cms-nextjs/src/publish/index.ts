@@ -1,11 +1,11 @@
 import { type NextRequest, NextResponse } from 'next/server.js'
 import { revalidatePath, revalidateTag } from "next/cache.js"
-import { type ClientFactory, OptiCmsSchema, RouteResolver, type Route } from '@remkoj/optimizely-graph-client'
-import { createClient } from '@remkoj/optimizely-cms-nextjs'
+import { type ClientFactory, type IOptiGraphClient, OptiCmsSchema, RouteResolver, type Route } from '@remkoj/optimizely-graph-client'
+import { createAuthorizedClient } from '../client.js'
 
 export { type NextRequest, NextResponse } from 'next/server.js'
 export type PublishApiHandler = (req: NextRequest) => Promise<NextResponse<PublishApiResponse>> | NextResponse<PublishApiResponse>
-export type PublishScopes = NonNullable<Parameters<typeof revalidatePath>[1]>
+export type PublishScopes = Parameters<typeof revalidatePath>[1]
 export type PublishHookData = {
   timestamp: string
   tenantId: string
@@ -121,10 +121,10 @@ export type PublishApiResponse = {
 const publishApiDefaults: PublishApiOptions = {
   paths: ['/', '/[[...path]]', '/[lang]', '/[lang]/[[...path]]'],
   additionalPaths: [],
-  scopes: ['page', 'layout'],
+  scopes: [undefined, 'layout'],
   tags: [],
   optimizePublish: false,
-  client: createClient,
+  client: createAuthorizedClient,
   router: {},
   hookDataFilter: (hookType) => hookType.subject == 'bulk' && hookType.action == 'completed',
   bulkItemStatusFilter: (bulkItemStatus: string) => bulkItemStatus == "indexed" || bulkItemStatus == "deleted",
@@ -142,8 +142,7 @@ export function createPublishApi(options?: Partial<PublishApiOptions>): PublishA
     ...options
   }
 
-  const client = clientFactory()
-  function getRouteResolver(): PartialRouteResolver {
+  function getRouteResolver(client: IOptiGraphClient): PartialRouteResolver {
     return typeof routerFactory == 'function' ? routerFactory() : new RouteResolver(client, routerFactory?.urlBase, routerFactory?.resolverMode ?? client.currentOptiCmsSchema)
   }
 
@@ -155,14 +154,14 @@ export function createPublishApi(options?: Partial<PublishApiOptions>): PublishA
     return Promise.resolve([tags])
   }
 
-  function publishAll(targetPaths: string[], targetTags: Array<Parameters<typeof revalidateTag>[0]>, optimized: boolean = false): PublishApiResponse {
-    scopes.forEach(scope => {
+  function publishAll(targetPaths: string[], targetTags: Array<Parameters<typeof revalidateTag>[0]>, optimized: boolean = false, publishScopes: PublishScopes[] = scopes): PublishApiResponse {
+    publishScopes.forEach(scope => {
       targetPaths.forEach(path => revalidatePath(path, scope))
       additionalPaths.forEach(path => revalidatePath(path, scope))
     })
 
     targetTags.forEach(tag => revalidateTag(tag))
-    return { revalidated: { scopes, paths: [...targetPaths, ...additionalPaths], tags: targetTags }, optimized }
+    return { revalidated: { scopes: publishScopes, paths: [...targetPaths, ...additionalPaths], tags: targetTags }, optimized }
   }
 
   function getItemIds(hookData: PublishHookData): Array<{ key: string, locale: string }> {
@@ -190,6 +189,7 @@ export function createPublishApi(options?: Partial<PublishApiOptions>): PublishA
 
   const requestHandler: PublishApiHandler = async (req) => {
     // Validate the request
+    const client = clientFactory()
     const publishToken = client.siteInfo.publishToken
     const requestToken = getRequestToken(req)
     if (!publishToken) {
@@ -231,7 +231,7 @@ export function createPublishApi(options?: Partial<PublishApiOptions>): PublishA
       console.debug("[Publish-API] Content items to publish:", JSON.stringify(contentIds))
 
       // Resolve the contentids to paths
-      const router = getRouteResolver()
+      const router = getRouteResolver(client)
       const results = await Promise.allSettled(contentIds.map(contentId => router.getContentInfoById(contentId.key, contentId.locale)))
       const pathsToFlush = results.map(result => {
         if (result.status == "rejected") {

@@ -119,7 +119,10 @@ export type GetContentByIdData = {
     items?: MayBe<Array<{
       __typename?: MayBe<string>
       _type?: MayBe<string>
-    } & Record<string, any>>>
+    } & Record<string, any>> | ({
+      __typename?: MayBe<string>
+      _type?: MayBe<string>
+    } & Record<string, any>)>
     total?: MayBe<number>
   }>
 }

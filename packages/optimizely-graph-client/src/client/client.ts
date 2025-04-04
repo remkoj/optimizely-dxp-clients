@@ -1,5 +1,5 @@
 import { readEnvironmentVariables, applyConfigDefaults, validateConfig, type OptimizelyGraphConfigInternal, type OptimizelyGraphConfig } from "../config.js"
-import { GraphQLClient, RequestMiddleware, Variables } from "graphql-request"
+import { GraphQLClient, type RequestMiddleware, type Variables } from "graphql-request"
 import { AuthMode, type RequestMethod, type IOptiGraphClient, type OptiGraphSiteInfo, type IOptiGraphClientFlags, type OptiCmsSchema, type FrontendUser, SchemaVersion } from "./types.js"
 import createHmacFetch, { type FetchAPI } from "../hmac-fetch.js"
 import { base64encode, isError, validateToken, getAuthMode, isValidFrontendUser } from "./utils.js"
@@ -13,12 +13,13 @@ type RequestExtendedInit<V extends Variables = Variables> = Parameters<RequestMi
 }
 
 const defaultFlags: IOptiGraphClientFlags = {
-  queryCache: false,
   cache: true,
+  queryCache: false,
   recursive: false,
   omitEmpty: false,
   cache_uniq: false,
-  nextJsFetchDirectives: false
+  nextJsFetchDirectives: false,
+  includeDeleted: false
 }
 
 export class ContentGraphClient extends GraphQLClient implements IOptiGraphClient {
@@ -29,6 +30,7 @@ export class ContentGraphClient extends GraphQLClient implements IOptiGraphClien
   private _token: string | undefined
   private _hmacFetch: FetchAPI | undefined
   private _flags: IOptiGraphClientFlags
+  private _customMiddleware: RequestMiddleware<Variables> | undefined
   public get currentOptiCmsSchema(): OptiCmsSchema {
     return this._config.opti_cms_schema
   }
@@ -96,15 +98,19 @@ export class ContentGraphClient extends GraphQLClient implements IOptiGraphClien
       keepalive: false,
       credentials: "include",
       redirect: "error",
-      requestMiddleware: <V extends Variables = Variables>(request: RequestExtendedInit<V>) => {
-        if (this._flags.nextJsFetchDirectives) {
+      requestMiddleware: async <V extends Variables = Variables>(request: RequestExtendedInit<V>) => {
+        if (this._flags.nextJsFetchDirectives && request.operationName) {
           if (!Array.isArray(request.next?.tags)) {
-            if (!request.next) request.next = {};
-            if (!Array.isArray(request.next?.tags)) request.next.tags = []
-            if (request.operationName)
-              request.next.tags.push('opti-graph-operation-' + request.operationName)
+            if (!request.next)
+              request.next = {};
+            request.next.tags = []
           }
+          request.next.tags = request.next.tags.filter(x => !x.startsWith('opti-graph-operation-'))
+          request.next.tags.push('opti-graph-operation-' + request.operationName)
         }
+        if (this._customMiddleware)
+          request = await this._customMiddleware(request) as RequestExtendedInit<V>
+
         if (QUERY_LOG) {
           console.log(`🔎 [Optimizely Graph] [Request URL] ${request.url} [${request.cache}]\n
 🔎 [Optimizely Graph] [Request Headers] ${JSON.stringify(request.headers)}\n
@@ -163,6 +169,22 @@ export class ContentGraphClient extends GraphQLClient implements IOptiGraphClien
       throw new Error("❌ [Optimizely Graph] User mode authentication automatically activated when setting user information");
     this.token = tokenOrAuthmode == AuthMode.Public ? undefined : tokenOrAuthmode
     this.updateRequestConfig()
+    return this
+  }
+
+  public toJSON(key?: string): OptimizelyGraphConfig {
+    return {
+      single_key: this._config.single_key,
+      opti_cms_schema: this._config.opti_cms_schema,
+      gateway: this._config.gateway,
+      query_log: this._config.query_log,
+      debug: this._config.debug,
+      graph_schema: this._config.graph_schema
+    }
+  }
+
+  public setRequestMiddleware(additionalMiddleware: RequestMiddleware): ContentGraphClient {
+    this._customMiddleware = additionalMiddleware
     return this
   }
 
@@ -245,24 +267,30 @@ export class ContentGraphClient extends GraphQLClient implements IOptiGraphClien
     }
 
     // Update fetch configuration
-    if (!this.cacheEnabled)
+    if (this.cacheEnabled)
+      this.requestConfig.cache = undefined
+    else
       this.requestConfig.cache = "no-store"
 
     // Apply Next.JS Fetch directives
     if (this._flags.nextJsFetchDirectives) {
-      const mode = this.currentAuthMode == AuthMode.Public ? 'opti-graph-public' : 'opti-graph-private'
-      const tags: string[] = ['opti-graph', mode]
-      if (this.cacheEnabled)
-        (this.requestConfig as RequestExtendedInit).next = { revalidate: false, tags };
-      else
-        (this.requestConfig as RequestExtendedInit).next = { ...(this.requestConfig as RequestExtendedInit).next, revalidate: 0, cache: "no-store", tags };
+      const tags: string[] = ['opti-graph', this.currentAuthMode == AuthMode.Public ? 'opti-graph-public' : 'opti-graph-private'];
+      const nextRequestConfig: {} & RequestExtendedInit['next'] = { tags };
+      if (this.cacheEnabled && (this.requestConfig as RequestExtendedInit).next?.revalidate == undefined) {
+        nextRequestConfig.revalidate = false
+      }
+      (this.requestConfig as RequestExtendedInit).next = {
+        ...(this.requestConfig as RequestExtendedInit).next,
+        ...nextRequestConfig
+      };
     }
 
     this.setHeaders(headers)
     if (this.debug)
-      console.log(`🔗 [Optimizely Graph] Updated service endpoint headers: ${this.requestConfig.headers}`)
+      console.log(`🔗 [Optimizely Graph] Updated service endpoint headers: ${JSON.stringify(headers)}`)
     this.setEndpoint(this.buildUrlWithFlags())
   }
+
 
   /**
    * Build headers that are shared across authentication modes, taking
@@ -271,13 +299,20 @@ export class ContentGraphClient extends GraphQLClient implements IOptiGraphClien
    * @returns The default header set
    */
   protected buildDefaultHeaders(): Record<string, string> {
+    // Default headers
     const headers: Record<string, string> = {
-      "X-Client": "@RemkoJ/OptimizelyGraphClient",
-      "cg-query-new": this.graphSchemaVersion == SchemaVersion.Next ? "true" : "false"
+      "X-Client": "@RemkoJ/OptimizelyGraphClient"
     }
+
+    // Add feature flag based headers
+    if (this.graphSchemaVersion == SchemaVersion.Next)
+      headers["cg-query-new"] = "true"
+    if (this._flags.includeDeleted)
+      headers["cg-include-deleted"] = "true"
     if (this._flags.recursive)
       headers["cg-recursive-enabled"] = "true"
 
+    // Tell the Optimizely Graph service to not cache the request
     headers["Cache-Control"] = "no-store";
     headers["Pragma"] = "no-cache";
     return headers

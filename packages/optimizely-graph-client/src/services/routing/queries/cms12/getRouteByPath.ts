@@ -2,21 +2,21 @@ import { gql } from "graphql-request"
 import type * as GetAllRoutes from './getAllRoutes.js'
 
 export type Variables = {
-    path: string
-    siteId?: string | null
+  path: string
+  siteId?: string | null
 }
 export type Result = {
-    Content: {
-        total: number
-        items: GetAllRoutes.Route[]
-    }
+  Content: {
+    total: number
+    items: GetAllRoutes.Route[]
+  }
 }
-export const query = gql`query GetRouteByPath($path: String!, $siteId: String) {
+export const query = gql`query GetRouteByPath($path: [String!]!, $siteId: String) {
 Content(
   where: {
     _and: {
       RelativePath: {
-        eq: $path
+        in: $path
       },
       SiteId: {
         eq:$siteId
