@@ -37,17 +37,7 @@ export type RichTextProps = {
      * will be set on the Fragment to prevent React errors.
      */
     noWrapper?: boolean
-} & ({
-    /**
-     * The fieldname of this Rich Text, when it is used as part of a block
-     */
-    cmsFieldName?: never
-
-    /**
-     * The Element ID if this is the sole output of a Visual Builder element
-     */
-    cmsId?: string | null
-} | {
+} & {
     /**
      * The fieldname of this Rich Text, when it is used as part of a block
      */
@@ -56,8 +46,8 @@ export type RichTextProps = {
     /**
      * The Element ID if this is the sole output of a Visual Builder element
      */
-    cmsId?: never
-})
+    cmsId?: string | null
+}
 
 export type RichTextComponent = ReactComponentType<RichTextProps>
 
