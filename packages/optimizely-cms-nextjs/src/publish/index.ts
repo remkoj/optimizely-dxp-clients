@@ -72,7 +72,7 @@ export type PublishApiOptions = {
    * The Optimizely Graph client to use for Graph Operations needed to publish 
    * content
    */
-  client: ClientFactory
+  client: ClientFactory | IOptiGraphClient
 
   /**
    * The router to use when the publishing optimization is enabled
@@ -136,6 +136,12 @@ const publishApiDefaults: PublishApiOptions = {
   }
 }
 
+/**
+ * Create the default handler for webhooks received from Optimizely Graph.
+ * 
+ * @param     options   The configuration fo the API
+ * @returns   The created API Handler
+ */
 export function createPublishApi(options?: Partial<PublishApiOptions>): PublishApiHandler {
   const { paths, additionalPaths, optimizePublish, client: clientFactory, router: routerFactory, hookDataFilter, tags, scopes, itemIdToKeyAndLocale, bulkItemStatusFilter }: PublishApiOptions = {
     ...publishApiDefaults,
@@ -189,7 +195,7 @@ export function createPublishApi(options?: Partial<PublishApiOptions>): PublishA
 
   const requestHandler: PublishApiHandler = async (req) => {
     // Validate the request
-    const client = clientFactory()
+    const client = typeof (clientFactory) == 'object' ? clientFactory : clientFactory();
     const publishToken = client.siteInfo.publishToken
     const requestToken = getRequestToken(req)
     if (!publishToken) {

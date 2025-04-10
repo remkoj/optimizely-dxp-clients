@@ -10,7 +10,6 @@ import { ContentService } from './services/ContentService';
 import { ContentTypesService } from './services/ContentTypesService';
 import { DisplayTemplatesService } from './services/DisplayTemplatesService';
 import { OauthService } from './services/OauthService';
-import { PackagesService } from './services/PackagesService';
 import { PropertyFormatsService } from './services/PropertyFormatsService';
 import { PropertyGroupsService } from './services/PropertyGroupsService';
 type HttpRequestConstructor = new (config: OpenAPIConfig) => BaseHttpRequest;
@@ -20,7 +19,6 @@ export class CmsIntegrationApiClient {
     public readonly contentTypes: ContentTypesService;
     public readonly displayTemplates: DisplayTemplatesService;
     public readonly oauth: OauthService;
-    public readonly packages: PackagesService;
     public readonly propertyFormats: PropertyFormatsService;
     public readonly propertyGroups: PropertyGroupsService;
     public readonly request: BaseHttpRequest;
@@ -41,7 +39,6 @@ export class CmsIntegrationApiClient {
         this.contentTypes = new ContentTypesService(this.request);
         this.displayTemplates = new DisplayTemplatesService(this.request);
         this.oauth = new OauthService(this.request);
-        this.packages = new PackagesService(this.request);
         this.propertyFormats = new PropertyFormatsService(this.request);
         this.propertyGroups = new PropertyGroupsService(this.request);
     }
