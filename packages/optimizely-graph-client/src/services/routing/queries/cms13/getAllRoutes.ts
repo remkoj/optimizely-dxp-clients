@@ -35,7 +35,7 @@ export const query = gql`query GetAllRoutes($skip: Int = 0, $pageSize: Int = 100
   Content: _Page(
     where: {
       _metadata: {
-        url: { hierarchical: { exist: true }, base: { eq: $domain, exist: $mustHaveDomain } }
+        url: { default: { exist: true }, base: { eq: $domain, exist: $mustHaveDomain } }
         types: { in: $typeFilter }
       }
     }
@@ -51,7 +51,7 @@ export const query = gql`query GetAllRoutes($skip: Int = 0, $pageSize: Int = 100
         displayName
         types
         url {
-          path: hierarchical
+          path: default
           domain: base
         }
         ... on IInstanceMetadata {
