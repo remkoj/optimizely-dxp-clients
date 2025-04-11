@@ -12,13 +12,13 @@ export function getContent<NDL extends boolean = false>(client: IOptiGraphClient
   const myFragmentData = fragmentData || {}
   const fragmentProps = Object.getOwnPropertyNames(myFragmentData).filter(x => !CmsContentFragments.IContentDataProps.includes(x))
   if (fragmentProps.length > 0) {
-    if (debug)
-      console.log("⚪ [CmsContent][getContent] Rendering CMS Component using fragment information", fragmentProps)
-
     if (validatesFragment(Component) && !Component.validateFragment(myFragmentData))
       console.warn("🔴 [CmsContent][getContent] Invalid fragment data received, falling back to loading for ", componentLabel)
-    else
+    else {
+      if (debug)
+        console.log("⚪ [CmsContent][getContent] Rendering CMS Component using fragment information")
       return (noDataLoad ? myFragmentData : Promise.resolve(myFragmentData)) as NDL extends true ? Record<string, any> : Promise<Record<string, any>>
+    }
   }
 
   // No meaningful fragment provided with inline content, warn in debug, but just return an empty dataset
@@ -38,13 +38,13 @@ export function getContent<NDL extends boolean = false>(client: IOptiGraphClient
   // If we don't have a valid link, stop here
   if (!isContentLink(contentLink)) {
     if (debug)
-      console.log(`🔴 [CmsContent][getContent] Unable to load data for "${componentLabel}" without a valid content link`)
+      console.warn(`🟠 [CmsContent][getContent] Unable to load data for "${componentLabel}" without a valid content link`)
     return Promise.resolve(myFragmentData)
   }
 
   // Return immediately when there's no client
   if (!client) {
-    console.log(`🔴 [CmsContent][getContent] Data loading for "${componentLabel}" requires a GraphQL Client`)
+    console.error(`🔴 [CmsContent][getContent] Data loading for "${componentLabel}" requires a GraphQL Client`)
     throw new Error(`Data loading for "${componentLabel}" requires a GraphQL Client`)
   }
 
@@ -55,12 +55,8 @@ export function getContent<NDL extends boolean = false>(client: IOptiGraphClient
     const gqlQuery = Component.getDataQuery()
     const gqlVariables = contentLinkToRequestVariables(contentLink as ContentLink)
     if (client.debug)
-      console.log("⚪ [CmsContent] Component data fetching variables:", gqlVariables)
-    return client.request<{}>(gqlQuery, gqlVariables).then(gqlResponse => {
-      if (client.debug)
-        console.log("⚪ [CmsContent] Component requested the following data:", gqlResponse)
-      return gqlResponse
-    })
+      console.log("⚪ [CmsContent][getContent] Component fetching data using query, provided variables:", gqlVariables)
+    return client.request<{}>(gqlQuery, gqlVariables)
   }
 
   // Assume there's no data load required for the component

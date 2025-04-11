@@ -13,7 +13,7 @@ export class OptimizelyCms13Client implements OptimizelyCmsRoutingApi {
     let totalRoutes: number = 0
     let retrievedRoutes: number = 0
     let currentPage: number = 0
-    let pageSize: number = 10
+    let pageSize: number = 50
     const graphRoutes: GetAllRoutes.Route[] = []
 
     do {
@@ -55,7 +55,7 @@ export class OptimizelyCms13Client implements OptimizelyCmsRoutingApi {
       variables: { path: paths, domain: siteId }
     })
 
-    if ((resultSet.getRouteByPath?.items?.length ?? 0) === 0) {
+    if ((resultSet.getRouteByPath?.total ?? 0) === 0) {
       if (client.debug)
         console.warn("🟠 [RouteResolver] No items in the resultset");
       return undefined
@@ -67,10 +67,11 @@ export class OptimizelyCms13Client implements OptimizelyCmsRoutingApi {
     }
 
     if (client.debug)
-      console.log(`⚪ [RouteResolver] Resolved content info for ${path} to: ${JSON.stringify(resultSet.getRouteByPath.items[0])}`)
+      console.log(`⚪ [RouteResolver] Resolved content info for ${path} to: ${JSON.stringify(resultSet.getRouteByPath.items)}`)
 
-    return this.convertResponse(resultSet.getRouteByPath.items[0])
+    return this.convertResponse(resultSet.getRouteByPath.items)
   }
+
   async getRouteById(client: GraphQLClient, contentId: string, locale: string, version: string | number): Promise<undefined | Route> {
     const variables: GetRouteById.Variables = { key: contentId, version: version?.toString(), locale: locale?.replaceAll('-', '_') }
 

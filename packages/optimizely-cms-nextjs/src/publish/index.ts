@@ -6,6 +6,7 @@ import { createAuthorizedClient } from '../client.js'
 export { type NextRequest, NextResponse } from 'next/server.js'
 export type PublishApiHandler = (req: NextRequest) => Promise<NextResponse<PublishApiResponse>> | NextResponse<PublishApiResponse>
 export type PublishScopes = Parameters<typeof revalidatePath>[1]
+export type DynamicScopes = NonNullable<Parameters<typeof revalidatePath>[1]>
 export type PublishHookData = {
   timestamp: string
   tenantId: string
@@ -55,6 +56,11 @@ export type PublishApiOptions = {
    * The scopes for which to revalidate the cache
    */
   scopes: Array<PublishScopes>
+
+  /**
+   * The scopes for which to revalidate the cache for dynamic routes
+   */
+  dynamicScopes: Array<DynamicScopes>
 
   /**
    * The tags to revalidate the cache for
@@ -110,8 +116,8 @@ export type PublishApiOptions = {
 
 export type PublishApiResponse = {
   revalidated: {
-    paths: Array<Parameters<typeof revalidatePath>[0]>
-    scopes: Array<PublishScopes>
+    paths: Array<string | { path: string, scope: PublishScopes }>
+    scopes?: Array<PublishScopes>
     tags: Array<Parameters<typeof revalidateTag>[0]>
   }
   optimized: boolean
@@ -122,6 +128,7 @@ const publishApiDefaults: PublishApiOptions = {
   paths: ['/', '/[[...path]]', '/[lang]', '/[lang]/[[...path]]'],
   additionalPaths: [],
   scopes: [undefined, 'layout'],
+  dynamicScopes: ['page', 'layout'],
   tags: [],
   optimizePublish: false,
   client: createAuthorizedClient,
@@ -143,7 +150,19 @@ const publishApiDefaults: PublishApiOptions = {
  * @returns   The created API Handler
  */
 export function createPublishApi(options?: Partial<PublishApiOptions>): PublishApiHandler {
-  const { paths, additionalPaths, optimizePublish, client: clientFactory, router: routerFactory, hookDataFilter, tags, scopes, itemIdToKeyAndLocale, bulkItemStatusFilter }: PublishApiOptions = {
+  const {
+    paths,
+    additionalPaths,
+    optimizePublish,
+    client: clientFactory,
+    router: routerFactory,
+    hookDataFilter,
+    tags,
+    scopes,
+    dynamicScopes,
+    itemIdToKeyAndLocale,
+    bulkItemStatusFilter
+  }: PublishApiOptions = {
     ...publishApiDefaults,
     ...options
   }
@@ -160,14 +179,36 @@ export function createPublishApi(options?: Partial<PublishApiOptions>): PublishA
     return Promise.resolve([tags])
   }
 
-  function publishAll(targetPaths: string[], targetTags: Array<Parameters<typeof revalidateTag>[0]>, optimized: boolean = false, publishScopes: PublishScopes[] = scopes): PublishApiResponse {
-    publishScopes.forEach(scope => {
-      targetPaths.forEach(path => revalidatePath(path, scope))
-      additionalPaths.forEach(path => revalidatePath(path, scope))
-    })
+  function isDynamic(path: string) {
+    return path.indexOf("[") >= 0
+  }
 
+  function publishAll(targetPaths: string[], targetTags: Array<Parameters<typeof revalidateTag>[0]>, optimized: boolean = false, publishScopes: PublishScopes[] = scopes, dscopes: DynamicScopes[] = dynamicScopes): PublishApiResponse {
+    const publishedPathAndScopes: { path: string, scope: PublishScopes }[] = []
+
+    // Publish the paths targeted explicitly
+    targetPaths.forEach(path => {
+      const scopes = isDynamic(path) ? dscopes : publishScopes
+      scopes.forEach(scope => {
+        revalidatePath(path, scope)
+        publishedPathAndScopes.push({ path, scope })
+      })
+    });
+
+    // Publish the enforced paths
+    additionalPaths.forEach(path => {
+      const scopes = isDynamic(path) ? dscopes : publishScopes
+      scopes.forEach(scope => {
+        revalidatePath(path, scope)
+        publishedPathAndScopes.push({ path, scope })
+      })
+    });
+
+    // Publish the tags te published
     targetTags.forEach(tag => revalidateTag(tag))
-    return { revalidated: { scopes: publishScopes, paths: [...targetPaths, ...additionalPaths], tags: targetTags }, optimized }
+
+    // Build the outcome
+    return { revalidated: { paths: publishedPathAndScopes, tags: targetTags }, optimized }
   }
 
   function getItemIds(hookData: PublishHookData): Array<{ key: string, locale: string }> {
@@ -219,18 +260,23 @@ export function createPublishApi(options?: Partial<PublishApiOptions>): PublishA
       // Purge everything if not known (e.g. for a GET request)
       if (!webhookData) {
         console.error("[Publish-API] No hook data received, optimization disabled")
-        return NextResponse.json(publishAll(paths, publishTags))
+        const responseData = publishAll(paths, publishTags);
+        console.debug("[Publish-API] Publish result:", JSON.stringify(responseData))
+        return NextResponse.json(responseData)
       }
 
       // Make sure we're allowed to process the hook
       if (!hookDataFilter(webhookData.type)) {
         console.log("[Publish-API] Webhook ignored due to hookDataFilter", webhookData.type)
-        return NextResponse.json({ optimized: false, revalidated: { paths: [], scopes: [], tags: [] } })
+        return NextResponse.json({ optimized: false, revalidated: { paths: [], tags: [] } })
       }
 
       // If we're not optimizing, just publish everything
-      if (!optimizePublish)
-        return NextResponse.json(publishAll(paths, publishTags))
+      if (!optimizePublish) {
+        const responseData = publishAll(paths, publishTags);
+        console.debug("[Publish-API] Publish result:", JSON.stringify(responseData))
+        return NextResponse.json(responseData)
+      }
 
       // Get the actual content ids from the hook data
       const contentIds = getItemIds(webhookData)
@@ -249,7 +295,9 @@ export function createPublishApi(options?: Partial<PublishApiOptions>): PublishA
       console.debug("[Publish-API] Content paths to publish:", JSON.stringify(pathsToFlush))
 
       // Flush these paths
-      return NextResponse.json(publishAll(pathsToFlush, publishTags, true))
+      const responseData = publishAll(pathsToFlush, publishTags, true);
+      console.debug("[Publish-API] Publish result:", JSON.stringify(responseData))
+      return NextResponse.json(responseData)
     } catch (e) {
       console.error("[Publish-API] Error handling publishing request", (e as Error)?.message ?? e)
       return NextResponse.json({ error: (e as Error)?.message ?? "Unknown error " }, { status: 500 })

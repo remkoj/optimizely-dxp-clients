@@ -9,7 +9,7 @@ export type Variables = {
 export type Result = {
   getRouteByPath: {
     total: number
-    items: Route[]
+    items: Route
   }
 }
 

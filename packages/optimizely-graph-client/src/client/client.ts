@@ -97,7 +97,7 @@ export class ContentGraphClient extends GraphQLClient implements IOptiGraphClien
       method: "post",
       keepalive: false,
       credentials: "include",
-      redirect: "error",
+      redirect: "manual",
       requestMiddleware: async <V extends Variables = Variables>(request: RequestExtendedInit<V>) => {
         if (this._flags.nextJsFetchDirectives && request.operationName) {
           if (!Array.isArray(request.next?.tags)) {
