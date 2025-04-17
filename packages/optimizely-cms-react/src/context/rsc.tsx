@@ -34,6 +34,7 @@ export class ServerContext implements GenericContext {
   private _client: IOptiGraphClient | undefined
   private _factory: ComponentFactory
   private _editable: GenericContext['editableContent']
+  private _editableIsExperience: boolean = false
 
   get client(): IOptiGraphClient | undefined {
     return this._client
@@ -62,6 +63,12 @@ export class ServerContext implements GenericContext {
   }
   get editableContent(): GenericContext['editableContent'] {
     return this._editable
+  }
+  get editableContentIsExperience(): boolean {
+    return this._editableIsExperience
+  }
+  set editableContentIsExperience(newValue: boolean) {
+    this._editableIsExperience = newValue
   }
 
   public constructor({
@@ -132,6 +139,9 @@ export class ServerContext implements GenericContext {
         `🦺 [ServerContext] Assigning editable content id: ${JSON.stringify(link)}`
       )
     this._editable = link
+  }
+  public setEditableContentIsExperience(isExperience: boolean) {
+    this._editableIsExperience = isExperience
   }
 
   public toJSON(key?: string): TransferrableContext {
