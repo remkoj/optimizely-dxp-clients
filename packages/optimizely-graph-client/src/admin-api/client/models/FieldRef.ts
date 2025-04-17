@@ -2,7 +2,8 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-/**
- * Represent the status of a package job.
- */
-export type PackageJobStatus = Record<string, any>;
+export type FieldRef = {
+    id?: string;
+    type?: string;
+};
+

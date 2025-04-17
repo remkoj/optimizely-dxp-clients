@@ -1,10 +1,10 @@
-import yargs, { type CommandModule } from 'yargs'
-import type { Argv } from 'yargs'
-import { readEnvironmentVariables as getEnvConfig, validateConfig, applyConfigDefaults, type OptimizelyGraphConfigInternal, type OptimizelyGraphConfig } from "@remkoj/optimizely-graph-client/config"
+import yargs from 'yargs'
+import { readEnvironmentVariables as getEnvConfig, type OptimizelyGraphConfig } from "@remkoj/optimizely-graph-client/config"
 import { isDemanded } from './utils/index.js'
 import chalk from 'chalk'
+import type { CliApp } from './types.js'
 
-export function createCliApp(scriptName: string, version?: string, epilogue?: string, envFiles?: Array<string>) {
+export function createCliApp(scriptName: string, version?: string, epilogue?: string, envFiles?: Array<string>): CliApp {
   let config: OptimizelyGraphConfig
   try {
     config = getEnvConfig()
@@ -46,36 +46,5 @@ export function createCliApp(scriptName: string, version?: string, epilogue?: st
       process.exit(1)
     })
 }
-
-export function getArgsConfig(args: CliArgs): OptimizelyGraphConfigInternal {
-  const config = applyConfigDefaults({
-    dxp_url: args.dxp_url,
-    deploy_domain: args.deploy_domain,
-    app_key: args.app_key,
-    secret: args.secret,
-    single_key: args.single_key,
-    gateway: args.gateway,
-    query_log: args.verbose
-  })
-
-  if (!validateConfig(config, false))
-    throw new Error("Invalid Content-Graph connection details provided")
-
-  return config
-}
-
-export function getFrontendURL(config: OptimizelyGraphConfigInternal): URL {
-  const host = config.deploy_domain ?? 'localhost:3000'
-  const hostname = host.split(":")[0]
-  const scheme = hostname == 'localhost' || hostname.endsWith(".local") ? 'http:' : 'https:'
-  return new URL(`${scheme}//${host}/`)
-}
-
-export type CliApp = ReturnType<typeof createCliApp>
-export type CliArgs = CliApp extends Argv<infer R> ? R : never
-type CliModuleBase<P> = CommandModule<CliArgs, CliArgs & Partial<P>>
-export type CliModuleArgs<P = {}> = Argv<CliArgs & Partial<P>>
-export type CliModule<P = {}> = Pick<Required<CliModuleBase<P>>, 'command' | 'describe'> & Omit<CliModuleBase<P>, 'command' | 'describe'>
-export type CliModuleList = CliModuleBase<any>[]
 
 export default createCliApp

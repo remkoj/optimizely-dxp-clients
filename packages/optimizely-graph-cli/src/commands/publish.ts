@@ -1,4 +1,5 @@
-import { getArgsConfig, getFrontendURL, type CliModule } from '../app.js'
+import { getArgsConfig, getFrontendURL } from "../config.js";
+import type { CliModule } from '../types.js';
 import createAdminApi, { isApiError } from '@remkoj/optimizely-graph-client/admin'
 import { readEnvironmentVariables as getEnvConfig } from "@remkoj/optimizely-graph-client/config"
 import chalk from 'chalk'

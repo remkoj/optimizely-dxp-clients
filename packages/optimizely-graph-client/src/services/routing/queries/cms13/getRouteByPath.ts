@@ -2,41 +2,48 @@ import { gql } from "graphql-request"
 import { type Route } from "./getAllRoutes.js"
 
 export type Variables = {
-    path: string
-    domain?: string | null
+  path: string | string[]
+  domain?: string | null
 }
 
 export type Result = {
-    getRouteByPath: {
-        total: number
-        items: Route[]
-    }
+  getRouteByPath: {
+    total: number
+    items: Route
+  }
 }
 
-export const query = gql`query getRouteByPath($path: String!, $domain: String) {
-    getRouteByPath: _Content(
-        where: { _metadata: { url: { default: { eq: $path }, base: { endsWith: $domain } } } }
-    ) {
-        total
-        items {
-            _metadata {
-                key
-                version
-                locale
-                displayName
-                types
-                url {
-                    path: default
-                    domain: base
-                }
-                ... on IInstanceMetadata {
-                    slug: routeSegment
-                }
-                ... on IMediaMetadata {
-                    slug: routeSegment
-                }
-            }
-            changed: _modified
-        }
+export const query = gql`query getRouteByPath($path: [String!]!, $domain: String, $changeset: String) {
+  getRouteByPath: _Page(
+    where: {
+      _metadata: {
+        url: { default: { in: $path }, base: { endsWith: $domain } }
+        changeset: { eq: $changeset }
+      }
     }
+    orderBy: { _metadata: { url: { default: ASC } } }
+  ) {
+    total
+    items: item {
+      _metadata {
+        key
+        version
+        locale
+        displayName
+        types
+        url {
+          path: default
+          domain: base
+        }
+        ... on IInstanceMetadata {
+          slug: routeSegment
+        }
+        ... on IMediaMetadata {
+          slug: routeSegment
+        }
+        changeset
+      }
+      changed: _modified
+    }
+  }
 }`

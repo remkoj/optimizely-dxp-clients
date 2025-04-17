@@ -1,4 +1,4 @@
-import { type CliModule, type CliModuleArgs } from '../app.js';
+import type { CliModule, CliModuleArgs } from '../types.js';
 import chalk from 'chalk';
 import figures from 'figures';
 import { compareVersions } from 'compare-versions';
