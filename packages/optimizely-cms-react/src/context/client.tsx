@@ -35,6 +35,7 @@ export const enum OptimizelyCmsMode {
 export interface ClientContext extends GenericContext {
   setLocale: Dispatch<SetStateAction<string | undefined>>
   setMode: Dispatch<SetStateAction<OptimizelyCmsMode>>
+  setEditableContentIsExperience: Dispatch<SetStateAction<boolean>>
 }
 
 export class ClientContextInstance implements GenericContext {
@@ -68,10 +69,14 @@ const _clientContext = createContext<ClientContext>({
   isDebug: false,
   isDebugOrDevelopment: false,
   isDevelopment: false,
+  editableContentIsExperience: false,
   setLocale: () => {
     throw new Error('Not implemented')
   },
   setMode: () => {
+    throw new Error('Not implemented')
+  },
+  setEditableContentIsExperience: () => {
     throw new Error('Not implemented')
   },
 })
@@ -159,6 +164,8 @@ export const OptimizelyCms: FunctionComponent<
   //#region React State
   const [locale, setLocale] = useState<string>()
   const [mode, setMode] = useState<OptimizelyCmsMode>(initialMode)
+  const [editableContentIsExperience, setEditableContentIsExperience] =
+    useState<boolean>(false)
   //#endregion
 
   //#region Memoized Optimizely Graph Client
@@ -203,8 +210,15 @@ export const OptimizelyCms: FunctionComponent<
     inEditMode: mode == OptimizelyCmsMode.edit,
     inPreviewMode: mode == OptimizelyCmsMode.preview,
     locale,
+    get editableContentIsExperience() {
+      return editableContentIsExperience
+    },
+    set editableContentIsExperience(newValue: boolean) {
+      setEditableContentIsExperience(newValue)
+    },
     setLocale,
     setMode,
+    setEditableContentIsExperience,
   }
 
   return <CtxProvider value={ctxValue}>{children}</CtxProvider>

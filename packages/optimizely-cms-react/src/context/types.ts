@@ -13,6 +13,7 @@ export interface GenericContext {
   readonly isDebug: boolean
   readonly isDebugOrDevelopment: boolean
   readonly editableContent?: ContentLink | null
+  editableContentIsExperience?: boolean
 }
 
 /**
@@ -27,6 +28,7 @@ export interface TransferrableContext {
   readonly isDebug: boolean
   readonly isDebugOrDevelopment: boolean
   readonly editableContent?: ContentLink | null
+  readonly editableContentIsExperience?: boolean
 }
 
 export type BaseContext = TransferrableContext | GenericContext
