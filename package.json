@@ -1,6 +1,6 @@
 {
   "name": "optimizely-dxp-clients",
-  "version": "4.3.2",
+  "version": "5.0.0",
   "description": "Javascript clients for Optimizely Products",
   "repository": "https://github.com/remkoj/optimizely-dxp-clients.git",
   "author": "Remko Jantzen <693172+remkoj@users.noreply.github.com>",
@@ -8,7 +8,7 @@
   "license": "Apache-2.0",
   "private": true,
   "devDependencies": {
-    "@types/node": "^22.14.0",
+    "@types/node": "^22.14.1",
     "@yarnpkg/sdks": "^3.2.1",
     "browserslist": "^4.24.4",
     "glob": "^11.0.1",
@@ -18,7 +18,7 @@
     "update-browserslist-db": "^1.1.3",
     "yaml": "^2.7.1"
   },
-  "packageManager": "yarn@4.9.0",
+  "packageManager": "yarn@4.9.1",
   "workspaces": [
     "packages/*"
   ],

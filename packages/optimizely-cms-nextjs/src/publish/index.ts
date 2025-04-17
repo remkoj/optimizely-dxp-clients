@@ -102,7 +102,7 @@ export type PublishApiOptions = {
    * @param       subject     The Hook Subject, to make the processing different for single or bulk. Typical values are "bulk" or "doc"
    * @returns     An array, with the first item being the key, second locale
    */
-  itemIdToKeyAndLocale: (itemId: string, subject?: PublishHookData['type']['subject']) => { key: string, locale: string } | undefined
+  itemIdToKeyAndLocale: (itemId: string, subject?: PublishHookData['type']['subject']) => { key: string, locale: string, version?: string, status?: string } | undefined
 
   /**
    * Basic filter for bulk operations, to only select those items in a bulk operation
@@ -136,9 +136,16 @@ const publishApiDefaults: PublishApiOptions = {
   hookDataFilter: (hookType) => hookType.subject == 'bulk' && hookType.action == 'completed',
   bulkItemStatusFilter: (bulkItemStatus: string) => bulkItemStatus == "indexed" || bulkItemStatus == "deleted",
   itemIdToKeyAndLocale: (id) => {
-    const [key, versionId, locale] = id.split('_')
+    const idParts = id.split('_');
+
+    // The version may or may not be in the ID, so parsing accordingly
+    const [key, version, locale, status] = idParts.length >= 4 ?
+      idParts :
+      [idParts[0], undefined, idParts[1], idParts[2]];
+
+    // Only return a value if we have both a key & locale
     if (key && locale)
-      return { key: key.replaceAll('-', ''), locale, versionId }
+      return { key: key.replaceAll('-', ''), locale, version, status }
     return undefined
   }
 }
