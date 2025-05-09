@@ -1,4 +1,25 @@
-import { GenericContext } from "../rsc.js"
+import type { GenericContext } from "../rsc.js"
+import type { PropsWithChildren } from "react"
+
+/**
+ * Define an element as a React Component, React ExoticComponent or string name
+ * representing a HTML Element (e.g. "div", "a", etc...), this value can be used
+ * as first argument of React.createElement()
+ */
+export type ElementType = (React.ComponentType<any>) | (React.ExoticComponent<any>) | (keyof JSX.IntrinsicElements)
+/**
+ * Define an element as a React Component, React ExoticComponent or string name
+ * representing a HTML Element (e.g. "div", "a", etc...), this value can be used
+ * as first argument of React.createElement()
+ * 
+ * The type must support children
+ */
+export type ElementWithChildrenType = React.ComponentType<PropsWithChildren> | React.ExoticComponent<PropsWithChildren> | keyof Omit<JSX.IntrinsicElements, 'meta' | 'img' | 'video' | 'audio'>
+
+/**
+ * The properties type of an ElementType
+ */
+export type ElementProps<T extends ElementType> = T extends keyof JSX.IntrinsicElements ? React.HTMLProps<JSX.IntrinsicElements[T]> : React.ComponentProps<T>
 
 /**
  * Tests if K is a property of T - if so: it is the type of
@@ -18,23 +39,11 @@ export type TypeIfPropExists<T extends ElementType, K, U> = K extends keyof Elem
 export type MayBeArray<T> = T | T[]
 
 /**
- * The properties type of an ElementType
- */
-export type ElementProps<T extends ElementType> = T extends keyof JSX.IntrinsicElements ? React.HTMLProps<JSX.IntrinsicElements[T]> : React.ComponentProps<T>
-
-/**
  * The union of property names of an Element that may receive child elements
  */
 export type ElementChildrenProps<T extends ElementType> = keyof { [P in keyof ElementProps<T> as React.ReactElement[] extends ElementProps<T>[P] ? P : never]: ElementProps<T>[P] }
 
 export type GenericContextProps<T extends ElementType> = keyof { [P in keyof ElementProps<T> as GenericContext extends ElementProps<T>[P] ? P : never]: ElementProps<T>[P] }
-
-/**
- * Define an element as a React Component, React ExoticComponent or string name
- * representing a HTML Element (e.g. "div", "a", etc...), this value can be used
- * as first argument of React.createElement()
- */
-export type ElementType = (React.ComponentType<any>) | (React.ExoticComponent<any>) | (keyof JSX.IntrinsicElements)
 
 /**
  * Reserved Element properties that may not be passed to CmsContentArea wrappers, as these are auto-injected

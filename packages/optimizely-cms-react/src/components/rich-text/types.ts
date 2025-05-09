@@ -1,10 +1,10 @@
-import type { ComponentType as ReactComponentType } from "react";
+import type { ComponentType as ReactComponentType, FunctionComponent } from "react";
 import type { ComponentFactory } from "../../factory/types.js";
-import type { PropsWithOptionalContext } from "../../context/types.js";
-import type { ElementType } from "../type-utils.js";
+import type { PropsWithOptionalContext, PropsWithContext } from "../../context/types.js";
+import type { ElementType, ElementProps, ElementWithChildrenType } from "../type-utils.js";
 
 //#region Type defintions
-export type RichTextProps = {
+export type RichTextProps<ET extends ElementWithChildrenType> = {
   /**
    * The component factory used for this rich text content
    * 
@@ -27,10 +27,12 @@ export type RichTextProps = {
    * Set the component type of the wrapper to use, defaults to a 'div' 
    * element when not defined
    */
-  as?: ElementType
+  as?: ET
 
   /**
    * Control the debugging output
+   * 
+   * @deprecated The debug value from the context will be used
    */
   debug?: boolean
 
@@ -51,7 +53,10 @@ export type RichTextProps = {
   cmsId?: string | null
 }
 
-export type RichTextComponent = ReactComponentType<PropsWithOptionalContext<RichTextProps>>
+//export type _RichTextComponent = ReactComponentType<PropsWithOptionalContext<RichTextProps>>
+
+export type RichTextComponent = <ET extends ElementWithChildrenType>(props: PropsWithOptionalContext<RichTextProps<ET>>) => ReturnType<FunctionComponent>
+export type RichTextImplProps<ET extends ElementWithChildrenType> = PropsWithContext<RichTextProps<ET> & Omit<ElementProps<ET>, keyof RichTextProps<ET>>>
 
 export type RichTextElementProps = Readonly<{
   debug?: boolean

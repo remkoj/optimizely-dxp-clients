@@ -95,6 +95,24 @@ export const DefaultTextNode: FunctionComponent<
 }
 
 /**
+ * Default component for Rich Text elements that should not be part of the HTML fragment
+ * and should not be rendered if they are.
+ *
+ * @param     param0  The component parameters
+ * @returns   The children, if any
+ */
+export const DefaultNoRenderNode: FunctionComponent<
+  PropsWithOptionalContext<PropsWithChildren<{ node: TypedNode }>>
+> = ({ children, ctx, node }) => {
+  if (ctx?.isDebugOrDevelopment) {
+    console.warn(
+      `🟠 [Rich Text] Not rendering ${node.type} to prevent React/JSX errors`
+    )
+  }
+  return children
+}
+
+/**
  * A default component dictionary that allows to serialize the structured HTML
  * into React, using the component library shared across the react SDK.
  */
@@ -107,6 +125,13 @@ export const DefaultComponents: ComponentTypeDictionary = [
     }),
   },
   { type: 'RichText/text', component: DefaultTextNode },
+
+  // Catch elements that should not be in the content
+  { type: 'RichText/html', component: DefaultNoRenderNode },
+  { type: 'RichText/head', component: DefaultNoRenderNode },
+  { type: 'RichText/meta', component: DefaultNoRenderNode },
+  { type: 'RichText/title', component: DefaultNoRenderNode },
+  { type: 'RichText/body', component: DefaultNoRenderNode },
 
   // Aliased tags
   { type: 'RichText/paragraph', component: createHtmlComponent('p') },

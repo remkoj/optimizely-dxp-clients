@@ -1,5 +1,5 @@
-import { type FunctionComponent } from 'react'
-import type { RichTextElementProps, RichTextProps } from './types.js'
+import type { ComponentProps, FunctionComponent } from 'react'
+import type { RichTextElementProps, RichTextImplProps } from './types.js'
 import * as Utils from './utils.js'
 import { DefaultComponentFactory } from '../../factory/default.js'
 import {
@@ -9,59 +9,76 @@ import {
 } from './components.js'
 import { type PropsWithContext } from '../../context/types.js'
 import { CmsEditable } from '../cms-editable/index.js'
+import type { ElementWithChildrenType } from '../type-utils.js'
 
 export * from './types.js'
 
-export const RichText: FunctionComponent<PropsWithContext<RichTextProps>> = ({
+export const RichText = <ET extends ElementWithChildrenType>({
   factory,
   text = '{ "type": "richText" }',
   className = 'rich-text',
-  as: Wrapper = 'div',
+  as: Wrapper,
   debug = false,
   noWrapper = false,
   cmsFieldName = null,
   cmsId = null,
   ctx,
+  children,
   ...props
-}) => {
+}: RichTextImplProps<ET>) => {
   const id = Utils.getRandomId('rich-text')
   const richTextFactory =
     ctx.factory ?? factory ?? new DefaultComponentFactory(DefaultComponents)
+  const isDebug = ctx.isDebug || debug
 
   try {
     const data = Utils.processNodeInput(text)
-    const textContent = (data?.children || []).map((child, idx) => {
-      const elementId = id + '::' + idx
-      return (
-        <RichTextElement
-          key={elementId}
-          factory={richTextFactory}
-          node={child}
-          idPrefix={elementId + '::'}
-          ctx={ctx}
-        />
-      )
-    })
+    const textContent =
+      data?.children?.map((child, idx) => {
+        const elementId = id + '::' + idx
+        return (
+          <RichTextElement
+            key={elementId}
+            factory={richTextFactory}
+            node={child}
+            idPrefix={elementId + '::'}
+            ctx={ctx}
+          />
+        )
+      }) || children
 
-    if (noWrapper) return <>{textContent}</>
+    if (cmsId || cmsFieldName)
+      return (
+        <CmsEditable
+          as={(Wrapper ?? 'div') as ComponentProps<typeof CmsEditable>['as']}
+          className={className}
+          cmsId={cmsId || undefined}
+          cmsFieldName={cmsFieldName || undefined}
+          ctx={ctx}
+          {...props}
+        >
+          {textContent}
+        </CmsEditable>
+      )
+
+    if (noWrapper || !Wrapper) return <>{textContent}</>
 
     return (
-      <CmsEditable
-        as={Wrapper}
-        className={className}
-        cmsId={cmsId || undefined}
-        cmsFieldName={cmsFieldName || undefined}
-        ctx={ctx}
-        {...props}
-      >
+      //@ts-expect-error
+      <Wrapper className={className} {...props}>
         {textContent}
-      </CmsEditable>
+      </Wrapper>
     )
   } catch {
-    if (debug) console.warn('🟠 [Rich Text] Invalid rich text received: ', text)
+    if (isDebug)
+      console.warn('🟠 [Rich Text] Invalid rich text received: ', text)
     return Object.getOwnPropertyNames(props).length > 0 ? (
-      <div className={className} {...props}></div>
-    ) : null
+      <div className={className} {...props}>
+        {children}
+      </div>
+    ) : (
+      <>{children}</>
+    )
   }
 }
 
@@ -69,6 +86,8 @@ export const RichText: FunctionComponent<PropsWithContext<RichTextProps>> = ({
 const RichTextElement: FunctionComponent<
   PropsWithContext<RichTextElementProps>
 > = ({ factory, node, idPrefix, debug, ctx }) => {
+  const isDebug = ctx.isDebug || debug
+
   // Render text
   if (Utils.isText(node)) {
     if (node.text.length == 0) return null
@@ -78,7 +97,7 @@ const RichTextElement: FunctionComponent<
 
   // Ignore incorrect data
   if (!Utils.isTypedNode(node)) {
-    if (debug)
+    if (isDebug)
       console.warn(
         '🟠 [Rich Text] Invalid rich text element data received:',
         node
@@ -106,7 +125,7 @@ const RichTextElement: FunctionComponent<
   // Resolve component (and add to factory if not yet present)
   let Component = factory?.resolve(`RichText/${node.type}`)
   if (!Component) {
-    if (debug)
+    if (isDebug)
       console.warn(
         `🟠 [Rich Text] No renderer for node type, using and registering HtmlComponent for "${node.type}": RichText/${node.type}`
       )
