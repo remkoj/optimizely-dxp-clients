@@ -1,6 +1,6 @@
 {
   "name": "optimizely-dxp-clients",
-  "version": "5.0.1",
+  "version": "5.0.2",
   "description": "Javascript clients for Optimizely Products",
   "repository": "https://github.com/remkoj/optimizely-dxp-clients.git",
   "author": "Remko Jantzen <693172+remkoj@users.noreply.github.com>",
