@@ -27,7 +27,7 @@ export type RichTextProps<ET extends ElementWithChildrenType> = {
    * Set the component type of the wrapper to use, defaults to a 'div' 
    * element when not defined
    */
-  as?: ET
+  as?: ET | null
 
   /**
    * Control the debugging output

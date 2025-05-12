@@ -17,7 +17,7 @@ export const RichText = <ET extends ElementWithChildrenType>({
   factory,
   text = '{ "type": "richText" }',
   className = 'rich-text',
-  as: Wrapper,
+  as: Wrapper = 'div' as ET,
   debug = false,
   noWrapper = false,
   cmsFieldName = null,
