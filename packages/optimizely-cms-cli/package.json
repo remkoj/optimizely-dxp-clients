@@ -20,9 +20,9 @@
     "@remkoj/optimizely-cms-api": "workspace:5.0.1",
     "@rollup/plugin-json": "^6.1.0",
     "@rollup/plugin-typescript": "^12.1.2",
-    "@types/node": "^22.14.1",
+    "@types/node": "^22.15.17",
     "@types/yargs": "^17.0.33",
-    "rollup": "^4.40.0",
+    "rollup": "^4.40.2",
     "tslib": "^2.8.1",
     "typescript": "^5.8.3"
   },
@@ -31,13 +31,13 @@
     "@types/node": "*"
   },
   "dependencies": {
-    "@inquirer/prompts": "^7.4.1",
+    "@inquirer/prompts": "^7.5.0",
     "chalk": "^5.4.1",
     "cli-table3": "^0.6.5",
     "dotenv": "^16.5.0",
     "dotenv-expand": "^12.0.2",
     "figures": "^6.1.0",
-    "glob": "^11.0.1",
+    "glob": "^11.0.2",
     "yargs": "^17.7.2"
   }
 }
