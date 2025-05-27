@@ -1,7 +1,7 @@
 {
   "name": "@remkoj/optimizely-one-nextjs",
   "license": "Apache-2.0",
-  "version": "5.0.2",
+  "version": "6.0.0-pre1",
   "repository": "https://github.com/remkoj/optimizely-dxp-clients.git",
   "author": "Remko Jantzen <693172+remkoj@users.noreply.github.com>",
   "homepage": "https://github.com/remkoj/optimizely-dxp-clients",
@@ -39,41 +39,41 @@
     }
   },
   "devDependencies": {
-    "@headlessui/react": "^2.2.2",
-    "@headlessui/tailwindcss": "^0.2.2",
-    "@heroicons/react": "^2.2.0",
-    "@remkoj/optimizely-graph-client": "workspace:^5.0.2",
-    "@types/node": "^22.15.17",
-    "@types/react": "^18.3.21",
-    "@types/react-dom": "18.3.7",
+    "@remkoj/optimizely-graph-client": "workspace:^6.0.0-pre1",
+    "@tailwindcss/cli": "^4.1.7",
+    "@types/node": "^22.15.21",
+    "@types/react": "^19.1.6",
+    "@types/react-dom": "19.1.5",
     "@types/uuid": "^10.0.0",
     "browserslist": "^4.24.5",
-    "next": "^14.2.28",
+    "next": "^15.3.2",
     "prop-types": "^15.8.1",
-    "react": "^18.3.1",
-    "react-dom": "^18.3.1",
-    "scheduler": "^0.25.0",
-    "swr": "^2.3.3",
-    "tailwindcss": "^3.4.17",
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0",
+    "scheduler": "^0.26.0",
+    "tailwindcss": "^4.1.7",
     "typescript": "^5.8.3",
-    "update-browserslist-db": "^1.1.3",
-    "uuid": "^11.1.0"
+    "update-browserslist-db": "^1.1.3"
   },
   "peerDependencies": {
-    "@headlessui/react": "^2",
-    "@heroicons/react": "^2",
-    "@remkoj/optimizely-graph-client": "^5.0.2",
-    "next": "^14",
-    "react": "^18",
-    "react-dom": "^18",
-    "swr": "^2",
-    "uuid": "^11"
+    "next": "^15",
+    "react": "^19",
+    "react-dom": "^19"
+  },
+  "dependencies": {
+    "@headlessui/react": "^2.2.4",
+    "@heroicons/react": "^2.2.0",
+    "@remkoj/optimizely-graph-client": "^6.0.0-pre1",
+    "swr": "^2.3.3",
+    "uuid": "^11.1.0"
   },
   "scripts": {
     "clean": "tsc --build --clean",
     "prepare": "tsc --build --force && tailwindcss -i ./src/styles.css -o ./dist/styles.css --minify",
     "watch": "tsc --watch",
     "watch-styles": "tailwindcss -i ./src/styles.css -o ./dist/styles.css --minify --watch",
+    "tailwind": "tailwindcss -i ./src/styles.css -o ./dist/styles.css --minify",
     "recompile": "tsc --build --clean && tsc --build --force"
-  }
+  },
+  "stableVersion": "5.0.2"
 }

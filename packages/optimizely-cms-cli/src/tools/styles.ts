@@ -1,6 +1,6 @@
 import type { OptiCmsArgs } from '../types.js'
 import type { Argv, ArgumentsCamelCase } from 'yargs'
-import { CmsIntegrationApiClient as CmsApiClient, type IntegrationApi, OptiCmsVersion } from '@remkoj/optimizely-cms-api'
+import { CmsIntegrationApiClient as CmsApiClient, IntegrationApi, OptiCmsVersion } from '@remkoj/optimizely-cms-api'
 import { parseArgs } from '../tools/parseArgs.js'
 import chalk from 'chalk'
 import figures from 'figures'

@@ -1,50 +1,54 @@
-import { type ComponentType, type PropsWithChildren } from 'react'
+import { type ComponentType, type PropsWithChildren, type JSX } from 'react'
 import { type ClientFactory } from '@remkoj/optimizely-graph-client'
 import { type GraphQLClient } from 'graphql-request'
 import { type ContentQueryProps } from '@remkoj/optimizely-cms-react/rsc'
 
 export type ContentRequest = (Omit<ContentQueryProps<string>, 'path'> & { path: string | null, token: string, ctx: 'edit' | 'preview' })
 
-type ServerPageProps = { params: Record<string, string | Array<string>>, searchParams: Record<string, string> }
+type ServerPageProps = { params: Promise<Record<string, string | Array<string>>>, searchParams: Promise<Record<string, string>> }
 export type EditPageComponent<T extends ServerPageProps = EditPageProps> = ({ params, searchParams }: T) => Promise<JSX.Element>
 
 export type EditPageProps = {
-  params: {
-    path?: string[] | string
-    lang?: string
-  },
-  searchParams: {
-    preview_token: string
-    key?: string
-    ver?: string
-    loc?: string
-    ctx?: 'edit' | 'preview'
-    path?: string
-    epieditmode?: string
-  }
+  readonly params: Promise<{
+    readonly path?: string[] | string
+    readonly lang?: string
+  }>,
+  readonly searchParams: Promise<{
+    readonly preview_token: string
+    readonly key?: string
+    readonly ver?: string
+    readonly loc?: string
+    readonly ctx?: 'edit' | 'preview'
+    readonly path?: string
+    readonly epieditmode?: string
+  }>
+}
+
+export type AwaitedEditPageProps = {
+  [K in keyof EditPageProps]: Awaited<EditPageProps[K]>
 }
 
 export type ValidatedEditPageProps = {
-  params: {
-    path?: string[] | string
-    lang?: string
+  readonly params: {
+    readonly path?: string[] | string
+    readonly lang?: string
   },
   searchParams: {
-    preview_token: string
+    readonly preview_token: string
   } & ({
-    key: string
-    ver: string
-    loc: string
-    ctx: 'edit' | 'preview'
-    path?: string
-    epieditmode: never
+    readonly key: string
+    readonly ver: string
+    readonly loc: string
+    readonly ctx: 'edit' | 'preview'
+    readonly path?: string
+    readonly epieditmode: never
   } | {
-    key: never
-    ver: never
-    loc: never
-    ctx: never
-    path: never
-    epieditmode: 'true' | 'false'
+    readonly key: never
+    readonly ver: never
+    readonly loc: never
+    readonly ctx: never
+    readonly path: never
+    readonly epieditmode: 'true' | 'false'
   })
 }
 
@@ -103,7 +107,7 @@ export type EditViewOptions<LocaleType = string> = {
    * @param       isDevelopment       Whether this request runs in development mode
    * @returns     If the request is valid
    */
-  requestValidator: (props: EditPageProps, throwOnInvalid?: boolean, isDevelopment?: boolean) => props is ValidatedEditPageProps
+  requestValidator: (props: AwaitedEditPageProps, throwOnInvalid?: boolean, isDevelopment?: boolean) => props is ValidatedEditPageProps
 
   /**
    * Enforce a refresh delay in the on page editing / preview, between a signal

@@ -2,7 +2,7 @@ import 'server-only'
 import type { Metadata, ResolvingMetadata } from 'next'
 import deepmerge from 'deepmerge'
 import { notFound } from 'next/navigation.js'
-import { cache } from 'react'
+import { type JSX } from 'react'
 
 // GraphQL Client & Services
 import { type ContentLinkWithLocale } from '@remkoj/optimizely-graph-client'
@@ -50,8 +50,8 @@ export type DefaultCmsPageProps<
     string | Array<string> | undefined
   > = DefaultCmsPageSearchParams,
 > = {
-  params: TParams
-  searchParams: TSearchParams
+  params: Promise<TParams>
+  searchParams: Promise<TSearchParams>
 }
 
 export type OptiCmsNextJsPage<
@@ -151,7 +151,7 @@ export type CreatePageOptions<
    */
   propsToCmsPath: (
     props: DefaultCmsPageProps<TParams, TSearchParams>
-  ) => string | null
+  ) => Promise<string | null>
 
   /**
    * Take the route from the Routing Service and transform that to the route
@@ -172,21 +172,23 @@ export type CreatePageOptions<
    * @returns     The resolved locale
    */
   paramsToLocale: (
-    params?: TParams,
+    params?: Promise<TParams | undefined>,
     channel?: ChannelDefinition
-  ) => string | undefined
+  ) => Promise<string | undefined>
 }
 
 const CreatePageOptionDefaults: CreatePageOptions<string> = {
   client: createClient,
   routerFactory: (client) => new RouteResolver(client),
-  propsToCmsPath: ({ params }) => buildRequestPath(params),
+  propsToCmsPath: async ({ params }) => buildRequestPath(await params),
   routeToParams: (route) => {
     return { path: urlToPath(route.url), lang: route.locale }
   },
-  paramsToLocale: (params, channel) => {
+  paramsToLocale: async (params, channel) => {
     if (!channel) return undefined
-    const lang = (params as Record<string, string | string[] | undefined>)?.lang
+    const lang = (
+      (await params) as Record<string, string | string[] | undefined>
+    )?.lang
     const toTest = Array.isArray(lang) ? lang.at(0) : lang
     if (!toTest) return channel.defaultLocale
     return channel.slugToLocale(toTest.toString())
@@ -259,9 +261,11 @@ export function createPage<
       const channelId = getChannelId(context.client, channel)
 
       // Read variables from request
-      const requestPath = propsToCmsPath({ params, searchParams })
+      const [requestPath, initialLocale] = await Promise.all([
+        propsToCmsPath({ params, searchParams }),
+        paramsToLocale(params, channel),
+      ])
       if (!requestPath) return Promise.resolve({})
-      const initialLocale = paramsToLocale(params, channel)
       if (initialLocale) context.setLocale(initialLocale)
 
       // Debug output
@@ -340,7 +344,10 @@ export function createPage<
       const context = buildContext()
 
       // Analyze the Next.JS Request props
-      const requestPath = propsToCmsPath({ params, searchParams })
+      const [requestPath, initialLocale] = await Promise.all([
+        propsToCmsPath({ params, searchParams }),
+        paramsToLocale(params, channel),
+      ])
       if (context.isDebug)
         console.log(
           `⚪ [CmsPage] Processed Next.JS route: ${JSON.stringify(params)} => Optimizely CMS route: ${JSON.stringify({ path: requestPath })}`
@@ -350,7 +357,6 @@ export function createPage<
       if (!requestPath || requestPath.startsWith('/_next/')) return notFound()
 
       // Determine the initial locale
-      const initialLocale = paramsToLocale(params, channel)
       if (initialLocale) context.setLocale(initialLocale)
 
       // Resolve the content based upon the path

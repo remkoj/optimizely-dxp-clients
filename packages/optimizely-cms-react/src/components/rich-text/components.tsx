@@ -1,4 +1,4 @@
-import { type FunctionComponent, type PropsWithChildren } from 'react'
+import { type FunctionComponent, type PropsWithChildren, type JSX } from 'react'
 import { ComponentTypeDictionary } from '../../factory/types.js'
 import type { TextNode, TypedNode } from './types.js'
 import { type PropsWithOptionalContext } from '../../context/types.js'

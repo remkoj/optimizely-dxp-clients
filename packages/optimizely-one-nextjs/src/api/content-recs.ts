@@ -11,7 +11,7 @@ export const ContentRecsApiService: ApiService<any> = {
     if (!optiOneConfig.ContentRecsHost)
       return Responses.NotFound
 
-    const crId = ContentRecs.Tools.getVisitorID(cookies)
+    const crId = ContentRecs.Tools.getVisitorID(await cookies)
     if (!crId)
       return [{ total_hits: 0, content: [] }, 200]
     const recsService = new URL(`https://api.${optiOneConfig.ContentRecsHost}/1.0/users/idio_visitor_id:${crId}/content?callback=fn`)

@@ -11,7 +11,7 @@ import type {
   ContentAreaItemDefinition,
   ValidContentAreaItemDefinition,
 } from './types.js'
-import { Suspense } from 'react'
+import { Suspense, type JSX } from 'react'
 
 //#region Export Type definitions
 export type {

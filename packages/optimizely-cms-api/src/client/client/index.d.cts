@@ -5,7 +5,7 @@ interface Auth {
      *
      * @default 'header'
      */
-    in?: 'header' | 'query';
+    in?: 'header' | 'query' | 'cookie';
     /**
      * Header or query parameter name.
      *
@@ -112,12 +112,14 @@ type ErrInterceptor<Err, Res, Req, Options> = (error: Err, response: Res, reques
 type ReqInterceptor<Req, Options> = (request: Req, options: Options) => Req | Promise<Req>;
 type ResInterceptor<Res, Req, Options> = (response: Res, request: Req, options: Options) => Res | Promise<Res>;
 declare class Interceptors<Interceptor> {
-    _fns: Interceptor[];
+    _fns: (Interceptor | null)[];
     constructor();
     clear(): void;
-    exists(fn: Interceptor): boolean;
-    eject(fn: Interceptor): void;
-    use(fn: Interceptor): void;
+    getInterceptorIndex(id: number | Interceptor): number;
+    exists(id: number | Interceptor): boolean;
+    eject(id: number | Interceptor): void;
+    update(id: number | Interceptor, fn: Interceptor): number | false | Interceptor;
+    use(fn: Interceptor): number;
 }
 interface Middleware<Req, Res, Err, Options> {
     error: Pick<Interceptors<ErrInterceptor<Err, Res, Req, Options>>, 'eject' | 'use'>;
@@ -138,6 +140,13 @@ interface Config<T extends ClientOptions = ClientOptions> extends Omit<RequestIn
      * @default globalThis.fetch
      */
     fetch?: (request: Request) => ReturnType<typeof fetch>;
+    /**
+     * Please don't use the Fetch client for Next.js applications. The `next`
+     * options won't have any effect.
+     *
+     * Install {@link https://www.npmjs.com/package/@hey-api/client-next `@hey-api/client-next`} instead.
+     */
+    next?: never;
     /**
      * Return the response data parsed in a specified format. By default, `auto`
      * will infer the appropriate method from the `Content-Type` response header.

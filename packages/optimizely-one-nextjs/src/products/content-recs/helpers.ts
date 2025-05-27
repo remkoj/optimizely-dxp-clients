@@ -9,9 +9,8 @@ import EnvVars from '../../env-vars'
  * @param       cookies         The request cookies
  * @returns     The identifier, or undefined if not known
  */
-export function getVisitorID(cookies: ReadonlyRequestCookies) : string | undefined
-{
-    return cookies.get('iv')?.value
+export function getVisitorID(cookies: Awaited<ReadonlyRequestCookies>): string | undefined {
+  return cookies.get('iv')?.value
 }
 
 /**
@@ -19,14 +18,13 @@ export function getVisitorID(cookies: ReadonlyRequestCookies) : string | undefin
  * 
  * @returns     True if the integration has been configured, false otherwise
  */
-export function isEnabled()
-{
-    const clientId = EnvTools.readValue(EnvVars.ContentRecsClient, "")
-    const deliveryId = EnvTools.readValue(EnvVars.ContentRecsDelivery, "")
-    return clientId != "" && deliveryId != ""
+export function isEnabled() {
+  const clientId = EnvTools.readValue(EnvVars.ContentRecsClient, "")
+  const deliveryId = EnvTools.readValue(EnvVars.ContentRecsDelivery, "")
+  return clientId != "" && deliveryId != ""
 }
 
 export default {
-    getVisitorID,
-    isEnabled
+  getVisitorID,
+  isEnabled
 }

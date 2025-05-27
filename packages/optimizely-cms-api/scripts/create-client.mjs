@@ -24,6 +24,7 @@ const CMS_PATHS = {
       clean: true,
       case: 'camelCase',
       path: path.resolve(path.join(process.cwd(), 'src', 'client')),
+      tsConfigPath: path.resolve(path.join(process.cwd(), 'tsconfig.json')),
     },
     plugins: [
       ...defaultPlugins,
@@ -32,6 +33,7 @@ const CMS_PATHS = {
         bundle: true,
         exportFromIndex: true,
         throwOnError: false,
+        runtimeConfigPath: './src/client-config.ts',
       },
       {
         dates: true,
@@ -45,12 +47,14 @@ const CMS_PATHS = {
         exportInlineEnums: true,
         identifierCase: 'preserve',
         exportFromIndex: true,
+        readableNameBuilder: '{{name}}',
       },
       {
         name: '@hey-api/sdk',
         transformer: true,
         exportFromIndex: true,
         auth: false,
+        client: '@hey-api/client-fetch',
       },
     ],
   })

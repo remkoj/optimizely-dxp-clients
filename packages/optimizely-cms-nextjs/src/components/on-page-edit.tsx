@@ -21,7 +21,7 @@ export const OnPageEdit: FunctionComponent<
 > = ({ children, refreshTimeout = false }) => {
   const router = useRouter()
   const [showMask, setShowMask] = useState<boolean>(false)
-  const reloadDelay = useRef<NodeJS.Timeout | number>()
+  const reloadDelay = useRef<NodeJS.Timeout | number | undefined>(undefined)
 
   function onContentSaved(eventData: OptimizelyCmsContentSavedEvent) {
     const previewUrl = window.location.href

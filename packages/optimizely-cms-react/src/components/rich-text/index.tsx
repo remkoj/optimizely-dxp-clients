@@ -1,4 +1,4 @@
-import type { ComponentProps, FunctionComponent } from 'react'
+import type { ComponentProps, FunctionComponent, JSX } from 'react'
 import type { RichTextElementProps, RichTextImplProps } from './types.js'
 import * as Utils from './utils.js'
 import { DefaultComponentFactory } from '../../factory/default.js'

@@ -7,47 +7,60 @@ import type { ProfileApiResponse as MeResponse } from '../../api/profile-api-ser
 import Notice from './_notice'
 
 export type IdsPanelProps = {
-    servicePrefix?: string
-    refreshInterval?: number
+  servicePrefix?: string
+  refreshInterval?: number
 }
 
-export const IdsPanel : FunctionComponent<IdsPanelProps> = ({ servicePrefix = '/api/me', refreshInterval = 2000}) => 
-{
-    const currentPath = usePathname()
-    const opti = useOptimizelyOne()
-    const webEx = opti.getService('webex')?.getBrowserApi()
+export const IdsPanel: FunctionComponent<IdsPanelProps> = ({
+  servicePrefix = '/api/me',
+  refreshInterval = 2000,
+}) => {
+  const currentPath = usePathname()
+  const opti = useOptimizelyOne()
+  const webEx = opti.getService('webex')?.getBrowserApi()
 
-    const ids = `${ servicePrefix }?scope=ids`
-    const { data: profile, isLoading, error } = useSWR<MeResponse>(ids, {
-        revalidateOnMount: true,
-        refreshInterval,
-        fetcher: () => fetch(ids).then(r => {
-            if (!r.ok)
-                throw new Error(`${ r.status }: ${ r.statusText}`)
-            return r.json()
-        })
-    })
+  const ids = `${servicePrefix}?scope=ids`
+  const {
+    data: profile,
+    isLoading,
+    error,
+  } = useSWR<MeResponse>(ids, {
+    revalidateOnMount: true,
+    refreshInterval,
+    fetcher: () =>
+      fetch(ids).then((r) => {
+        if (!r.ok) throw new Error(`${r.status}: ${r.statusText}`)
+        return r.json()
+      }),
+  })
 
-    if (isLoading)
-        return <Notice message='Loading your profile information...' />
+  if (isLoading) return <Notice message="Loading your profile information..." />
 
-    if (error)
-        return <Notice message='There was an error loading your profile information' />
+  if (error)
+    return (
+      <Notice message="There was an error loading your profile information" />
+    )
 
-    return <>
-        <dl className='oo-definitions'>
-            <dt className='oo-definitions-term'>Frontend (Feature Experimentation):</dt>
-            <dd className='oo-definitions-data'>{ profile?.ids.frontend ?? 'n/a' }</dd>
-            <dt className='oo-definitions-term'>Web Experimentation:</dt>
-            <dd className='oo-definitions-data'>{ webEx && webEx.get ? webEx.get('visitor').visitorId : 'n/a' }</dd>
-            <dt className='oo-definitions-term'>Content Intelligence:</dt>
-            <dd className='oo-definitions-data'>{ profile?.ids.contentIntelligence ?? 'n/a' }</dd>
-            <dt className='oo-definitions-term'>Data Platform:</dt>
-            <dd className='oo-definitions-data'>{ profile?.ids.dataPlatform ?? 'n/a' }</dd>
-            <dt className='oo-definitions-term'>Current path:</dt>
-            <dd className='oo-definitions-data'>{ currentPath }</dd>
-        </dl>
+  return (
+    <>
+      <dl className="oo:grid oo:grid-cols-3 oo:gap-x-4 oo:gap-y-1">
+        <dt className="oo:font-bold">Frontend (Feature Experimentation):</dt>
+        <dd className="oo:col-span-2">{profile?.ids.frontend ?? 'n/a'}</dd>
+        <dt className="oo:font-bold">Web Experimentation:</dt>
+        <dd className="oo:col-span-2">
+          {webEx && webEx.get ? webEx.get('visitor').visitorId : 'n/a'}
+        </dd>
+        <dt className="oo:font-bold">Content Intelligence:</dt>
+        <dd className="oo:col-span-2">
+          {profile?.ids.contentIntelligence ?? 'n/a'}
+        </dd>
+        <dt className="oo:font-bold">Data Platform:</dt>
+        <dd className="oo:col-span-2">{profile?.ids.dataPlatform ?? 'n/a'}</dd>
+        <dt className="oo:font-bold">Current path:</dt>
+        <dd className="oo:col-span-2">{currentPath}</dd>
+      </dl>
     </>
+  )
 }
 
 export default IdsPanel

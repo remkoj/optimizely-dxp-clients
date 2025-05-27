@@ -46,10 +46,39 @@ export type Changeset = {
 };
 
 /**
+ * Changesets are used to group work on several content items together.
+ */
+export type ChangesetWritable = {
+    /**
+     * The unique key of this Changeset.
+     */
+    key: string;
+    /**
+     * The source of this Changeset
+     */
+    source?: string;
+    /**
+     * The name of this Changeset.
+     */
+    displayName: string;
+    lastModified?: Date;
+};
+
+/**
  * Items in an changeset that contains a link to the specific content version.
  */
 export type ChangesetItem = {
     reference: ContentReference;
+    /**
+     * Gets/sets the changeset item category.
+     */
+    category?: string;
+};
+
+/**
+ * Items in an changeset that contains a link to the specific content version.
+ */
+export type ChangesetItemWritable = {
     /**
      * Gets/sets the changeset item category.
      */
@@ -75,6 +104,10 @@ export type ChangesetItemPage = {
     readonly totalItemCount?: number;
 };
 
+export type ChangesetItemPageWritable = {
+    [key: string]: never;
+};
+
 export type ChangesetPage = {
     /**
      * The items in this paged collection.
@@ -92,6 +125,10 @@ export type ChangesetPage = {
      * The estimated total number of items in the collection. May be omitted if the total item count is unknown.
      */
     readonly totalItemCount?: number;
+};
+
+export type ChangesetPageWritable = {
+    [key: string]: never;
 };
 
 /**
@@ -189,7 +226,9 @@ export type ContentItem = {
     /**
      * Properties as they are defined by corresponding component or content type.
      */
-    properties?: {};
+    properties?: {
+        [key: string]: unknown;
+    };
     /**
      * The key that identifies this content item.
      */
@@ -243,6 +282,48 @@ export type ContentItem = {
 };
 
 /**
+ * Represents a version of a content item.
+ */
+export type ContentItemWritable = {
+    /**
+     * Properties as they are defined by corresponding component or content type.
+     */
+    properties?: {
+        [key: string]: unknown;
+    };
+    /**
+     * The display name of this content item.
+     */
+    displayName: string;
+    /**
+     * Indicates a time when this content was published or should be published.
+     */
+    published?: Date | null;
+    /**
+     * Indicates a time when this content expired or should expire.
+     */
+    expired?: Date | null;
+    status?: VersionStatus;
+    /**
+     * Indicates a time when this content version should transition to published status. Must only be assigned when Status is set to Scheduled.
+     */
+    delayPublishUntil?: Date | null;
+    /**
+     * The key that identifies the container content that this content item belongs to.
+     */
+    container?: string | null;
+    /**
+     * The key that identifies the owner of this content. Content that is own by another content is also known as an asset.
+     */
+    owner?: string | null;
+    /**
+     * A string that represents the segment that should be used when routing or generate routes to the current content instance.
+     */
+    routeSegment?: string | null;
+    lastModified?: Date;
+};
+
+/**
  * The response object for Page`1 when used ContentType are included.
  */
 export type ContentItemListWithContentTypes = {
@@ -268,6 +349,13 @@ export type ContentItemListWithContentTypes = {
     readonly totalItemCount?: number;
 };
 
+/**
+ * The response object for Page`1 when used ContentType are included.
+ */
+export type ContentItemListWithContentTypesWritable = {
+    [key: string]: never;
+};
+
 export type ContentItemPage = {
     /**
      * The items in this paged collection.
@@ -287,6 +375,10 @@ export type ContentItemPage = {
     readonly totalItemCount?: number;
 };
 
+export type ContentItemPageWritable = {
+    [key: string]: never;
+};
+
 /**
  * The response object for ContentItem when used ContentType are included.
  */
@@ -296,6 +388,13 @@ export type ContentItemWithContentTypes = {
      */
     readonly contentTypes?: Array<ContentType>;
     item?: ContentItem;
+};
+
+/**
+ * The response object for ContentItem when used ContentType are included.
+ */
+export type ContentItemWithContentTypesWritable = {
+    item?: ContentItemWritable;
 };
 
 /**
@@ -373,6 +472,28 @@ export type ContentMetadata = {
     readonly deletedBy?: string | null;
 };
 
+/**
+ * Represents metadata about a content item.
+ */
+export type ContentMetadataWritable = {
+    /**
+     * The key that identifies this content.
+     */
+    key?: string;
+    /**
+     * The content type of this content.
+     */
+    contentType?: string;
+    /**
+     * The key that identifies the container content that this content belongs to.
+     */
+    container?: string | null;
+    /**
+     * The key that identifies the owner of this content. Content that is own by another content is also known as an asset.
+     */
+    owner?: string | null;
+};
+
 export type ContentMetadataPage = {
     /**
      * The items in this paged collection.
@@ -390,6 +511,10 @@ export type ContentMetadataPage = {
      * The estimated total number of items in the collection. May be omitted if the total item count is unknown.
      */
     readonly totalItemCount?: number;
+};
+
+export type ContentMetadataPageWritable = {
+    [key: string]: never;
 };
 
 /**
@@ -521,29 +646,112 @@ export type ContentType = {
      */
     properties?: {
         [key: string]: (({
-            type?: 'BinaryProperty';
+            type: 'BinaryProperty';
         } & BinaryProperty) | ({
-            type?: 'BooleanProperty';
+            type: 'BooleanProperty';
         } & BooleanProperty) | ({
-            type?: 'ComponentProperty';
+            type: 'ComponentProperty';
         } & ComponentProperty) | ({
-            type?: 'ContentProperty';
+            type: 'ContentProperty';
         } & ContentProperty) | ({
-            type?: 'ContentReferenceProperty';
+            type: 'ContentReferenceProperty';
         } & ContentReferenceProperty) | ({
-            type?: 'DateTimeProperty';
+            type: 'DateTimeProperty';
         } & DateTimeProperty) | ({
-            type?: 'FloatProperty';
+            type: 'FloatProperty';
         } & FloatProperty) | ({
-            type?: 'IntegerProperty';
+            type: 'IntegerProperty';
         } & IntegerProperty) | ({
-            type?: 'StringProperty';
+            type: 'StringProperty';
         } & StringProperty) | ({
-            type?: 'UrlProperty';
+            type: 'UrlProperty';
         } & UrlProperty) | ({
-            type?: 'JsonStringProperty';
+            type: 'JsonStringProperty';
         } & JsonStringProperty) | ({
-            type?: 'ListProperty';
+            type: 'ListProperty';
+        } & ListProperty)) & {
+            /**
+             * Settings for the editor.
+             */
+            editorSettings?: {
+                [key: string]: {
+                    [key: string]: unknown;
+                };
+            } | null;
+        };
+    };
+};
+
+/**
+ * A writable implementation of an ContentType.
+ */
+export type ContentTypeWritable = {
+    /**
+     * The key that identifies this ContentType.
+     */
+    key: string;
+    /**
+     * The display name of this ContentType.
+     */
+    displayName?: string;
+    /**
+     * A description of this ContentType.
+     */
+    description?: string;
+    baseType?: ContentBaseType;
+    /**
+     * An value that is used to when sorting ContentType instances.
+     */
+    sortOrder?: number;
+    /**
+     * Provides a set of features that content based on this ContentType supports.
+     * This value is assigned based on the BaseType and cannot be modified.
+     */
+    features?: Array<ContentTypeFeature>;
+    /**
+     * Specifies how this ContentType can be used.
+     */
+    usage?: Array<ContentTypeUsage>;
+    /**
+     * Provides a set of content types that can be created in container of this type
+     */
+    mayContainTypes?: Array<string>;
+    /**
+     * Provides a set of media file extensions that this content type can handle.
+     */
+    mediaFileExtensions?: Array<string>;
+    /**
+     * Provides a set of composition behaviors specifying how this content type can be used within compositions.
+     */
+    compositionBehaviors?: Array<CompositionBehavior>;
+    /**
+     * Dictionary with all custom properties of this ContentType.
+     */
+    properties?: {
+        [key: string]: (({
+            type: 'BinaryProperty';
+        } & BinaryProperty) | ({
+            type: 'BooleanProperty';
+        } & BooleanProperty) | ({
+            type: 'ComponentProperty';
+        } & ComponentProperty) | ({
+            type: 'ContentProperty';
+        } & ContentProperty) | ({
+            type: 'ContentReferenceProperty';
+        } & ContentReferenceProperty) | ({
+            type: 'DateTimeProperty';
+        } & DateTimeProperty) | ({
+            type: 'FloatProperty';
+        } & FloatProperty) | ({
+            type: 'IntegerProperty';
+        } & IntegerProperty) | ({
+            type: 'StringProperty';
+        } & StringProperty) | ({
+            type: 'UrlProperty';
+        } & UrlProperty) | ({
+            type: 'JsonStringProperty';
+        } & JsonStringProperty) | ({
+            type: 'ListProperty';
         } & ListProperty)) & {
             /**
              * Settings for the editor.
@@ -590,6 +798,10 @@ export type ContentTypePage = {
      * The estimated total number of items in the collection. May be omitted if the total item count is unknown.
      */
     readonly totalItemCount?: number;
+};
+
+export type ContentTypePageWritable = {
+    [key: string]: never;
 };
 
 /**
@@ -797,6 +1009,36 @@ export type DisplayTemplate = {
     };
 };
 
+/**
+ * Describes a display template that can be assigned to content.
+ */
+export type DisplayTemplateWritable = {
+    /**
+     * The display name of this display template.
+     */
+    displayName: string;
+    /**
+     * The optional node type this display template is valid for.
+     */
+    nodeType?: string | null;
+    baseType?: ContentBaseType;
+    /**
+     * The optional key of the content type this display template is valid for.
+     */
+    contentType?: string | null;
+    /**
+     * If this is the default display template for the associated base type,
+     * node type or content type.
+     */
+    isDefault?: boolean;
+    /**
+     * The available settings for this display template.
+     */
+    settings?: {
+        [key: string]: DisplaySetting;
+    };
+};
+
 export type DisplayTemplatePage = {
     /**
      * The items in this paged collection.
@@ -814,6 +1056,10 @@ export type DisplayTemplatePage = {
      * The estimated total number of items in the collection. May be omitted if the total item count is unknown.
      */
     readonly totalItemCount?: number;
+};
+
+export type DisplayTemplatePageWritable = {
+    [key: string]: never;
 };
 
 /**
@@ -991,21 +1237,21 @@ export type ListProperty = ContentTypeProperty & {
      * Describes the list item of a ListProperty in the CMS.
      */
     items: ({
-        type?: 'ComponentListItem';
+        type: 'ComponentListItem';
     } & ComponentListItem) | ({
-        type?: 'ContentListItem';
+        type: 'ContentListItem';
     } & ContentListItem) | ({
-        type?: 'ContentReferenceListItem';
+        type: 'ContentReferenceListItem';
     } & ContentReferenceListItem) | ({
-        type?: 'DateTimeListItem';
+        type: 'DateTimeListItem';
     } & DateTimeListItem) | ({
-        type?: 'FloatListItem';
+        type: 'FloatListItem';
     } & FloatListItem) | ({
-        type?: 'IntegerListItem';
+        type: 'IntegerListItem';
     } & IntegerListItem) | ({
-        type?: 'StringListItem';
+        type: 'StringListItem';
     } & StringListItem) | ({
-        type?: 'UrlListItem';
+        type: 'UrlListItem';
     } & UrlListItem);
 };
 
@@ -1103,6 +1349,15 @@ export type ProblemDetails = {
     } | null) | undefined;
 };
 
+export type ProblemDetailsWritable = {
+    type?: string | null;
+    title?: string | null;
+    status?: number | null;
+    detail?: string | null;
+    instance?: string | null;
+    [key: string]: unknown | (string | null) | (string | null) | (number | null) | (string | null) | (string | null) | undefined;
+};
+
 /**
  * Represent the basic type that a PropertyFormat
  * is using for data storage and data transport.
@@ -1188,6 +1443,10 @@ export type PropertyFormatPage = {
     readonly totalItemCount?: number;
 };
 
+export type PropertyFormatPageWritable = {
+    [key: string]: never;
+};
+
 /**
  * Describes a property group of a ContentType in the CMS.
  */
@@ -1204,6 +1463,20 @@ export type PropertyGroup = {
      * A string that is used to indicate the source of this PropertyGroup.
      */
     readonly source?: string;
+    /**
+     * An value that is used to when sorting PropertyGroup instances.
+     */
+    sortOrder?: number;
+};
+
+/**
+ * Describes a property group of a ContentType in the CMS.
+ */
+export type PropertyGroupWritable = {
+    /**
+     * The display name of this PropertyGroup.
+     */
+    displayName?: string;
     /**
      * An value that is used to when sorting PropertyGroup instances.
      */
@@ -1227,6 +1500,10 @@ export type PropertyGroupPage = {
      * The estimated total number of items in the collection. May be omitted if the total item count is unknown.
      */
     readonly totalItemCount?: number;
+};
+
+export type PropertyGroupPageWritable = {
+    [key: string]: never;
 };
 
 /**
@@ -1331,7 +1608,7 @@ export const VersionStatus = {
     IN_REVIEW: 'inReview'
 } as const;
 
-export type ChangesetsList_Data = {
+export type ChangesetsListData = {
     body?: never;
     path?: never;
     query?: {
@@ -1341,35 +1618,35 @@ export type ChangesetsList_Data = {
     url: '/changesets';
 };
 
-export type ChangesetsList_Errors = {
+export type ChangesetsListErrors = {
     /**
      * Forbidden
      */
     403: ProblemDetails;
 };
 
-export type ChangesetsList_Error = ChangesetsList_Errors[keyof ChangesetsList_Errors];
+export type ChangesetsListError = ChangesetsListErrors[keyof ChangesetsListErrors];
 
-export type ChangesetsList_Responses = {
+export type ChangesetsListResponses = {
     /**
      * OK
      */
     200: ChangesetPage;
 };
 
-export type ChangesetsList_Response = ChangesetsList_Responses[keyof ChangesetsList_Responses];
+export type ChangesetsListResponse = ChangesetsListResponses[keyof ChangesetsListResponses];
 
-export type ChangesetsCreate_Data = {
+export type ChangesetsCreateData = {
     /**
      * The changeset that should be created.
      */
-    body: Changeset;
+    body: ChangesetWritable;
     path?: never;
     query?: never;
     url: '/changesets';
 };
 
-export type ChangesetsCreate_Errors = {
+export type ChangesetsCreateErrors = {
     /**
      * Bad Request
      */
@@ -1380,18 +1657,18 @@ export type ChangesetsCreate_Errors = {
     403: ProblemDetails;
 };
 
-export type ChangesetsCreate_Error = ChangesetsCreate_Errors[keyof ChangesetsCreate_Errors];
+export type ChangesetsCreateError = ChangesetsCreateErrors[keyof ChangesetsCreateErrors];
 
-export type ChangesetsCreate_Responses = {
+export type ChangesetsCreateResponses = {
     /**
      * OK
      */
     200: Changeset;
 };
 
-export type ChangesetsCreate_Response = ChangesetsCreate_Responses[keyof ChangesetsCreate_Responses];
+export type ChangesetsCreateResponse = ChangesetsCreateResponses[keyof ChangesetsCreateResponses];
 
-export type ChangesetsDelete_Data = {
+export type ChangesetsDeleteData = {
     body?: never;
     path: {
         /**
@@ -1403,7 +1680,7 @@ export type ChangesetsDelete_Data = {
     url: '/changesets/{key}';
 };
 
-export type ChangesetsDelete_Errors = {
+export type ChangesetsDeleteErrors = {
     /**
      * Bad Request
      */
@@ -1414,18 +1691,18 @@ export type ChangesetsDelete_Errors = {
     403: ProblemDetails;
 };
 
-export type ChangesetsDelete_Error = ChangesetsDelete_Errors[keyof ChangesetsDelete_Errors];
+export type ChangesetsDeleteError = ChangesetsDeleteErrors[keyof ChangesetsDeleteErrors];
 
-export type ChangesetsDelete_Responses = {
+export type ChangesetsDeleteResponses = {
     /**
      * OK
      */
     200: Changeset;
 };
 
-export type ChangesetsDelete_Response = ChangesetsDelete_Responses[keyof ChangesetsDelete_Responses];
+export type ChangesetsDeleteResponse = ChangesetsDeleteResponses[keyof ChangesetsDeleteResponses];
 
-export type ChangesetsGet_Data = {
+export type ChangesetsGetData = {
     body?: never;
     path: {
         /**
@@ -1437,29 +1714,29 @@ export type ChangesetsGet_Data = {
     url: '/changesets/{key}';
 };
 
-export type ChangesetsGet_Errors = {
+export type ChangesetsGetErrors = {
     /**
      * Forbidden
      */
     403: ProblemDetails;
 };
 
-export type ChangesetsGet_Error = ChangesetsGet_Errors[keyof ChangesetsGet_Errors];
+export type ChangesetsGetError = ChangesetsGetErrors[keyof ChangesetsGetErrors];
 
-export type ChangesetsGet_Responses = {
+export type ChangesetsGetResponses = {
     /**
      * OK
      */
     200: Changeset;
 };
 
-export type ChangesetsGet_Response = ChangesetsGet_Responses[keyof ChangesetsGet_Responses];
+export type ChangesetsGetResponse = ChangesetsGetResponses[keyof ChangesetsGetResponses];
 
-export type ChangesetsPut_Data = {
+export type ChangesetsPutData = {
     /**
      * The values of the created or replaced changeset.
      */
-    body: Changeset;
+    body: ChangesetWritable;
     path: {
         /**
          * The key of the changeset to update or create.
@@ -1470,7 +1747,7 @@ export type ChangesetsPut_Data = {
     url: '/changesets/{key}';
 };
 
-export type ChangesetsPut_Errors = {
+export type ChangesetsPutErrors = {
     /**
      * Bad Request
      */
@@ -1481,18 +1758,18 @@ export type ChangesetsPut_Errors = {
     403: ProblemDetails;
 };
 
-export type ChangesetsPut_Error = ChangesetsPut_Errors[keyof ChangesetsPut_Errors];
+export type ChangesetsPutError = ChangesetsPutErrors[keyof ChangesetsPutErrors];
 
-export type ChangesetsPut_Responses = {
+export type ChangesetsPutResponses = {
     /**
      * OK
      */
     200: Changeset;
 };
 
-export type ChangesetsPut_Response = ChangesetsPut_Responses[keyof ChangesetsPut_Responses];
+export type ChangesetsPutResponse = ChangesetsPutResponses[keyof ChangesetsPutResponses];
 
-export type ChangesetsDeleteItem_Data = {
+export type ChangesetsDeleteItemData = {
     body?: never;
     path: {
         /**
@@ -1512,7 +1789,7 @@ export type ChangesetsDeleteItem_Data = {
     url: '/changesets/{changeset}/items/{key}/versions/{version}';
 };
 
-export type ChangesetsDeleteItem_Errors = {
+export type ChangesetsDeleteItemErrors = {
     /**
      * Bad Request
      */
@@ -1523,18 +1800,18 @@ export type ChangesetsDeleteItem_Errors = {
     403: ProblemDetails;
 };
 
-export type ChangesetsDeleteItem_Error = ChangesetsDeleteItem_Errors[keyof ChangesetsDeleteItem_Errors];
+export type ChangesetsDeleteItemError = ChangesetsDeleteItemErrors[keyof ChangesetsDeleteItemErrors];
 
-export type ChangesetsDeleteItem_Responses = {
+export type ChangesetsDeleteItemResponses = {
     /**
      * OK
      */
     200: ChangesetItem;
 };
 
-export type ChangesetsDeleteItem_Response = ChangesetsDeleteItem_Responses[keyof ChangesetsDeleteItem_Responses];
+export type ChangesetsDeleteItemResponse = ChangesetsDeleteItemResponses[keyof ChangesetsDeleteItemResponses];
 
-export type ChangesetsGetItem_Data = {
+export type ChangesetsGetItemData = {
     body?: never;
     path: {
         /**
@@ -1554,25 +1831,25 @@ export type ChangesetsGetItem_Data = {
     url: '/changesets/{changeset}/items/{key}/versions/{version}';
 };
 
-export type ChangesetsGetItem_Errors = {
+export type ChangesetsGetItemErrors = {
     /**
      * Forbidden
      */
     403: ProblemDetails;
 };
 
-export type ChangesetsGetItem_Error = ChangesetsGetItem_Errors[keyof ChangesetsGetItem_Errors];
+export type ChangesetsGetItemError = ChangesetsGetItemErrors[keyof ChangesetsGetItemErrors];
 
-export type ChangesetsGetItem_Responses = {
+export type ChangesetsGetItemResponses = {
     /**
      * OK
      */
     200: ChangesetItem;
 };
 
-export type ChangesetsGetItem_Response = ChangesetsGetItem_Responses[keyof ChangesetsGetItem_Responses];
+export type ChangesetsGetItemResponse = ChangesetsGetItemResponses[keyof ChangesetsGetItemResponses];
 
-export type ChangesetsListItems_Data = {
+export type ChangesetsListItemsData = {
     body?: never;
     path: {
         /**
@@ -1587,29 +1864,29 @@ export type ChangesetsListItems_Data = {
     url: '/changesets/{changeset}/items';
 };
 
-export type ChangesetsListItems_Errors = {
+export type ChangesetsListItemsErrors = {
     /**
      * Forbidden
      */
     403: ProblemDetails;
 };
 
-export type ChangesetsListItems_Error = ChangesetsListItems_Errors[keyof ChangesetsListItems_Errors];
+export type ChangesetsListItemsError = ChangesetsListItemsErrors[keyof ChangesetsListItemsErrors];
 
-export type ChangesetsListItems_Responses = {
+export type ChangesetsListItemsResponses = {
     /**
      * OK
      */
     200: ChangesetItemPage;
 };
 
-export type ChangesetsListItems_Response = ChangesetsListItems_Responses[keyof ChangesetsListItems_Responses];
+export type ChangesetsListItemsResponse = ChangesetsListItemsResponses[keyof ChangesetsListItemsResponses];
 
-export type ChangesetsCreateItem_Data = {
+export type ChangesetsCreateItemData = {
     /**
      * The changeset item
      */
-    body: ChangesetItem;
+    body: ChangesetItemWritable;
     path: {
         /**
          * The changeset key
@@ -1620,7 +1897,7 @@ export type ChangesetsCreateItem_Data = {
     url: '/changesets/{changeset}/items';
 };
 
-export type ChangesetsCreateItem_Errors = {
+export type ChangesetsCreateItemErrors = {
     /**
      * Bad Request
      */
@@ -1631,22 +1908,22 @@ export type ChangesetsCreateItem_Errors = {
     403: ProblemDetails;
 };
 
-export type ChangesetsCreateItem_Error = ChangesetsCreateItem_Errors[keyof ChangesetsCreateItem_Errors];
+export type ChangesetsCreateItemError = ChangesetsCreateItemErrors[keyof ChangesetsCreateItemErrors];
 
-export type ChangesetsCreateItem_Responses = {
+export type ChangesetsCreateItemResponses = {
     /**
      * OK
      */
     200: ChangesetItem;
 };
 
-export type ChangesetsCreateItem_Response = ChangesetsCreateItem_Responses[keyof ChangesetsCreateItem_Responses];
+export type ChangesetsCreateItemResponse = ChangesetsCreateItemResponses[keyof ChangesetsCreateItemResponses];
 
-export type ChangesetsUpdateItem_Data = {
+export type ChangesetsUpdateItemData = {
     /**
      * The changeset item
      */
-    body: ChangesetItem;
+    body: ChangesetItemWritable;
     path: {
         /**
          * The changeset key
@@ -1670,7 +1947,7 @@ export type ChangesetsUpdateItem_Data = {
     url: '/changesets/{changeset}/items/{contentKey}/versions/{contentVersion}';
 };
 
-export type ChangesetsUpdateItem_Errors = {
+export type ChangesetsUpdateItemErrors = {
     /**
      * Bad Request
      */
@@ -1681,22 +1958,22 @@ export type ChangesetsUpdateItem_Errors = {
     403: ProblemDetails;
 };
 
-export type ChangesetsUpdateItem_Error = ChangesetsUpdateItem_Errors[keyof ChangesetsUpdateItem_Errors];
+export type ChangesetsUpdateItemError = ChangesetsUpdateItemErrors[keyof ChangesetsUpdateItemErrors];
 
-export type ChangesetsUpdateItem_Responses = {
+export type ChangesetsUpdateItemResponses = {
     /**
      * OK
      */
     200: ChangesetItem;
 };
 
-export type ChangesetsUpdateItem_Response = ChangesetsUpdateItem_Responses[keyof ChangesetsUpdateItem_Responses];
+export type ChangesetsUpdateItemResponse = ChangesetsUpdateItemResponses[keyof ChangesetsUpdateItemResponses];
 
-export type ContentCreate_Data = {
+export type ContentCreateData = {
     /**
      * The content item that should be created.
      */
-    body: ContentItem;
+    body: ContentItemWritable;
     path?: never;
     query?: {
         /**
@@ -1707,7 +1984,7 @@ export type ContentCreate_Data = {
     url: '/content';
 };
 
-export type ContentCreate_Errors = {
+export type ContentCreateErrors = {
     /**
      * Bad Request
      */
@@ -1718,18 +1995,18 @@ export type ContentCreate_Errors = {
     403: ProblemDetails;
 };
 
-export type ContentCreate_Error = ContentCreate_Errors[keyof ContentCreate_Errors];
+export type ContentCreateError = ContentCreateErrors[keyof ContentCreateErrors];
 
-export type ContentCreate_Responses = {
+export type ContentCreateResponses = {
     /**
      * Created
      */
     201: ContentItemWithContentTypes;
 };
 
-export type ContentCreate_Response = ContentCreate_Responses[keyof ContentCreate_Responses];
+export type ContentCreateResponse = ContentCreateResponses[keyof ContentCreateResponses];
 
-export type ContentDelete_Data = {
+export type ContentDeleteData = {
     body?: never;
     path: {
         /**
@@ -1746,7 +2023,7 @@ export type ContentDelete_Data = {
     url: '/content/{key}';
 };
 
-export type ContentDelete_Errors = {
+export type ContentDeleteErrors = {
     /**
      * Bad Request
      */
@@ -1757,18 +2034,18 @@ export type ContentDelete_Errors = {
     403: ProblemDetails;
 };
 
-export type ContentDelete_Error = ContentDelete_Errors[keyof ContentDelete_Errors];
+export type ContentDeleteError = ContentDeleteErrors[keyof ContentDeleteErrors];
 
-export type ContentDelete_Responses = {
+export type ContentDeleteResponses = {
     /**
      * OK
      */
     200: ContentMetadata;
 };
 
-export type ContentDelete_Response = ContentDelete_Responses[keyof ContentDelete_Responses];
+export type ContentDeleteResponse = ContentDeleteResponses[keyof ContentDeleteResponses];
 
-export type ContentGetMetadata_Data = {
+export type ContentGetMetadataData = {
     body?: never;
     path: {
         /**
@@ -1785,29 +2062,29 @@ export type ContentGetMetadata_Data = {
     url: '/content/{key}';
 };
 
-export type ContentGetMetadata_Errors = {
+export type ContentGetMetadataErrors = {
     /**
      * Forbidden
      */
     403: ProblemDetails;
 };
 
-export type ContentGetMetadata_Error = ContentGetMetadata_Errors[keyof ContentGetMetadata_Errors];
+export type ContentGetMetadataError = ContentGetMetadataErrors[keyof ContentGetMetadataErrors];
 
-export type ContentGetMetadata_Responses = {
+export type ContentGetMetadataResponses = {
     /**
      * OK
      */
     200: ContentMetadata;
 };
 
-export type ContentGetMetadata_Response = ContentGetMetadata_Responses[keyof ContentGetMetadata_Responses];
+export type ContentGetMetadataResponse = ContentGetMetadataResponses[keyof ContentGetMetadataResponses];
 
-export type ContentPatchMetadata_Data = {
+export type ContentPatchMetadataData = {
     /**
      * The values of the content item that should be updated.
      */
-    body: ContentMetadata;
+    body: ContentMetadataWritable;
     path: {
         /**
          * The key of the content item to patch.
@@ -1818,7 +2095,7 @@ export type ContentPatchMetadata_Data = {
     url: '/content/{key}';
 };
 
-export type ContentPatchMetadata_Errors = {
+export type ContentPatchMetadataErrors = {
     /**
      * Bad Request
      */
@@ -1829,18 +2106,18 @@ export type ContentPatchMetadata_Errors = {
     403: ProblemDetails;
 };
 
-export type ContentPatchMetadata_Error = ContentPatchMetadata_Errors[keyof ContentPatchMetadata_Errors];
+export type ContentPatchMetadataError = ContentPatchMetadataErrors[keyof ContentPatchMetadataErrors];
 
-export type ContentPatchMetadata_Responses = {
+export type ContentPatchMetadataResponses = {
     /**
      * OK
      */
     200: ContentMetadata;
 };
 
-export type ContentPatchMetadata_Response = ContentPatchMetadata_Responses[keyof ContentPatchMetadata_Responses];
+export type ContentPatchMetadataResponse = ContentPatchMetadataResponses[keyof ContentPatchMetadataResponses];
 
-export type ContentGetPath_Data = {
+export type ContentGetPathData = {
     body?: never;
     path: {
         /**
@@ -1855,25 +2132,25 @@ export type ContentGetPath_Data = {
     url: '/content/{key}/path';
 };
 
-export type ContentGetPath_Errors = {
+export type ContentGetPathErrors = {
     /**
      * Forbidden
      */
     403: ProblemDetails;
 };
 
-export type ContentGetPath_Error = ContentGetPath_Errors[keyof ContentGetPath_Errors];
+export type ContentGetPathError = ContentGetPathErrors[keyof ContentGetPathErrors];
 
-export type ContentGetPath_Responses = {
+export type ContentGetPathResponses = {
     /**
      * OK
      */
     200: ContentMetadataPage;
 };
 
-export type ContentGetPath_Response = ContentGetPath_Responses[keyof ContentGetPath_Responses];
+export type ContentGetPathResponse = ContentGetPathResponses[keyof ContentGetPathResponses];
 
-export type ContentListItems_Data = {
+export type ContentListItemsData = {
     body?: never;
     path: {
         /**
@@ -1892,25 +2169,25 @@ export type ContentListItems_Data = {
     url: '/content/{key}/items';
 };
 
-export type ContentListItems_Errors = {
+export type ContentListItemsErrors = {
     /**
      * Forbidden
      */
     403: ProblemDetails;
 };
 
-export type ContentListItems_Error = ContentListItems_Errors[keyof ContentListItems_Errors];
+export type ContentListItemsError = ContentListItemsErrors[keyof ContentListItemsErrors];
 
-export type ContentListItems_Responses = {
+export type ContentListItemsResponses = {
     /**
      * OK
      */
     200: ContentMetadataPage;
 };
 
-export type ContentListItems_Response = ContentListItems_Responses[keyof ContentListItems_Responses];
+export type ContentListItemsResponse = ContentListItemsResponses[keyof ContentListItemsResponses];
 
-export type ContentListAssets_Data = {
+export type ContentListAssetsData = {
     body?: never;
     path: {
         /**
@@ -1929,25 +2206,25 @@ export type ContentListAssets_Data = {
     url: '/content/{key}/assets';
 };
 
-export type ContentListAssets_Errors = {
+export type ContentListAssetsErrors = {
     /**
      * Forbidden
      */
     403: ProblemDetails;
 };
 
-export type ContentListAssets_Error = ContentListAssets_Errors[keyof ContentListAssets_Errors];
+export type ContentListAssetsError = ContentListAssetsErrors[keyof ContentListAssetsErrors];
 
-export type ContentListAssets_Responses = {
+export type ContentListAssetsResponses = {
     /**
      * OK
      */
     200: ContentMetadataPage;
 };
 
-export type ContentListAssets_Response = ContentListAssets_Responses[keyof ContentListAssets_Responses];
+export type ContentListAssetsResponse = ContentListAssetsResponses[keyof ContentListAssetsResponses];
 
-export type ContentCopy_Data = {
+export type ContentCopyData = {
     /**
      * Optional instructions for how to copy content.
      */
@@ -1962,7 +2239,7 @@ export type ContentCopy_Data = {
     url: '/content/{key}:copy';
 };
 
-export type ContentCopy_Errors = {
+export type ContentCopyErrors = {
     /**
      * Bad Request
      */
@@ -1973,18 +2250,18 @@ export type ContentCopy_Errors = {
     403: ProblemDetails;
 };
 
-export type ContentCopy_Error = ContentCopy_Errors[keyof ContentCopy_Errors];
+export type ContentCopyError = ContentCopyErrors[keyof ContentCopyErrors];
 
-export type ContentCopy_Responses = {
+export type ContentCopyResponses = {
     /**
      * OK
      */
     200: ContentMetadata;
 };
 
-export type ContentCopy_Response = ContentCopy_Responses[keyof ContentCopy_Responses];
+export type ContentCopyResponse = ContentCopyResponses[keyof ContentCopyResponses];
 
-export type ContentUndelete_Data = {
+export type ContentUndeleteData = {
     body?: never;
     path: {
         /**
@@ -1996,7 +2273,7 @@ export type ContentUndelete_Data = {
     url: '/content/{key}:undelete';
 };
 
-export type ContentUndelete_Errors = {
+export type ContentUndeleteErrors = {
     /**
      * Bad Request
      */
@@ -2007,18 +2284,18 @@ export type ContentUndelete_Errors = {
     403: ProblemDetails;
 };
 
-export type ContentUndelete_Error = ContentUndelete_Errors[keyof ContentUndelete_Errors];
+export type ContentUndeleteError = ContentUndeleteErrors[keyof ContentUndeleteErrors];
 
-export type ContentUndelete_Responses = {
+export type ContentUndeleteResponses = {
     /**
      * OK
      */
     200: ContentMetadata;
 };
 
-export type ContentUndelete_Response = ContentUndelete_Responses[keyof ContentUndelete_Responses];
+export type ContentUndeleteResponse = ContentUndeleteResponses[keyof ContentUndeleteResponses];
 
-export type ContentListAllVersions_Data = {
+export type ContentListAllVersionsData = {
     body?: never;
     path?: never;
     query?: {
@@ -2037,25 +2314,25 @@ export type ContentListAllVersions_Data = {
     url: '/content/versions';
 };
 
-export type ContentListAllVersions_Errors = {
+export type ContentListAllVersionsErrors = {
     /**
      * Forbidden
      */
     403: ProblemDetails;
 };
 
-export type ContentListAllVersions_Error = ContentListAllVersions_Errors[keyof ContentListAllVersions_Errors];
+export type ContentListAllVersionsError = ContentListAllVersionsErrors[keyof ContentListAllVersionsErrors];
 
-export type ContentListAllVersions_Responses = {
+export type ContentListAllVersionsResponses = {
     /**
      * OK
      */
     200: ContentItemListWithContentTypes;
 };
 
-export type ContentListAllVersions_Response = ContentListAllVersions_Responses[keyof ContentListAllVersions_Responses];
+export type ContentListAllVersionsResponse = ContentListAllVersionsResponses[keyof ContentListAllVersionsResponses];
 
-export type ContentDeleteLocale_Data = {
+export type ContentDeleteLocaleData = {
     body?: never;
     path: {
         key: string;
@@ -2066,7 +2343,7 @@ export type ContentDeleteLocale_Data = {
     url: '/content/{key}/versions';
 };
 
-export type ContentDeleteLocale_Errors = {
+export type ContentDeleteLocaleErrors = {
     /**
      * Bad Request
      */
@@ -2077,18 +2354,18 @@ export type ContentDeleteLocale_Errors = {
     403: ProblemDetails;
 };
 
-export type ContentDeleteLocale_Error = ContentDeleteLocale_Errors[keyof ContentDeleteLocale_Errors];
+export type ContentDeleteLocaleError = ContentDeleteLocaleErrors[keyof ContentDeleteLocaleErrors];
 
-export type ContentDeleteLocale_Responses = {
+export type ContentDeleteLocaleResponses = {
     /**
      * OK
      */
     200: ContentItemWithContentTypes;
 };
 
-export type ContentDeleteLocale_Response = ContentDeleteLocale_Responses[keyof ContentDeleteLocale_Responses];
+export type ContentDeleteLocaleResponse = ContentDeleteLocaleResponses[keyof ContentDeleteLocaleResponses];
 
-export type ContentListVersions_Data = {
+export type ContentListVersionsData = {
     body?: never;
     path: {
         key: string;
@@ -2109,29 +2386,29 @@ export type ContentListVersions_Data = {
     url: '/content/{key}/versions';
 };
 
-export type ContentListVersions_Errors = {
+export type ContentListVersionsErrors = {
     /**
      * Forbidden
      */
     403: ProblemDetails;
 };
 
-export type ContentListVersions_Error = ContentListVersions_Errors[keyof ContentListVersions_Errors];
+export type ContentListVersionsError = ContentListVersionsErrors[keyof ContentListVersionsErrors];
 
-export type ContentListVersions_Responses = {
+export type ContentListVersionsResponses = {
     /**
      * OK
      */
     200: ContentItemListWithContentTypes;
 };
 
-export type ContentListVersions_Response = ContentListVersions_Responses[keyof ContentListVersions_Responses];
+export type ContentListVersionsResponse = ContentListVersionsResponses[keyof ContentListVersionsResponses];
 
-export type ContentCreateVersion_Data = {
+export type ContentCreateVersionData = {
     /**
      * The content version that should be created.
      */
-    body: ContentItem;
+    body: ContentItemWritable;
     path: {
         /**
          * The key of the content item for which a new content version should be created.
@@ -2147,7 +2424,7 @@ export type ContentCreateVersion_Data = {
     url: '/content/{key}/versions';
 };
 
-export type ContentCreateVersion_Errors = {
+export type ContentCreateVersionErrors = {
     /**
      * Bad Request
      */
@@ -2158,18 +2435,18 @@ export type ContentCreateVersion_Errors = {
     403: ProblemDetails;
 };
 
-export type ContentCreateVersion_Error = ContentCreateVersion_Errors[keyof ContentCreateVersion_Errors];
+export type ContentCreateVersionError = ContentCreateVersionErrors[keyof ContentCreateVersionErrors];
 
-export type ContentCreateVersion_Responses = {
+export type ContentCreateVersionResponses = {
     /**
      * Created
      */
     201: ContentItemWithContentTypes;
 };
 
-export type ContentCreateVersion_Response = ContentCreateVersion_Responses[keyof ContentCreateVersion_Responses];
+export type ContentCreateVersionResponse = ContentCreateVersionResponses[keyof ContentCreateVersionResponses];
 
-export type ContentDeleteVersion_Data = {
+export type ContentDeleteVersionData = {
     body?: never;
     path: {
         key: string;
@@ -2179,7 +2456,7 @@ export type ContentDeleteVersion_Data = {
     url: '/content/{key}/versions/{version}';
 };
 
-export type ContentDeleteVersion_Errors = {
+export type ContentDeleteVersionErrors = {
     /**
      * Bad Request
      */
@@ -2190,18 +2467,18 @@ export type ContentDeleteVersion_Errors = {
     403: ProblemDetails;
 };
 
-export type ContentDeleteVersion_Error = ContentDeleteVersion_Errors[keyof ContentDeleteVersion_Errors];
+export type ContentDeleteVersionError = ContentDeleteVersionErrors[keyof ContentDeleteVersionErrors];
 
-export type ContentDeleteVersion_Responses = {
+export type ContentDeleteVersionResponses = {
     /**
      * OK
      */
     200: ContentItemWithContentTypes;
 };
 
-export type ContentDeleteVersion_Response = ContentDeleteVersion_Responses[keyof ContentDeleteVersion_Responses];
+export type ContentDeleteVersionResponse = ContentDeleteVersionResponses[keyof ContentDeleteVersionResponses];
 
-export type ContentGetVersion_Data = {
+export type ContentGetVersionData = {
     body?: never;
     path: {
         key: string;
@@ -2213,29 +2490,29 @@ export type ContentGetVersion_Data = {
     url: '/content/{key}/versions/{version}';
 };
 
-export type ContentGetVersion_Errors = {
+export type ContentGetVersionErrors = {
     /**
      * Forbidden
      */
     403: ProblemDetails;
 };
 
-export type ContentGetVersion_Error = ContentGetVersion_Errors[keyof ContentGetVersion_Errors];
+export type ContentGetVersionError = ContentGetVersionErrors[keyof ContentGetVersionErrors];
 
-export type ContentGetVersion_Responses = {
+export type ContentGetVersionResponses = {
     /**
      * OK
      */
     200: ContentItemWithContentTypes;
 };
 
-export type ContentGetVersion_Response = ContentGetVersion_Responses[keyof ContentGetVersion_Responses];
+export type ContentGetVersionResponse = ContentGetVersionResponses[keyof ContentGetVersionResponses];
 
-export type ContentPatchVersion_Data = {
+export type ContentPatchVersionData = {
     /**
      * The content information that should be updated.
      */
-    body: ContentItem;
+    body: ContentItemWritable;
     path: {
         /**
          * The key of the content item that should be updated.
@@ -2259,7 +2536,7 @@ export type ContentPatchVersion_Data = {
     url: '/content/{key}/versions/{version}';
 };
 
-export type ContentPatchVersion_Errors = {
+export type ContentPatchVersionErrors = {
     /**
      * Bad Request
      */
@@ -2270,18 +2547,18 @@ export type ContentPatchVersion_Errors = {
     403: ProblemDetails;
 };
 
-export type ContentPatchVersion_Error = ContentPatchVersion_Errors[keyof ContentPatchVersion_Errors];
+export type ContentPatchVersionError = ContentPatchVersionErrors[keyof ContentPatchVersionErrors];
 
-export type ContentPatchVersion_Responses = {
+export type ContentPatchVersionResponses = {
     /**
      * OK
      */
     200: ContentItemWithContentTypes;
 };
 
-export type ContentPatchVersion_Response = ContentPatchVersion_Responses[keyof ContentPatchVersion_Responses];
+export type ContentPatchVersionResponse = ContentPatchVersionResponses[keyof ContentPatchVersionResponses];
 
-export type ContentTypesList_Data = {
+export type ContentTypesListData = {
     body?: never;
     path?: never;
     query?: {
@@ -2301,35 +2578,35 @@ export type ContentTypesList_Data = {
     url: '/contenttypes';
 };
 
-export type ContentTypesList_Errors = {
+export type ContentTypesListErrors = {
     /**
      * Forbidden
      */
     403: ProblemDetails;
 };
 
-export type ContentTypesList_Error = ContentTypesList_Errors[keyof ContentTypesList_Errors];
+export type ContentTypesListError = ContentTypesListErrors[keyof ContentTypesListErrors];
 
-export type ContentTypesList_Responses = {
+export type ContentTypesListResponses = {
     /**
      * OK
      */
     200: ContentTypePage;
 };
 
-export type ContentTypesList_Response = ContentTypesList_Responses[keyof ContentTypesList_Responses];
+export type ContentTypesListResponse = ContentTypesListResponses[keyof ContentTypesListResponses];
 
-export type ContentTypesCreate_Data = {
+export type ContentTypesCreateData = {
     /**
      * The content type that should be created.
      */
-    body: ContentType;
+    body: ContentTypeWritable;
     path?: never;
     query?: never;
     url: '/contenttypes';
 };
 
-export type ContentTypesCreate_Errors = {
+export type ContentTypesCreateErrors = {
     /**
      * Bad Request
      */
@@ -2340,18 +2617,18 @@ export type ContentTypesCreate_Errors = {
     403: ProblemDetails;
 };
 
-export type ContentTypesCreate_Error = ContentTypesCreate_Errors[keyof ContentTypesCreate_Errors];
+export type ContentTypesCreateError = ContentTypesCreateErrors[keyof ContentTypesCreateErrors];
 
-export type ContentTypesCreate_Responses = {
+export type ContentTypesCreateResponses = {
     /**
      * OK
      */
     200: ContentType;
 };
 
-export type ContentTypesCreate_Response = ContentTypesCreate_Responses[keyof ContentTypesCreate_Responses];
+export type ContentTypesCreateResponse = ContentTypesCreateResponses[keyof ContentTypesCreateResponses];
 
-export type ContentTypesDelete_Data = {
+export type ContentTypesDeleteData = {
     body?: never;
     path: {
         /**
@@ -2363,7 +2640,7 @@ export type ContentTypesDelete_Data = {
     url: '/contenttypes/{key}';
 };
 
-export type ContentTypesDelete_Errors = {
+export type ContentTypesDeleteErrors = {
     /**
      * Bad Request
      */
@@ -2374,18 +2651,18 @@ export type ContentTypesDelete_Errors = {
     403: ProblemDetails;
 };
 
-export type ContentTypesDelete_Error = ContentTypesDelete_Errors[keyof ContentTypesDelete_Errors];
+export type ContentTypesDeleteError = ContentTypesDeleteErrors[keyof ContentTypesDeleteErrors];
 
-export type ContentTypesDelete_Responses = {
+export type ContentTypesDeleteResponses = {
     /**
      * OK
      */
     200: ContentType;
 };
 
-export type ContentTypesDelete_Response = ContentTypesDelete_Responses[keyof ContentTypesDelete_Responses];
+export type ContentTypesDeleteResponse = ContentTypesDeleteResponses[keyof ContentTypesDeleteResponses];
 
-export type ContentTypesGet_Data = {
+export type ContentTypesGetData = {
     body?: never;
     path: {
         /**
@@ -2397,29 +2674,29 @@ export type ContentTypesGet_Data = {
     url: '/contenttypes/{key}';
 };
 
-export type ContentTypesGet_Errors = {
+export type ContentTypesGetErrors = {
     /**
      * Forbidden
      */
     403: ProblemDetails;
 };
 
-export type ContentTypesGet_Error = ContentTypesGet_Errors[keyof ContentTypesGet_Errors];
+export type ContentTypesGetError = ContentTypesGetErrors[keyof ContentTypesGetErrors];
 
-export type ContentTypesGet_Responses = {
+export type ContentTypesGetResponses = {
     /**
      * OK
      */
     200: ContentType;
 };
 
-export type ContentTypesGet_Response = ContentTypesGet_Responses[keyof ContentTypesGet_Responses];
+export type ContentTypesGetResponse = ContentTypesGetResponses[keyof ContentTypesGetResponses];
 
-export type ContentTypesPatch_Data = {
+export type ContentTypesPatchData = {
     /**
      * The values of the content type that should be updated.
      */
-    body: ContentType;
+    body: ContentTypeWritable;
     path: {
         /**
          * The key of the content type to patch.
@@ -2435,7 +2712,7 @@ export type ContentTypesPatch_Data = {
     url: '/contenttypes/{key}';
 };
 
-export type ContentTypesPatch_Errors = {
+export type ContentTypesPatchErrors = {
     /**
      * Bad Request
      */
@@ -2446,22 +2723,22 @@ export type ContentTypesPatch_Errors = {
     403: ProblemDetails;
 };
 
-export type ContentTypesPatch_Error = ContentTypesPatch_Errors[keyof ContentTypesPatch_Errors];
+export type ContentTypesPatchError = ContentTypesPatchErrors[keyof ContentTypesPatchErrors];
 
-export type ContentTypesPatch_Responses = {
+export type ContentTypesPatchResponses = {
     /**
      * OK
      */
     200: ContentType;
 };
 
-export type ContentTypesPatch_Response = ContentTypesPatch_Responses[keyof ContentTypesPatch_Responses];
+export type ContentTypesPatchResponse = ContentTypesPatchResponses[keyof ContentTypesPatchResponses];
 
-export type ContentTypesPut_Data = {
+export type ContentTypesPutData = {
     /**
      * The values of the created or replaced content type.
      */
-    body: ContentType;
+    body: ContentTypeWritable;
     path: {
         /**
          * The key of the content type to update or create.
@@ -2477,7 +2754,7 @@ export type ContentTypesPut_Data = {
     url: '/contenttypes/{key}';
 };
 
-export type ContentTypesPut_Errors = {
+export type ContentTypesPutErrors = {
     /**
      * Bad Request
      */
@@ -2488,18 +2765,18 @@ export type ContentTypesPut_Errors = {
     403: ProblemDetails;
 };
 
-export type ContentTypesPut_Error = ContentTypesPut_Errors[keyof ContentTypesPut_Errors];
+export type ContentTypesPutError = ContentTypesPutErrors[keyof ContentTypesPutErrors];
 
-export type ContentTypesPut_Responses = {
+export type ContentTypesPutResponses = {
     /**
      * OK
      */
     200: ContentType;
 };
 
-export type ContentTypesPut_Response = ContentTypesPut_Responses[keyof ContentTypesPut_Responses];
+export type ContentTypesPutResponse = ContentTypesPutResponses[keyof ContentTypesPutResponses];
 
-export type DisplayTemplatesList_Data = {
+export type DisplayTemplatesListData = {
     body?: never;
     path?: never;
     query?: {
@@ -2509,35 +2786,35 @@ export type DisplayTemplatesList_Data = {
     url: '/displaytemplates';
 };
 
-export type DisplayTemplatesList_Errors = {
+export type DisplayTemplatesListErrors = {
     /**
      * Forbidden
      */
     403: ProblemDetails;
 };
 
-export type DisplayTemplatesList_Error = DisplayTemplatesList_Errors[keyof DisplayTemplatesList_Errors];
+export type DisplayTemplatesListError = DisplayTemplatesListErrors[keyof DisplayTemplatesListErrors];
 
-export type DisplayTemplatesList_Responses = {
+export type DisplayTemplatesListResponses = {
     /**
      * OK
      */
     200: DisplayTemplatePage;
 };
 
-export type DisplayTemplatesList_Response = DisplayTemplatesList_Responses[keyof DisplayTemplatesList_Responses];
+export type DisplayTemplatesListResponse = DisplayTemplatesListResponses[keyof DisplayTemplatesListResponses];
 
-export type DisplayTemplatesCreate_Data = {
+export type DisplayTemplatesCreateData = {
     /**
      * The display template that should be created.
      */
-    body: DisplayTemplate;
+    body: DisplayTemplateWritable;
     path?: never;
     query?: never;
     url: '/displaytemplates';
 };
 
-export type DisplayTemplatesCreate_Errors = {
+export type DisplayTemplatesCreateErrors = {
     /**
      * Bad Request
      */
@@ -2548,18 +2825,18 @@ export type DisplayTemplatesCreate_Errors = {
     403: ProblemDetails;
 };
 
-export type DisplayTemplatesCreate_Error = DisplayTemplatesCreate_Errors[keyof DisplayTemplatesCreate_Errors];
+export type DisplayTemplatesCreateError = DisplayTemplatesCreateErrors[keyof DisplayTemplatesCreateErrors];
 
-export type DisplayTemplatesCreate_Responses = {
+export type DisplayTemplatesCreateResponses = {
     /**
      * OK
      */
     200: DisplayTemplate;
 };
 
-export type DisplayTemplatesCreate_Response = DisplayTemplatesCreate_Responses[keyof DisplayTemplatesCreate_Responses];
+export type DisplayTemplatesCreateResponse = DisplayTemplatesCreateResponses[keyof DisplayTemplatesCreateResponses];
 
-export type DisplayTemplatesDelete_Data = {
+export type DisplayTemplatesDeleteData = {
     body?: never;
     path: {
         /**
@@ -2571,7 +2848,7 @@ export type DisplayTemplatesDelete_Data = {
     url: '/displaytemplates/{key}';
 };
 
-export type DisplayTemplatesDelete_Errors = {
+export type DisplayTemplatesDeleteErrors = {
     /**
      * Bad Request
      */
@@ -2582,18 +2859,18 @@ export type DisplayTemplatesDelete_Errors = {
     403: ProblemDetails;
 };
 
-export type DisplayTemplatesDelete_Error = DisplayTemplatesDelete_Errors[keyof DisplayTemplatesDelete_Errors];
+export type DisplayTemplatesDeleteError = DisplayTemplatesDeleteErrors[keyof DisplayTemplatesDeleteErrors];
 
-export type DisplayTemplatesDelete_Responses = {
+export type DisplayTemplatesDeleteResponses = {
     /**
      * OK
      */
     200: DisplayTemplate;
 };
 
-export type DisplayTemplatesDelete_Response = DisplayTemplatesDelete_Responses[keyof DisplayTemplatesDelete_Responses];
+export type DisplayTemplatesDeleteResponse = DisplayTemplatesDeleteResponses[keyof DisplayTemplatesDeleteResponses];
 
-export type DisplayTemplatesGet_Data = {
+export type DisplayTemplatesGetData = {
     body?: never;
     path: {
         /**
@@ -2605,29 +2882,29 @@ export type DisplayTemplatesGet_Data = {
     url: '/displaytemplates/{key}';
 };
 
-export type DisplayTemplatesGet_Errors = {
+export type DisplayTemplatesGetErrors = {
     /**
      * Forbidden
      */
     403: ProblemDetails;
 };
 
-export type DisplayTemplatesGet_Error = DisplayTemplatesGet_Errors[keyof DisplayTemplatesGet_Errors];
+export type DisplayTemplatesGetError = DisplayTemplatesGetErrors[keyof DisplayTemplatesGetErrors];
 
-export type DisplayTemplatesGet_Responses = {
+export type DisplayTemplatesGetResponses = {
     /**
      * OK
      */
     200: DisplayTemplate;
 };
 
-export type DisplayTemplatesGet_Response = DisplayTemplatesGet_Responses[keyof DisplayTemplatesGet_Responses];
+export type DisplayTemplatesGetResponse = DisplayTemplatesGetResponses[keyof DisplayTemplatesGetResponses];
 
-export type DisplayTemplatesPatch_Data = {
+export type DisplayTemplatesPatchData = {
     /**
      * The values of the display template that should be updated.
      */
-    body: DisplayTemplate;
+    body: DisplayTemplateWritable;
     path: {
         /**
          * The key of the display template to patch.
@@ -2638,7 +2915,7 @@ export type DisplayTemplatesPatch_Data = {
     url: '/displaytemplates/{key}';
 };
 
-export type DisplayTemplatesPatch_Errors = {
+export type DisplayTemplatesPatchErrors = {
     /**
      * Bad Request
      */
@@ -2649,22 +2926,22 @@ export type DisplayTemplatesPatch_Errors = {
     403: ProblemDetails;
 };
 
-export type DisplayTemplatesPatch_Error = DisplayTemplatesPatch_Errors[keyof DisplayTemplatesPatch_Errors];
+export type DisplayTemplatesPatchError = DisplayTemplatesPatchErrors[keyof DisplayTemplatesPatchErrors];
 
-export type DisplayTemplatesPatch_Responses = {
+export type DisplayTemplatesPatchResponses = {
     /**
      * OK
      */
     200: DisplayTemplate;
 };
 
-export type DisplayTemplatesPatch_Response = DisplayTemplatesPatch_Responses[keyof DisplayTemplatesPatch_Responses];
+export type DisplayTemplatesPatchResponse = DisplayTemplatesPatchResponses[keyof DisplayTemplatesPatchResponses];
 
-export type DisplayTemplatesPut_Data = {
+export type DisplayTemplatesPutData = {
     /**
      * The values of the created or replaced display template.
      */
-    body: DisplayTemplate;
+    body: DisplayTemplateWritable;
     path: {
         /**
          * The key of the display template to update or create.
@@ -2675,7 +2952,7 @@ export type DisplayTemplatesPut_Data = {
     url: '/displaytemplates/{key}';
 };
 
-export type DisplayTemplatesPut_Errors = {
+export type DisplayTemplatesPutErrors = {
     /**
      * Bad Request
      */
@@ -2686,43 +2963,43 @@ export type DisplayTemplatesPut_Errors = {
     403: ProblemDetails;
 };
 
-export type DisplayTemplatesPut_Error = DisplayTemplatesPut_Errors[keyof DisplayTemplatesPut_Errors];
+export type DisplayTemplatesPutError = DisplayTemplatesPutErrors[keyof DisplayTemplatesPutErrors];
 
-export type DisplayTemplatesPut_Responses = {
+export type DisplayTemplatesPutResponses = {
     /**
      * OK
      */
     200: DisplayTemplate;
 };
 
-export type DisplayTemplatesPut_Response = DisplayTemplatesPut_Responses[keyof DisplayTemplatesPut_Responses];
+export type DisplayTemplatesPutResponse = DisplayTemplatesPutResponses[keyof DisplayTemplatesPutResponses];
 
-export type OauthToken_Data = {
+export type OauthTokenData = {
     body: OauthTokenRequest;
     path?: never;
     query?: never;
     url: '/oauth/token';
 };
 
-export type OauthToken_Errors = {
+export type OauthTokenErrors = {
     /**
      * Bad Request
      */
     400: OauthTokenError;
 };
 
-export type OauthToken_Error = OauthToken_Errors[keyof OauthToken_Errors];
+export type OauthTokenError2 = OauthTokenErrors[keyof OauthTokenErrors];
 
-export type OauthToken_Responses = {
+export type OauthTokenResponses = {
     /**
      * OK
      */
     200: OauthToken;
 };
 
-export type OauthToken_Response = OauthToken_Responses[keyof OauthToken_Responses];
+export type OauthTokenResponse = OauthTokenResponses[keyof OauthTokenResponses];
 
-export type PropertyFormatsList_Data = {
+export type PropertyFormatsListData = {
     body?: never;
     path?: never;
     query?: {
@@ -2732,25 +3009,25 @@ export type PropertyFormatsList_Data = {
     url: '/propertyformats';
 };
 
-export type PropertyFormatsList_Errors = {
+export type PropertyFormatsListErrors = {
     /**
      * Forbidden
      */
     403: ProblemDetails;
 };
 
-export type PropertyFormatsList_Error = PropertyFormatsList_Errors[keyof PropertyFormatsList_Errors];
+export type PropertyFormatsListError = PropertyFormatsListErrors[keyof PropertyFormatsListErrors];
 
-export type PropertyFormatsList_Responses = {
+export type PropertyFormatsListResponses = {
     /**
      * OK
      */
     200: PropertyFormatPage;
 };
 
-export type PropertyFormatsList_Response = PropertyFormatsList_Responses[keyof PropertyFormatsList_Responses];
+export type PropertyFormatsListResponse = PropertyFormatsListResponses[keyof PropertyFormatsListResponses];
 
-export type PropertyFormatsGet_Data = {
+export type PropertyFormatsGetData = {
     body?: never;
     path: {
         /**
@@ -2767,25 +3044,25 @@ export type PropertyFormatsGet_Data = {
     url: '/propertyformats/{key}';
 };
 
-export type PropertyFormatsGet_Errors = {
+export type PropertyFormatsGetErrors = {
     /**
      * Forbidden
      */
     403: ProblemDetails;
 };
 
-export type PropertyFormatsGet_Error = PropertyFormatsGet_Errors[keyof PropertyFormatsGet_Errors];
+export type PropertyFormatsGetError = PropertyFormatsGetErrors[keyof PropertyFormatsGetErrors];
 
-export type PropertyFormatsGet_Responses = {
+export type PropertyFormatsGetResponses = {
     /**
      * OK
      */
     200: PropertyFormat;
 };
 
-export type PropertyFormatsGet_Response = PropertyFormatsGet_Responses[keyof PropertyFormatsGet_Responses];
+export type PropertyFormatsGetResponse = PropertyFormatsGetResponses[keyof PropertyFormatsGetResponses];
 
-export type PropertyGroupsList_Data = {
+export type PropertyGroupsListData = {
     body?: never;
     path?: never;
     query?: {
@@ -2799,35 +3076,35 @@ export type PropertyGroupsList_Data = {
     url: '/propertygroups';
 };
 
-export type PropertyGroupsList_Errors = {
+export type PropertyGroupsListErrors = {
     /**
      * Forbidden
      */
     403: ProblemDetails;
 };
 
-export type PropertyGroupsList_Error = PropertyGroupsList_Errors[keyof PropertyGroupsList_Errors];
+export type PropertyGroupsListError = PropertyGroupsListErrors[keyof PropertyGroupsListErrors];
 
-export type PropertyGroupsList_Responses = {
+export type PropertyGroupsListResponses = {
     /**
      * OK
      */
     200: PropertyGroupPage;
 };
 
-export type PropertyGroupsList_Response = PropertyGroupsList_Responses[keyof PropertyGroupsList_Responses];
+export type PropertyGroupsListResponse = PropertyGroupsListResponses[keyof PropertyGroupsListResponses];
 
-export type PropertyGroupsCreate_Data = {
+export type PropertyGroupsCreateData = {
     /**
      * The property group that should be created.
      */
-    body: PropertyGroup;
+    body: PropertyGroupWritable;
     path?: never;
     query?: never;
     url: '/propertygroups';
 };
 
-export type PropertyGroupsCreate_Errors = {
+export type PropertyGroupsCreateErrors = {
     /**
      * Bad Request
      */
@@ -2838,18 +3115,18 @@ export type PropertyGroupsCreate_Errors = {
     403: ProblemDetails;
 };
 
-export type PropertyGroupsCreate_Error = PropertyGroupsCreate_Errors[keyof PropertyGroupsCreate_Errors];
+export type PropertyGroupsCreateError = PropertyGroupsCreateErrors[keyof PropertyGroupsCreateErrors];
 
-export type PropertyGroupsCreate_Responses = {
+export type PropertyGroupsCreateResponses = {
     /**
      * OK
      */
     200: PropertyGroup;
 };
 
-export type PropertyGroupsCreate_Response = PropertyGroupsCreate_Responses[keyof PropertyGroupsCreate_Responses];
+export type PropertyGroupsCreateResponse = PropertyGroupsCreateResponses[keyof PropertyGroupsCreateResponses];
 
-export type PropertyGroupsDelete_Data = {
+export type PropertyGroupsDeleteData = {
     body?: never;
     path: {
         /**
@@ -2861,7 +3138,7 @@ export type PropertyGroupsDelete_Data = {
     url: '/propertygroups/{key}';
 };
 
-export type PropertyGroupsDelete_Errors = {
+export type PropertyGroupsDeleteErrors = {
     /**
      * Bad Request
      */
@@ -2872,18 +3149,18 @@ export type PropertyGroupsDelete_Errors = {
     403: ProblemDetails;
 };
 
-export type PropertyGroupsDelete_Error = PropertyGroupsDelete_Errors[keyof PropertyGroupsDelete_Errors];
+export type PropertyGroupsDeleteError = PropertyGroupsDeleteErrors[keyof PropertyGroupsDeleteErrors];
 
-export type PropertyGroupsDelete_Responses = {
+export type PropertyGroupsDeleteResponses = {
     /**
      * OK
      */
     200: PropertyGroup;
 };
 
-export type PropertyGroupsDelete_Response = PropertyGroupsDelete_Responses[keyof PropertyGroupsDelete_Responses];
+export type PropertyGroupsDeleteResponse = PropertyGroupsDeleteResponses[keyof PropertyGroupsDeleteResponses];
 
-export type PropertyGroupsGet_Data = {
+export type PropertyGroupsGetData = {
     body?: never;
     path: {
         /**
@@ -2895,29 +3172,29 @@ export type PropertyGroupsGet_Data = {
     url: '/propertygroups/{key}';
 };
 
-export type PropertyGroupsGet_Errors = {
+export type PropertyGroupsGetErrors = {
     /**
      * Forbidden
      */
     403: ProblemDetails;
 };
 
-export type PropertyGroupsGet_Error = PropertyGroupsGet_Errors[keyof PropertyGroupsGet_Errors];
+export type PropertyGroupsGetError = PropertyGroupsGetErrors[keyof PropertyGroupsGetErrors];
 
-export type PropertyGroupsGet_Responses = {
+export type PropertyGroupsGetResponses = {
     /**
      * OK
      */
     200: PropertyGroup;
 };
 
-export type PropertyGroupsGet_Response = PropertyGroupsGet_Responses[keyof PropertyGroupsGet_Responses];
+export type PropertyGroupsGetResponse = PropertyGroupsGetResponses[keyof PropertyGroupsGetResponses];
 
-export type PropertyGroupsPatch_Data = {
+export type PropertyGroupsPatchData = {
     /**
      * The values of the property group that should be updated.
      */
-    body: PropertyGroup;
+    body: PropertyGroupWritable;
     path: {
         /**
          * The key of the property group to patch.
@@ -2928,7 +3205,7 @@ export type PropertyGroupsPatch_Data = {
     url: '/propertygroups/{key}';
 };
 
-export type PropertyGroupsPatch_Errors = {
+export type PropertyGroupsPatchErrors = {
     /**
      * Bad Request
      */
@@ -2939,22 +3216,22 @@ export type PropertyGroupsPatch_Errors = {
     403: ProblemDetails;
 };
 
-export type PropertyGroupsPatch_Error = PropertyGroupsPatch_Errors[keyof PropertyGroupsPatch_Errors];
+export type PropertyGroupsPatchError = PropertyGroupsPatchErrors[keyof PropertyGroupsPatchErrors];
 
-export type PropertyGroupsPatch_Responses = {
+export type PropertyGroupsPatchResponses = {
     /**
      * OK
      */
     200: PropertyGroup;
 };
 
-export type PropertyGroupsPatch_Response = PropertyGroupsPatch_Responses[keyof PropertyGroupsPatch_Responses];
+export type PropertyGroupsPatchResponse = PropertyGroupsPatchResponses[keyof PropertyGroupsPatchResponses];
 
-export type PropertyGroupsPut_Data = {
+export type PropertyGroupsPutData = {
     /**
      * The values of the created or replaced property group.
      */
-    body: PropertyGroup;
+    body: PropertyGroupWritable;
     path: {
         /**
          * The key of the property group to update or create.
@@ -2965,7 +3242,7 @@ export type PropertyGroupsPut_Data = {
     url: '/propertygroups/{key}';
 };
 
-export type PropertyGroupsPut_Errors = {
+export type PropertyGroupsPutErrors = {
     /**
      * Bad Request
      */
@@ -2976,16 +3253,16 @@ export type PropertyGroupsPut_Errors = {
     403: ProblemDetails;
 };
 
-export type PropertyGroupsPut_Error = PropertyGroupsPut_Errors[keyof PropertyGroupsPut_Errors];
+export type PropertyGroupsPutError = PropertyGroupsPutErrors[keyof PropertyGroupsPutErrors];
 
-export type PropertyGroupsPut_Responses = {
+export type PropertyGroupsPutResponses = {
     /**
      * OK
      */
     200: PropertyGroup;
 };
 
-export type PropertyGroupsPut_Response = PropertyGroupsPut_Responses[keyof PropertyGroupsPut_Responses];
+export type PropertyGroupsPutResponse = PropertyGroupsPutResponses[keyof PropertyGroupsPutResponses];
 
 export type ClientOptions = {
     baseUrl: `${string}://${string}/_cms/preview2` | (string & {});

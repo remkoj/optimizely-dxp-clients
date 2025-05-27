@@ -1,5 +1,5 @@
 import type { GenericContext } from "../rsc.js"
-import type { PropsWithChildren } from "react"
+import type { PropsWithChildren, JSX } from "react"
 
 /**
  * Define an element as a React Component, React ExoticComponent or string name

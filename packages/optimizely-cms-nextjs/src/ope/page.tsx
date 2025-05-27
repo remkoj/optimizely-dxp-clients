@@ -20,7 +20,7 @@ import {
 import { notFound } from 'next/navigation.js'
 import OnPageEdit from '../components/on-page-edit.js'
 import { createAuthorizedClient } from '../client.js'
-import React from 'react'
+import React, { type JSX } from 'react'
 import Script from 'next/script.js'
 import { getContentById } from './data.js'
 import { getContentRequest, isValidRequest } from './tools.js'
@@ -63,7 +63,15 @@ export function createEditPageComponent<LocaleType = string>(
     return process.env.NODE_ENV == 'development'
   }
 
-  async function EditPage(props: EditPageProps): Promise<JSX.Element> {
+  async function EditPage({
+    params,
+    searchParams,
+  }: EditPageProps): Promise<JSX.Element> {
+    const props = {
+      params: await params,
+      searchParams: await searchParams,
+    }
+
     // Validate the search parameters
     if (!validateRequest(props, false, isDevelopment())) {
       console.error('🔴 [OnPageEdit] Invalid edit mode request')

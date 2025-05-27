@@ -7,11 +7,10 @@ import type { ReadonlyRequestCookies } from '../types'
  * @param       cookies         The request cookies
  * @returns     The identifier, or undefined if not known
  */
-export function getVisitorID(cookies: ReadonlyRequestCookies) : string | undefined
-{
-    return cookies.get('optimizelyEndUserId')?.value
+export function getVisitorID(cookies: Awaited<ReadonlyRequestCookies>): string | undefined {
+  return cookies.get('optimizelyEndUserId')?.value
 }
 
 export default {
-    getVisitorID,
+  getVisitorID,
 }
