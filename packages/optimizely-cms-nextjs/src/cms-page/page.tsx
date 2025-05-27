@@ -2,6 +2,7 @@ import 'server-only'
 import type { Metadata, ResolvingMetadata } from 'next'
 import deepmerge from 'deepmerge'
 import { notFound } from 'next/navigation.js'
+import { cache } from 'react'
 
 // GraphQL Client & Services
 import { type ContentLinkWithLocale } from '@remkoj/optimizely-graph-client'
@@ -22,7 +23,9 @@ import { normalizeContentLinkWithLocale } from '@remkoj/optimizely-graph-client/
 import {
   CmsContent,
   Utils,
-  getServerContext,
+  ServerContext,
+  updateSharedServerContext,
+  type GenericContext,
   type ComponentFactory,
 } from '@remkoj/optimizely-cms-react/rsc'
 
@@ -30,7 +33,7 @@ import {
 import { MetaDataResolver } from '../metadata.js'
 import { urlToPath, localeToGraphLocale } from './utils.js'
 import getContentByPathBase, { type GetContentByPathMethod } from './data.js'
-import { getServerClient } from '../client.js'
+import { createClient } from '../client.js'
 
 export type DefaultCmsPageParams = {
   path?: string[]
@@ -47,7 +50,7 @@ export type DefaultCmsPageProps<
     string | Array<string> | undefined
   > = DefaultCmsPageSearchParams,
 > = {
-  params: Promise<TParams>
+  params: TParams
   searchParams: TSearchParams
 }
 
@@ -90,7 +93,7 @@ export type OptiCmsNextJsPage<
    */
   CmsPage: (
     props: DefaultCmsPageProps<TParams, TSearchParams>
-  ) => Promise<Element>
+  ) => Promise<JSX.Element>
 }
 
 export enum SystemLocales {
@@ -112,13 +115,13 @@ export type CreatePageOptions<
   /**
    * Main function used to retrieve the content by path
    */
-  getContentByPath: GetContentByPathMethod<LocaleEnum>
+  getContentByPath?: GetContentByPathMethod<LocaleEnum>
 
   /**
    * The factory that should yield the GraphQL Client to be used within this
    * page.
    */
-  client: ClientFactory
+  client: () => IOptiGraphClient
 
   /**
    * The channel information used to resolve locales, domains and more
@@ -148,7 +151,7 @@ export type CreatePageOptions<
    */
   propsToCmsPath: (
     props: DefaultCmsPageProps<TParams, TSearchParams>
-  ) => string | null | Promise<string | null>
+  ) => string | null
 
   /**
    * Take the route from the Routing Service and transform that to the route
@@ -175,10 +178,9 @@ export type CreatePageOptions<
 }
 
 const CreatePageOptionDefaults: CreatePageOptions<string> = {
-  getContentByPath: getContentByPathBase,
-  client: getServerClient,
+  client: createClient,
   routerFactory: (client) => new RouteResolver(client),
-  propsToCmsPath: async ({ params }) => buildRequestPath(await params),
+  propsToCmsPath: ({ params }) => buildRequestPath(params),
   routeToParams: (route) => {
     return { path: urlToPath(route.url), lang: route.locale }
   },
@@ -228,53 +230,38 @@ export function createPage<
     ...options,
   } as CreatePageOptions<LocaleEnum, TParams, TSearchParams>
 
-  // Create the global Graph Client
-  //const globalClient = clientFactory()
-
-  // Create the global Router instance
-  //const router = routerFactory(globalClient)
-  const getInfoByPath = async (requestPath: string, siteId?: string) => {
-    const route = await router.getContentInfoByPath(requestPath, siteId)
-    if (!route) return undefined
-    const contentLink = router.routeToContentLink(route)
-    const contentType = route.contentType
-    const graphLocale = localeToGraphLocale(route.locale, channel)
-    return [route, contentLink, contentType, graphLocale] as [
-      Route,
-      ContentLinkWithLocale,
-      string[],
-      string,
-    ]
+  function buildContext(
+    initialLocale: string = 'en'
+  ): ContextWith<ServerContext, 'client' | 'locale'> {
+    return new ServerContext({
+      factory,
+      client: clientFactory(),
+      mode: 'public',
+      locale: initialLocale,
+    }) as ContextWith<ServerContext, 'client' | 'locale'>
   }
-
-  // Create channelId
-  /**
-   * The Channel Identifier to be used for this page
-   */
-  const channelId = (client: IOptiGraphClient) =>
-    channel
-      ? client.currentOptiCmsSchema == OptiCmsSchema.CMS12
-        ? channel.id
-        : getPrimaryURL(channel).origin
-      : undefined
 
   const pageDefintion: OptiCmsNextJsPage<TParams, TSearchParams> = {
     generateStaticParams: async () => {
       const client = clientFactory()
-      const router = routerFactory(clientFactory())
-      const routes = await router.getRoutes(channelId(client))
-      return routes.map((r) => routeToParams(r))
+      const router = routerFactory(client)
+      const channelId = getChannelId(client, channel)
+      const allRoutes = await router.getRoutes(
+        channelId,
+        channel ? undefined : true
+      )
+      return allRoutes.map((r) => routeToParams(r))
     },
+
     generateMetadata: async ({ params, searchParams }, parent) => {
       // Get context
-      const context = getServerContext()
-      context.setOptimizelyGraphClient(globalClient)
-      context.setComponentFactory(factory)
+      const context = buildContext()
+      const channelId = getChannelId(context.client, channel)
 
       // Read variables from request
-      const requestPath = await propsToCmsPath({ params, searchParams })
-      if (!requestPath) return {}
-      const initialLocale = paramsToLocale(await params, channel)
+      const requestPath = propsToCmsPath({ params, searchParams })
+      if (!requestPath) return Promise.resolve({})
+      const initialLocale = paramsToLocale(params, channel)
       if (initialLocale) context.setLocale(initialLocale)
 
       // Debug output
@@ -284,8 +271,13 @@ export function createPage<
         )
 
       // Resolve the route to a content link
-      const routeInfo = await getInfoByPath(requestPath, channelId)
-      if (!routeInfo) {
+      const routeInfo = await getInfoByPath(
+        context.client,
+        routerFactory,
+        requestPath,
+        channel
+      )
+      if (!routeInfo || !routeInfo[0]) {
         if (context.isDebug)
           console.log('⚪ [CmsPage.generateMetadata] No data received')
         return Promise.resolve({})
@@ -300,8 +292,11 @@ export function createPage<
       // Update context from route
       context.setLocale(route.locale)
 
+      // Make the shared server context available
+      updateSharedServerContext(context)
+
       // Fetch the metadata based upon the actual content type and resolve parent
-      const metaResolver = new MetaDataResolver(globalClient)
+      const metaResolver = new MetaDataResolver(context.client)
       const [pageMetadata, baseMetadata] = await Promise.all([
         metaResolver.resolve(factory, contentLink, contentType, graphLocale),
         parent,
@@ -318,13 +313,11 @@ export function createPage<
         pageMetadata
       ) as (keyof Metadata)[]) {
         if (
-          typeof pageMetadata[metaKey] == 'object' &&
-          pageMetadata[metaKey] != null &&
-          baseMetadata[metaKey] != undefined &&
-          baseMetadata[metaKey] != null
+          isObject(pageMetadata[metaKey]) &&
+          isObject(baseMetadata[metaKey])
         ) {
           //@ts-expect-error Silence error due to failed introspection...
-          pageMetadata[metaKey] = deepmerge(
+          pageMetadata[metaKey] = deepmerge<object>(
             baseMetadata[metaKey],
             pageMetadata[metaKey],
             { arrayMerge: (target, source) => [...source] }
@@ -341,11 +334,10 @@ export function createPage<
       }
       return pageMetadata
     },
+
     CmsPage: async ({ params, searchParams }) => {
       // Prepare the context
-      const context = getServerContext()
-      context.setOptimizelyGraphClient(globalClient)
-      context.setComponentFactory(factory)
+      const context = buildContext()
 
       // Analyze the Next.JS Request props
       const requestPath = propsToCmsPath({ params, searchParams })
@@ -362,64 +354,141 @@ export function createPage<
       if (initialLocale) context.setLocale(initialLocale)
 
       // Resolve the content based upon the path
-      const pathForRequest = (
-        requestPath.endsWith('/')
-          ? [requestPath.substring(0, requestPath.length - 1), requestPath]
-          : [requestPath, requestPath + '/']
-      ).filter((x) => x.length >= 1)
-      const requestVars = {
-        path: pathForRequest,
-        siteId: channelId,
-      }
-      if (context.isDebug)
-        console.log(
-          `⚪ [CmsPage] Processed Next.JS route: ${JSON.stringify(params)} => getContentByPath Variables: ${JSON.stringify(requestVars)}`
-        )
-
-      const response = await getContentByPath(globalClient, requestVars)
-      const info = (response?.content?.items ?? [])[0]
-
-      if (!info) {
-        if (context.isDebugOrDevelopment) {
-          console.error(
-            `🔴 [CmsPage] Unable to load content for ${requestPath}, data received: `,
-            response
+      const lookupData = getContentByPath
+        ? await loadContentByPath(
+            context.client,
+            getContentByPath,
+            requestPath,
+            channel
           )
-        }
-        return notFound()
-      } else if (
-        context.isDebugOrDevelopment &&
-        (response?.content?.items ?? []).length > 1
-      ) {
-        console.warn(
-          `🟠 [CmsPage] Resolving content for ${requestPath}, yielded ${(response?.content?.items ?? []).length} items, picked:`,
-          info
-        )
-      }
-
-      // Extract the type & link
-      const contentType = Utils.normalizeContentType(info._metadata?.types)
-      const contentLink = normalizeContentLinkWithLocale(info._metadata)
-      if (!contentLink) {
+        : await getInfoByPath(
+            context.client,
+            routerFactory,
+            requestPath,
+            channel
+          )
+      if (!lookupData) {
         console.error(
-          '🔴 [CmsPage] Unable to infer the contentLink from the retrieved content, this should not have happened!'
+          `🔴 [CmsPage] Unable to resolve the content for ${JSON.stringify(params)}!`
         )
         return notFound()
       }
+      const [route, contentLink, contentType, graphLocale, contentData] =
+        lookupData
+
       if (contentLink?.locale) context.setLocale(contentLink?.locale as string)
+
+      // Make the shared server context available
+      updateSharedServerContext(context)
 
       // Render the content link
       return (
         <CmsContent
           contentType={contentType}
           contentLink={contentLink}
-          fragmentData={info}
+          fragmentData={contentData ?? undefined}
+          ctx={context}
         />
       )
     },
   }
 
   return pageDefintion
+}
+
+type ContextWith<C extends GenericContext, T extends keyof C> = Omit<C, T> & {
+  [P in T]: NonNullable<C[P]>
+}
+
+type LookupResponse = [
+  Route | null,
+  ContentLinkWithLocale,
+  string[],
+  string,
+  Record<string, any> | null,
+]
+
+// Helper function to obtain the info by path
+async function getInfoByPath(
+  client: IOptiGraphClient,
+  routerFactory: (client?: IOptiGraphClient) => IRouteResolver,
+  requestPath: string,
+  channel?: ChannelDefinition
+) {
+  const channelId = getChannelId(client, channel)
+  const router = routerFactory(client)
+  const route = await router.getContentInfoByPath(requestPath, channelId)
+  if (!route) return undefined
+  const contentLink = router.routeToContentLink(route)
+  const contentType = route.contentType
+  const graphLocale = localeToGraphLocale(route.locale, channel)
+  return [route, contentLink, contentType, graphLocale, null] as LookupResponse
+}
+
+async function loadContentByPath<LocaleEnum = SystemLocales>(
+  client: IOptiGraphClient,
+  getContentByPath: GetContentByPathMethod<LocaleEnum>,
+  requestPath: string,
+  channel?: ChannelDefinition,
+  isDebug: boolean = false
+) {
+  const channelId = getChannelId(client, channel)
+  const pathForRequest = [
+    requestPath,
+    requestPath.endsWith('/')
+      ? requestPath.substring(0, requestPath.length - 1)
+      : requestPath + '/',
+  ].filter((x) => x)
+
+  const requestVars = {
+    path: pathForRequest,
+    siteId: channelId,
+  }
+  if (isDebug)
+    console.log(
+      `⚪ [CmsPage] Processed Next.JS route => getContentByPath Variables: ${JSON.stringify(requestVars)}`
+    )
+
+  const response = await getContentByPath(client, requestVars)
+  const info = Array.isArray(response?.content?.items)
+    ? response?.content?.items[0]
+    : response?.content?.items
+
+  if (!info) {
+    if (isDebug) {
+      console.error(
+        `🔴 [CmsPage] Unable to load content for ${requestPath}, data received: `,
+        response
+      )
+    }
+    return notFound()
+  } else if (isDebug && (response?.content?.total ?? 0) > 1) {
+    console.warn(
+      `🟠 [CmsPage] Resolving content for ${requestPath}, yielded ${response?.content?.total ?? 0} items, picked:`,
+      info
+    )
+  }
+
+  // Extract the type & link
+  const contentType = Utils.normalizeContentType(info._metadata?.types)
+  const contentLink = normalizeContentLinkWithLocale(info._metadata)
+  if (!contentLink) {
+    console.error(
+      '🔴 [CmsPage] Unable to infer the contentLink from the retrieved content, this should not have happened!'
+    )
+    return notFound()
+  }
+  const graphLocale = localeToGraphLocale(info._metadata?.locale, channel)
+
+  return [null, contentLink, contentType, graphLocale, info] as LookupResponse
+}
+
+function getChannelId(client: IOptiGraphClient, channel?: ChannelDefinition) {
+  return channel
+    ? client.currentOptiCmsSchema == OptiCmsSchema.CMS12
+      ? channel.id
+      : getPrimaryURL(channel).origin
+    : undefined
 }
 
 /**
@@ -458,4 +527,8 @@ function getPrimaryURL(chnl: ChannelDefinition): URL {
       ? 'http:'
       : 'https:'
   return new URL(`${s}//${dd.name}`)
+}
+
+function isObject(toTest: any): toTest is object {
+  return typeof toTest == 'object' && toTest != null && toTest != undefined
 }

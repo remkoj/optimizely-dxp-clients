@@ -1,32 +1,156 @@
-import { type ComponentProps, type ComponentType as ReactComponentType, type ExoticComponent as ReactExoticComponent, type ReactNode } from 'react'
-import { PropsWithContext } from '../../context/types.js';
+import { PropsWithChildren, type ReactNode } from 'react'
+import { GenericContext, PropsWithContext } from '../../context/types.js'
+import type {
+  ElementType,
+  GenericContextProps,
+  ElementProps,
+} from '../type-utils.js'
+import { type ContentLink } from '@remkoj/optimizely-graph-client'
 
-export type EditableComponentType = (ReactComponentType<any>) | (ReactExoticComponent<any>) | (keyof JSX.IntrinsicElements);
-export type EditableComponentProps<FT extends EditableComponentType> = FT extends keyof JSX.IntrinsicElements ? JSX.IntrinsicElements[FT] : ComponentProps<FT>
-export type CmsEditableProps<FT extends EditableComponentType> = {
+export type CmsEditableProps<FT extends ElementType> = PropsWithChildren<
+  {
+    /**
+     * Override the component used to render, instead of wrapping the children. It allows
+     * any valid JSX identifier (e.g. HTML Element, Component or ExoticComponent)
+     */
     as?: FT
-} & ({
+
+    /**
+     * The identifier of the component wrapped in this CmsEditable component. This will
+     * add the 'data-epi-block-id' property to the component.
+     */
     cmsId?: string | null
-    cmsFieldName?: never
-} | {
-    cmsId?: never
+
+    /**
+     * The name of the component field wrapped by this CmsEditable component. This will
+     * add the 'data-epi-property-name' property to the component.
+     */
     cmsFieldName?: string | null
-}) & EditableComponentProps<FT>
-export type CmsEditableComponent = <CT extends EditableComponentType>(props: CmsEditableProps<CT>) => ReactNode
-export type CmsEditableBaseComponent = <CT extends EditableComponentType>(props: PropsWithContext<CmsEditableProps<CT>>) => ReactNode
+
+    /**
+     * The Context to be used when determining if the page rendering happens in edit mode
+     * or not.
+     */
+    ctx?: GenericContext
+
+    /**
+     * The default CTX paramteer is caught by this component, set this to true to pass the
+     * `ctx` property to the 'as' Component, or set to a valid property name to pass into
+     * that property.
+     */
+    forwardCtx?: ElementProps<FT>['ctx'] extends GenericContext
+      ? boolean | GenericContextProps<FT>
+      : GenericContextProps<FT>
+
+    /**
+     * If set, the `data-epi-block-id` attribute will always be included when the `cmsId`
+     * parameter is being set.
+     */
+    forceBlockId?: boolean
+
+    /**
+     * If set, this will be used to test if the content item being rendered is actually
+     * the one being edited. This allows
+     */
+    currentContent?: ContentLink
+
+    /**
+     * Override the value for the `data-epi-property-edittype` property
+     */
+    editType?: 'floating' | 'inline' | null
+  } & Omit<
+    ElementProps<FT>,
+    'as' | 'cmsId' | 'cmsFieldName' | 'ctx' | 'forwardCtx'
+  >
+>
+
+export type CmsEditableComponent = <CT extends ElementType>(
+  props: CmsEditableProps<CT>
+) => ReactNode
+export type CmsEditableBaseComponent = <CT extends ElementType>(
+  props: PropsWithContext<CmsEditableProps<CT>>
+) => ReactNode
 
 /**
- * Server side wrapper to create HTML elements that include the needed 
- * data-epi- properties to render the edit mode markers
- * 
+ * Server side wrapper to create HTML elements that include the needed
+ * data-epi- properties to render the edit mode markers. If the `cmsId`
+ * is a 32 character long string, it is assumed to be a GUID and rendered
+ * as `data-epi-content-id`, otherwise it is rendered as `data-epi-block-id`.
+ *
  * @param   param0      The HTML element with the simple properties
- * @returns 
+ * @returns
  */
-//@ts-expect-error Typescript doesn't understand the property type :'(
-export const CmsEditable : CmsEditableBaseComponent = <CT extends EditableComponentType = 'div'>({ ctx, as: DefaultElement = 'div', cmsId, cmsFieldName, children, key, ...props }: PropsWithContext<CmsEditableProps<CT>>) =>
-{
-    const { inEditMode } = ctx
-    return <DefaultElement {...props} data-epi-block-id={ inEditMode ? cmsId ?? undefined : undefined } data-epi-property-name={ inEditMode ? cmsFieldName ?? undefined : undefined }>{ children }</DefaultElement>
+export const CmsEditable: CmsEditableBaseComponent = <CT extends ElementType>({
+  ctx,
+  forwardCtx,
+  as,
+  cmsId,
+  cmsFieldName,
+  children,
+  key,
+  forceBlockId,
+  currentContent,
+  editType,
+  ...props
+}: PropsWithContext<CmsEditableProps<CT>>) => {
+  const {
+    inEditMode,
+    isDebugOrDevelopment,
+    isDebug,
+    editableContent,
+    editableContentIsExperience,
+  } = ctx || {
+    inEditMode: false,
+    isDebug: true,
+    isDebugOrDevelopment: true,
+    editableContentIsExperience: false,
+  }
+  const DefaultElement = as || 'div'
+
+  if (isDebugOrDevelopment && inEditMode && !cmsFieldName && !cmsId) {
+    console.warn(
+      `⚠ [CmsEditable] CMS Editable used without a fieldname or id, this will not ouline the item`
+    )
+    if (isDebug) {
+      console.trace('This happened here')
+    }
+  }
+
+  const addEditProps = inEditMode
+    ? currentContent
+      ? editableContent?.key == currentContent.key
+      : true
+    : false
+
+  // If we're rendering for an experience, we don't need to inject property names, as the
+  // experience editor only deals with property ids - injecting property names will cause
+  // it to outline incorrect items.
+  const dataEpiPropertyName = editableContentIsExperience
+    ? undefined
+    : (cmsFieldName ?? undefined)
+
+  const itemProps: Record<string, any> = addEditProps
+    ? {
+        ...props,
+        // We assume GUIDs are represented as 32 char long strings, all other values are IDs
+        'data-epi-block-id':
+          cmsId && (cmsId.length != 32 || forceBlockId) ? cmsId : undefined,
+        // We assume GUIDs are represented as 32 char long strings
+        'data-epi-content-id': cmsId && cmsId.length == 32 ? cmsId : undefined,
+        // We pass through the property name if provided
+        'data-epi-property-name': dataEpiPropertyName,
+        // Configure the rendition of the property editor
+        'data-epi-property-edittype': editType ?? undefined,
+      }
+    : {
+        ...props,
+      }
+
+  if (forwardCtx === true) itemProps['ctx'] = ctx
+  if (typeof forwardCtx == 'string' && forwardCtx.length > 0)
+    itemProps[forwardCtx] = ctx
+
+  return <DefaultElement {...itemProps}>{children}</DefaultElement>
 }
 
 export default CmsEditable

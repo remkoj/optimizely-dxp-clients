@@ -1,79 +1,155 @@
-import "server-only"
+import 'server-only'
 import { type ReactNode, type ComponentType } from 'react'
-import { type PropsWithContext } from '../context/types.js'
+import {
+  type PropsWithContext,
+  type PropsWithOptionalContext,
+} from '../context/types.js'
 import { getServerContext } from '../context/rsc.js'
 import { cmsContentAware } from './cms-content/utils.js'
 
-import { CmsContentArea as BaseContentArea, type CmsContentAreaComponent } from './cms-content-area/index.js' // Both RSC & Client capable
-import { CmsEditable as BaseEditable, type CmsEditableComponent } from './cms-editable/index.js' // Both RSC & Client capable
-import { CmsContent as BaseCmsContent, type CmsContentComponent, type CmsContentBaseComponent } from './cms-content/rsc.js' // Different components for RSC & Client
-import { OptimizelyComposition as BaseOptimizelyComposition, type OptimizelyCompositionComponent } from './visual-builder/index.js' // Both RSC & Client capable
-import { RichText as BaseRichText, type RichTextComponent } from './rich-text/index.js'
+import {
+  CmsContentArea as BaseContentArea,
+  type CmsContentAreaComponent,
+} from './cms-content-area/index.js' // Both RSC & Client capable
+import {
+  CmsEditable as BaseEditable,
+  type CmsEditableComponent,
+} from './cms-editable/index.js' // Both RSC & Client capable
+import {
+  CmsContent as BaseCmsContent,
+  type CmsContentComponent,
+  type CmsContentBaseComponent,
+} from './cms-content/rsc.js' // Different components for RSC & Client
+import {
+  OptimizelyComposition as BaseOptimizelyComposition,
+  type OptimizelyCompositionComponent,
+} from './visual-builder/index.js' // Both RSC & Client capable
+import {
+  RichText as BaseRichText,
+  type RichTextComponent,
+} from './rich-text/index.js'
 
 // Pass through Style functions types
-export type { BaseStyleDefinition, ElementStyleDefinition, LayoutProps, LayoutPropsSetting, LayoutPropsSettingChoices, LayoutPropsSettingKeys, LayoutPropsSettingValues, NodeStyleDefinition, StyleDefinition, StyleSetting } from "./cms-styles/index.js"
-export { extractSettings, readSetting } from "./cms-styles/index.js"
-export * from "./cms-styles/index.js"
+export type {
+  BaseStyleDefinition,
+  ElementStyleDefinition,
+  LayoutProps,
+  LayoutPropsSetting,
+  LayoutPropsSettingChoices,
+  LayoutPropsSettingKeys,
+  LayoutPropsSettingValues,
+  NodeStyleDefinition,
+  StyleDefinition,
+  StyleSetting,
+} from './cms-styles/index.js'
+export { extractSettings, readSetting } from './cms-styles/index.js'
+export * from './cms-styles/index.js'
 
 // Visual Builder items
-export { isNode, isComponentNode, isComponentNodeOfType, isStructureNode, isElementNode } from "./visual-builder/functions.js"
+export {
+  isNode,
+  isComponentNode,
+  isComponentNodeOfType,
+  isStructureNode,
+  isElementNode,
+} from './visual-builder/functions.js'
 
 /**
  *  Fallback while RSC hasn't been moved from Canary to Main
  */
-type ReactServerComponentType<P = any> = ComponentType<P> | ((props: P) => Promise<ReactNode>)
+type ReactServerComponentType<P = any> =
+  | ComponentType<P>
+  | ((props: P) => Promise<ReactNode>)
 
 /**
- * Wrapper function to turn context dependant components into easy to use 
+ * Wrapper function to turn context dependant components into easy to use
  * server components
- * 
+ *
  * @param       component       The component where the `ctx` parameter must be fulfilled
  * @returns     The component, without CTX parameter
  */
-export function serverContextAware<P = any>(component: ReactServerComponentType<PropsWithContext<P>>) : ComponentType<P>
-{
-    const BaseComponent = component as ComponentType<PropsWithContext<P>>
-    const ServerContextInjector : ComponentType<P> = (props: P) => {
-        const ctx = getServerContext()
-        if (!ctx)
-            console.log(`🔴 [ServerContextAware] Context for context aware component ${ BaseComponent.displayName ?? BaseComponent.name ?? '[ANONYMOUS]'} is not defined!`, ctx)
-        return <BaseComponent ctx={ctx} { ...props } />
-    }
-    ServerContextInjector.displayName = "Server Context Injector"
-    return ServerContextInjector
+export function serverContextAware<P extends PropsWithContext>(
+  component: ReactServerComponentType<P>
+): ComponentType<PropsWithOptionalContext<Omit<P, 'ctx'>>> {
+  const BaseComponent = component as ComponentType<P>
+
+  const ServerContextInjector: ComponentType<
+    PropsWithOptionalContext<Omit<P, 'ctx'>>
+  > = ({ ctx, ...props }) => {
+    if (!ctx)
+      console.error(
+        `🔴 [ServerContextAware] Context for context aware component ${BaseComponent.displayName ?? BaseComponent.name ?? '[ANONYMOUS]'} is not defined!`
+      )
+    const cmpCtx = ctx || getServerContext()
+    const componentProps = { ...props, ctx: cmpCtx } as P
+    return <BaseComponent {...componentProps} />
+  }
+  ServerContextInjector.displayName = 'Server Context Injector'
+  return ServerContextInjector
 }
 
 /**
- * Client side Optimizely CMS Editable 
+ * Client side Optimizely CMS Editable
  */
-export const CmsEditable = serverContextAware(BaseEditable) as CmsEditableComponent
-
+export const CmsEditable = serverContextAware(
+  BaseEditable
+) as CmsEditableComponent
 
 /**
  * Client side Optimizely CMS Content, leveraging the CMS Context to load the
  * content type and content data when needed
  */
-export const CmsContent = serverContextAware(BaseCmsContent as unknown as CmsContentBaseComponent) as CmsContentComponent
-export type { CmsContentComponent, CmsContentProps } from "./cms-content/rsc.js"
+export const CmsContent = serverContextAware(
+  BaseCmsContent as unknown as CmsContentBaseComponent
+) as CmsContentComponent
+export type { CmsContentComponent, CmsContentProps } from './cms-content/rsc.js'
 
 /**
  * Client side Optimizely CMS Content Area, leveraging the CMS Context to infer
  * the connection to Optimizely Graph and component dictionary.
  */
-export const CmsContentArea = cmsContentAware(serverContextAware(BaseContentArea), CmsContent) as CmsContentAreaComponent
-export type { CmsContentAreaClassMapper, CmsContentAreaComponent, CmsContentAreaProps, ContentAreaItemDefinition } from "./cms-content-area/index.js"
+export const CmsContentArea = cmsContentAware(
+  serverContextAware(BaseContentArea),
+  CmsContent
+) as CmsContentAreaComponent
+export type {
+  CmsContentAreaClassMapper,
+  CmsContentAreaComponent,
+  CmsContentAreaProps,
+  ContentAreaItemDefinition,
+} from './cms-content-area/index.js'
 
 /**
  * Client side Optimizely Composition (e.g. Visual Builder), leveraging the CMS
- * Context to infer the connection to Optimizely Graph and component 
+ * Context to infer the connection to Optimizely Graph and component
  * dictionary.
  */
-export const OptimizelyComposition = cmsContentAware(serverContextAware(BaseOptimizelyComposition), CmsContent) as OptimizelyCompositionComponent
+export const OptimizelyComposition = cmsContentAware(
+  serverContextAware(BaseOptimizelyComposition),
+  CmsContent
+) as OptimizelyCompositionComponent
 
 /**
  * Client side renderer for Rich Text
  */
 export const RichText = serverContextAware(BaseRichText) as RichTextComponent
-export type { RichTextComponent, RichTextProps, RichTextNode, StringNode, TypedNode, NodeInput } from "./rich-text/index.js"
-export { DefaultComponents as RichTextComponentDictionary, createHtmlComponent } from './rich-text/components.js'
-export { isNodeInput, isNonEmptyString, isRichTextNode, isStringNode, isText, isTypedNode  } from "./rich-text/utils.js"
+export type {
+  RichTextComponent,
+  RichTextProps,
+  RichTextNode,
+  StringNode,
+  TypedNode,
+  NodeInput,
+} from './rich-text/index.js'
+export {
+  DefaultComponents as RichTextComponentDictionary,
+  createHtmlComponent,
+} from './rich-text/components.js'
+export {
+  isNodeInput,
+  isNonEmptyString,
+  isRichTextNode,
+  isStringNode,
+  isText,
+  isTypedNode,
+} from './rich-text/utils.js'

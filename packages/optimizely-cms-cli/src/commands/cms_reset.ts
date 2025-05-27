@@ -1,5 +1,5 @@
 import type { CliModule } from '../types.js'
-import { CmsIntegrationApiClient, IntegrationApi, ContentRoots, ApiError } from '@remkoj/optimizely-cms-api'
+import { CmsIntegrationApiClient, IntegrationApi, ContentRoots } from '@remkoj/optimizely-cms-api'
 import createClient from '../tools/cmsClient.js'
 import chalk from 'chalk'
 import figures from 'figures'
@@ -22,12 +22,11 @@ export const CmsResetCommand: CliModule = {
   describe: "Completely clear & reset the CMS Database",
   handler: async (args) => {
     const client = createClient(args)
-
-    process.stdout.write(`\n⚠ Optimizely CMS Instance: ${client.cmsUrl.host}\n\n`)
+    process.stdout.write(chalk.blueBright(`${figures.arrowRight} CMS Instance URL: ${client.cmsUrl.href}`) + '\n');
 
     //#region Confirmations        
     const doDelete = await confirm({
-      message: "This will remove all data and configuration from the SaaS CMS Instance above, are you sure?",
+      message: "This will remove all data and configuration from the SaaS CMS Instance, are you sure?",
       default: false
     })
     if (!doDelete) {
@@ -131,7 +130,7 @@ async function deleteContentItem(client: CmsIntegrationApiClient, key: string, o
     return removedCount
   }
 
-  const deleteResult = await client.contentDelete({ path: { key }, query: { permanent: true } }).then(r => r.key).catch((e: ApiError) => {
+  const deleteResult = await client.content.contentDelete(key, true).then(r => r.key).catch((e: IntegrationApi.ApiError) => {
     if (e.status == 404)
       return key
     throw e
@@ -155,18 +154,10 @@ async function resetSystemTypes(client: CmsIntegrationApiClient): Promise<number
   for (const systemType of reservedTypes) {
     if (client.debug)
       process.stdout.write(chalk.gray(`  ${figures.arrowRight} Resetting ${systemType} by removing all attributes\n`))
-    const newType: IntegrationApi.ContentType | undefined | null = await client.contentTypesPatch({
-      path: {
-        key: systemType
-      },
-      body: {
-        key: systemType,
-        properties: {}
-      },
-      query: {
-        ignoreDataLossWarnings: true
-      }
-    }).catch((e: ApiError) => e.status == 404 ? undefined : null)
+    const newType: IntegrationApi.ContentType | undefined | null = await client.contentTypes.contentTypesPatch(systemType, {
+      key: systemType,
+      properties: {}
+    }, true).catch((e: IntegrationApi.ApiError) => e.status == 404 ? undefined : null)
 
     if (newType)
       resetTypes++
@@ -181,7 +172,7 @@ async function removeContentTypes(client: CmsIntegrationApiClient): Promise<numb
   for (let contentType of contentTypes.filter(item => item.source == '' && !reservedTypes.includes(item.key))) {
     if (client.debug)
       process.stdout.write(`  ${chalk.blueBright(figures.arrowRight)} Removing content type ${contentType.displayName} (${contentType.key})\n`)
-    const result: IntegrationApi.ContentType | null = await client.contentTypesDelete({ path: { key: contentType.key } }).catch((e: ApiError) => {
+    const result: IntegrationApi.ContentType | null = await client.contentTypes.contentTypesDelete(contentType.key).catch((e: IntegrationApi.ApiError) => {
       if (e.status == 404)
         return contentType
       return null
@@ -198,10 +189,10 @@ async function removeDisplayTemplates(client: CmsIntegrationApiClient): Promise<
   for (const template of allTemplates) {
     if (client.debug)
       process.stdout.write(`  ${chalk.blueBright(figures.arrowRight)} Removing display template ${template.displayName} (${template.key})\n`)
-    const deleteResult = client.displayTemplatesDelete({ path: { key: template.key } }).catch((e: ApiError) => {
+    const deleteResult = client.displayTemplates.displayTemplatesDelete(template.key).catch((e: IntegrationApi.ApiError) => {
       if (e.status == 404)
         return template
-      console.log(e.data)
+      console.log(e.body)
       return null
     })
     if (deleteResult)
@@ -211,7 +202,7 @@ async function removeDisplayTemplates(client: CmsIntegrationApiClient): Promise<
 }
 
 async function getAllTemplates(client: CmsIntegrationApiClient, batchSize: number = 100): Promise<IntegrationApi.DisplayTemplate[]> {
-  const items = await client.displayTemplatesList({ query: { pageIndex: 0, pageSize: batchSize } }).catch((e: ApiError) => {
+  const items = await client.displayTemplates.displayTemplatesList(0, batchSize).catch((e: IntegrationApi.ApiError) => {
     if (e.status == 404) {
       return {
         items: [],
@@ -226,8 +217,8 @@ async function getAllTemplates(client: CmsIntegrationApiClient, batchSize: numbe
   const actualItems = items.items ?? []
   const pageCount = Math.ceil(totalItemCount / pageSize)
 
-  for (let pageIndex = 1; pageIndex < pageCount; pageIndex++) {
-    const pageData = await client.displayTemplatesList({ query: { pageIndex, pageSize } }).catch((e: ApiError) => {
+  for (let pageNr = 1; pageNr < pageCount; pageNr++) {
+    const pageData = await client.displayTemplates.displayTemplatesList(pageNr, pageSize).catch((e: IntegrationApi.ApiError) => {
       if (e.status == 404) {
         return {
           items: [],
@@ -244,7 +235,7 @@ async function getAllTemplates(client: CmsIntegrationApiClient, batchSize: numbe
 }
 
 async function getAllTypes(client: CmsIntegrationApiClient, batchSize: number = 100): Promise<IntegrationApi.ContentType[]> {
-  const items = await client.contentTypesList({ query: { pageIndex: 0, pageSize: batchSize } }).catch((e: ApiError) => {
+  const items = await client.contentTypes.contentTypesList(undefined, undefined, 0, batchSize).catch((e: IntegrationApi.ApiError) => {
     if (e.status == 404) {
       return {
         items: [],
@@ -259,8 +250,8 @@ async function getAllTypes(client: CmsIntegrationApiClient, batchSize: number = 
   const actualItems = items.items ?? []
   const pageCount = Math.ceil(totalItemCount / pageSize)
 
-  for (let pageIndex = 1; pageIndex < pageCount; pageIndex++) {
-    const pageData = await client.contentTypesList({ query: { pageIndex, pageSize } }).catch((e: ApiError) => {
+  for (let pageNr = 1; pageNr < pageCount; pageNr++) {
+    const pageData = await client.contentTypes.contentTypesList(undefined, undefined, pageNr, pageSize).catch((e: IntegrationApi.ApiError) => {
       if (e.status == 404) {
         return {
           items: [],
@@ -277,7 +268,7 @@ async function getAllTypes(client: CmsIntegrationApiClient, batchSize: number = 
 }
 
 async function getAllAssets(client: CmsIntegrationApiClient, parentKey: string, batchSize: number = 100): Promise<IntegrationApi.ContentMetadata[]> {
-  const items = await client.contentListAssets({ path: { key: parentKey }, query: { pageIndex: 0, pageSize: batchSize } }).catch((e: ApiError) => {
+  const items = await client.content.contentListAssets(parentKey, undefined, 0, batchSize).catch((e: IntegrationApi.ApiError) => {
     if (e.status == 404) {
       return {
         items: [],
@@ -292,8 +283,8 @@ async function getAllAssets(client: CmsIntegrationApiClient, parentKey: string, 
   const actualItems = items.items ?? []
   const pageCount = Math.ceil(totalItemCount / pageSize)
 
-  for (let pageIndex = 1; pageIndex < pageCount; pageIndex++) {
-    const pageData = await client.contentListAssets({ path: { key: parentKey }, query: { pageIndex, pageSize } }).catch((e: ApiError) => {
+  for (let pageNr = 1; pageNr < pageCount; pageNr++) {
+    const pageData = await client.content.contentListAssets(parentKey, undefined, pageNr, pageSize).catch((e: IntegrationApi.ApiError) => {
       if (e.status == 404) {
         return {
           items: [],
@@ -310,7 +301,7 @@ async function getAllAssets(client: CmsIntegrationApiClient, parentKey: string, 
 }
 
 async function getAllItems(client: CmsIntegrationApiClient, parentKey: string, batchSize: number = 100): Promise<IntegrationApi.ContentMetadata[]> {
-  const items = await client.contentListItems({ path: { key: parentKey }, query: { pageIndex: 0, pageSize: batchSize } }).catch((e: ApiError) => {
+  const items = await client.content.contentListItems(parentKey, undefined, 0, batchSize).catch((e: IntegrationApi.ApiError) => {
     if (e.status == 404) {
       return {
         items: [],
@@ -325,8 +316,8 @@ async function getAllItems(client: CmsIntegrationApiClient, parentKey: string, b
   const actualItems = items.items ?? []
   const pageCount = Math.ceil(totalItemCount / pageSize)
 
-  for (let pageIndex = 1; pageIndex < pageCount; pageIndex++) {
-    const pageData = await client.contentListItems({ path: { key: parentKey }, query: { pageIndex, pageSize } }).catch((e: ApiError) => {
+  for (let pageNr = 1; pageNr < pageCount; pageNr++) {
+    const pageData = await client.content.contentListItems(parentKey, undefined, pageNr, pageSize).catch((e: IntegrationApi.ApiError) => {
       if (e.status == 404) {
         return {
           items: [],

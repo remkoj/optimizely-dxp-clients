@@ -1,4 +1,5 @@
-import { getArgsConfig, getFrontendURL, type CliModule } from '../app.js'
+import { getArgsConfig, getFrontendURL } from "../config.js";
+import type { CliModule } from '../types.js'
 import ChannelRepository, { type ChannelDefinition } from '@remkoj/optimizely-graph-client/channels'
 import fs from 'node:fs'
 import path from 'node:path'

@@ -1,7 +1,7 @@
 export { ContentGraphClient } from './client.js'
 export { createHmacFetch } from '../hmac-fetch.js'
 export { isContentGraphClient, isOptiGraphClient, isOptiGraphConfig } from './utils.js'
-export { OptiCmsSchema, AuthMode, type IOptiGraphClient, type ClientFactory } from './types.js'
+export * from './types.js'
 
 
 import type { OptimizelyGraphConfig } from '../types.js'

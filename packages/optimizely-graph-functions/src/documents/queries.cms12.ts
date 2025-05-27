@@ -1,5 +1,5 @@
 export default [
-    `query getContentById($id: Int, $workId: Int, $guidValue: String, $locale: [Locales!], $isCommonDraft: Boolean) {
+  `query getContentById($id: Int, $workId: Int, $guidValue: String, $locale: [Locales!], $isCommonDraft: Boolean) {
         content: Content(
             where: {
                 ContentLink: { 
@@ -12,14 +12,14 @@ export default [
             locale: $locale
         ) {
             total
-            items {
+            item: items {
                 ...IContentData
                 ...PageData
                 ...BlockData
             }
         }
     }`,
-    `query getContentByPath($path: [String!]!, $locale: [Locales], $siteId: String) {
+  `query getContentByPath($path: [String!]!, $locale: [Locales], $siteId: String) {
         content: Content(
             where: {
                 RelativePath: {
@@ -31,13 +31,13 @@ export default [
             },
             locale: $locale
         ) {
-            items {
+            items: item {
                 ...IContentData
                 ...PageData
             }
         }
     }`,
-    `query getContentType($id: Int, $workId: Int, $guidValue: String, $locale: [Locales]) {
+  `query getContentType($id: Int, $workId: Int, $guidValue: String, $locale: [Locales]) {
         content: Content(
             where: {
                 ContentLink: {
@@ -55,7 +55,7 @@ export default [
             locale: $locale
             limit: 1
         ) {
-            items {
+            item: items {
                 ContentType
             },
             total
