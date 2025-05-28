@@ -80,6 +80,8 @@ export const GraphPanel: FunctionComponent<GraphPanelProps> = ({
 
 function updateLabel(label: string) {
   if (label == 'default') return 'Optimizely CMS'
+  if (label == 'cmp') return 'Optimizely CMP'
+  if (label == 'hub') return 'Optimizely Connect'
   return label
 }
 
