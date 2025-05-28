@@ -50,8 +50,6 @@
     "@types/node": "^22.15.21",
     "@types/react": "^19.1.6",
     "@types/react-dom": "19.1.5",
-    "graphql": "^16.11.0",
-    "graphql-request": "^7.2.0",
     "next": "^15.3.2",
     "prop-types": "^15.8.1",
     "react": "^19.1.0",
@@ -64,11 +62,15 @@
     "@remkoj/optimizely-cms-react": "^6.0.0-pre1",
     "@remkoj/optimizely-graph-client": "^6.0.0-pre1",
     "deepmerge": "^4.3.1",
+    "entities": "^6.0.0",
+    "graphql": "^16.11.0",
+    "graphql-request": "^7.2.0",
     "negotiator": "^1.0.0"
   },
   "peerDependencies": {
     "next": "^15",
-    "react": "^19"
+    "react": "^19",
+    "react-dom": "^19"
   },
   "scripts": {
     "clean": "yarn tsc --build --clean",
@@ -76,5 +78,5 @@
     "watch": "yarn tsc --watch",
     "recompile": "yarn tsc --build --clean && yarn tsc --build --force"
   },
-  "stableVersion": "4.3.1"
+  "stableVersion": "5.0.2"
 }

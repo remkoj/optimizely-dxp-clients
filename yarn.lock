@@ -1581,14 +1581,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@jridgewell/sourcemap-codec@npm:^1.4.10, @jridgewell/sourcemap-codec@npm:^1.4.14, @jridgewell/sourcemap-codec@npm:^1.4.15":
-  version: 1.4.15
-  resolution: "@jridgewell/sourcemap-codec@npm:1.4.15"
-  checksum: 10c0/0c6b5ae663087558039052a626d2d7ed5208da36cfd707dcc5cea4a07cfc918248403dcb5989a8f7afaf245ce0573b7cc6fd94c4a30453bd10e44d9363940ba5
-  languageName: node
-  linkType: hard
-
-"@jridgewell/sourcemap-codec@npm:^1.5.0":
+"@jridgewell/sourcemap-codec@npm:^1.4.10, @jridgewell/sourcemap-codec@npm:^1.4.14, @jridgewell/sourcemap-codec@npm:^1.5.0":
   version: 1.5.0
   resolution: "@jridgewell/sourcemap-codec@npm:1.5.0"
   checksum: 10c0/2eb864f276eb1096c3c11da3e9bb518f6d9fc0023c78344cdc037abadc725172c70314bdb360f2d4b7bffec7f5d657ce006816bc5d4ecb35e61b66132db00c18
@@ -2031,6 +2024,7 @@ __metadata:
     "@types/react": "npm:^19.1.6"
     "@types/react-dom": "npm:19.1.5"
     deepmerge: "npm:^4.3.1"
+    entities: "npm:^6.0.0"
     graphql: "npm:^16.11.0"
     graphql-request: "npm:^7.2.0"
     negotiator: "npm:^1.0.0"
@@ -2043,6 +2037,7 @@ __metadata:
   peerDependencies:
     next: ^15
     react: ^19
+    react-dom: ^19
   languageName: unknown
   linkType: soft
 
@@ -2066,7 +2061,6 @@ __metadata:
     scheduler: "npm:^0.26.0"
     typescript: "npm:^5.8.3"
   peerDependencies:
-    entities: ^6
     react: ^19
     react-dom: ^19
   languageName: unknown
@@ -2128,6 +2122,7 @@ __metadata:
     "@graphql-codegen/typescript": "npm:^4.1.6"
     "@graphql-codegen/typescript-graphql-request": "npm:^6.2.1"
     "@graphql-codegen/typescript-operations": "npm:^4.6.1"
+    "@graphql-typed-document-node/core": "npm:^3.2.0"
     "@remkoj/optimizely-graph-client": "workspace:6.0.0-pre1"
     "@types/node": "npm:^22.15.21"
     graphql: "npm:^16.11.0"
@@ -2136,11 +2131,6 @@ __metadata:
     graphql-tag: "npm:^2.12.6"
     tslib: "npm:^2.8.1"
     typescript: "npm:^5.8.3"
-  peerDependencies:
-    "@graphql-typed-document-node/core": ^3
-    graphql: ^16
-    graphql-request: ^6
-    graphql-tag: ^2
   bin:
     opti-patch: dist/patch.js
   languageName: unknown
@@ -4751,21 +4741,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"magic-string@npm:^0.30.17":
+"magic-string@npm:^0.30.17, magic-string@npm:^0.30.3":
   version: 0.30.17
   resolution: "magic-string@npm:0.30.17"
   dependencies:
     "@jridgewell/sourcemap-codec": "npm:^1.5.0"
   checksum: 10c0/16826e415d04b88378f200fe022b53e638e3838b9e496edda6c0e086d7753a44a6ed187adc72d19f3623810589bf139af1a315541cd6a26ae0771a0193eaf7b8
-  languageName: node
-  linkType: hard
-
-"magic-string@npm:^0.30.3":
-  version: 0.30.8
-  resolution: "magic-string@npm:0.30.8"
-  dependencies:
-    "@jridgewell/sourcemap-codec": "npm:^1.4.15"
-  checksum: 10c0/51a1f06f678c082aceddfb5943de9b6bdb88f2ea1385a1c2adf116deb73dfcfa50df6c222901d691b529455222d4d68d0b28be5689ac6f69b3baa3462861f922
   languageName: node
   linkType: hard
 

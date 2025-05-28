@@ -32,9 +32,6 @@
     "@types/node": "^22.15.21",
     "@types/react": "^19.1.6",
     "@types/react-dom": "^19.1.5",
-    "entities": "^6.0.0",
-    "graphql": "^16.11.0",
-    "graphql-request": "^7.2.0",
     "prop-types": "^15.8.1",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
@@ -45,10 +42,11 @@
     "@graphql-typed-document-node/core": "^3.2.0",
     "@remkoj/optimizely-graph-client": "^6.0.0-pre1",
     "crypto-js": "^4.2.0",
-    "graphql": "^16.11.0"
+    "entities": "^6.0.0",
+    "graphql": "^16.11.0",
+    "graphql-request": "^7.2.0"
   },
   "peerDependencies": {
-    "entities": "^6",
     "react": "^19",
     "react-dom": "^19"
   },
@@ -58,5 +56,5 @@
     "watch": "tsc --watch",
     "recompile": "tsc --build --clean && tsc --build --force"
   },
-  "stableVersion": "4.3.1"
+  "stableVersion": "5.0.2"
 }

@@ -41,5 +41,5 @@
     "tslib": "^2.8.1",
     "yargs": "^17.7.2"
   },
-  "stableVersion": "4.3.1"
+  "stableVersion": "5.0.2"
 }
