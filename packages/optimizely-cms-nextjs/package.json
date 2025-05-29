@@ -47,7 +47,7 @@
     "@remkoj/optimizely-cms-react": "workspace:6.0.0-pre1",
     "@remkoj/optimizely-graph-client": "workspace:6.0.0-pre1",
     "@types/negotiator": "^0.6.3",
-    "@types/node": "^22.15.21",
+    "@types/node": "^22.15.24",
     "@types/react": "^19.1.6",
     "@types/react-dom": "19.1.5",
     "next": "^15.3.2",

@@ -51,7 +51,7 @@
   },
   "devDependencies": {
     "@types/crypto-js": "^4.2.2",
-    "@types/node": "^22.15.21",
+    "@types/node": "^22.15.24",
     "openapi-typescript-codegen": "^0.29.0",
     "prop-types": "^15.8.1",
     "scheduler": "^0.26.0",
