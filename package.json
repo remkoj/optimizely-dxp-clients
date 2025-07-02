@@ -35,6 +35,7 @@
   "scripts": {
     "opti-graph": "yarn workspace @remkoj/optimizely-graph-cli opti-graph",
     "clean": "yarn node ./scripts/clean.js",
+    "generate": "yarn workspaces foreach -Apt --topological-dev --exclude optimizely-dxp-clients run generate",
     "prepare": "yarn update-browserslist-db && yarn workspaces foreach -Apt --topological-dev --exclude optimizely-dxp-clients run prepare",
     "recompile": "yarn workspaces foreach -Apt --topological-dev --exclude optimizely-dxp-clients run recompile",
     "watch": "yarn workspaces foreach -Api -j unlimited --exclude optimizely-dxp-clients run watch",
