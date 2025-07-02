@@ -1,23 +1,37 @@
 import { ASTNode, print } from 'graphql'
+import { ComponentType } from 'react';
 import { type ContentLink, type InlineContentLink, type IOptiGraphClient, isContentLink, isInlineContentLink, contentLinkToString, OptiCmsSchema } from "@remkoj/optimizely-graph-client";
 import { CmsComponent, CmsComponentWithFragment } from "../../types.js";
 import { CmsContentFragments } from "../../data/queries.js";
 import { validatesFragment, contentLinkToRequestVariables, isCmsComponentWithFragment, isCmsComponentWithDataQuery } from "../../utilities.js";
 
+import { getComponentLabel } from './resolve-component.js';
+
 export function getContent<NDL extends boolean = false>(client: IOptiGraphClient | undefined, contentLink: InlineContentLink | ContentLink | undefined, Component: CmsComponent<any> | undefined, fragmentData: Record<string, any> | undefined | null, noDataLoad?: NDL): NDL extends true ? Record<string, any> : Promise<Record<string, any>> {
   const debug = client?.debug ?? false
 
   // Handle provided fragment
-  const componentLabel: string = Component?.displayName ?? Component?.toString() ?? 'undefined'
+
+  const componentLabel: string = getComponentLabel(Component as ComponentType)
   const fragmentProps = fragmentData ? Object.getOwnPropertyNames(fragmentData).filter(x => !CmsContentFragments.IContentDataProps.includes(x)) : []
   if (fragmentData && fragmentProps.length > 0) {
-    if (debug)
-      console.log("⚪ [CmsContent][getContent] Rendering CMS Component using fragment information", fragmentProps)
+    // Invalid fragment
+    if (validatesFragment(Component) && !Component.validateFragment(fragmentData)) {
+      if (debug)
+        console.warn("🔴 [CmsContent][getContent] Invalid fragment data received, falling back to loading for ", componentLabel)
 
-    if (validatesFragment(Component) && !Component.validateFragment(fragmentData))
-      console.warn("🔴 [CmsContent][getContent] Invalid fragment data received, falling back to loading for ", componentLabel)
-    else
+      // Preview mode, so load data for changeset
+    } else if (client?.isPreviewEnabled() && isContentLink(contentLink) && !isInlineContentLink(contentLink)) {
+      if (debug)
+        console.warn("🔴 [CmsContent][getContent] Rendering shared instance, while in preview mode, falling back to loading for ", componentLabel);
+      contentLink.version = null;
+
+      // Default mode, use fragment
+    } else {
+      if (debug)
+        console.log("⚪ [CmsContent][getContent] Rendering CMS Component using fragment information", fragmentProps)
       return (noDataLoad ? fragmentData : Promise.resolve(fragmentData)) as NDL extends true ? Record<string, any> : Promise<Record<string, any>>
+    }
   }
 
   if (isInlineContentLink(contentLink)) {
@@ -112,8 +126,8 @@ function tryParsePositiveInt(value: string | undefined | null, defaultValue?: nu
   return defaultValue
 }
 
-const buildCms12Query = (name: string, fragment: ASTNode) => `query getContentFragmentById($key: String!, $version: Int, $locale: [Locales!]) { contentById: Content(where: { ContentLink: { GuidValue: { eq: $key }, WorkId: { eq: $version } } }, locale: $locale) { total, items { _type: __typename, _metadata: ContentLink { key: GuidValue, version: WorkId }, _locale: Language { name: Name } ...${name} }}}\n ${print(fragment)}`
-const buildCms13Query = (name: string, fragment: ASTNode) => `query getContentFragmentById($key: String!, $version: String, $locale: [Locales!], $changeset: String) {
+const buildCms12Query = (name: string, fragment: ASTNode | string) => `query getContentFragmentById($key: String!, $version: Int, $locale: [Locales!]) { contentById: Content(where: { ContentLink: { GuidValue: { eq: $key }, WorkId: { eq: $version } } }, locale: $locale) { total, items { _type: __typename, _metadata: ContentLink { key: GuidValue, version: WorkId }, _locale: Language { name: Name } ...${name} }}}\n${typeof (fragment) == 'string' ? fragment : print(fragment)}`
+const buildCms13Query = (name: string, fragment: ASTNode | string) => `query getContentFragmentById($key: String!, $version: String, $locale: [Locales!], $changeset: String) {
   contentById: _Content(
     where: {
       _metadata: { key: { eq: $key }, version: { eq: $version }, changeset: { eq: $changeset } }
@@ -133,4 +147,4 @@ const buildCms13Query = (name: string, fragment: ASTNode) => `query getContentFr
     }
   }
 }
-${print(fragment)}`
+${typeof (fragment) == 'string' ? fragment : print(fragment)}`

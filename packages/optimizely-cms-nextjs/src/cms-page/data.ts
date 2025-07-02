@@ -1,4 +1,5 @@
-import { gql, GraphQLClient } from "graphql-request"
+import { gql } from "graphql-request"
+import { type IOptiGraphClient } from "@remkoj/optimizely-graph-client"
 
 export type GetContentByPathVariables<LocaleType = string> = {
   path: string | string[],
@@ -31,14 +32,18 @@ export type GetMetaDataByPathResponse = {
   }
 }
 
-export type GetContentByPathMethod<LocaleType = string> = (client: GraphQLClient, variables: GetContentByPathVariables<LocaleType>) => Promise<GetContentByPathResponse>
-export type GetMetaDataByPathMethod<LocaleType = string> = (client: GraphQLClient, variables: GetContentByPathVariables<LocaleType>) => Promise<GetMetaDataByPathResponse>
+export type GetContentByPathMethod<LocaleType = string> = (client: IOptiGraphClient, variables: GetContentByPathVariables<LocaleType>) => Promise<GetContentByPathResponse>
+export type GetMetaDataByPathMethod<LocaleType = string> = (client: IOptiGraphClient, variables: GetContentByPathVariables<LocaleType>) => Promise<GetMetaDataByPathResponse>
 
 export const getMetaDataByPath: GetMetaDataByPathMethod = (client, variables) => {
+  if (client.debug)
+    console.log("⚪ [CmsPage.getMetaDataByPath] Running fallback query with parameters:", variables)
   return client.request<GetMetaDataByPathResponse, GetContentByPathVariables>(metadataQuery, variables)
 }
 
 export const getContentByPath: GetContentByPathMethod = (client, variables) => {
+  if (client.debug)
+    console.log("⚪ [CmsPage.getContentByPath] Running fallback query with parameters:", variables)
   return client.request<GetContentByPathResponse, GetContentByPathVariables>(contentQuery, variables)
 }
 
