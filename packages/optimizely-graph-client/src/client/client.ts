@@ -274,6 +274,22 @@ export class ContentGraphClient extends GraphQLClient implements IOptiGraphClien
   protected get cacheEnabled(): boolean {
     return this._flags.cache && this.currentAuthMode == AuthMode.Public
   }
+
+  private _changeset: string | null = null
+  public enablePreview(changeset: string = "default"): IOptiGraphClient {
+    this._changeset = changeset;
+    return this;
+  }
+  public disablePreview(): IOptiGraphClient {
+    this._changeset = null;
+    return this;
+  }
+  public isPreviewEnabled(): boolean {
+    return typeof (this._changeset) == 'string'
+  }
+  public getChangeset(): string | null {
+    return this._changeset
+  }
 }
 
 export default ContentGraphClient
