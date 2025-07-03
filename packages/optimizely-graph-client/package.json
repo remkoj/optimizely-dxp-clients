@@ -1,7 +1,7 @@
 {
   "name": "@remkoj/optimizely-graph-client",
   "license": "Apache-2.0",
-  "version": "4.3.1",
+  "version": "4.4.0",
   "repository": "https://github.com/remkoj/optimizely-dxp-clients.git",
   "author": "Remko Jantzen <693172+remkoj@users.noreply.github.com>",
   "homepage": "https://github.com/remkoj/optimizely-dxp-clients",
