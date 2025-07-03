@@ -1,6 +1,7 @@
 export default [
   `query getContentById($key: String!, $version: String, $locale: [Locales!], $path: String, $domain: String) {
         content: _Content(
+            variation: { include: ALL }
             where: {
                 _or: [
                     { _metadata: { key: { eq: $key }, version: { eq: $version } } }
@@ -32,6 +33,7 @@ export default [
     }`,
   `query getContentType($key: String!, $version: String, $locale: [Locales!], $path: String, $domain: String) {
         content: _Content(
+            variation: { include: ALL }
             where: {
                 _or: [
                     { _metadata: { key: { eq: $key }, version: { eq: $version } } }
