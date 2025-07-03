@@ -370,7 +370,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@formatjs/intl-localematcher@npm:^0.6.0":
+"@formatjs/intl-localematcher@npm:^0.6.1":
   version: 0.6.1
   resolution: "@formatjs/intl-localematcher@npm:0.6.1"
   dependencies:
@@ -445,7 +445,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@graphql-codegen/client-preset@npm:^4.6.4, @graphql-codegen/client-preset@npm:^4.8.2":
+"@graphql-codegen/client-preset@npm:^4.8.2, @graphql-codegen/client-preset@npm:^4.8.3":
   version: 4.8.3
   resolution: "@graphql-codegen/client-preset@npm:4.8.3"
   dependencies:
@@ -561,7 +561,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@graphql-codegen/typescript-graphql-request@npm:^6.2.0":
+"@graphql-codegen/typescript-graphql-request@npm:^6.3.0":
   version: 6.3.0
   resolution: "@graphql-codegen/typescript-graphql-request@npm:6.3.0"
   dependencies:
@@ -577,7 +577,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@graphql-codegen/typescript-operations@npm:^4.5.1, @graphql-codegen/typescript-operations@npm:^4.6.1":
+"@graphql-codegen/typescript-operations@npm:^4.6.1":
   version: 4.6.1
   resolution: "@graphql-codegen/typescript-operations@npm:4.6.1"
   dependencies:
@@ -596,7 +596,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@graphql-codegen/typescript@npm:^4.1.5, @graphql-codegen/typescript@npm:^4.1.6":
+"@graphql-codegen/typescript@npm:^4.1.6":
   version: 4.1.6
   resolution: "@graphql-codegen/typescript@npm:4.1.6"
   dependencies:
@@ -611,9 +611,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@graphql-codegen/visitor-plugin-common@file:./packages/graphql-codegen-visitor-plugin-common-v5.8.0-patched.tgz::locator=basic-project%40workspace%3A.":
+"@graphql-codegen/visitor-plugin-common@file:../../dependencies/graphql-codegen-visitor-plugin-common-v5.8.0-patched.tgz::locator=basic-project%40workspace%3A.":
   version: 5.8.0
-  resolution: "@graphql-codegen/visitor-plugin-common@file:./packages/graphql-codegen-visitor-plugin-common-v5.8.0-patched.tgz#./packages/graphql-codegen-visitor-plugin-common-v5.8.0-patched.tgz::hash=1ef42c&locator=basic-project%40workspace%3A."
+  resolution: "@graphql-codegen/visitor-plugin-common@file:../../dependencies/graphql-codegen-visitor-plugin-common-v5.8.0-patched.tgz#../../dependencies/graphql-codegen-visitor-plugin-common-v5.8.0-patched.tgz::hash=1ef42c&locator=basic-project%40workspace%3A."
   dependencies:
     "@graphql-codegen/plugin-helpers": "npm:^5.1.0"
     "@graphql-tools/optimize": "npm:^2.0.0"
@@ -1209,7 +1209,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@inquirer/prompts@npm:^7.3.2":
+"@inquirer/prompts@npm:^7.6.0":
   version: 7.6.0
   resolution: "@inquirer/prompts@npm:7.6.0"
   dependencies:
@@ -1491,120 +1491,121 @@ __metadata:
   linkType: hard
 
 "@remkoj/optimizely-cms-api@file:../../packages/optimizely-cms-api::locator=basic-project%40workspace%3A.":
-  version: 4.3.1
-  resolution: "@remkoj/optimizely-cms-api@file:../../packages/optimizely-cms-api#../../packages/optimizely-cms-api::hash=1e63e0&locator=basic-project%40workspace%3A."
-  checksum: 10c0/bae0d4667143a201eb9be523ad4dc631b8f97279922edb9bd6b67c0c2f884c39e59e6c000940b3a52956be26cc1c870babe8573e7f5588db12b6c5f75b602cfa
+  version: 5.0.2
+  resolution: "@remkoj/optimizely-cms-api@file:../../packages/optimizely-cms-api#../../packages/optimizely-cms-api::hash=5f9364&locator=basic-project%40workspace%3A."
+  checksum: 10c0/7fa8ea11208f2b8be3d38a882c4decb7a8b357cb05d7443ee4b8264d01d95936b526ed89cd255c06d83bea7fa257f6e4c61609be657d8666d82670ef67b3c1b2
   languageName: node
   linkType: hard
 
 "@remkoj/optimizely-cms-cli@file:../../packages/optimizely-cms-cli::locator=basic-project%40workspace%3A.":
-  version: 4.3.1
-  resolution: "@remkoj/optimizely-cms-cli@file:../../packages/optimizely-cms-cli#../../packages/optimizely-cms-cli::hash=6221d1&locator=basic-project%40workspace%3A."
+  version: 5.0.2
+  resolution: "@remkoj/optimizely-cms-cli@file:../../packages/optimizely-cms-cli#../../packages/optimizely-cms-cli::hash=b979c3&locator=basic-project%40workspace%3A."
   dependencies:
-    "@inquirer/prompts": "npm:^7.3.2"
+    "@inquirer/prompts": "npm:^7.6.0"
     chalk: "npm:^5.4.1"
     cli-table3: "npm:^0.6.5"
-    dotenv: "npm:^16.4.7"
-    dotenv-expand: "npm:^12.0.1"
+    dotenv: "npm:^16.6.1"
+    dotenv-expand: "npm:^12.0.2"
     figures: "npm:^6.1.0"
-    glob: "npm:^11.0.1"
+    glob: "npm:^11.0.3"
     yargs: "npm:^17.7.2"
   peerDependencies:
-    "@remkoj/optimizely-cms-api": ^4.3.1
+    "@remkoj/optimizely-cms-api": ^5.0.2
     "@types/node": "*"
   bin:
     opti-cms: ./dist/index.js
-  checksum: 10c0/96d86256230aa718699dd5d06e99f3422f0455ddf7e2656ff0b634da3e5c30b4bf15f1d4ca2cac4ab815aa9b38947db2ebb1e232b71483c2200225a5b76be6a5
+  checksum: 10c0/e144b592092e01d3e1dd57bd5a499964a1176dfbbd1192354dcfda36d64453cc839c938b8d140e40943e00c55cdfc5a840b7c1c0adb01249edca964fc8a7334f
   languageName: node
   linkType: hard
 
 "@remkoj/optimizely-cms-nextjs@file:../../packages/optimizely-cms-nextjs::locator=basic-project%40workspace%3A.":
-  version: 4.3.1
-  resolution: "@remkoj/optimizely-cms-nextjs@file:../../packages/optimizely-cms-nextjs#../../packages/optimizely-cms-nextjs::hash=c592a4&locator=basic-project%40workspace%3A."
+  version: 5.0.2
+  resolution: "@remkoj/optimizely-cms-nextjs@file:../../packages/optimizely-cms-nextjs#../../packages/optimizely-cms-nextjs::hash=4b01b5&locator=basic-project%40workspace%3A."
   dependencies:
-    "@formatjs/intl-localematcher": "npm:^0.6.0"
+    "@formatjs/intl-localematcher": "npm:^0.6.1"
     deepmerge: "npm:^4.3.1"
     negotiator: "npm:^1.0.0"
   peerDependencies:
-    "@remkoj/optimizely-cms-react": ^4
-    "@remkoj/optimizely-graph-client": ^4
+    "@remkoj/optimizely-cms-react": ^5.0.2
+    "@remkoj/optimizely-graph-client": ^5.0.2
     graphql: ^16
     graphql-request: ^6
     next: ^14
     react: ^18
-  checksum: 10c0/365fc91f26ba99b43b47a1a209fcc94c3871cb1b7e9dfae4a8a8fd3c7f68607e2ce2ca4ad68aee554eeadcdb3e9cd01147748ca0a6fa035466cda8eeb24cd96a
+  checksum: 10c0/1d200a9dd49ae4ab8cfc7919ffb49720bb58755108963d7edca343a76d7a734ebf7d8baa98f6aa51098622546af25ae4fd66934e00dd01ec500a7f86142e1e44
   languageName: node
   linkType: hard
 
 "@remkoj/optimizely-cms-react@file:../../packages/optimizely-cms-react::locator=basic-project%40workspace%3A.":
-  version: 4.3.1
-  resolution: "@remkoj/optimizely-cms-react@file:../../packages/optimizely-cms-react#../../packages/optimizely-cms-react::hash=5ce831&locator=basic-project%40workspace%3A."
+  version: 5.0.2
+  resolution: "@remkoj/optimizely-cms-react@file:../../packages/optimizely-cms-react#../../packages/optimizely-cms-react::hash=588181&locator=basic-project%40workspace%3A."
   dependencies:
     "@graphql-typed-document-node/core": "npm:^3.2.0"
     crypto-js: "npm:^4.2.0"
   peerDependencies:
-    "@remkoj/optimizely-graph-client": ^4
+    "@remkoj/optimizely-graph-client": ^5
     entities: ^6
     graphql: ^16
     graphql-request: ^6
     react: ^18
     react-dom: ^18
-  checksum: 10c0/7e5e998b92b092f7c469ba777cd4c67913018ea8e8a068eb696b715f3270799114f29178910057fd7449b23c402b9759ae5aca7ebbf37ebbc5a410c47961a4ed
+  checksum: 10c0/5980f2b3ed0d28aa1e7ce5b1dc6382cf9ed3c713781b2cda6029b635c6c0ac8c34d6dcc3fc83f95ef23af8d4ce9e667d719eee8c20b00e76834761465ba6962a
   languageName: node
   linkType: hard
 
 "@remkoj/optimizely-graph-cli@file:../../packages/optimizely-graph-cli::locator=basic-project%40workspace%3A.":
-  version: 4.3.1
-  resolution: "@remkoj/optimizely-graph-cli@file:../../packages/optimizely-graph-cli#../../packages/optimizely-graph-cli::hash=80a025&locator=basic-project%40workspace%3A."
+  version: 5.0.2
+  resolution: "@remkoj/optimizely-graph-cli@file:../../packages/optimizely-graph-cli#../../packages/optimizely-graph-cli::hash=4dd58f&locator=basic-project%40workspace%3A."
   dependencies:
     chalk: "npm:^5.4.1"
     cli-table3: "npm:^0.6.5"
     compare-versions: "npm:^6.1.1"
-    dotenv: "npm:^16.4.7"
-    dotenv-expand: "npm:^12.0.1"
+    dotenv: "npm:^16.6.1"
+    dotenv-expand: "npm:^12.0.2"
     figures: "npm:^6.1.0"
-    glob: "npm:^11.0.1"
+    glob: "npm:^11.0.3"
     yargs: "npm:^17.7.2"
   peerDependencies:
-    "@remkoj/optimizely-graph-client": ^4
+    "@remkoj/optimizely-graph-client": ^5.0.2
   bin:
     opti-graph: bin/index.js
-  checksum: 10c0/103f5faf0d754fc31a13428fdff3288b4edc228843998e1c6208ed7b5ee352bfee0d6c202bfe6f825c4adaf9fc05310538305166bf401b34edccd3e6eabbf752
+  checksum: 10c0/016e5f5c5a85cfd273e18e4d41a19c26cc232f4e12af1875f2e368d3f756a7bc87f1bb4bb3937ef0b688e35f66fe2caefd559212f1d26b34c5f51fc44325ded4
   languageName: node
   linkType: hard
 
 "@remkoj/optimizely-graph-client@file:../../packages/optimizely-graph-client::locator=basic-project%40workspace%3A.":
-  version: 4.3.1
-  resolution: "@remkoj/optimizely-graph-client@file:../../packages/optimizely-graph-client#../../packages/optimizely-graph-client::hash=d6388a&locator=basic-project%40workspace%3A."
+  version: 5.0.2
+  resolution: "@remkoj/optimizely-graph-client@file:../../packages/optimizely-graph-client#../../packages/optimizely-graph-client::hash=fa858b&locator=basic-project%40workspace%3A."
   dependencies:
     crypto-js: "npm:^4.2.0"
     uuid: "npm:^11.1.0"
   peerDependencies:
     graphql-request: ^6
-  checksum: 10c0/d6fdc5ee7e2d0038286cc96e942dceac9e1cd86c51a66613011579ef66180fd96f13426a2a4ad8fe209e2240b979e95293e701186c38eecc315abc1b56ba8226
+  checksum: 10c0/052a8e3c4572b1720de890ea31ba0a6dd4bf19562d0a6637c3b8dce228c847d466177695320d01df22064ca7c9810f57deaefeb12550776398a674cd0db688e0
   languageName: node
   linkType: hard
 
 "@remkoj/optimizely-graph-functions@file:../../packages/optimizely-graph-functions::locator=basic-project%40workspace%3A.":
-  version: 4.3.1
-  resolution: "@remkoj/optimizely-graph-functions@file:../../packages/optimizely-graph-functions#../../packages/optimizely-graph-functions::hash=a7c2e3&locator=basic-project%40workspace%3A."
+  version: 5.0.2
+  resolution: "@remkoj/optimizely-graph-functions@file:../../packages/optimizely-graph-functions#../../packages/optimizely-graph-functions::hash=631117&locator=basic-project%40workspace%3A."
   dependencies:
     "@graphql-codegen/add": "npm:^5.0.3"
-    "@graphql-codegen/client-preset": "npm:^4.6.4"
-    "@graphql-codegen/plugin-helpers": "npm:^5.1.0"
-    "@graphql-codegen/typescript": "npm:^4.1.5"
-    "@graphql-codegen/typescript-graphql-request": "npm:^6.2.0"
-    "@graphql-codegen/typescript-operations": "npm:^4.5.1"
+    "@graphql-codegen/client-preset": "npm:^4.8.3"
+    "@graphql-codegen/plugin-helpers": "npm:^5.1.1"
+    "@graphql-codegen/typescript": "npm:^4.1.6"
+    "@graphql-codegen/typescript-graphql-request": "npm:^6.3.0"
+    "@graphql-codegen/typescript-operations": "npm:^4.6.1"
+    graphql-sock: "npm:^1.0.1"
     tslib: "npm:^2.8.1"
   peerDependencies:
     "@graphql-typed-document-node/core": ^3
-    "@remkoj/optimizely-graph-client": ^4
+    "@remkoj/optimizely-graph-client": ^5.0.2
     graphql: ^16
     graphql-request: ^6
     graphql-tag: ^2
   bin:
     opti-patch: dist/patch.js
-  checksum: 10c0/6fd857af0ffbf214f05d3c4f7c1418493668c41022fbfe8c1f2929359fcf21ada523d0b46d8f4ccaebdcf391eae5d27c08468c182008dadaf5d13b17f9bc4edc
+  checksum: 10c0/f307d40ea08c1cde06ccf6f7aaef0041ef514781c885b3a94c8e89cd54d5e10ef074479f06a0e0489f45b9a318525db0de1138c16546770c8e47c8cf38eb6bbe
   languageName: node
   linkType: hard
 
@@ -2953,7 +2954,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"dotenv-expand@npm:^12.0.1":
+"dotenv-expand@npm:^12.0.2":
   version: 12.0.2
   resolution: "dotenv-expand@npm:12.0.2"
   dependencies:
@@ -2962,7 +2963,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"dotenv@npm:^16.0.0, dotenv@npm:^16.4.5, dotenv@npm:^16.4.7":
+"dotenv@npm:^16.0.0, dotenv@npm:^16.4.5, dotenv@npm:^16.6.1":
   version: 16.6.1
   resolution: "dotenv@npm:16.6.1"
   checksum: 10c0/15ce56608326ea0d1d9414a5c8ee6dcf0fffc79d2c16422b4ac2268e7e2d76ff5a572d37ffe747c377de12005f14b3cc22361e79fc7f1061cce81f77d2c973dc
@@ -3810,7 +3811,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"glob@npm:^11.0.1":
+"glob@npm:^11.0.3":
   version: 11.0.3
   resolution: "glob@npm:11.0.3"
   dependencies:
@@ -3935,6 +3936,18 @@ __metadata:
   peerDependencies:
     graphql: 14 - 16
   checksum: 10c0/f8167925a110e8e1de93d56c14245e7e64391dc8dce5002dd01bf24a3059f345d4ca1bb6ce2040e2ec78264211b0704e75da3e63984f0f74d2042f697a4e8cc6
+  languageName: node
+  linkType: hard
+
+"graphql-sock@npm:^1.0.1":
+  version: 1.0.1
+  resolution: "graphql-sock@npm:1.0.1"
+  peerDependencies:
+    graphql: 15.x || 16.x || 17.x
+  bin:
+    semantic-to-nullable: dist/cli/to-nullable.js
+    semantic-to-strict: dist/cli/to-strict.js
+  checksum: 10c0/12b88e6b53ca48a11164410f7064be206c351a6cec400094599c10da1b3e891d1387b3781546e1f422dbae1e6ed48b1076949e6ef202bd908f75e9d0298b8401
   languageName: node
   linkType: hard
 

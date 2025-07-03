@@ -2,7 +2,6 @@ import 'server-only'
 import type { Metadata, ResolvingMetadata } from 'next'
 import deepmerge from 'deepmerge'
 import { notFound } from 'next/navigation.js'
-import { cache } from 'react'
 
 // GraphQL Client & Services
 import { type ContentLinkWithLocale } from '@remkoj/optimizely-graph-client'
@@ -13,7 +12,6 @@ import {
 } from '@remkoj/optimizely-graph-client/router'
 import { type ChannelDefinition } from '@remkoj/optimizely-graph-client/channels'
 import {
-  type ClientFactory,
   type IOptiGraphClient,
   OptiCmsSchema,
 } from '@remkoj/optimizely-graph-client/client'
@@ -32,7 +30,7 @@ import {
 // Within package
 import { MetaDataResolver } from '../metadata.js'
 import { urlToPath, localeToGraphLocale } from './utils.js'
-import getContentByPathBase, {
+import {
   type GetContentByPathMethod,
   type GetContentByPathVariables,
 } from './data.js'
@@ -118,7 +116,7 @@ export type CreatePageOptions<
   /**
    * Main function used to retrieve the content by path
    */
-  getContentByPath: GetContentByPathMethod<LocaleEnum>
+  getContentByPath?: GetContentByPathMethod<LocaleEnum>
 
   /**
    * The factory that should yield the GraphQL Client to be used within this
@@ -185,7 +183,6 @@ export type CreatePageOptions<
 }
 
 const CreatePageOptionDefaults: CreatePageOptions<string> = {
-  getContentByPath: getContentByPathBase,
   client: createClient,
   routerFactory: (client) => new RouteResolver(client),
   propsToCmsPath: ({ params }) => buildRequestPath(params),
@@ -243,7 +240,7 @@ export function createPage<
   ): ContextWith<ServerContext, 'client' | 'locale'> {
     return new ServerContext({
       factory,
-      client: clientFactory(),
+      client: clientFactory(undefined, 'request'),
       mode: 'public',
       locale: initialLocale,
     }) as ContextWith<ServerContext, 'client' | 'locale'>
@@ -251,7 +248,7 @@ export function createPage<
 
   const pageDefintion: OptiCmsNextJsPage<TParams, TSearchParams> = {
     generateStaticParams: async () => {
-      const client = clientFactory()
+      const client = clientFactory(undefined, 'metadata')
       const router = routerFactory(client)
       const channelId = getChannelId(client, channel)
       const allRoutes = await router.getRoutes(
@@ -362,19 +359,14 @@ export function createPage<
       if (initialLocale) context.setLocale(initialLocale)
 
       // Resolve the content based upon the path
-      const lookupData = getContentByPath
-        ? await loadContentByPath(
+      const lookupData = await (getContentByPath
+        ? loadContentByPath(
             context.client,
             getContentByPath,
             requestPath,
             channel
           )
-        : await getInfoByPath(
-            context.client,
-            routerFactory,
-            requestPath,
-            channel
-          )
+        : getInfoByPath(context.client, routerFactory, requestPath, channel))
       if (!lookupData) {
         console.error(
           `🔴 [CmsPage] Unable to resolve the content for ${JSON.stringify(params)}!`
@@ -384,7 +376,7 @@ export function createPage<
       const [route, contentLink, contentType, graphLocale, contentData] =
         lookupData
 
-      if (contentLink?.locale) context.setLocale(contentLink?.locale as string)
+      if (contentLink?.locale) context.setLocale(contentLink.locale as string)
 
       // Make the shared server context available
       updateSharedServerContext(context)
@@ -423,10 +415,20 @@ async function getInfoByPath(
   requestPath: string,
   channel?: ChannelDefinition
 ) {
+  if (client.debug)
+    console.log(
+      `⚪ [CmsPage.getInfoByPath] Loading content for path "${requestPath}" using RouteResolver`
+    )
   const channelId = getChannelId(client, channel)
   const router = routerFactory(client)
   const route = await router.getContentInfoByPath(requestPath, channelId)
-  if (!route) return undefined
+  if (!route) {
+    if (client.debug)
+      console.warn(
+        `🟠 [CmsPage.getInfoByPath] The RouteResolver was unable to resolve the route information for "${requestPath}"`
+      )
+    return undefined
+  }
   const contentLink = router.routeToContentLink(route)
   const contentType = route.contentType
   const graphLocale = localeToGraphLocale(route.locale, channel)
@@ -440,6 +442,10 @@ async function loadContentByPath<LocaleEnum = SystemLocales>(
   channel?: ChannelDefinition,
   isDebug: boolean = false
 ) {
+  if (client.debug)
+    console.log(
+      `⚪ [CmsPage.loadContentByPath] Loading content for path "${requestPath}" using getContentByPath method`
+    )
   const channelId = getChannelId(client, channel)
   const pathForRequest = [
     requestPath,
@@ -455,7 +461,7 @@ async function loadContentByPath<LocaleEnum = SystemLocales>(
   if (client?.isPreviewEnabled()) requestVars.changeset = client?.getChangeset()
   if (isDebug)
     console.log(
-      `⚪ [CmsPage] Processed Next.JS route => getContentByPath Variables: ${JSON.stringify(requestVars)}`
+      `⚪ [CmsPage.loadContentByPath] Processed Next.JS route => getContentByPath Variables: ${JSON.stringify(requestVars)}`
     )
 
   const response = await getContentByPath(client, requestVars)
@@ -466,14 +472,14 @@ async function loadContentByPath<LocaleEnum = SystemLocales>(
   if (!info) {
     if (isDebug) {
       console.error(
-        `🔴 [CmsPage] Unable to load content for ${requestPath}, data received: `,
+        `🔴 [CmsPage.loadContentByPath] Unable to load content for ${requestPath}, data received: `,
         response
       )
     }
     return notFound()
   } else if (isDebug && (response?.content?.total ?? 0) > 1) {
     console.warn(
-      `🟠 [CmsPage] Resolving content for ${requestPath}, yielded ${response?.content?.total ?? 0} items, picked:`,
+      `🟠 [CmsPage.loadContentByPath] Resolving content for ${requestPath}, yielded ${response?.content?.total ?? 0} items, picked:`,
       info
     )
   }
@@ -483,7 +489,7 @@ async function loadContentByPath<LocaleEnum = SystemLocales>(
   const contentLink = normalizeContentLinkWithLocale(info._metadata)
   if (!contentLink) {
     console.error(
-      '🔴 [CmsPage] Unable to infer the contentLink from the retrieved content, this should not have happened!'
+      '🔴 [CmsPage.loadContentByPath] Unable to infer the contentLink from the retrieved content, this should not have happened!'
     )
     return notFound()
   }

@@ -37,7 +37,7 @@
     "typescript": "^5.8.3"
   },
   "resolutions": {
-    "@graphql-codegen/visitor-plugin-common": "file:./packages/graphql-codegen-visitor-plugin-common-v5.8.0-patched.tgz",
+    "@graphql-codegen/visitor-plugin-common": "file:../../dependencies/graphql-codegen-visitor-plugin-common-v5.8.0-patched.tgz",
     "@remkoj/optimizely-cms-nextjs": "file:../../packages/optimizely-cms-nextjs",
     "@remkoj/optimizely-cms-react": "file:../../packages/optimizely-cms-react",
     "@remkoj/optimizely-graph-client": "file:../../packages/optimizely-graph-client",

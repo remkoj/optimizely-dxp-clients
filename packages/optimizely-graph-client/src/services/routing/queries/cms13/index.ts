@@ -113,7 +113,7 @@ export class OptimizelyCms13Client implements OptimizelyCmsRoutingApi {
       url: itemUrl,
       slug: item._metadata?.slug ?? "",
       changed: item.changed ? new Date(item.changed) : null,
-      contentType: item._metadata.types.reverse(),
+      contentType: item._metadata.types,
       version: item._metadata.version,
       key: item._metadata.key
     }

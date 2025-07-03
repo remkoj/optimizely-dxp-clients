@@ -14,7 +14,7 @@ const {
   generateStaticParams,
   CmsPage: Page,
 } = createPage(factory, {
-  getContentByPath,
+  //getContentByPath,
   /**
    * The factory to use to create the GraphQL Client to fetch data from Optimizely
    * CMS.
@@ -26,8 +26,8 @@ const {
     const client = createClient(undefined, token, {
       nextJsFetchDirectives: true,
     })
-    if (client.debug)
-      console.log('⚪ [Sample Site] Created new Optimizely Graph client')
+    //if (client.debug)
+    console.log('⚪ [Sample Site] Created new Optimizely Graph client')
 
     // Check if we're in request mode, if not the "draft mode" check will fail
     if (mode == 'request') {
@@ -37,8 +37,8 @@ const {
       if (isEnabled) {
         client.updateAuthentication(AuthMode.HMAC)
         client.enablePreview()
-        if (client.debug)
-          console.log('⚪ [Sample Site] Switching to common drafts')
+        //if (client.debug)
+        console.log('⚪ [Sample Site] Switching to common drafts')
       }
     }
     return client

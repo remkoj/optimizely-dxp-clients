@@ -2,7 +2,6 @@ import { type OptimizelyNextPage as CmsComponent } from '@remkoj/optimizely-cms-
 import { getFragmentData } from '@/gql/fragment-masking'
 import {
   ExperienceDataFragmentDoc,
-  CompositionDataFragmentDoc,
   BlankExperienceDataFragmentDoc,
   type BlankExperienceDataFragment,
 } from '@/gql/graphql'
@@ -19,23 +18,26 @@ import { getSdk } from '@/gql'
  */
 export const BlankExperienceExperience: CmsComponent<
   BlankExperienceDataFragment
-> = ({ data, contentLink }) => {
+> = ({ data, contentLink, ctx }) => {
+  if (ctx) ctx.editableContentIsExperience = true
   const composition = getFragmentData(
-    CompositionDataFragmentDoc,
-    getFragmentData(ExperienceDataFragmentDoc, data)?.composition
-  )
+    ExperienceDataFragmentDoc,
+    data
+  ).composition
+
   return (
     <CmsEditable
       as="div"
       className="mx-auto px-2 container"
       cmsFieldName="unstructuredData"
+      ctx={ctx}
     >
       <h1>
         {contentLink.key} ({contentLink.version})
       </h1>
       <pre>{JSON.stringify(contentLink, undefined, 4)}</pre>
       {composition && isNode(composition) && (
-        <OptimizelyComposition node={composition} />
+        <OptimizelyComposition node={composition} ctx={ctx} />
       )}
     </CmsEditable>
   )
