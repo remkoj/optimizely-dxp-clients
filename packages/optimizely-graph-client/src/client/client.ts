@@ -265,6 +265,8 @@ export class ContentGraphClient extends GraphQLClient implements IOptiGraphClien
     serviceUrl.searchParams.set('omit_empty', this._flags.omitEmpty ? 'true' : 'false')
     serviceUrl.searchParams.set('authMode', this.currentAuthMode)
     serviceUrl.searchParams.set('unique', this._flags.cache_uniq ? 'true' : 'false')
+    if (this.isPreviewEnabled())
+      serviceUrl.searchParams.set('changeset', this.getChangeset() ?? '')
     if (this.debug)
       console.log(`🔗 [Optimizely Graph] Setting service endpoint to: ${serviceUrl.href}`)
 
@@ -273,6 +275,24 @@ export class ContentGraphClient extends GraphQLClient implements IOptiGraphClien
 
   protected get cacheEnabled(): boolean {
     return this._flags.cache && this.currentAuthMode == AuthMode.Public
+  }
+
+  private _changeset: string | null = null
+  public enablePreview(changeset: string = "default"): IOptiGraphClient {
+    this._changeset = changeset;
+    this.updateRequestConfig();
+    return this;
+  }
+  public disablePreview(): IOptiGraphClient {
+    this._changeset = null;
+    this.updateRequestConfig();
+    return this;
+  }
+  public isPreviewEnabled(): boolean {
+    return typeof (this._changeset) == 'string'
+  }
+  public getChangeset(): string | null {
+    return this._changeset
   }
 }
 

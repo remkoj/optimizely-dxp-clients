@@ -23,7 +23,7 @@
     "prepare": "tsc --build",
     "watch": "tsc --watch",
     "rebuild": "yarn clean && yarn update-client && tsc --build --force",
-    "update-client": "yarn generate-spec && yarn generate-client",
+    "generate": "yarn generate-spec && yarn generate-client",
     "generate-client": "yarn openapi --input ./integrationapi.spec.json --output ./src/client --name CmsIntegrationApiClient",
     "generate-spec": "yarn node scripts/update-spec.js"
   }

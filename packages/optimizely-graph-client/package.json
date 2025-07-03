@@ -60,7 +60,8 @@
     "typescript": "^5.7.3"
   },
   "dependencies": {
-    "crypto-js": "^4.2.0"
+    "crypto-js": "^4.2.0",
+    "uuid": "^11.1.0"
   },
   "peerDependencies": {
     "graphql-request": "^6"
@@ -68,9 +69,9 @@
   "scripts": {
     "clean": "tsc --build --clean",
     "compile-ts": "tsc --build",
-    "prepare": "yarn generate-admin && tsc --build",
+    "prepare": "tsc --build",
     "watch": "yarn tsc --watch",
     "recompile": "tsc --build --clean && tsc --build --force",
-    "generate-admin": "openapi --input https://cg.optimizely.com/app/swagger/swagger.json --output ./src/admin-api/client --name OptimizelyGraphAdminApi && node ./scripts/update-imports.cjs"
+    "generate": "openapi --input https://cg.optimizely.com/app/swagger/swagger.json --output ./src/admin-api/client --name OptimizelyGraphAdminApi && node ./scripts/update-imports.cjs"
   }
 }
