@@ -120,8 +120,12 @@ export type CreatePageOptions<
   /**
    * The factory that should yield the GraphQL Client to be used within this
    * page.
+   *
+   * @param token   The token retrieved by the CMS Page from the context, always undefined
+   * @param scope   The scope in which the client is being created, this allows for checking draftMode in configuring the client
+   * @returns       The client instance
    */
-  client: ClientFactory
+  client: (token?: string, scope?: 'request' | 'metadata') => IOptiGraphClient
 
   /**
    * The channel information used to resolve locales, domains and more
@@ -231,12 +235,11 @@ export function createPage<
     ...options,
   } as CreatePageOptions<LocaleEnum, TParams, TSearchParams>
 
-  // Create the global Graph Client
-  const globalClient = clientFactory()
-
-  // Create the global Router instance
-  const router = routerFactory(globalClient)
-  const getInfoByPath = async (requestPath: string, siteId?: string) => {
+  async function getInfoByPath(
+    router: IRouteResolver,
+    requestPath: string,
+    siteId?: string
+  ) {
     const route = await router.getContentInfoByPath(requestPath, siteId)
     if (!route) return undefined
     const contentLink = router.routeToContentLink(route)
@@ -250,23 +253,32 @@ export function createPage<
     ]
   }
 
-  // Create channelId
-  /**
-   * The Channel Identifier to be used for this page
-   */
-  const channelId = channel
-    ? globalClient.currentOptiCmsSchema == OptiCmsSchema.CMS12
-      ? channel.id
-      : getPrimaryURL(channel).origin
-    : undefined
+  function getChannelId(schema: OptiCmsSchema) {
+    if (channel) {
+      return schema == OptiCmsSchema.CMS12
+        ? channel.id
+        : getPrimaryURL(channel).origin
+    }
+    return undefined
+  }
 
   const pageDefintion: OptiCmsNextJsPage<TParams, TSearchParams> = {
-    generateStaticParams: async () =>
-      (await router.getRoutes(channelId)).map((r) => routeToParams(r)),
+    generateStaticParams: async () => {
+      const client = clientFactory(undefined, 'metadata')
+      const router = routerFactory(client)
+      const channelId = getChannelId(client.currentOptiCmsSchema)
+      const allRoutes = await router.getRoutes(channelId)
+      return allRoutes.map((r) => routeToParams(r))
+    },
     generateMetadata: async ({ params, searchParams }, parent) => {
+      // Create client & router
+      const client = clientFactory(undefined, 'request')
+      const router = routerFactory(client)
+      const channelId = getChannelId(client.currentOptiCmsSchema)
+
       // Get context
       const context = getServerContext()
-      context.setOptimizelyGraphClient(globalClient)
+      context.setOptimizelyGraphClient(client)
       context.setComponentFactory(factory)
 
       // Read variables from request
@@ -282,7 +294,7 @@ export function createPage<
         )
 
       // Resolve the route to a content link
-      const routeInfo = await getInfoByPath(requestPath, channelId)
+      const routeInfo = await getInfoByPath(router, requestPath, channelId)
       if (!routeInfo) {
         if (context.isDebug)
           console.log('⚪ [CmsPage.generateMetadata] No data received')
@@ -299,7 +311,7 @@ export function createPage<
       context.setLocale(route.locale)
 
       // Fetch the metadata based upon the actual content type and resolve parent
-      const metaResolver = new MetaDataResolver(globalClient)
+      const metaResolver = new MetaDataResolver(client)
       const [pageMetadata, baseMetadata] = await Promise.all([
         metaResolver.resolve(factory, contentLink, contentType, graphLocale),
         parent,
@@ -341,9 +353,13 @@ export function createPage<
     },
 
     CmsPage: async ({ params, searchParams }) => {
+      // Create client & router
+      const client = clientFactory(undefined, 'request')
+      const channelId = getChannelId(client.currentOptiCmsSchema)
+
       // Prepare the context
       const context = getServerContext()
-      context.setOptimizelyGraphClient(globalClient)
+      context.setOptimizelyGraphClient(client)
       context.setComponentFactory(factory)
 
       // Analyze the Next.JS Request props
@@ -377,7 +393,7 @@ export function createPage<
           `⚪ [CmsPage] Processed Next.JS route: ${JSON.stringify(params)} => getContentByPath Variables: ${JSON.stringify(requestVars)}`
         )
 
-      const response = await getContentByPath(globalClient, requestVars)
+      const response = await getContentByPath(client, requestVars)
       const info = (response?.content?.items ?? [])[0]
 
       if (!info) {

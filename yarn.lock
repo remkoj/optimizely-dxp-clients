@@ -1723,6 +1723,7 @@ __metadata:
     prop-types: "npm:^15.8.1"
     scheduler: "npm:^0.25.0"
     typescript: "npm:^5.7.3"
+    uuid: "npm:^11.1.0"
   peerDependencies:
     graphql-request: ^6
   languageName: unknown

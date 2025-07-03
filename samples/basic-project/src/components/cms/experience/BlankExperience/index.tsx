@@ -30,7 +30,10 @@ export const BlankExperienceExperience: CmsComponent<
       className="mx-auto px-2 container"
       cmsFieldName="unstructuredData"
     >
-      <pre>{JSON.stringify(contentLink)}</pre>
+      <h1>
+        {contentLink.key} ({contentLink.version})
+      </h1>
+      <pre>{JSON.stringify(contentLink, undefined, 4)}</pre>
       {composition && isNode(composition) && (
         <OptimizelyComposition node={composition} />
       )}
