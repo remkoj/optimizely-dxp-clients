@@ -1,6 +1,6 @@
 import { ASTNode, print } from 'graphql'
 import { ComponentType } from 'react';
-import { type ContentLink, type InlineContentLink, type IOptiGraphClient, isContentLink, isInlineContentLink, contentLinkToString, OptiCmsSchema } from "@remkoj/optimizely-graph-client";
+import { type ContentLink, type InlineContentLink, type IOptiGraphClient, isContentLink, isInlineContentLink, OptiCmsSchema } from "@remkoj/optimizely-graph-client";
 import { CmsComponent, CmsComponentWithFragment } from "../../types.js";
 import { CmsContentFragments } from "../../data/queries.js";
 import { validatesFragment, contentLinkToRequestVariables, isCmsComponentWithFragment, isCmsComponentWithDataQuery } from "../../utilities.js";
@@ -34,9 +34,11 @@ export function getContent<NDL extends boolean = false>(client: IOptiGraphClient
     }
   }
 
+  // No meaningful fragment provided with inline content, warn in debug, but just return an empty dataset
   if (isInlineContentLink(contentLink)) {
-    console.error(`🔴 [CmsContent][getContent] No data for content ${contentLinkToString(contentLink)}, data cannot be resolved for inline content`)
-    throw new Error(`Unable to render Inline CMS Content without data. (Content Type: ${componentLabel}; Content Link: ${contentLinkToString(contentLink)}; Data keys: ${Object.getOwnPropertyNames(fragmentData ?? {}).join(", ")})`)
+    if (debug)
+      console.warn(`🟠 [CmsContent][getContent] No data present for inline content item, this may cause errors if your component expects certain fields to be present`)
+    return (noDataLoad ? fragmentData ?? {} : Promise.resolve(fragmentData ?? {})) as NDL extends true ? Record<string, any> : Promise<Record<string, any>>
   }
 
   if (noDataLoad) {
@@ -45,15 +47,16 @@ export function getContent<NDL extends boolean = false>(client: IOptiGraphClient
     return (noDataLoad ? {} : Promise.resolve({})) as NDL extends true ? Record<string, any> : Promise<Record<string, any>>
   }
 
+  // If we don't have a valid link, stop here
   if (!isContentLink(contentLink)) {
     if (debug)
-      console.log(`🔴 [CmsContent][getContent] Unable to load data for "${componentLabel}" without a valid content link`)
+      console.warn(`🟠 [CmsContent][getContent] Unable to load data for "${componentLabel}" without a valid content link`)
     return Promise.resolve({})
   }
 
   // Return immediately when there's no client
   if (!client) {
-    console.log(`🔴 [CmsContent][getContent] Data loading for "${componentLabel}" requires a GraphQL Client`)
+    console.error(`🔴 [CmsContent][getContent] Data loading for "${componentLabel}" requires a GraphQL Client`)
     throw new Error(`Data loading for "${componentLabel}" requires a GraphQL Client`)
   }
 
@@ -66,14 +69,9 @@ export function getContent<NDL extends boolean = false>(client: IOptiGraphClient
     // If the CMS Preview mode has been enabled, make sure we include that in the query
     if (client.isPreviewEnabled())
       gqlVariables.changeset = client.getChangeset()
-
     if (client.debug)
-      console.log("⚪ [CmsContent] Component data fetching variables:", gqlVariables)
-    return client.request<{}>(gqlQuery, gqlVariables).then(gqlResponse => {
-      if (client.debug)
-        console.log("⚪ [CmsContent] Component request the following data:", gqlResponse)
-      return gqlResponse
-    })
+      console.log("⚪ [CmsContent][getContent] Component fetching data using query, provided variables:", gqlVariables)
+    return client.request<{}>(gqlQuery, gqlVariables)
   }
 
   // Assume there's no data load required for the component

@@ -11,14 +11,15 @@ import {
 } from '@remkoj/optimizely-graph-client/utils'
 import { type ContentLinkWithLocale } from '@remkoj/optimizely-graph-client'
 import {
-  getServerContext,
+  ServerContext,
   Utils,
   CmsContent,
+  updateSharedServerContext,
   type ComponentFactory,
 } from '@remkoj/optimizely-cms-react/rsc'
 import { notFound } from 'next/navigation.js'
 import OnPageEdit from '../components/on-page-edit.js'
-import { getAuthorizedServerClient } from '../client.js'
+import { createAuthorizedClient } from '../client.js'
 import React from 'react'
 import Script from 'next/script.js'
 import { getContentById } from './data.js'
@@ -28,7 +29,7 @@ const defaultOptions: EditViewOptions<string> = {
   refreshNotice: () => <></>,
   layout: (props) => <>{props.children}</>,
   loader: getContentById,
-  clientFactory: (token?: string) => getAuthorizedServerClient(token),
+  clientFactory: (token?: string) => createAuthorizedClient(token),
   communicationInjectorPath: '/util/javascript/communicationinjector.js',
   contentResolver: getContentRequest,
   requestValidator: isValidRequest,
@@ -58,12 +59,13 @@ export function createEditPageComponent<LocaleType = string>(
     refreshTimeout,
   } = { ...defaultOptions, ...options } as EditViewOptions<string>
 
-  async function EditPage(props: EditPageProps): Promise<JSX.Element> {
-    // Create context
-    const context = getServerContext()
+  function isDevelopment(): boolean {
+    return process.env.NODE_ENV == 'development'
+  }
 
+  async function EditPage(props: EditPageProps): Promise<JSX.Element> {
     // Validate the search parameters
-    if (!validateRequest(props, false, context.isDevelopment)) {
+    if (!validateRequest(props, false, isDevelopment())) {
       console.error('🔴 [OnPageEdit] Invalid edit mode request')
       return notFound()
     }
@@ -78,10 +80,11 @@ export function createEditPageComponent<LocaleType = string>(
 
     // Build context
     const client = clientFactory(token)
-    //client.updateFlags({ cache: false, queryCache: false })
-    context.setOptimizelyGraphClient(client)
-    context.setComponentFactory(factory)
-    context.setMode(ctx)
+    const context = new ServerContext({
+      client,
+      factory,
+      mode: ctx,
+    })
 
     // Get information from the Request URI
     if (context.isDebug) {
@@ -106,7 +109,10 @@ export function createEditPageComponent<LocaleType = string>(
             ' yielded more then one item, picking first matching'
         )
       }
-      const contentItem = (contentInfo?.content?.items ?? [])[0]
+      const contentItem =
+        (Array.isArray(contentInfo?.content?.items)
+          ? contentInfo?.content?.items[0]
+          : contentInfo?.content?.items) ?? undefined
       const contentType = Utils.normalizeContentType(
         contentItem?._metadata.types
       )
@@ -130,6 +136,7 @@ export function createEditPageComponent<LocaleType = string>(
         locale: contentItem._metadata.locale,
         version: contentItem._metadata.version,
       }
+
       if (context.isDebug) {
         console.log(
           '⚪ [OnPageEdit] Resolved content:',
@@ -143,6 +150,9 @@ export function createEditPageComponent<LocaleType = string>(
       // Store the editable content so it can be tested
       context.setEditableContentId(contentLink)
       if (contentLink.locale) context.setLocale(contentLink.locale)
+
+      // Make the shared server context available
+      updateSharedServerContext(context)
 
       // Render the content, with edit mode context
       const isPage =
@@ -165,6 +175,7 @@ export function createEditPageComponent<LocaleType = string>(
               contentType={contentType}
               contentLink={contentLink}
               fragmentData={contentItem}
+              ctx={context}
             />
           </Layout>
           {context.isDebug && (

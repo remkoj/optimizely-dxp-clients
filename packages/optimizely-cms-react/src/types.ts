@@ -2,6 +2,7 @@ import type { PropsWithChildren, ComponentType as ReactComponentType } from "rea
 import type { DocumentNode } from "graphql"
 import type { TypedDocumentNode } from '@graphql-typed-document-node/core'
 import type { ContentLinkWithLocale, ContentLink, InlineContentLinkWithLocale } from "@remkoj/optimizely-graph-client"
+import type { GenericContext } from "./context/types.js"
 
 // Export reused content types
 export type ContentType = string[]
@@ -36,6 +37,11 @@ export type CmsComponentProps<T, L extends Record<string, any> = Record<string, 
    * Contextual layout data, if any
    */
   layoutProps?: L
+
+  /**
+   * The context in which this component will be rendered
+   */
+  ctx?: GenericContext
 }>
 
 export type ContentQueryProps<LocaleType = string> = ContentLink & {

@@ -64,9 +64,9 @@ export async function CmsContent<LocalesType = string>({
       : ctx.inPreviewMode
         ? 'Preview'
         : 'Public'
-    console.log(
+    /*console.log(
       `👔 [CmsContent] ${mode} mode active for content with id: ${contentLinkToString(contentLink)} of type ${myContentType?.join('/') ?? 'unknown'}`
-    )
+    )*/
     if (
       (ctx.inEditMode || ctx.inPreviewMode) &&
       graphClient.currentAuthMode == AuthMode.Public
@@ -102,6 +102,7 @@ export async function CmsContent<LocalesType = string>({
       data={data}
       inEditMode={ctx.inEditMode}
       layoutProps={layoutProps}
+      ctx={ctx}
     >
       {children}
     </Component>

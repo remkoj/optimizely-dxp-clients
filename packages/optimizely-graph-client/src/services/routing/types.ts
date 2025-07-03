@@ -36,10 +36,13 @@ export interface IRouteResolver {
   /**
    * Retrieve all registered routes for the provided domain - all domains if none specified
    * 
-   * @param       domain      The domain to filter on
+   * @param       domainOrChannelId   The domain to filter on
+   * @param       onlyWithDomain      If set/kept to `undefined` will only filter by domain. When
+   *                                  set to `true`, requires the domain (CMS SaaS/13 only) to be 
+   *                                  set. This allows to get all routes bound to a domain.
    * @returns     The list of routes
    */
-  getRoutes(domainOrChannelId?: string): Promise<Route[]>
+  getRoutes(domainOrChannelId?: string, onlyWithDomain?: boolean): Promise<Route[]>
 
   /**
    * Resolve a path to route information, either from string or from URL

@@ -2,7 +2,7 @@ import { gql } from "graphql-request"
 import { type Route } from "./getAllRoutes.js"
 
 export type Variables = {
-  path: string
+  path: string | string[]
   domain?: string | null
   changeset?: string | null
 }
@@ -10,21 +10,22 @@ export type Variables = {
 export type Result = {
   getRouteByPath: {
     total: number
-    items: Route[]
+    items: Route
   }
 }
 
-export const query = gql`query getRouteByPath($path: String!, $domain: String, $changeset: String) {
-  getRouteByPath: _Content(
+export const query = gql`query getRouteByPath($path: [String!]!, $domain: String, $changeset: String) {
+  getRouteByPath: _Page(
     where: {
       _metadata: {
-        url: { default: { eq: $path }, base: { endsWith: $domain } }
+        url: { default: { in: $path }, base: { endsWith: $domain } }
         changeset: { eq: $changeset }
       }
     }
+    orderBy: { _metadata: { url: { default: ASC } } }
   ) {
     total
-    items {
+    items: item {
       _metadata {
         key
         version
@@ -41,6 +42,7 @@ export const query = gql`query getRouteByPath($path: String!, $domain: String, $
         ... on IMediaMetadata {
           slug: routeSegment
         }
+        changeset
       }
       changed: _modified
     }

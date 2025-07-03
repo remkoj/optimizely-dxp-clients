@@ -6,7 +6,7 @@ import { type OptimizelyGraphConfig } from '../../types.js'
 import type { Route, IRouteResolver } from "./types.js"
 import type { ContentLinkWithLocale } from '../types.js'
 
-import type { OptimizelyCmsRoutingApi } from './queries/types.js'
+import type { OptimizelyCmsRoutingApi, OptimizelyCmsRoutingApiClass } from './queries/types.js'
 
 
 /**
@@ -68,9 +68,13 @@ export class RouteResolver implements IRouteResolver {
 
   private async getResolver(): Promise<OptimizelyCmsRoutingApi> {
     if (!this._resolver) {
-      if (this._resolverMode == OptiCmsSchema.CMS12)
-        return new (await import('./queries/cms12/index.js')).default
-      this._resolver = new (await import('./queries/cms13/index.js')).default
+      let ResolverClass: OptimizelyCmsRoutingApiClass
+      if (this._resolverMode == OptiCmsSchema.CMS12) {
+        ResolverClass = (await import('./queries/cms12/index.js')).default
+      } else {
+        ResolverClass = (await import('./queries/cms13/index.js')).default
+      }
+      this._resolver = new ResolverClass()
     }
     return this._resolver
   }
@@ -78,11 +82,14 @@ export class RouteResolver implements IRouteResolver {
   /**
    * Retrieve all registered routes for the provided domain - all domains if none specified
    * 
-   * @param       domain      The domain to filter on
+   * @param       domain          The domain to filter on
+   * @param       onlyWithDomain  If set/kept to `undefined` will only filter by domain. When set
+   *                              to `true`, requires the domain (CMS SaaS/13 only) to be set. This
+   *                              allows to get all routes bound to a domain.
    * @returns     The list of routes
    */
-  public async getRoutes(domain?: string): Promise<Route[]> {
-    return (await this.getResolver()).getRoutes(this._cgClient, domain)
+  public async getRoutes(domain?: string, onlyWithDomain?: boolean): Promise<Route[]> {
+    return (await this.getResolver()).getRoutes(this._cgClient, domain, onlyWithDomain)
   }
 
   /**

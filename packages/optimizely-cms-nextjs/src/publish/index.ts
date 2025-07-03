@@ -1,11 +1,12 @@
 import { type NextRequest, NextResponse } from 'next/server.js'
 import { revalidatePath, revalidateTag } from "next/cache.js"
-import { type ClientFactory, OptiCmsSchema, RouteResolver, type Route } from '@remkoj/optimizely-graph-client'
-import { createClient } from '@remkoj/optimizely-cms-nextjs'
+import { type ClientFactory, type IOptiGraphClient, OptiCmsSchema, RouteResolver, type Route } from '@remkoj/optimizely-graph-client'
+import { createAuthorizedClient } from '../client.js'
 
 export { type NextRequest, NextResponse } from 'next/server.js'
 export type PublishApiHandler = (req: NextRequest) => Promise<NextResponse<PublishApiResponse>> | NextResponse<PublishApiResponse>
-export type PublishScopes = NonNullable<Parameters<typeof revalidatePath>[1]>
+export type PublishScopes = Parameters<typeof revalidatePath>[1]
+export type DynamicScopes = NonNullable<Parameters<typeof revalidatePath>[1]>
 export type PublishHookData = {
   timestamp: string
   tenantId: string
@@ -57,6 +58,11 @@ export type PublishApiOptions = {
   scopes: Array<PublishScopes>
 
   /**
+   * The scopes for which to revalidate the cache for dynamic routes
+   */
+  dynamicScopes: Array<DynamicScopes>
+
+  /**
    * The tags to revalidate the cache for
    */
   tags: Parameters<typeof revalidateTag>[0] | Array<Parameters<typeof revalidateTag>[0]> | ((data: PublishHookData | null | undefined) => Promise<Array<Parameters<typeof revalidateTag>[0]>>)
@@ -72,7 +78,7 @@ export type PublishApiOptions = {
    * The Optimizely Graph client to use for Graph Operations needed to publish 
    * content
    */
-  client: ClientFactory
+  client: ClientFactory | IOptiGraphClient
 
   /**
    * The router to use when the publishing optimization is enabled
@@ -96,7 +102,7 @@ export type PublishApiOptions = {
    * @param       subject     The Hook Subject, to make the processing different for single or bulk. Typical values are "bulk" or "doc"
    * @returns     An array, with the first item being the key, second locale
    */
-  itemIdToKeyAndLocale: (itemId: string, subject?: PublishHookData['type']['subject']) => { key: string, locale: string } | undefined
+  itemIdToKeyAndLocale: (itemId: string, subject?: PublishHookData['type']['subject']) => { key: string, locale: string, version?: string, status?: string } | undefined
 
   /**
    * Basic filter for bulk operations, to only select those items in a bulk operation
@@ -110,8 +116,8 @@ export type PublishApiOptions = {
 
 export type PublishApiResponse = {
   revalidated: {
-    paths: Array<Parameters<typeof revalidatePath>[0]>
-    scopes: Array<PublishScopes>
+    paths: Array<string | { path: string, scope: PublishScopes }>
+    scopes?: Array<PublishScopes>
     tags: Array<Parameters<typeof revalidateTag>[0]>
   }
   optimized: boolean
@@ -121,29 +127,54 @@ export type PublishApiResponse = {
 const publishApiDefaults: PublishApiOptions = {
   paths: ['/', '/[[...path]]', '/[lang]', '/[lang]/[[...path]]'],
   additionalPaths: [],
-  scopes: ['page', 'layout'],
+  scopes: [undefined, 'layout'],
+  dynamicScopes: ['page', 'layout'],
   tags: [],
   optimizePublish: false,
-  client: createClient,
+  client: createAuthorizedClient,
   router: {},
   hookDataFilter: (hookType) => hookType.subject == 'bulk' && hookType.action == 'completed',
   bulkItemStatusFilter: (bulkItemStatus: string) => bulkItemStatus == "indexed" || bulkItemStatus == "deleted",
   itemIdToKeyAndLocale: (id) => {
-    const [key, versionId, locale] = id.split('_')
+    const idParts = id.split('_');
+
+    // The version may or may not be in the ID, so parsing accordingly
+    const [key, version, locale, status] = idParts.length >= 4 ?
+      idParts :
+      [idParts[0], undefined, idParts[1], idParts[2]];
+
+    // Only return a value if we have both a key & locale
     if (key && locale)
-      return { key: key.replaceAll('-', ''), locale, versionId }
+      return { key: key.replaceAll('-', ''), locale, version, status }
     return undefined
   }
 }
 
+/**
+ * Create the default handler for webhooks received from Optimizely Graph.
+ * 
+ * @param     options   The configuration fo the API
+ * @returns   The created API Handler
+ */
 export function createPublishApi(options?: Partial<PublishApiOptions>): PublishApiHandler {
-  const { paths, additionalPaths, optimizePublish, client: clientFactory, router: routerFactory, hookDataFilter, tags, scopes, itemIdToKeyAndLocale, bulkItemStatusFilter }: PublishApiOptions = {
+  const {
+    paths,
+    additionalPaths,
+    optimizePublish,
+    client: clientFactory,
+    router: routerFactory,
+    hookDataFilter,
+    tags,
+    scopes,
+    dynamicScopes,
+    itemIdToKeyAndLocale,
+    bulkItemStatusFilter
+  }: PublishApiOptions = {
     ...publishApiDefaults,
     ...options
   }
 
-  const client = clientFactory()
-  function getRouteResolver(): PartialRouteResolver {
+  function getRouteResolver(client: IOptiGraphClient): PartialRouteResolver {
     return typeof routerFactory == 'function' ? routerFactory() : new RouteResolver(client, routerFactory?.urlBase, routerFactory?.resolverMode ?? client.currentOptiCmsSchema)
   }
 
@@ -155,14 +186,36 @@ export function createPublishApi(options?: Partial<PublishApiOptions>): PublishA
     return Promise.resolve([tags])
   }
 
-  function publishAll(targetPaths: string[], targetTags: Array<Parameters<typeof revalidateTag>[0]>, optimized: boolean = false): PublishApiResponse {
-    scopes.forEach(scope => {
-      targetPaths.forEach(path => revalidatePath(path, scope))
-      additionalPaths.forEach(path => revalidatePath(path, scope))
-    })
+  function isDynamic(path: string) {
+    return path.indexOf("[") >= 0
+  }
 
+  function publishAll(targetPaths: string[], targetTags: Array<Parameters<typeof revalidateTag>[0]>, optimized: boolean = false, publishScopes: PublishScopes[] = scopes, dscopes: DynamicScopes[] = dynamicScopes): PublishApiResponse {
+    const publishedPathAndScopes: { path: string, scope: PublishScopes }[] = []
+
+    // Publish the paths targeted explicitly
+    targetPaths.forEach(path => {
+      const scopes = isDynamic(path) ? dscopes : publishScopes
+      scopes.forEach(scope => {
+        revalidatePath(path, scope)
+        publishedPathAndScopes.push({ path, scope })
+      })
+    });
+
+    // Publish the enforced paths
+    additionalPaths.forEach(path => {
+      const scopes = isDynamic(path) ? dscopes : publishScopes
+      scopes.forEach(scope => {
+        revalidatePath(path, scope)
+        publishedPathAndScopes.push({ path, scope })
+      })
+    });
+
+    // Publish the tags te published
     targetTags.forEach(tag => revalidateTag(tag))
-    return { revalidated: { scopes, paths: [...targetPaths, ...additionalPaths], tags: targetTags }, optimized }
+
+    // Build the outcome
+    return { revalidated: { paths: publishedPathAndScopes, tags: targetTags }, optimized }
   }
 
   function getItemIds(hookData: PublishHookData): Array<{ key: string, locale: string }> {
@@ -190,6 +243,7 @@ export function createPublishApi(options?: Partial<PublishApiOptions>): PublishA
 
   const requestHandler: PublishApiHandler = async (req) => {
     // Validate the request
+    const client = typeof (clientFactory) == 'object' ? clientFactory : clientFactory();
     const publishToken = client.siteInfo.publishToken
     const requestToken = getRequestToken(req)
     if (!publishToken) {
@@ -213,25 +267,30 @@ export function createPublishApi(options?: Partial<PublishApiOptions>): PublishA
       // Purge everything if not known (e.g. for a GET request)
       if (!webhookData) {
         console.error("[Publish-API] No hook data received, optimization disabled")
-        return NextResponse.json(publishAll(paths, publishTags))
+        const responseData = publishAll(paths, publishTags);
+        console.debug("[Publish-API] Publish result:", JSON.stringify(responseData))
+        return NextResponse.json(responseData)
       }
 
       // Make sure we're allowed to process the hook
       if (!hookDataFilter(webhookData.type)) {
         console.log("[Publish-API] Webhook ignored due to hookDataFilter", webhookData.type)
-        return NextResponse.json({ optimized: false, revalidated: { paths: [], scopes: [], tags: [] } })
+        return NextResponse.json({ optimized: false, revalidated: { paths: [], tags: [] } })
       }
 
       // If we're not optimizing, just publish everything
-      if (!optimizePublish)
-        return NextResponse.json(publishAll(paths, publishTags))
+      if (!optimizePublish) {
+        const responseData = publishAll(paths, publishTags);
+        console.debug("[Publish-API] Publish result:", JSON.stringify(responseData))
+        return NextResponse.json(responseData)
+      }
 
       // Get the actual content ids from the hook data
       const contentIds = getItemIds(webhookData)
       console.debug("[Publish-API] Content items to publish:", JSON.stringify(contentIds))
 
       // Resolve the contentids to paths
-      const router = getRouteResolver()
+      const router = getRouteResolver(client)
       const results = await Promise.allSettled(contentIds.map(contentId => router.getContentInfoById(contentId.key, contentId.locale)))
       const pathsToFlush = results.map(result => {
         if (result.status == "rejected") {
@@ -243,7 +302,9 @@ export function createPublishApi(options?: Partial<PublishApiOptions>): PublishA
       console.debug("[Publish-API] Content paths to publish:", JSON.stringify(pathsToFlush))
 
       // Flush these paths
-      return NextResponse.json(publishAll(pathsToFlush, publishTags, true))
+      const responseData = publishAll(pathsToFlush, publishTags, true);
+      console.debug("[Publish-API] Publish result:", JSON.stringify(responseData))
+      return NextResponse.json(responseData)
     } catch (e) {
       console.error("[Publish-API] Error handling publishing request", (e as Error)?.message ?? e)
       return NextResponse.json({ error: (e as Error)?.message ?? "Unknown error " }, { status: 500 })

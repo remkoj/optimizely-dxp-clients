@@ -36,6 +36,7 @@ export function OptimizelyComposition({
         contentType={contentType}
         fragmentData={fragmentData}
         layoutProps={layoutProps}
+        ctx={ctx}
       />
     )
   }
@@ -54,7 +55,10 @@ export function OptimizelyComposition({
 
   const [contentLink, contentTypes, fragmentData, layoutProps] =
     nodePropsFactory(node)
-  const contentType = contentTypes.find((ct) => factory.has([...ct].reverse()))
+  const firstExistingType = contentTypes
+    .map((ct) => factory.has([...ct].reverse()))
+    .indexOf(true)
+  const contentType = contentTypes[firstExistingType]
   if (!contentType)
     throw new Error(
       `🟡 [VisualBuilder] [OptimizelyComposition] The factory must have a definition for one of these types: ${contentTypes.map((x) => x.join('/')).join(', ')}`
@@ -67,6 +71,7 @@ export function OptimizelyComposition({
       fragmentData={fragmentData}
       layoutProps={layoutProps}
       noDataLoad
+      ctx={ctx}
     >
       {(node.nodes ?? []).map((child) => {
         const childKey = child.key ? child.key : `vb::${JSON.stringify(child)}`

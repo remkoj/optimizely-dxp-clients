@@ -19,32 +19,32 @@ export type Route = {
 export type Result = {
   Content: {
     items: Route[],
-    cursor: string,
     total: number
   }
 }
 
 export type Variables = {
-  cursor?: string,
+  skip?: number,
   pageSize?: number,
   typeFilter?: string | string[]
   domain?: string
+  mustHaveDomain?: boolean | null
   changeset?: string | null
 }
 
-export const query = gql`query GetAllRoutes($cursor: String, $pageSize: Int = 100, $typeFilter: [String] = "_Page", $domain: String, $changeset: String) {
-  Content: _Content(
+export const query = gql`query GetAllRoutes($skip: Int = 0, $pageSize: Int = 100, $typeFilter: [String] = "_Page", $domain: String, $mustHaveDomain: Boolean, $changeset: String) {
+  Content: _Page(
     where: {
       _metadata: {
-        url: { default: { exist: true }, base: { endsWith: $domain } }
+        url: { default: { exist: true }, base: { eq: $domain, exist: $mustHaveDomain } }
         types: { in: $typeFilter }
         changeset: { eq: $changeset }
       }
     }
-    orderBy: { _metadata: { url: { default: ASC } } }
     limit: $pageSize
-    cursor: $cursor
+    skip: $skip
   ) {
+    total
     items {
       _metadata {
         key
@@ -65,7 +65,5 @@ export const query = gql`query GetAllRoutes($cursor: String, $pageSize: Int = 10
       }
       changed: _modified
     }
-    cursor
-    total
   }
 }`

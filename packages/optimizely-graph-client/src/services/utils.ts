@@ -83,7 +83,7 @@ export function isContentLinkWithLocale(toTest: any): toTest is ContentLinkWithL
 }
 
 /**
- * Test if the variable is an 
+ * Test if the variable is an inline content link
  * 
  * @param toTest 
  * @returns 
@@ -95,9 +95,44 @@ export function isInlineContentLink(toTest: any): toTest is InlineContentLinkWit
   if ((toTest as InlineContentLinkWithLocale).isInline === true)
     return true
 
-  return ((toTest as InlineContentLinkWithLocale).key == null || (toTest as ContentLinkWithLocale).key == "" || (toTest as InlineContentLinkWithLocale).key == undefined) &&
-    ((toTest as InlineContentLinkWithLocale).version == null || (toTest as InlineContentLinkWithLocale).version == undefined) &&
-    (typeof (toTest as InlineContentLinkWithLocale).locale == 'string' || (toTest as InlineContentLinkWithLocale).locale == null || (toTest as InlineContentLinkWithLocale).locale == undefined)
+  return (
+    isNullOrEmptyString((toTest as InlineContentLinkWithLocale).key) &&
+    isNullOrEmpty((toTest as InlineContentLinkWithLocale).version) &&
+    isOptionalString((toTest as InlineContentLinkWithLocale).locale)
+  )
+}
+
+/**
+ * Test if a value is null, undefined or an empty string
+ * 
+ * @param     value 
+ * @returns 
+ */
+function isNullOrEmptyString(value: any): value is string | null | undefined {
+  if (value === null || value === undefined)
+    return true;
+  return typeof (value) == 'string' && value == "";
+}
+
+/**
+ * Simple inverse boolean coescaling. I.e. it returns true when the value
+ * is not set, null or evaluates to false (e.g. empty string, numeric 0, etc...)
+ * 
+ * @param value 
+ * @returns 
+ */
+function isNullOrEmpty<T>(value: T | null | undefined): value is T {
+  return value ? false : true
+}
+
+/**
+ * Test if a value is null, undefined or a string of any length
+ * 
+ * @param value 
+ * @returns 
+ */
+function isOptionalString(value: any): value is string | null | undefined {
+  return value === null || value === undefined || typeof (value) == 'string';
 }
 
 type Nullable<T> = {

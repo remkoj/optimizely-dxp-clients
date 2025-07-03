@@ -36,7 +36,7 @@ export function resolveComponent(
   // Ensure we have a factory - we should, but lets' help by providing an explicit error
   if (!factory) {
     console.error(
-      `🔴 [CmsContent] No content type factory registered in the context`
+      `🔴 [CmsContent][resolveComponent] No content type factory registered in the context`
     )
     throw new Error('Empty factory on the context')
   }
@@ -56,12 +56,17 @@ export function resolveComponent(
   if (!myContentType || myContentType.length == 0) {
     if (isDebug)
       console.error(
-        `🔴 [CmsContent] The content type ${JSON.stringify(contentType)}, with prefix ${JSON.stringify(prefix)} yielded an empty normalized type`
+        `🔴 [CmsContent][resolveComponent] The content type ${JSON.stringify(contentType)}, with prefix ${JSON.stringify(prefix)} yielded an empty normalized type`
       )
     throw new Error(
       `The content type ${JSON.stringify(contentType)}, with prefix ${JSON.stringify(prefix)} yielded an empty normalized type`
     )
   }
+
+  if (isDebug)
+    console.log(
+      `⚪ [CmsContent][resolveComponent] Normalized content type ${JSON.stringify(contentType)} to ${myContentType}`
+    )
 
   // Resolve component
   const Component = Utils.resolveComponentType(

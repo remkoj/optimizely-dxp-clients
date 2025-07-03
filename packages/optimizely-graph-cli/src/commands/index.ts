@@ -1,4 +1,4 @@
-import type { CliModuleList } from 'src/app.js'
+import type { CliModuleList } from 'src/types.js'
 
 import publish from './publish.js'
 import unpublish from './unpublish.js'

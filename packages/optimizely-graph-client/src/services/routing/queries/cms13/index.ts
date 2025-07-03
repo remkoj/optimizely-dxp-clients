@@ -16,68 +16,75 @@ export class OptimizelyCms13Client implements OptimizelyCmsRoutingApi {
     this._changeset = null
   }
 
-  async getRoutes(client: GraphQLClient, siteId?: string): Promise<Route[]> {
-    client.updateFlags({ queryCache: false/*, cache: false*/ }, true)
-    const variables: GetAllRoutes.Variables = { domain: siteId, changeset: this._changeset || client.getChangeset() }
+  async getRoutes(client: GraphQLClient, siteId?: string, onlyWithDomain?: boolean): Promise<Route[]> {
     if (client.debug)
-      console.log("⚪ [RouteResolver] Fetching all routes with filters:", JSON.stringify(variables))
-    let page = await client.request<GetAllRoutes.Result, GetAllRoutes.Variables>(GetAllRoutes.query, variables).catch(e => {
+      console.log(`⚪ [RouteResolver] Loading routes for ${siteId ?? 'all applications'}${!siteId && onlyWithDomain ? ' that have a domain defined.' : ''}`)
+
+    let totalRoutes: number = 0
+    let retrievedRoutes: number = 0
+    let currentPage: number = 0
+    let pageSize: number = 50
+    const graphRoutes: GetAllRoutes.Route[] = []
+
+    do {
       if (client.debug)
-        console.error("🔴 [RouteResolver] Error while fetching routes", e)
-      return undefined
-    })
-    let results = page?.Content?.items ?? []
-    const totalCount = page?.Content?.total ?? 0
-    const cursor = page?.Content?.cursor ?? ''
+        console.log(`⚪ [RouteResolver] Fetching page ${currentPage + 1} with ${pageSize} routes, of ${totalRoutes > 0 ? Math.ceil(totalRoutes / pageSize) : 'unknown'}`)
+      const page = await client.request<GetAllRoutes.Result, GetAllRoutes.Variables>(GetAllRoutes.query, {
+        domain: siteId,
+        mustHaveDomain: onlyWithDomain ? true : null,
+        pageSize: pageSize,
+        skip: currentPage * pageSize,
+        changeset: this._changeset || client.getChangeset()
+      }).catch(e => {
+        if (client.debug)
+          console.error("🔴 [RouteResolver] Error while fetching routes", e)
+        return undefined
+      })
 
-    if (totalCount > 0 && cursor !== '' && totalCount > results.length)
-      while ((page?.Content?.items?.length ?? 0) > 0 && results.length < totalCount) {
-        page = await client.request<GetAllRoutes.Result, GetAllRoutes.Variables>({
-          document: GetAllRoutes.query,
-          variables: {
-            cursor,
-            domain: siteId
-          }
-        })
-        results = results.concat(page.Content?.items ?? [])
+      if (page) {
+        totalRoutes = page.Content.total
+        retrievedRoutes = page.Content.items.length
+        graphRoutes.push(...page.Content.items)
+        currentPage++
+      } else {
+        totalRoutes = 0
+        retrievedRoutes = 0
       }
+    } while (totalRoutes > 0 && retrievedRoutes > 0 && graphRoutes.length < totalRoutes && retrievedRoutes == pageSize)
 
-    client.restoreFlags()
-    return results.map(this.tryConvertResponse.bind(this)).filter(this.isNotNullOrUndefined)
+    return graphRoutes.map(this.tryConvertResponse.bind(this)).filter(this.isNotNullOrUndefined)
   }
 
   async getRouteByPath(client: GraphQLClient, path: string, siteId?: string): Promise<undefined | Route> {
-    const variables: GetRouteByPath.Variables = { path: path, domain: siteId, changeset: this._changeset || client.getChangeset() }
     if (client.debug)
-      console.log("⚪ [RouteResolver] Resolving content by path:", JSON.stringify(variables))
+      console.log(`⚪ [RouteResolver] Resolving content info for ${path} on ${siteId ? siteId : "all domains"}`)
+
+    const paths = [path, path.endsWith('/') ? path.substring(0, path.length - 1) : path + '/'].filter(p => p)
 
     const resultSet = await client.request<GetRouteByPath.Result, GetRouteByPath.Variables>({
       document: GetRouteByPath.query,
-      variables
+      variables: { path: paths, domain: siteId, changeset: this._changeset || client.getChangeset() }
     })
 
-    if ((resultSet.getRouteByPath?.items?.length ?? 0) === 0) {
+    if ((resultSet.getRouteByPath?.total ?? 0) === 0) {
       if (client.debug)
         console.warn("🟠 [RouteResolver] No items in the resultset");
       return undefined
     }
 
-    if ((resultSet.getRouteByPath?.items?.length ?? 0) > 1)
-      throw new Error("🔴 [RouteResolver] Ambiguous URL provided, did you omit the domain in a multi-site setup?")
+    if ((resultSet.getRouteByPath?.total ?? 0) > 1) {
+      if (client.debug)
+        console.warn("🟠 [RouteResolver] Ambiguous URL provided - picking first match, did you omit the domain in a multi-site setup?")
+    }
 
     if (client.debug)
-      console.log(`⚪ [RouteResolver] Resolved content info for ${path} to: ${JSON.stringify(resultSet.getRouteByPath.items[0])}`)
+      console.log(`⚪ [RouteResolver] Resolved content info for ${path} to: ${JSON.stringify(resultSet.getRouteByPath.items)}`)
 
-    return this.convertResponse(resultSet.getRouteByPath.items[0])
+    return this.convertResponse(resultSet.getRouteByPath.items)
   }
 
   async getRouteById(client: GraphQLClient, contentId: string, locale: string, version: string | number): Promise<undefined | Route> {
-    const variables: GetRouteById.Variables = {
-      key: contentId,
-      version: version?.toString(),
-      locale: locale?.replaceAll('-', '_'),
-      changeset: this._changeset || client.getChangeset()
-    }
+    const variables: GetRouteById.Variables = { key: contentId, version: version?.toString(), locale: locale?.replaceAll('-', '_'), changeset: this._changeset || client.getChangeset() }
 
     if (client.debug)
       console.log("⚪ [RouteResolver] Resolving content by id:", JSON.stringify(variables))

@@ -16,7 +16,7 @@ export default [
         locale: $locale
       ) {
         total
-        items {
+        items: item {
           ...IContentData
           ...BlockData
           ...PageData
@@ -34,7 +34,7 @@ export default [
         locale: $locale
       ) {
         total
-        items {
+        items: item {
           ...IContentData
           ...PageData
         }
@@ -51,7 +51,7 @@ export default [
             locale: $locale
         ) {
             total
-            items {
+            items: item {
                 _metadata {
                     types
                 }
