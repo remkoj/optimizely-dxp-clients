@@ -92,6 +92,9 @@ export function isInlineContentLink(toTest: any): toTest is InlineContentLinkWit
   if (typeof toTest != 'object' || toTest == null)
     return false
 
+  if ((toTest as InlineContentLinkWithLocale).isInline === true)
+    return true
+
   return (
     isNullOrEmptyString((toTest as InlineContentLinkWithLocale).key) &&
     isNullOrEmpty((toTest as InlineContentLinkWithLocale).version) &&

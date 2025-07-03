@@ -100,6 +100,7 @@ export function createEditPageComponent<LocaleType = string>(
       const contentInfo = await getContentById(client, {
         ...contentRequest,
         locale: localeToGraphLocale(contentRequest.locale),
+        changeset: client.getChangeset(),
       })
       if ((contentInfo?.content?.total ?? 0) > 1) {
         console.warn(

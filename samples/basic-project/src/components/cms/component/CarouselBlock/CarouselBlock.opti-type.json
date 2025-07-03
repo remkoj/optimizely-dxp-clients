@@ -1,0 +1,36 @@
+{
+  "key": "CarouselBlock",
+  "displayName": "Carousel",
+  "description": "",
+  "baseType": "component",
+  "sortOrder": 100,
+  "mayContainTypes": [],
+  "mediaFileExtensions": [],
+  "compositionBehaviors": [
+    "sectionEnabled"
+  ],
+  "properties": {
+    "CarouselItemsContentArea": {
+      "type": "array",
+      "displayName": "Carousel items",
+      "description": "",
+      "localized": false,
+      "required": false,
+      "group": "Information",
+      "sortOrder": 10,
+      "editorSettings": {},
+      "minItems": 1,
+      "maxItems": 10,
+      "items": {
+        "type": "content",
+        "allowedTypes": [
+          "HeroBlock",
+          "Image",
+          "Video",
+          "QuoteBlock"
+        ],
+        "restrictedTypes": []
+      }
+    }
+  }
+}
