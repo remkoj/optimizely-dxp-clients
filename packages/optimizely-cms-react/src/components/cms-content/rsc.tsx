@@ -83,7 +83,8 @@ export async function CmsContent<LocalesType = string>({
     variant,
     ctx
   )
-  if (isComponentMissingComponent(Component)) return <Component />
+  if (isComponentMissingComponent(Component))
+    return <Component contentLink={contentLink as ContentLink} />
 
   // Ensure we have the data the Component requested
   const data = await getContent(

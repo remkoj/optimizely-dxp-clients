@@ -7,6 +7,15 @@ import {
   type PropsWithChildren,
   type ComponentType,
 } from 'react'
+import { type ContentLink } from '@remkoj/optimizely-graph-client'
+
+export function getComponentLabel(componentInstance?: ComponentType | null) {
+  if (!componentInstance) return 'n/a'
+  if (componentInstance.displayName) return componentInstance.displayName
+  if (typeof componentInstance == 'function' && componentInstance.name)
+    return componentInstance.name
+  return componentInstance.toString()
+}
 
 /**
  * Helper function to safely resolve a component from the ContentType information to
@@ -71,13 +80,21 @@ export function resolveComponent(
     const contentTypeDisplay = Array.isArray(myContentType)
       ? myContentType.join('/')
       : myContentType
+    if (isDebug)
+      console.warn(
+        `🟠 [CmsContent] Component of type "${contentTypeDisplay}" not resolved by factory`
+      )
     if (isDebug || inEditMode) {
-      const ErrorComponent: ComponentMissingComponent = (props) => (
+      const ErrorComponent: ComponentMissingComponent = ({
+        children,
+        contentLink,
+      }) => (
         <>
           <div className="opti-error">
-            Component of type "{contentTypeDisplay}" not resolved by factory
+            Component of type "{contentTypeDisplay}" not resolved by factory for{' '}
+            {contentLink?.key ?? ''} version {contentLink?.version ?? ''}
           </div>
-          {props.children}
+          {children}
         </>
       )
       ErrorComponent.displayName = 'Opti::ComponentMissing'
@@ -89,12 +106,19 @@ export function resolveComponent(
   }
 
   // Return the component
+  if (isDebug)
+    console.log(
+      '⚪ [CmsContent] Rendering item using component:',
+      getComponentLabel(Component as ComponentType)
+    )
   return Component
 }
 
 export default resolveComponent
 
-export type ComponentMissingComponent = FunctionComponent<PropsWithChildren> & {
+export type ComponentMissingComponent = FunctionComponent<
+  PropsWithChildren<{ contentLink?: ContentLink }>
+> & {
   displayName: 'Opti::ComponentMissing'
 }
 

@@ -5,11 +5,8 @@ import type {
   ClientFactory,
 } from '@remkoj/optimizely-graph-client'
 import type { DefaultCmsPageProps } from './page.js'
-import {
-  getMetaDataByPath as getMetaDataByPathBase,
-  type GetMetaDataByPathMethod,
-} from './data.js'
-import { getServerClient } from '../client.js'
+import { type GetMetaDataByPathMethod } from './data.js'
+import { createClient } from '../client.js'
 import { Utils, isDebug } from '@remkoj/optimizely-cms-react/rsc'
 
 export type CmsPageLayout = {
@@ -24,15 +21,14 @@ export type CmsPageLayout = {
 
 export type CreateLayoutOptions = {
   defaultLocale: string | null
-  getMetaDataByPath: GetMetaDataByPathMethod
+  getMetaDataByPath?: GetMetaDataByPathMethod
   client: ClientFactory
   channel?: ChannelDefinition
 }
 
 const defaultCreateLayoutOptions: CreateLayoutOptions = {
   defaultLocale: null,
-  getMetaDataByPath: getMetaDataByPathBase,
-  client: getServerClient,
+  client: createClient,
 }
 
 export function createLayout(
@@ -45,7 +41,6 @@ export function createLayout(
     channel,
   }: CreateLayoutOptions = {
     ...defaultCreateLayoutOptions,
-    ...{ defaultLocale: null },
     ...options,
   }
 
@@ -66,6 +61,13 @@ export function createLayout(
           `⚪ [CmsPageLayout] Generating metadata for: ${relativePath}`
         )
 
+      if (!getMetaDataByPath) {
+        if (isDebug())
+          console.log(
+            `🟡 [CmsPageLayout] No generic metadata function provided`
+          )
+        return {}
+      }
       const variables = {
         path: relativePath,
       }
