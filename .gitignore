@@ -13,6 +13,7 @@
 *.tsbuildinfo
 
 # NPM build artifacts
+node_modules/
 artefacts/*.tgz
 
 # IDE Configuration
