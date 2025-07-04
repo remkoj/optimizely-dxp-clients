@@ -9,9 +9,8 @@ import type { ContentLinkWithLocale } from '../types.js'
 import type { OptimizelyCmsRoutingApi, OptimizelyCmsRoutingApiClass } from './queries/types.js'
 
 
-// Main router class
 /**
- * 
+ * Default router implementation for Optimizely CMS
  */
 export class RouteResolver implements IRouteResolver {
   private _cgClient: IOptiGraphClient
@@ -49,6 +48,22 @@ export class RouteResolver implements IRouteResolver {
     this._cgClient = isOptiGraphClient(clientOrConfig) ? clientOrConfig : createClient(clientOrConfig)
     this._defaultUrlBase = urlBase
     this._resolverMode = resolverMode ?? this._cgClient.currentOptiCmsSchema
+  }
+
+  public enablePreview(changeset?: string): void {
+    this.getResolver().then(resolver => {
+      if (this._cgClient.debug)
+        console.log("⚪ [RouteResolver] Enabling preview mode for changeset:", changeset ?? "default")
+      resolver.enablePreview(changeset)
+    })
+  }
+
+  public disablePreview(): void {
+    this.getResolver().then(resolver => {
+      if (this._cgClient.debug)
+        console.log("⚪ [RouteResolver] Disabling preview mode")
+      resolver.disablePreview()
+    })
   }
 
   private async getResolver(): Promise<OptimizelyCmsRoutingApi> {

@@ -48,6 +48,7 @@ export type ContentQueryProps<LocaleType = string> = ContentLink & {
   locale?: Array<LocaleType> | LocaleType | null
   path?: string | null
   domain?: string | null
+  changeset?: string | null
 }
 
 /**
@@ -56,7 +57,7 @@ export type ContentQueryProps<LocaleType = string> = ContentLink & {
 export type ResponseDataType<T extends DocumentNode> = T extends TypedDocumentNode<infer DataType> ? DataType : { [key: string]: any };
 
 export type GetDataQuery<T> = () => TypedDocumentNode<T, ContentQueryProps> | DocumentNode
-export type GetDataFragment<T> = () => [string, TypedDocumentNode<T, never> | DocumentNode]
+export type GetDataFragment<T> = () => [string, TypedDocumentNode<T, never> | DocumentNode | string]
 
 export type WithGqlFragment<BaseComponent, DataType> = BaseComponent & {
   getDataFragment: GetDataFragment<DataType>

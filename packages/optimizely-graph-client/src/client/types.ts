@@ -240,6 +240,30 @@ export interface IOptiGraphClient extends ClientInstanceType {
    * @returns 
    */
   setRequestMiddleware: (additionalMiddleware: RequestMiddleware) => IOptiGraphClient
+
+  /**
+   * Enable the "enablePreview" flag for this client. Setting this will not
+   * affect the client itself, but makes the configuration of the preview
+   * available to the application through the `getChangeset` method.
+   * 
+   * @param changeset   The changeset to apply, uses the default changeset if omitted
+   */
+  enablePreview(changeset?: string): IOptiGraphClient
+
+  /**
+   * Remove the "enablePreview" flag for this client.
+   */
+  disablePreview(): IOptiGraphClient
+
+  /**
+   * Check if the preview has been enabled
+   */
+  isPreviewEnabled(): boolean
+
+  /**
+   * Get the current changeset for this client
+   */
+  getChangeset(): string | null
 }
 
 // Factory service

@@ -4,6 +4,7 @@ import { type Route } from "./getAllRoutes.js"
 export type Variables = {
   path: string | string[]
   domain?: string | null
+  changeset?: string | null
 }
 
 export type Result = {

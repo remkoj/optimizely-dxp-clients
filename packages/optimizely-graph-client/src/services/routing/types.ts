@@ -15,6 +15,23 @@ export type Route = {
  * Main Router pattern, allow for implementation specific overrides
  */
 export interface IRouteResolver {
+  /**
+   * Enable preview mode for the RouteResolver, when enabled this will add a filter to the
+   * methods of this instance that allows selecting the appropriate version of the content
+   * item.
+   * 
+   * ***Warning***: Enabling previews, without a GraphQL client that has authentication in place
+   * will cause missing routes in the results
+   * 
+   * @param   changeset   The changeset to use, if omitted the it will use the published version
+   *                      or main draft of each content item.
+   */
+  enablePreview(changeset?: string): void
+
+  /**
+   * Disable preview mode for the RouteResolver
+   */
+  disablePreview(): void
 
   /**
    * Retrieve all registered routes for the provided domain - all domains if none specified
@@ -47,5 +64,14 @@ export interface IRouteResolver {
    */
   routeToContentLink(route: Route): ContentLinkWithLocale
 
+  /**
+   * Get the routing info for a specific content item
+   * 
+   * @param   key       The key of the content item
+   * @param   locale    The locale to use
+   * @param   version   The version of the content item
+   * @returns The Route information, if the `key`, `version`, `locale` combination 
+   *          yields a valid item
+   */
   getContentInfoById(key: string, locale?: string, version?: string | number): Promise<undefined | Route>
 }
