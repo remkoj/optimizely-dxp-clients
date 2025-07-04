@@ -35,5 +35,5 @@
     "rebuild": "yarn clean && yarn generate && tsc --build --force",
     "generate": "yarn node scripts/create-client.mjs"
   },
-  "stableVersion": "5.0.2"
+  "stableVersion": "5.1.0"
 }

@@ -68,5 +68,5 @@
     "watch": "yarn tsc --watch",
     "opti-patch": "yarn node dist/patch.js"
   },
-  "stableVersion": "5.0.2"
+  "stableVersion": "5.1.0"
 }

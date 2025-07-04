@@ -78,5 +78,5 @@
     "watch": "yarn tsc --watch",
     "recompile": "yarn tsc --build --clean && yarn tsc --build --force"
   },
-  "stableVersion": "5.0.2"
+  "stableVersion": "5.1.0"
 }

@@ -1,17 +1,17 @@
 import * as Operations from './client/sdk.gen'
-import { type Options } from './client/sdk.gen'
 import { type CmsIntegrationApiOptions, getCmsIntegrationApiConfigFromEnvironment } from "./config";
 import { type InstanceApiVersionInfo, OptiCmsVersion } from "./types";
-import { createClient, type RequestResult } from './client/client';
+import { createClient, type RequestResult, type ResponseStyle } from './client/client';
 import { type CreateClientConfig } from './client/client.gen';
 import buildInfo from "./version.json"
 import { getAccessToken as getAccessTokenImpl } from './getaccesstoken'
 
-type OperationsType = typeof Operations
-type OperationReturnType<RT> = RT extends RequestResult<infer TData, any, boolean> ? Promise<TData> : RT
+type OperationsType = { -readonly [KT in keyof typeof Operations]: (typeof Operations)[KT] }
+type OperationsNames = keyof OperationsType
+type OperationReturnType<RT extends (...args: any) => any> = ReturnType<RT> extends RequestResult<any, any, boolean, ResponseStyle> ? Promise<NonNullable<Awaited<ReturnType<RT>>['data']>> : never
 type ApiClientFunctions = {
-  [KT in keyof OperationsType]: OperationsType[KT] extends Function ?
-  (options?: Parameters<OperationsType[KT]>[0] extends Options<infer DT, boolean> ? Omit<DT, 'url'> : undefined) => OperationReturnType<ReturnType<OperationsType[KT]>> :
+  readonly [KT in OperationsNames]: OperationsType[KT] extends Function ?
+  (options?: Parameters<OperationsType[KT]>[0]) => OperationReturnType<OperationsType[KT]> :
   never
 }
 

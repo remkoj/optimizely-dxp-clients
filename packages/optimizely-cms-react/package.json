@@ -52,5 +52,5 @@
     "watch": "tsc --watch",
     "recompile": "tsc --build --clean && tsc --build --force"
   },
-  "stableVersion": "5.0.2"
+  "stableVersion": "5.1.0"
 }

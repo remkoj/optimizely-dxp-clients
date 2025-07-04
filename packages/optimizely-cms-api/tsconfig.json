@@ -1,15 +1,31 @@
 {
   "compilerOptions": {
-    "target": "ES2021",
+    "target": "esnext",
     "module": "CommonJS",
     /*"moduleResolution": "Bundler",*/
     "lib": [
       "DOM",
-      "ES2021",
-      "ES2021.String",
-      "ES2021.Intl",
-      "ES2021.Promise",
-      "ES2021.WeakRef"
+      "DOM.AsyncIterable",
+      "DOM.Iterable",
+      "WebWorker",
+      "WebWorker.AsyncIterable",
+      "WebWorker.ImportScripts",
+      "Webworker.Iterable",
+      "ESNext",
+      "ESNext.String",
+      "ESNext.Intl",
+      "ESNext.Promise",
+      "ESNext.WeakRef",
+      "ESNext.Array",
+      "ESNext.AsyncIterable",
+      "ESNext.BigInt",
+      "ESNext.Collection",
+      "ESNext.Decorators",
+      "ESNext.Disposable",
+      "ESNext.Iterator",
+      "ESNext.Object",
+      "ESNext.Regexp",
+      "ESNext.Symbol"
     ],
     "allowJs": true,
     "checkJs": true,

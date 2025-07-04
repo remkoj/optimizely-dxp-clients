@@ -71,5 +71,5 @@
     "recompile": "tsc --build --clean && tsc --build --force",
     "generate": "openapi --input https://cg.optimizely.com/app/swagger/swagger.json --output ./src/admin-api/client --name OptimizelyGraphAdminApi && node ./scripts/update-imports.cjs"
   },
-  "stableVersion": "5.0.2"
+  "stableVersion": "5.1.0"
 }
