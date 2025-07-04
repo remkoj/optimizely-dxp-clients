@@ -1,3 +1,4 @@
+'use server'
 import { type ReactNode } from 'react'
 import type { BaseCmsContentProps } from './types.js'
 import getContentType from './get-content-type.js'

@@ -87,7 +87,7 @@ export function createEditPageComponent<LocaleType = string>(
     const { token, ctx, ...contentRequest } = contentRequestInfo
 
     // Build context
-    const client = clientFactory(token)
+    const client = await clientFactory(token)
     const context = new ServerContext({
       client,
       factory,

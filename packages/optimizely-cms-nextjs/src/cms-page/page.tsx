@@ -127,7 +127,10 @@ export type CreatePageOptions<
    * @param scope   The scope in which the client is being created, this allows for checking draftMode in configuring the client
    * @returns       The client instance
    */
-  client: (token?: string, scope?: 'request' | 'metadata') => IOptiGraphClient
+  client: (
+    token?: string,
+    scope?: 'request' | 'metadata'
+  ) => IOptiGraphClient | Promise<IOptiGraphClient>
 
   /**
    * The channel information used to resolve locales, domains and more
@@ -238,12 +241,12 @@ export function createPage<
     ...options,
   } as CreatePageOptions<LocaleEnum, TParams, TSearchParams>
 
-  function buildContext(
+  async function buildContext(
     initialLocale: string = 'en'
-  ): ContextWith<ServerContext, 'client' | 'locale'> {
+  ): Promise<ContextWith<ServerContext, 'client' | 'locale'>> {
     return new ServerContext({
       factory,
-      client: clientFactory(undefined, 'request'),
+      client: await clientFactory(undefined, 'request'),
       mode: 'public',
       locale: initialLocale,
     }) as ContextWith<ServerContext, 'client' | 'locale'>
@@ -251,7 +254,7 @@ export function createPage<
 
   const pageDefintion: OptiCmsNextJsPage<TParams, TSearchParams> = {
     generateStaticParams: async () => {
-      const client = clientFactory(undefined, 'metadata')
+      const client = await clientFactory(undefined, 'metadata')
       const router = routerFactory(client)
       const channelId = getChannelId(client, channel)
       const allRoutes = await router.getRoutes(
@@ -263,7 +266,7 @@ export function createPage<
 
     generateMetadata: async ({ params, searchParams }, parent) => {
       // Get context
-      const context = buildContext()
+      const context = await buildContext()
       const channelId = getChannelId(context.client, channel)
 
       // Read variables from request
@@ -274,10 +277,12 @@ export function createPage<
       if (!requestPath) return Promise.resolve({})
       if (initialLocale) context.setLocale(initialLocale)
 
+      const awaitedParams = await params
+
       // Debug output
       if (context.isDebug)
         console.log(
-          `⚪ [CmsPage.generateMetadata] Processed Next.JS route: ${JSON.stringify(params)} => Optimizely CMS route: ${JSON.stringify({ path: requestPath, siteId: channelId })}`
+          `⚪ [CmsPage.generateMetadata] Processed Next.JS route: ${JSON.stringify(awaitedParams)} => Optimizely CMS route: ${JSON.stringify({ path: requestPath, siteId: channelId })}`
         )
 
       // Resolve the route to a content link
@@ -347,16 +352,18 @@ export function createPage<
 
     CmsPage: async ({ params, searchParams }) => {
       // Prepare the context
-      const context = buildContext()
+      const context = await buildContext()
+      //const params = await asyncParams;
 
       // Analyze the Next.JS Request props
       const [requestPath, initialLocale] = await Promise.all([
         propsToCmsPath({ params, searchParams }),
         paramsToLocale(params, channel),
       ])
+      const awaitedParams = await params
       if (context.isDebug)
         console.log(
-          `⚪ [CmsPage] Processed Next.JS route: ${JSON.stringify(params)} => Optimizely CMS route: ${JSON.stringify({ path: requestPath })}`
+          `⚪ [CmsPage] Processed Next.JS route: ${JSON.stringify(awaitedParams)} => Optimizely CMS route: ${JSON.stringify({ path: requestPath })}`
         )
 
       // If we don't have the path, or the path is an internal Next.js route reject it.

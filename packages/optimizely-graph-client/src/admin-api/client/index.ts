@@ -40,6 +40,7 @@ export type { Record_string_any_ } from './models/Record_string_any_.js';
 export type { Record_string_string_ } from './models/Record_string_string_.js';
 export type { Request } from './models/Request.js';
 export type { RequestLog } from './models/RequestLog.js';
+export { Slot } from './models/Slot.js';
 export type { SourceInfo } from './models/SourceInfo.js';
 export type { SourceInfoMap } from './models/SourceInfoMap.js';
 export type { SourceMetadata } from './models/SourceMetadata.js';

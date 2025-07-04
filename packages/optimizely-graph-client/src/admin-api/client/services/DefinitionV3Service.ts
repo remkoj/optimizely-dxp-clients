@@ -4,6 +4,7 @@
 /* eslint-disable */
 import type { ContentSource_V3 } from '../models/ContentSource_V3.js';
 import type { DeleteMode } from '../models/DeleteMode.js';
+import type { Slot } from '../models/Slot.js';
 import type { SourceInfoMap } from '../models/SourceInfoMap.js';
 import type { SourceMetadata } from '../models/SourceMetadata.js';
 import type { CancelablePromise } from '../core/CancelablePromise.js';
@@ -17,17 +18,22 @@ export class DefinitionV3Service {
      * - _(empty): all sources_
      * - _**default**: only default source_
      * - _**src1**:  only src1_
+     * @param slot The slot of the source _(optional)_
+     * - _(empty): old slot_
+     * - _**new**: new slot_
      * @returns SourceInfoMap Ok
      * @throws ApiError
      */
     public getContentV3SourceHandler(
         id?: string,
+        slot?: Slot,
     ): CancelablePromise<SourceInfoMap> {
         return this.httpRequest.request({
             method: 'GET',
             url: '/api/content/v3/sources',
             query: {
                 'id': id,
+                'slot': slot,
             },
         });
     }
@@ -46,12 +52,16 @@ export class DefinitionV3Service {
      * | _**types**_  | _delete only types_     | _(delete)_  |             |
      * | _**data**_   | _delete only data_      |             | _(delete)_  |
      * | _**reset**_  | _reset data_            | _(delete)_  | _(reset)_   |
+     * @param slot The slot of the source _(optional)_
+     * - _(empty): old slot_
+     * - _**new**: new slot_
      * @returns any Source is deleted successfully
      * @throws ApiError
      */
     public deleteContentV3SourceHandler(
         id?: string,
         mode?: DeleteMode,
+        slot?: Slot,
     ): CancelablePromise<any> {
         return this.httpRequest.request({
             method: 'DELETE',
@@ -59,6 +69,7 @@ export class DefinitionV3Service {
             query: {
                 'id': id,
                 'mode': mode,
+                'slot': slot,
             },
             errors: {
                 404: `Source is not found`,
@@ -70,18 +81,23 @@ export class DefinitionV3Service {
      * Update `label`, `description` fields of the source
      * @param id The id of the source
      * @param requestBody The new metadata source
+     * @param slot The slot of the source _(optional)_
+     * - _(empty): old slot_
+     * - _**new**: new slot_
      * @returns void
      * @throws ApiError
      */
     public postContentV3SourceHandler(
         id: string,
         requestBody: SourceMetadata,
+        slot?: Slot,
     ): CancelablePromise<void> {
         return this.httpRequest.request({
             method: 'POST',
             url: '/api/content/v3/sources',
             query: {
                 'id': id,
+                'slot': slot,
             },
             body: requestBody,
             mediaType: 'application/json',

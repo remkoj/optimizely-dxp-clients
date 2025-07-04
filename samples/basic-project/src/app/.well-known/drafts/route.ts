@@ -10,7 +10,7 @@ export async function GET(request: Request) {
 
 
   // Enable Draft Mode by setting the cookie
-  const draft = draftMode()
+  const draft = await draftMode()
   if (!draft.isEnabled) {
     console.log("Enabling draft mode")
     draft.enable()

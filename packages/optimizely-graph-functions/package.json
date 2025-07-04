@@ -43,7 +43,7 @@
   },
   "devDependencies": {
     "@remkoj/optimizely-graph-client": "workspace:6.0.0-pre1",
-    "@types/node": "^22.15.24",
+    "@types/node": "^22.16.0",
     "typescript": "^5.8.3"
   },
   "dependencies": {

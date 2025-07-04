@@ -30,14 +30,14 @@
     "@types/node": "*"
   },
   "dependencies": {
-    "@inquirer/prompts": "^7.5.3",
+    "@inquirer/prompts": "^7.6.0",
     "@remkoj/optimizely-cms-api": "^6.0.0-pre1",
     "chalk": "^5.4.1",
     "cli-table3": "^0.6.5",
-    "dotenv": "^16.6.1",
+    "dotenv": "^17.0.1",
     "dotenv-expand": "^12.0.2",
     "figures": "^6.1.0",
-    "glob": "^11.0.2",
+    "glob": "^11.0.3",
     "tslib": "^2.8.1",
     "yargs": "^18.0.0"
   },

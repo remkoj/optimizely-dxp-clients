@@ -11,19 +11,19 @@
     "./dist"
   ],
   "devDependencies": {
-    "@hey-api/client-fetch": "^0.10.2",
-    "@hey-api/openapi-ts": "^0.68.1",
-    "@types/node": "^22.15.24",
-    "dotenv": "^16.5.0",
+    "@hey-api/client-fetch": "^0.13.1",
+    "@hey-api/openapi-ts": "^0.77.0",
+    "@types/node": "^22.16.0",
+    "dotenv": "^17.0.1",
     "dotenv-expand": "^12.0.2",
-    "glob": "^11.0.2",
+    "glob": "^11.0.3",
     "rimraf": "^6.0.1",
     "typescript": "^5.8.3"
   },
   "dependencies": {
-    "@types/node": "^22.15.24",
-    "dotenv": "^16.5.0",
-    "glob": "^11.0.2",
+    "@types/node": "^22.16.0",
+    "dotenv": "^17.0.1",
+    "glob": "^11.0.3",
     "openapi-typescript-codegen": "^0.29.0",
     "tslib": "^2.8.1",
     "typescript": "^5.8.3"
@@ -32,8 +32,8 @@
     "clean": "rimraf -g ./dist ./*.tsbuildinfo && rimraf -g ./openapi-ts*log",
     "prepare": "tsc --build && yarn node scripts/copy-client.mjs",
     "watch": "tsc --watch",
-    "rebuild": "yarn clean && yarn update-client && tsc --build --force",
-    "update-client": "yarn node scripts/create-client.mjs"
+    "rebuild": "yarn clean && yarn generate && tsc --build --force",
+    "generate": "yarn node scripts/create-client.mjs"
   },
   "stableVersion": "5.0.2"
 }

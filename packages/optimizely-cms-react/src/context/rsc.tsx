@@ -145,14 +145,14 @@ export class ServerContext implements GenericContext {
   }
 
   public toJSON(key?: string): TransferrableContext {
-    if (this.isDebugOrDevelopment) {
+    /*if (this.isDebugOrDevelopment) {
       console.warn(
         '🦺 [ServerContext] Converting Context to JSON, this is typically a side effect of the context being passed between Server & Client components'
       )
       if (this.isDebug) {
         console.trace('The conversion happened here')
       }
-    }
+    }*/
 
     return {
       inEditMode: this.inEditMode,

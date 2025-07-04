@@ -1,5 +1,5 @@
 import { type ComponentType, type PropsWithChildren, type JSX } from 'react'
-import { type ClientFactory } from '@remkoj/optimizely-graph-client'
+import { type IOptiGraphClient } from '@remkoj/optimizely-graph-client'
 import { type GraphQLClient } from 'graphql-request'
 import { type ContentQueryProps } from '@remkoj/optimizely-cms-react/rsc'
 
@@ -79,7 +79,7 @@ export type EditViewOptions<LocaleType = string> = {
    * @param       token       The token to be used
    * @returns     The Optimizely Graph Client
    */
-  clientFactory: ClientFactory
+  clientFactory: (token?: string, scope?: 'request' | 'metadata') => IOptiGraphClient | Promise<IOptiGraphClient>
 
   /**
    * If provided, this allows to override the CommunicationInjector

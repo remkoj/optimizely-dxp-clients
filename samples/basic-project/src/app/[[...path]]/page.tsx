@@ -21,24 +21,27 @@ const {
    *
    * @returns     The Optimizely Graph Client
    */
-  client(token?: string, mode?: 'request' | 'metadata'): IOptiGraphClient {
+  async client(
+    token?: string,
+    mode?: 'request' | 'metadata'
+  ): Promise<IOptiGraphClient> {
     // Create the actual graph client
     const client = createClient(undefined, token, {
       nextJsFetchDirectives: true,
     })
-    //if (client.debug)
-    console.log('⚪ [Sample Site] Created new Optimizely Graph client')
+    if (client.debug)
+      console.log('⚪ [Sample Site] Created new Optimizely Graph client')
 
     // Check if we're in request mode, if not the "draft mode" check will fail
     if (mode == 'request') {
-      const { isEnabled } = draftMode()
+      const { isEnabled } = await draftMode()
 
       // When draftmode is enabled, switch to common drafts
       if (isEnabled) {
         client.updateAuthentication(AuthMode.HMAC)
         client.enablePreview()
-        //if (client.debug)
-        console.log('⚪ [Sample Site] Switching to common drafts')
+        if (client.debug)
+          console.log('⚪ [Sample Site] Switching to common drafts')
       }
     }
     return client

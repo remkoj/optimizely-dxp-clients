@@ -13,14 +13,10 @@
   ],
   "exports": {
     ".": "./dist/index.js",
-    "./components": "./dist/components.js",
     "./rsc": "./dist/rsc.js"
   },
   "typesVersions": {
     "*": {
-      "components": [
-        "dist/components.d.ts"
-      ],
       "rsc": [
         "dist/rsc.d.ts"
       ]
@@ -29,9 +25,9 @@
   "devDependencies": {
     "@remkoj/optimizely-graph-client": "workspace:6.0.0-pre1",
     "@types/crypto-js": "^4.2.2",
-    "@types/node": "^22.15.24",
-    "@types/react": "^19.1.6",
-    "@types/react-dom": "^19.1.5",
+    "@types/node": "^22.16.0",
+    "@types/react": "^19.1.8",
+    "@types/react-dom": "^19.1.6",
     "prop-types": "^15.8.1",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
@@ -42,7 +38,7 @@
     "@graphql-typed-document-node/core": "^3.2.0",
     "@remkoj/optimizely-graph-client": "^6.0.0-pre1",
     "crypto-js": "^4.2.0",
-    "entities": "^6.0.0",
+    "entities": "^6.0.1",
     "graphql": "^16.11.0",
     "graphql-request": "^7.2.0"
   },
