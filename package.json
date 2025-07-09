@@ -8,7 +8,7 @@
   "license": "Apache-2.0",
   "private": true,
   "devDependencies": {
-    "@types/node": "^22.16.0",
+    "@types/node": "^22.16.2",
     "@yarnpkg/sdks": "^3.2.2",
     "browserslist": "^4.25.1",
     "glob": "^11.0.3",

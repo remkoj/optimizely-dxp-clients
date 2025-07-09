@@ -4,23 +4,20 @@ import deepmerge from 'deepmerge'
 import { notFound } from 'next/navigation.js'
 
 // GraphQL Client & Services
-import { type ContentLinkWithLocale } from '@remkoj/optimizely-graph-client'
 import {
   RouteResolver,
   type IRouteResolver,
   type Route,
 } from '@remkoj/optimizely-graph-client/router'
-import { type ChannelDefinition } from '@remkoj/optimizely-graph-client/channels'
 import {
-  type IOptiGraphClient,
-  OptiCmsSchema,
-} from '@remkoj/optimizely-graph-client/client'
-import { normalizeContentLinkWithLocale } from '@remkoj/optimizely-graph-client/utils'
+  type ChannelDefinition,
+  ifChannelDefinition,
+} from '@remkoj/optimizely-graph-client/channels'
+import { type IOptiGraphClient } from '@remkoj/optimizely-graph-client/client'
 
 // React Support
 import {
   CmsContent,
-  Utils,
   ServerContext,
   updateSharedServerContext,
   type GenericContext,
@@ -29,12 +26,16 @@ import {
 
 // Within package
 import { MetaDataResolver } from '../metadata.js'
-import { urlToPath, localeToGraphLocale } from './utils.js'
-import {
-  type GetContentByPathMethod,
-  type GetContentByPathVariables,
-} from './data.js'
+import { urlToPath } from './utils.js'
+import { type GetContentByPathMethod } from './data.js'
 import { createClient } from '../client.js'
+import { getChannelId } from './_base.js'
+import { loadContentByPath } from './_loadContentByPath.js'
+import { getInfoByPath } from './_getInfoByPath.js'
+
+// Within CmsPage
+import { SystemLocales } from './_base.js'
+export { SystemLocales } from './_base.js'
 
 export type DefaultCmsPageParams = {
   path?: string[]
@@ -97,11 +98,6 @@ export type OptiCmsNextJsPage<
   ) => Promise<JSX.Element>
 }
 
-export enum SystemLocales {
-  All = 'ALL',
-  Neutral = 'NEUTRAL',
-}
-
 export type CreatePageOptions<
   LocaleEnum = SystemLocales,
   TParams extends Record<
@@ -123,15 +119,20 @@ export type CreatePageOptions<
    * page.
    *
    * @param token   The token retrieved by the CMS Page from the context, always undefined
-   * @param scope   The scope in which the client is being created, this allows for checking draftMode in configuring the client
+   * @param scope   The scope in which the client is being created, this allows for checking
+   *                draftMode in configuring the client
    * @returns       The client instance
    */
   client: (token?: string, scope?: 'request' | 'metadata') => IOptiGraphClient
 
   /**
-   * The channel information used to resolve locales, domains and more
+   * The channel information used to resolve locales, domains and more.
+   *
+   * If provided with a string value, this is assumed to be the Application/Website identifier
+   * for the deployment (Base URL ***without trailing slash*** for SaaS CMS; Website GUID for
+   * CMS 12).
    */
-  channel?: ChannelDefinition
+  channel?: ChannelDefinition | string
 
   /**
    * Override the default RouteResolver that is used to discover the routes
@@ -190,11 +191,23 @@ const CreatePageOptionDefaults: CreatePageOptions<string> = {
     return { path: urlToPath(route.url), lang: route.locale }
   },
   paramsToLocale: (params, channel) => {
+    // If there's no channel, just return undefined
     if (!channel) return undefined
+
+    // Check if we have a language, and if so, resolve based upon that language
     const lang = (params as Record<string, string | string[] | undefined>)?.lang
     const toTest = Array.isArray(lang) ? lang.at(0) : lang
-    if (!toTest) return channel.defaultLocale
-    return channel.slugToLocale(toTest.toString())
+    if (toTest)
+      return channel.slugToLocale(toTest.toString()) ?? channel.defaultLocale
+
+    // Check if we have a path, and if so, resolve based upon the first slug in the path
+    const path = (params as Record<string, string | string[] | undefined>)?.path
+    const firstSlug = Array.isArray(path) ? path.at(0) : path
+    if (firstSlug)
+      return channel.slugToLocale(firstSlug) ?? channel.defaultLocale
+
+    // We have neither a language, nor a slug, return the default
+    return channel.defaultLocale
   },
 }
 
@@ -266,7 +279,7 @@ export function createPage<
       // Read variables from request
       const requestPath = propsToCmsPath({ params, searchParams })
       if (!requestPath) return Promise.resolve({})
-      const initialLocale = paramsToLocale(params, channel)
+      const initialLocale = paramsToLocale(params, ifChannelDefinition(channel))
       if (initialLocale) context.setLocale(initialLocale)
 
       // Debug output
@@ -355,7 +368,7 @@ export function createPage<
       if (!requestPath || requestPath.startsWith('/_next/')) return notFound()
 
       // Determine the initial locale
-      const initialLocale = paramsToLocale(params, channel)
+      const initialLocale = paramsToLocale(params, ifChannelDefinition(channel))
       if (initialLocale) context.setLocale(initialLocale)
 
       // Resolve the content based upon the path
@@ -364,7 +377,8 @@ export function createPage<
             context.client,
             getContentByPath,
             requestPath,
-            channel
+            channel,
+            initialLocale as LocaleEnum | undefined
           )
         : getInfoByPath(context.client, routerFactory, requestPath, channel))
       if (!lookupData) {
@@ -400,112 +414,6 @@ type ContextWith<C extends GenericContext, T extends keyof C> = Omit<C, T> & {
   [P in T]: NonNullable<C[P]>
 }
 
-type LookupResponse = [
-  Route | null,
-  ContentLinkWithLocale,
-  string[],
-  string,
-  Record<string, any> | null,
-]
-
-// Helper function to obtain the info by path
-async function getInfoByPath(
-  client: IOptiGraphClient,
-  routerFactory: (client?: IOptiGraphClient) => IRouteResolver,
-  requestPath: string,
-  channel?: ChannelDefinition
-) {
-  if (client.debug)
-    console.log(
-      `⚪ [CmsPage.getInfoByPath] Loading content for path "${requestPath}" using RouteResolver`
-    )
-  const channelId = getChannelId(client, channel)
-  const router = routerFactory(client)
-  const route = await router.getContentInfoByPath(requestPath, channelId)
-  if (!route) {
-    if (client.debug)
-      console.warn(
-        `🟠 [CmsPage.getInfoByPath] The RouteResolver was unable to resolve the route information for "${requestPath}"`
-      )
-    return undefined
-  }
-  const contentLink = router.routeToContentLink(route)
-  const contentType = route.contentType
-  const graphLocale = localeToGraphLocale(route.locale, channel)
-  return [route, contentLink, contentType, graphLocale, null] as LookupResponse
-}
-
-async function loadContentByPath<LocaleEnum = SystemLocales>(
-  client: IOptiGraphClient,
-  getContentByPath: GetContentByPathMethod<LocaleEnum>,
-  requestPath: string,
-  channel?: ChannelDefinition,
-  isDebug: boolean = false
-) {
-  if (client.debug)
-    console.log(
-      `⚪ [CmsPage.loadContentByPath] Loading content for path "${requestPath}" using getContentByPath method`
-    )
-  const channelId = getChannelId(client, channel)
-  const pathForRequest = [
-    requestPath,
-    requestPath.endsWith('/')
-      ? requestPath.substring(0, requestPath.length - 1)
-      : requestPath + '/',
-  ].filter((x) => x)
-
-  const requestVars: GetContentByPathVariables<LocaleEnum> = {
-    path: pathForRequest,
-    siteId: channelId,
-  }
-  if (client?.isPreviewEnabled()) requestVars.changeset = client?.getChangeset()
-  if (isDebug)
-    console.log(
-      `⚪ [CmsPage.loadContentByPath] Processed Next.JS route => getContentByPath Variables: ${JSON.stringify(requestVars)}`
-    )
-
-  const response = await getContentByPath(client, requestVars)
-  const info = Array.isArray(response?.content?.items)
-    ? response?.content?.items[0]
-    : response?.content?.items
-
-  if (!info) {
-    if (isDebug) {
-      console.error(
-        `🔴 [CmsPage.loadContentByPath] Unable to load content for ${requestPath}, data received: `,
-        response
-      )
-    }
-    return notFound()
-  } else if (isDebug && (response?.content?.total ?? 0) > 1) {
-    console.warn(
-      `🟠 [CmsPage.loadContentByPath] Resolving content for ${requestPath}, yielded ${response?.content?.total ?? 0} items, picked:`,
-      info
-    )
-  }
-
-  // Extract the type & link
-  const contentType = Utils.normalizeContentType(info._metadata?.types)
-  const contentLink = normalizeContentLinkWithLocale(info._metadata)
-  if (!contentLink) {
-    console.error(
-      '🔴 [CmsPage.loadContentByPath] Unable to infer the contentLink from the retrieved content, this should not have happened!'
-    )
-    return notFound()
-  }
-  const graphLocale = localeToGraphLocale(info._metadata?.locale, channel)
-
-  return [null, contentLink, contentType, graphLocale, info] as LookupResponse
-}
-
-function getChannelId(client: IOptiGraphClient, channel?: ChannelDefinition) {
-  return channel
-    ? client.currentOptiCmsSchema == OptiCmsSchema.CMS12
-      ? channel.id
-      : getPrimaryURL(channel).origin
-    : undefined
-}
-
 /**
  *
  *
@@ -532,16 +440,6 @@ function buildRequestPath({
       .join('/')
   if (!slugs[slugs.length - 1].includes('.')) return fullPath + '/'
   return fullPath
-}
-
-function getPrimaryURL(chnl: ChannelDefinition): URL {
-  const dd = chnl.domains.filter((x) => x.isPrimary).at(0) ?? chnl.domains.at(0)
-  if (!dd) return chnl.getPrimaryDomain()
-  const s =
-    dd.name.startsWith('localhost') || dd.name.indexOf('.local') > 0
-      ? 'http:'
-      : 'https:'
-  return new URL(`${s}//${dd.name}`)
 }
 
 function isObject(toTest: any): toTest is object {
