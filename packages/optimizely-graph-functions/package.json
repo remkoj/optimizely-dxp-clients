@@ -3,7 +3,7 @@
   "repository": "https://github.com/remkoj/optimizely-dxp-clients.git",
   "author": "Remko Jantzen <693172+remkoj@users.noreply.github.com>",
   "homepage": "https://github.com/remkoj/optimizely-dxp-clients",
-  "version": "6.0.0-pre3",
+  "version": "6.0.0-pre4",
   "license": "Apache-2.0",
   "type": "commonjs",
   "description": "GraphQL Codegen preset for Optimizely Graph",
@@ -42,7 +42,7 @@
     }
   },
   "devDependencies": {
-    "@remkoj/optimizely-graph-client": "workspace:6.0.0-pre3",
+    "@remkoj/optimizely-graph-client": "workspace:6.0.0-pre4",
     "@types/node": "^22.16.2",
     "typescript": "^5.8.3"
   },
@@ -54,7 +54,7 @@
     "@graphql-codegen/typescript-graphql-request": "^6.3.0",
     "@graphql-codegen/typescript-operations": "^4.6.1",
     "@graphql-typed-document-node/core": "^3.2.0",
-    "@remkoj/optimizely-graph-client": "^6.0.0-pre3",
+    "@remkoj/optimizely-graph-client": "^6.0.0-pre4",
     "graphql": "^16.11.0",
     "graphql-request": "^7.2.0",
     "graphql-sock": "^1.0.1",

@@ -16,7 +16,7 @@ export async function getAccessToken(config?: CmsIntegrationApiOptions): Promise
   if (options.cmsVersion == OptiCmsVersion.CMS12)
     authUrl = authUrl.replace('preview2', 'preview1')
 
-  headers.append('Authorization', `Basic ${base64Encode(`${options.clientId}:${options.clientSecret}`)}`)
+  headers.append('Authorization', `Basic ${base64Encode(`${options.clientId ?? ''}:${options.clientSecret ?? ''}`)}`)
   headers.append('Content-Type', 'application/x-www-form-urlencoded')
   headers.append('Connection', 'close')
 

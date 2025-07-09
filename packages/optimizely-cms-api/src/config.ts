@@ -12,9 +12,53 @@ export type CmsIntegrationApiOptions = {
    */
   cmsVersion?: OptiCmsVersion
 }
+type ClientCredentials = 'clientId' | 'clientSecret'
+
+export function readPartialEnvConfig(): CmsIntegrationApiOptions {
+  const cmsUrl = getOptional('OPTIMIZELY_CMS_URL', 'https://api.cms.optimizely.com')
+  const clientId = getOptional('OPTIMIZELY_CMS_CLIENT_ID')
+  const clientSecret = getOptional('OPTIMIZELY_CMS_CLIENT_SECRET')
+  const actAs = getOptional('OPTIMIZELY_CMS_USER_ID')
+  const debug = getOptional('OPTIMIZELY_DEBUG', "0") == "1"
+  const cmsVersion = getSelection<OptiCmsVersion>('OPTIMIZELY_CMS_SCHEMA', [OptiCmsVersion.CMS12, OptiCmsVersion.CMS13], OptiCmsVersion.CMS13)
+
+  let baseUrl: URL
+  try {
+    const cmsUrlAdjusted = cmsUrl.includes("://") ? cmsUrl : 'https://' + cmsUrl
+    baseUrl = new URL('/_cms/preview2', cmsUrlAdjusted)
+    if (cmsVersion == OptiCmsVersion.CMS12)
+      baseUrl.pathname = baseUrl.pathname.replace('preview2', 'preview1')
+  } catch (e) {
+    throw new Error("Invalid Optimizely CMS URL provided")
+  }
+
+  if (debug)
+    console.log(`[Optimizely CMS API] Connecting to ${baseUrl} as ${clientId ?? 'Anonymous'}`)
+
+  return {
+    base: baseUrl,
+    clientId,
+    clientSecret,
+    actAs,
+    debug,
+    cmsVersion
+  }
+}
+
+export function readEnvConfig(): Omit<CmsIntegrationApiOptions, ClientCredentials> & Pick<Required<CmsIntegrationApiOptions>, ClientCredentials> {
+  const partialConfig = readPartialEnvConfig()
+
+  if (!partialConfig.clientId)
+    throw new Error("The Client ID (OPTIMIZELY_CMS_CLIENT_ID) is a required environment variable")
+
+  if (!partialConfig.clientSecret)
+    throw new Error("The Client Secret (OPTIMIZELY_CMS_CLIENT_SECRET) is a required environment variable")
+
+  return partialConfig as Omit<CmsIntegrationApiOptions, ClientCredentials> & Pick<Required<CmsIntegrationApiOptions>, ClientCredentials>
+}
 
 export function getCmsIntegrationApiConfigFromEnvironment(): CmsIntegrationApiOptions {
-  const cmsUrl = getOptional('OPTIMIZELY_CMS_URL', 'https://example.cms.optimizely.com')
+  const cmsUrl = getOptional('OPTIMIZELY_CMS_URL', 'https://api.cms.optimizely.com')
   const clientId = getMandatory('OPTIMIZELY_CMS_CLIENT_ID')
   const clientSecret = getMandatory('OPTIMIZELY_CMS_CLIENT_SECRET')
   const actAs = getOptional('OPTIMIZELY_CMS_USER_ID')

@@ -2,7 +2,7 @@ import * as Operations from './client/sdk.gen'
 import { type CmsIntegrationApiOptions, getCmsIntegrationApiConfigFromEnvironment } from "./config";
 import { type InstanceApiVersionInfo, OptiCmsVersion } from "./types";
 import { createClient, type RequestResult, type ResponseStyle } from './client/client';
-import { type CreateClientConfig } from './client/client.gen';
+import type { CreateClientConfig } from './client/client.gen';
 import buildInfo from "./version.json"
 import { getAccessToken as getAccessTokenImpl } from './getaccesstoken'
 

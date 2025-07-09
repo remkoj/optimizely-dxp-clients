@@ -6,6 +6,8 @@ export { OptiCmsVersion } from "./types"
 import { type CmsIntegrationApiOptions } from './config'
 import { ApiClient, type CmsIntegrationApiClient } from './api-client'
 
+export { getCmsIntegrationApiConfigFromEnvironment as readEnvConfig } from './config'
+
 export function createClient(config?: CmsIntegrationApiOptions): CmsIntegrationApiClient {
   return new ApiClient(config)
 }

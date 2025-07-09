@@ -27,7 +27,104 @@ export const stylesBuilder: (yargs: Argv<OptiCmsArgs>) => Argv<OptiCmsArgs<Style
 
 export type GetStylesResult = { all: Array<IntegrationApi.DisplayTemplate>, styles: Array<IntegrationApi.DisplayTemplate> }
 
-export async function getStyles(client: CmsApiClient, args: ArgumentsCamelCase<OptiCmsArgs<StylesArgs>>, pageSize: number = 100): Promise<GetStylesResult> {
+export async function getStyles(client: CmsApiClient, args: ArgumentsCamelCase<OptiCmsArgs<StylesArgs>>, pageSize: number = 25): Promise<GetStylesResult> {
+  if (client.runtimeCmsVersion == OptiCmsVersion.CMS12) return { all: [], styles: [] }
+  const { _config: cfg, excludeBaseTypes, excludeTypes, excludeNodeTypes, excludeTemplates, baseTypes, types, nodes, templates, templateTypes } = parseArgs(args)
+
+  process.stdout.write(chalk.yellowBright(`${figures.arrowRight} Pulling Style-Definitions from Optimizely CMS\n`))
+
+  const allDisplayTemplates: Array<IntegrationApi.DisplayTemplate> = []
+  const filteredDisplayTemplates: Array<IntegrationApi.DisplayTemplate> = []
+
+  for await (const displayTemplate of getAllStyles(client, cfg.debug, pageSize)) {
+    allDisplayTemplates.push(displayTemplate)
+    const templateType: string = displayTemplate.baseType ? 'base' : displayTemplate.nodeType ? 'node' : displayTemplate.contentType ? 'component' : 'unknown'
+
+    if (isExcluded(displayTemplate.key, excludeTemplates, templates)) {
+      if (cfg.debug)
+        process.stdout.write(chalk.gray(`${figures.arrowRight} Skipping Style-Defintion ${displayTemplate.key} - Style defintion key filtering active\n`))
+      continue
+    }
+
+    if (isExcluded(templateType, [], templateTypes)) {
+      if (cfg.debug)
+        process.stdout.write(chalk.gray(`${figures.arrowRight} Skipping Style-Defintion ${displayTemplate.key} - Style type filtering is active\n`))
+      continue
+    }
+    if (displayTemplate.baseType && isExcluded(displayTemplate.baseType, excludeBaseTypes, baseTypes)) {
+      if (cfg.debug)
+        process.stdout.write(chalk.gray(`${figures.arrowRight} Skipping Style-Defintion ${displayTemplate.key} - Style is defined at base type level and base type filtering is active\n`))
+      continue
+    }
+    if (displayTemplate.contentType && isExcluded(displayTemplate.contentType, excludeTypes, types)) {
+      if (cfg.debug)
+        process.stdout.write(chalk.gray(`${figures.arrowRight} Skipping Style-Defintion ${displayTemplate.key} - Style is defined at component type level and component type filtering is active\n`))
+      continue
+    }
+    if (templateType != 'component' && types.length > 0) {
+      if (cfg.debug)
+        process.stdout.write(chalk.gray(`${figures.arrowRight} Skipping Style-Defintion ${displayTemplate.key} - Style is targeting the ${templateType} level and component type selection is active\n`))
+      continue
+    }
+    if (displayTemplate.nodeType && isExcluded(displayTemplate.nodeType, excludeNodeTypes, nodes)) {
+      if (cfg.debug)
+        process.stdout.write(chalk.gray(`${figures.arrowRight} Skipping Style-Defintion ${displayTemplate.key} - Style is defined at node type level and node type filtering is active\n`))
+      continue
+    }
+    if (templateType != 'node' && nodes.length > 0) {
+      if (cfg.debug)
+        process.stdout.write(chalk.gray(`${figures.arrowRight} Skipping Style-Defintion ${displayTemplate.key} - Style is targeting the ${templateType} level and node type selection is active\n`))
+      continue
+    }
+
+    filteredDisplayTemplates.push(displayTemplate)
+  }
+
+  if (cfg.debug)
+    process.stdout.write(chalk.gray(`${figures.arrowRight} Applied style filters, reduced from ${allDisplayTemplates.length} to ${filteredDisplayTemplates.length} items\n`))
+
+  return {
+    all: allDisplayTemplates,
+    styles: filteredDisplayTemplates
+  }
+}
+
+export async function* getAllStyles(client: CmsApiClient, debug: boolean = false, pageSize: number = 5): AsyncGenerator<IntegrationApi.DisplayTemplate, void, IntegrationApi.DisplayTemplate> {
+  if (client.runtimeCmsVersion == OptiCmsVersion.CMS12) return;
+
+  let requestPageSize = pageSize;
+  let requestPageIndex = 0
+  let totalItemCount = 0
+  let totalPages = 0
+  do {
+    const resultsPage = await client.displayTemplatesList({ query: { pageIndex: requestPageIndex, pageSize: requestPageSize } }).catch((_) => {
+      return {
+        items: [],
+        totalItemCount: 0,
+        pageIndex: requestPageIndex,
+        pageSize: requestPageSize
+      } as IntegrationApi.DisplayTemplatePage
+    });
+
+    // Calculate fields for next page
+    totalItemCount = resultsPage.totalItemCount ?? 0;
+    requestPageSize = resultsPage.pageSize
+    requestPageIndex = resultsPage.pageIndex + 1
+    totalPages = Math.ceil(totalItemCount / requestPageSize)
+
+    // Debug output
+    if (debug)
+      process.stdout.write(chalk.gray(`${figures.arrowRight} Fetched displayTemplates page ${requestPageIndex} of ${totalPages} (${requestPageSize} items per page)\n`))
+
+    // Yield items
+    for (const displayTemplate of (resultsPage.items ?? [])) {
+      yield displayTemplate
+    }
+
+  } while (requestPageIndex < totalPages)
+}
+
+export async function getStylesOld(client: CmsApiClient, args: ArgumentsCamelCase<OptiCmsArgs<StylesArgs>>, pageSize: number = 100): Promise<GetStylesResult> {
   if (client.runtimeCmsVersion == OptiCmsVersion.CMS12) return { all: [], styles: [] }
   const { _config: cfg, excludeBaseTypes, excludeTypes, excludeNodeTypes, excludeTemplates, baseTypes, types, nodes, templates, templateTypes } = parseArgs(args)
 

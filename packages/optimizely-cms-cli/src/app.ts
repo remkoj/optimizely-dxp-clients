@@ -1,15 +1,20 @@
-import { CmsIntegrationApiOptions, getCmsIntegrationApiConfigFromEnvironment } from '@remkoj/optimizely-cms-api'
+import { type CmsIntegrationApiOptions, readPartialEnvConfig } from '@remkoj/optimizely-cms-api'
 import yargs from 'yargs'
 import { type OptiCmsApp } from './types.js'
 import chalk from 'chalk';
 
 export function createOptiCmsApp(scriptName: string, version?: string, epilogue?: string, envFiles?: Array<string>): OptiCmsApp {
+  if (envFiles) {
+    process.stdout.write(chalk.bold(`✅ Loaded environment files:`) + "\n")
+    envFiles.forEach(envFile => {
+      process.stdout.write(`  👉 ${envFile}\n`)
+    })
+    process.stdout.write("\n")
+  }
   let config: CmsIntegrationApiOptions;
   try {
-    config = getCmsIntegrationApiConfigFromEnvironment()
+    config = readPartialEnvConfig()
   } catch (e) {
-    if (envFiles)
-      console.error(chalk.gray(`Included environment files: ${envFiles.join(', ')}`))
     console.error(chalk.redBright(`${chalk.bold("[ERROR]:")} Error processing environment variables: ${e.message}`))
     process.exit(1)
   }
@@ -31,14 +36,11 @@ export function createOptiCmsApp(scriptName: string, version?: string, epilogue?
     .epilogue(epilogue ?? `Copyright Remko Jantzen - 2023-${(new Date(Date.now())).getFullYear()}`)
     .help()
     .fail((msg, error, args) => {
-      if (envFiles)
-        console.error(chalk.gray(`Included environment files: ${envFiles.join(', ')}\n`))
-
       if (msg)
-        console.error(msg + "\n")
+        console.error(chalk.redBright(msg) + "\n")
 
       if (error)
-        console.error(`[${chalk.bold(error.name ?? 'Error')}]: ${error.message ?? ''}\n`)
+        console.error(chalk.redBright(`[${chalk.bold(error.name ?? 'Error')}]: ${error.message ?? ''}`) + '\n')
 
       args.showHelp("error")
     })

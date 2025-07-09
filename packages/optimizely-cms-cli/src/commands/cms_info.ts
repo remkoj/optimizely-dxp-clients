@@ -4,6 +4,7 @@ import createClient from '../tools/cmsClient.js'
 import chalk from 'chalk'
 import figures from 'figures'
 import Table from 'cli-table3'
+import CLIInfo from '../version.json' with { type: "json" }
 
 export const CmsVersionCommand: CliModule = {
   command: "cms:version",
@@ -34,10 +35,11 @@ export const CmsVersionCommand: CliModule = {
       colAligns: ["left", "left"]
     })
     info.push(["Instance", client.cmsUrl.host])
-    info.push(["Client", client.apiVersion])
-    info.push(["API", versionInfo.apiVersion])
-    info.push(["CMS", versionInfo.cmsVersion])
-    info.push(["Service", versionInfo.serviceVersion])
+    info.push(["Client API", client.apiVersion])
+    info.push(["Service API", versionInfo.apiVersion])
+    info.push(["CMS Build", versionInfo.cmsVersion])
+    info.push(["Service Build", versionInfo.serviceVersion])
+    info.push(["SDK", CLIInfo.version])
 
     process.stdout.write(info.toString() + "\n")
     process.stdout.write(chalk.yellowBright(`${figures.arrowRight} Optimizely CMS Status: ${versionInfo.status}\n`))

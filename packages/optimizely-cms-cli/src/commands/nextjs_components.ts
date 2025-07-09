@@ -159,19 +159,19 @@ export default ${varName}`,
   // Template for all experience component types
   experience: (contentType, varName, displayTemplate) => `import { type OptimizelyNextPage as CmsComponent } from "@remkoj/optimizely-cms-nextjs";
 import { getFragmentData } from "@/gql/fragment-masking";
-import { ExperienceDataFragmentDoc, CompositionDataFragmentDoc, ${contentType.key}DataFragmentDoc, type ${contentType.key}DataFragment } from "@/gql/graphql";
+import { ExperienceDataFragmentDoc, ${contentType.key}DataFragmentDoc, type ${contentType.key}DataFragment } from "@/gql/graphql";
 import { OptimizelyComposition, isNode, CmsEditable } from "@remkoj/optimizely-cms-react/rsc";${displayTemplate ? `
 import { ${displayTemplate} } from "./displayTemplates";` : ''}
-import { getSdk } from "@/gql"
+import { getSdk } from "@/gql/client"
 
 /**
  * ${contentType.displayName}
  * ${contentType.description}
  */
 export const ${varName} : CmsComponent<${contentType.key}DataFragment${displayTemplate ? ', ' + displayTemplate : ''}> = ({ data${displayTemplate ? ', layoutProps' : ''}, ctx }) => {
-    const composition = getFragmentData(CompositionDataFragmentDoc, getFragmentData(ExperienceDataFragmentDoc, data)?.composition)
+    const composition = getFragmentData(ExperienceDataFragmentDoc, data)?.composition
     return <CmsEditable as="div" className="mx-auto px-2 container" cmsFieldName="unstructuredData" ctx={ctx}>
-        { composition && isNode(composition) && <OptimizelyComposition node={composition} /> }
+        { composition && isNode(composition) && <OptimizelyComposition node={composition} ctx={ctx} /> }
     </CmsEditable>
 }
 ${varName}.displayName = "${contentType.displayName} (${ucFirst(contentType.baseType)}/${contentType.key})"

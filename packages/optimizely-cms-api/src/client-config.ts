@@ -1,9 +1,9 @@
 import type { CreateClientConfig } from './client/client.gen';
-import { getCmsIntegrationApiConfigFromEnvironment } from "./config"
+import { readPartialEnvConfig } from "./config"
 import { getAccessToken } from "./getaccesstoken"
 
 export const createClientConfig: CreateClientConfig = (config) => {
-  const envConfig = getCmsIntegrationApiConfigFromEnvironment();
+  const envConfig = readPartialEnvConfig();
   const baseUrl = envConfig.base.href;
 
   const newClientConfig: ReturnType<CreateClientConfig> = {
