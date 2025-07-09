@@ -375,10 +375,10 @@ export function createPage<
         propsToCmsPath({ params, searchParams }),
         paramsToLocale(params, ifChannelDefinition(channel)),
       ])
-      const awaitedParams = await params
+
       if (context.isDebug)
         console.log(
-          `⚪ [CmsPage] Processed Next.JS route: ${JSON.stringify(awaitedParams)} => Optimizely CMS route: ${JSON.stringify({ path: requestPath })}`
+          `⚪ [CmsPage] Processed Next.JS route: ${JSON.stringify(await params)} => Optimizely CMS route: ${JSON.stringify({ path: requestPath })}`
         )
 
       // If we don't have the path, or the path is an internal Next.js route reject it.
@@ -399,7 +399,7 @@ export function createPage<
         : getInfoByPath(context.client, routerFactory, requestPath, channel))
       if (!lookupData) {
         console.error(
-          `🔴 [CmsPage] Unable to resolve the content for ${JSON.stringify(params)}!`
+          `🔴 [CmsPage] Unable to resolve the content for ${JSON.stringify(await params)}!`
         )
         return notFound()
       }
