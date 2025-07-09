@@ -101,15 +101,18 @@ export class ChannelRepository {
    * @param     cmsDomainGraphClientOrConfig  A means to infer the CMS domain, either directly provided or through the Optimizely Graph Client
    * @returns   The ChannelDefinition
    */
-  public static createDefinition(name: string, domain: string, locales: (string | ChannelLocale)[], cmsDomainGraphClientOrConfig?: string | IOptiGraphClient | OptimizelyGraphConfig) {
+  public static createDefinition(name: string, domain: string | URL, locales: (string | ChannelLocale)[], cmsDomainGraphClientOrConfig?: string | IOptiGraphClient | OptimizelyGraphConfig) {
     const dxp_url = typeof cmsDomainGraphClientOrConfig === 'string' ? cmsDomainGraphClientOrConfig : (isOptiGraphClient(cmsDomainGraphClientOrConfig) ? cmsDomainGraphClientOrConfig.siteInfo.cmsURL : cmsDomainGraphClientOrConfig?.dxp_url) ?? 'https://example.cms.optimizely.com';
+    const domainName = isURL(domain) ? domain.host : domain
+    const isSecure = isURL(domain) ? domain.protocol === 'https:' : !(domain.includes(".local") || domain.startsWith("localhost"))
     const data: ChannelDefinitionData = {
       id: generateGuid(),
       name,
       domains: [{
         isEdit: false,
         isPrimary: true,
-        name: domain
+        isSecure,
+        name: domainName,
       }],
       content: {},
       locales: locales.map((locale => {
@@ -125,6 +128,10 @@ export class ChannelRepository {
     }
     return new ChannelDefinition(data, dxp_url);
   }
+}
+
+function isURL(toTest: string | URL): toTest is URL {
+  return typeof (toTest) === 'object' && toTest !== null && typeof ((toTest as URL).protocol) === 'string'
 }
 
 export default ChannelRepository

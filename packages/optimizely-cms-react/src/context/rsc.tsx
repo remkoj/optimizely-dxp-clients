@@ -88,20 +88,24 @@ export class ServerContext implements GenericContext {
   }
 
   public setMode(mode: 'edit' | 'preview' | 'public'): ServerContext {
-    if (this.isDebug)
-      console.log(
-        `🦺 [ServerContext] Updating mode from ${this._mode} to ${mode}`
-      )
-    this._mode = mode
+    if (this._mode != mode) {
+      if (this.isDebug)
+        console.log(
+          `🦺 [ServerContext] Updating mode from ${this._mode} to ${mode}`
+        )
+      this._mode = mode
+    }
     return this
   }
 
   public setLocale(locale: string): ServerContext {
-    if (this.isDebug)
-      console.log(
-        `🦺 [ServerContext] Updating locale from ${this._locale} to ${locale}`
-      )
-    this._locale = locale
+    if (this._locale != locale) {
+      if (this.isDebug)
+        console.log(
+          `🦺 [ServerContext] Updating locale from ${this._locale} to ${locale}`
+        )
+      this._locale = locale
+    }
     return this
   }
   public setOptimizelyGraphClient(
