@@ -46,39 +46,10 @@ export type Changeset = {
 };
 
 /**
- * Changesets are used to group work on several content items together.
- */
-export type ChangesetWritable = {
-    /**
-     * The unique key of this Changeset.
-     */
-    key: string;
-    /**
-     * The source of this Changeset
-     */
-    source?: string;
-    /**
-     * The name of this Changeset.
-     */
-    displayName: string;
-    lastModified?: Date;
-};
-
-/**
  * Items in an changeset that contains a link to the specific content version.
  */
 export type ChangesetItem = {
     reference: ContentReference;
-    /**
-     * Gets/sets the changeset item category.
-     */
-    category?: string;
-};
-
-/**
- * Items in an changeset that contains a link to the specific content version.
- */
-export type ChangesetItemWritable = {
     /**
      * Gets/sets the changeset item category.
      */
@@ -104,10 +75,6 @@ export type ChangesetItemPage = {
     readonly totalItemCount?: number;
 };
 
-export type ChangesetItemPageWritable = {
-    [key: string]: never;
-};
-
 export type ChangesetPage = {
     /**
      * The items in this paged collection.
@@ -125,10 +92,6 @@ export type ChangesetPage = {
      * The estimated total number of items in the collection. May be omitted if the total item count is unknown.
      */
     readonly totalItemCount?: number;
-};
-
-export type ChangesetPageWritable = {
-    [key: string]: never;
 };
 
 /**
@@ -282,48 +245,6 @@ export type ContentItem = {
 };
 
 /**
- * Represents a version of a content item.
- */
-export type ContentItemWritable = {
-    /**
-     * Properties as they are defined by corresponding component or content type.
-     */
-    properties?: {
-        [key: string]: unknown;
-    };
-    /**
-     * The display name of this content item.
-     */
-    displayName: string;
-    /**
-     * Indicates a time when this content was published or should be published.
-     */
-    published?: Date | null;
-    /**
-     * Indicates a time when this content expired or should expire.
-     */
-    expired?: Date | null;
-    status?: VersionStatus;
-    /**
-     * Indicates a time when this content version should transition to published status. Must only be assigned when Status is set to Scheduled.
-     */
-    delayPublishUntil?: Date | null;
-    /**
-     * The key that identifies the container content that this content item belongs to.
-     */
-    container?: string | null;
-    /**
-     * The key that identifies the owner of this content. Content that is own by another content is also known as an asset.
-     */
-    owner?: string | null;
-    /**
-     * A string that represents the segment that should be used when routing or generate routes to the current content instance.
-     */
-    routeSegment?: string | null;
-    lastModified?: Date;
-};
-
-/**
  * The response object for Page`1 when used ContentType are included.
  */
 export type ContentItemListWithContentTypes = {
@@ -349,13 +270,6 @@ export type ContentItemListWithContentTypes = {
     readonly totalItemCount?: number;
 };
 
-/**
- * The response object for Page`1 when used ContentType are included.
- */
-export type ContentItemListWithContentTypesWritable = {
-    [key: string]: never;
-};
-
 export type ContentItemPage = {
     /**
      * The items in this paged collection.
@@ -375,10 +289,6 @@ export type ContentItemPage = {
     readonly totalItemCount?: number;
 };
 
-export type ContentItemPageWritable = {
-    [key: string]: never;
-};
-
 /**
  * The response object for ContentItem when used ContentType are included.
  */
@@ -388,13 +298,6 @@ export type ContentItemWithContentTypes = {
      */
     readonly contentTypes?: Array<ContentType>;
     item?: ContentItem;
-};
-
-/**
- * The response object for ContentItem when used ContentType are included.
- */
-export type ContentItemWithContentTypesWritable = {
-    item?: ContentItemWritable;
 };
 
 /**
@@ -472,28 +375,6 @@ export type ContentMetadata = {
     readonly deletedBy?: string | null;
 };
 
-/**
- * Represents metadata about a content item.
- */
-export type ContentMetadataWritable = {
-    /**
-     * The key that identifies this content.
-     */
-    key?: string;
-    /**
-     * The content type of this content.
-     */
-    contentType?: string;
-    /**
-     * The key that identifies the container content that this content belongs to.
-     */
-    container?: string | null;
-    /**
-     * The key that identifies the owner of this content. Content that is own by another content is also known as an asset.
-     */
-    owner?: string | null;
-};
-
 export type ContentMetadataPage = {
     /**
      * The items in this paged collection.
@@ -511,10 +392,6 @@ export type ContentMetadataPage = {
      * The estimated total number of items in the collection. May be omitted if the total item count is unknown.
      */
     readonly totalItemCount?: number;
-};
-
-export type ContentMetadataPageWritable = {
-    [key: string]: never;
 };
 
 /**
@@ -683,89 +560,6 @@ export type ContentType = {
 };
 
 /**
- * A writable implementation of an ContentType.
- */
-export type ContentTypeWritable = {
-    /**
-     * The key that identifies this ContentType.
-     */
-    key: string;
-    /**
-     * The display name of this ContentType.
-     */
-    displayName?: string;
-    /**
-     * A description of this ContentType.
-     */
-    description?: string;
-    baseType?: ContentBaseType;
-    /**
-     * An value that is used to when sorting ContentType instances.
-     */
-    sortOrder?: number;
-    /**
-     * Provides a set of features that content based on this ContentType supports.
-     * This value is assigned based on the BaseType and cannot be modified.
-     */
-    features?: Array<ContentTypeFeature>;
-    /**
-     * Specifies how this ContentType can be used.
-     */
-    usage?: Array<ContentTypeUsage>;
-    /**
-     * Provides a set of content types that can be created in container of this type
-     */
-    mayContainTypes?: Array<string>;
-    /**
-     * Provides a set of media file extensions that this content type can handle.
-     */
-    mediaFileExtensions?: Array<string>;
-    /**
-     * Provides a set of composition behaviors specifying how this content type can be used within compositions.
-     */
-    compositionBehaviors?: Array<CompositionBehavior>;
-    /**
-     * Dictionary with all custom properties of this ContentType.
-     */
-    properties?: {
-        [key: string]: (({
-            type: 'BinaryProperty';
-        } & BinaryProperty) | ({
-            type: 'BooleanProperty';
-        } & BooleanProperty) | ({
-            type: 'ComponentProperty';
-        } & ComponentProperty) | ({
-            type: 'ContentProperty';
-        } & ContentProperty) | ({
-            type: 'ContentReferenceProperty';
-        } & ContentReferenceProperty) | ({
-            type: 'DateTimeProperty';
-        } & DateTimeProperty) | ({
-            type: 'FloatProperty';
-        } & FloatProperty) | ({
-            type: 'IntegerProperty';
-        } & IntegerProperty) | ({
-            type: 'StringProperty';
-        } & StringProperty) | ({
-            type: 'UrlProperty';
-        } & UrlProperty) | ({
-            type: 'JsonStringProperty';
-        } & JsonStringProperty) | ({
-            type: 'ListProperty';
-        } & ListProperty)) & {
-            /**
-             * Settings for the editor.
-             */
-            editorSettings?: {
-                [key: string]: {
-                    [key: string]: unknown;
-                };
-            } | null;
-        };
-    };
-};
-
-/**
  * Represent different features that a content type can have.
  */
 export type ContentTypeFeature = 'localization' | 'versioning' | 'publishPeriod' | 'routing' | 'binary';
@@ -798,10 +592,6 @@ export type ContentTypePage = {
      * The estimated total number of items in the collection. May be omitted if the total item count is unknown.
      */
     readonly totalItemCount?: number;
-};
-
-export type ContentTypePageWritable = {
-    [key: string]: never;
 };
 
 /**
@@ -1009,36 +799,6 @@ export type DisplayTemplate = {
     };
 };
 
-/**
- * Describes a display template that can be assigned to content.
- */
-export type DisplayTemplateWritable = {
-    /**
-     * The display name of this display template.
-     */
-    displayName: string;
-    /**
-     * The optional node type this display template is valid for.
-     */
-    nodeType?: string | null;
-    baseType?: ContentBaseType;
-    /**
-     * The optional key of the content type this display template is valid for.
-     */
-    contentType?: string | null;
-    /**
-     * If this is the default display template for the associated base type,
-     * node type or content type.
-     */
-    isDefault?: boolean;
-    /**
-     * The available settings for this display template.
-     */
-    settings?: {
-        [key: string]: DisplaySetting;
-    };
-};
-
 export type DisplayTemplatePage = {
     /**
      * The items in this paged collection.
@@ -1056,10 +816,6 @@ export type DisplayTemplatePage = {
      * The estimated total number of items in the collection. May be omitted if the total item count is unknown.
      */
     readonly totalItemCount?: number;
-};
-
-export type DisplayTemplatePageWritable = {
-    [key: string]: never;
 };
 
 /**
@@ -1349,15 +1105,6 @@ export type ProblemDetails = {
     } | null) | undefined;
 };
 
-export type ProblemDetailsWritable = {
-    type?: string | null;
-    title?: string | null;
-    status?: number | null;
-    detail?: string | null;
-    instance?: string | null;
-    [key: string]: unknown | (string | null) | (string | null) | (number | null) | (string | null) | (string | null) | undefined;
-};
-
 /**
  * Represent the basic type that a PropertyFormat
  * is using for data storage and data transport.
@@ -1443,10 +1190,6 @@ export type PropertyFormatPage = {
     readonly totalItemCount?: number;
 };
 
-export type PropertyFormatPageWritable = {
-    [key: string]: never;
-};
-
 /**
  * Describes a property group of a ContentType in the CMS.
  */
@@ -1463,20 +1206,6 @@ export type PropertyGroup = {
      * A string that is used to indicate the source of this PropertyGroup.
      */
     readonly source?: string;
-    /**
-     * An value that is used to when sorting PropertyGroup instances.
-     */
-    sortOrder?: number;
-};
-
-/**
- * Describes a property group of a ContentType in the CMS.
- */
-export type PropertyGroupWritable = {
-    /**
-     * The display name of this PropertyGroup.
-     */
-    displayName?: string;
     /**
      * An value that is used to when sorting PropertyGroup instances.
      */
@@ -1500,10 +1229,6 @@ export type PropertyGroupPage = {
      * The estimated total number of items in the collection. May be omitted if the total item count is unknown.
      */
     readonly totalItemCount?: number;
-};
-
-export type PropertyGroupPageWritable = {
-    [key: string]: never;
 };
 
 /**
@@ -1640,7 +1365,7 @@ export type ChangesetsCreateData = {
     /**
      * The changeset that should be created.
      */
-    body: ChangesetWritable;
+    body: Changeset;
     path?: never;
     query?: never;
     url: '/changesets';
@@ -1736,7 +1461,7 @@ export type ChangesetsPutData = {
     /**
      * The values of the created or replaced changeset.
      */
-    body: ChangesetWritable;
+    body: Changeset;
     path: {
         /**
          * The key of the changeset to update or create.
@@ -1886,7 +1611,7 @@ export type ChangesetsCreateItemData = {
     /**
      * The changeset item
      */
-    body: ChangesetItemWritable;
+    body: ChangesetItem;
     path: {
         /**
          * The changeset key
@@ -1923,7 +1648,7 @@ export type ChangesetsUpdateItemData = {
     /**
      * The changeset item
      */
-    body: ChangesetItemWritable;
+    body: ChangesetItem;
     path: {
         /**
          * The changeset key
@@ -1973,7 +1698,7 @@ export type ContentCreateData = {
     /**
      * The content item that should be created.
      */
-    body: ContentItemWritable;
+    body: ContentItem;
     path?: never;
     query?: {
         /**
@@ -2084,7 +1809,7 @@ export type ContentPatchMetadataData = {
     /**
      * The values of the content item that should be updated.
      */
-    body: ContentMetadataWritable;
+    body: ContentMetadata;
     path: {
         /**
          * The key of the content item to patch.
@@ -2408,7 +2133,7 @@ export type ContentCreateVersionData = {
     /**
      * The content version that should be created.
      */
-    body: ContentItemWritable;
+    body: ContentItem;
     path: {
         /**
          * The key of the content item for which a new content version should be created.
@@ -2512,7 +2237,7 @@ export type ContentPatchVersionData = {
     /**
      * The content information that should be updated.
      */
-    body: ContentItemWritable;
+    body: ContentItem;
     path: {
         /**
          * The key of the content item that should be updated.
@@ -2600,7 +2325,7 @@ export type ContentTypesCreateData = {
     /**
      * The content type that should be created.
      */
-    body: ContentTypeWritable;
+    body: ContentType;
     path?: never;
     query?: never;
     url: '/contenttypes';
@@ -2696,7 +2421,7 @@ export type ContentTypesPatchData = {
     /**
      * The values of the content type that should be updated.
      */
-    body: ContentTypeWritable;
+    body: ContentType;
     path: {
         /**
          * The key of the content type to patch.
@@ -2738,7 +2463,7 @@ export type ContentTypesPutData = {
     /**
      * The values of the created or replaced content type.
      */
-    body: ContentTypeWritable;
+    body: ContentType;
     path: {
         /**
          * The key of the content type to update or create.
@@ -2808,7 +2533,7 @@ export type DisplayTemplatesCreateData = {
     /**
      * The display template that should be created.
      */
-    body: DisplayTemplateWritable;
+    body: DisplayTemplate;
     path?: never;
     query?: never;
     url: '/displaytemplates';
@@ -2904,7 +2629,7 @@ export type DisplayTemplatesPatchData = {
     /**
      * The values of the display template that should be updated.
      */
-    body: DisplayTemplateWritable;
+    body: DisplayTemplate;
     path: {
         /**
          * The key of the display template to patch.
@@ -2941,7 +2666,7 @@ export type DisplayTemplatesPutData = {
     /**
      * The values of the created or replaced display template.
      */
-    body: DisplayTemplateWritable;
+    body: DisplayTemplate;
     path: {
         /**
          * The key of the display template to update or create.
@@ -3098,7 +2823,7 @@ export type PropertyGroupsCreateData = {
     /**
      * The property group that should be created.
      */
-    body: PropertyGroupWritable;
+    body: PropertyGroup;
     path?: never;
     query?: never;
     url: '/propertygroups';
@@ -3194,7 +2919,7 @@ export type PropertyGroupsPatchData = {
     /**
      * The values of the property group that should be updated.
      */
-    body: PropertyGroupWritable;
+    body: PropertyGroup;
     path: {
         /**
          * The key of the property group to patch.
@@ -3231,7 +2956,7 @@ export type PropertyGroupsPutData = {
     /**
      * The values of the created or replaced property group.
      */
-    body: PropertyGroupWritable;
+    body: PropertyGroup;
     path: {
         /**
          * The key of the property group to update or create.
