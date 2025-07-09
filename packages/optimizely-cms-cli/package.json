@@ -2,7 +2,7 @@
   "name": "@remkoj/optimizely-cms-cli",
   "description": "Optimizely CMS CLI Tools",
   "type": "module",
-  "version": "6.0.0-pre2",
+  "version": "6.0.0-pre3",
   "bin": {
     "opti-cms": "./dist/index.js"
   },
@@ -17,7 +17,7 @@
     "opti-cms": "node ./dist/index.js"
   },
   "devDependencies": {
-    "@remkoj/optimizely-cms-api": "workspace:6.0.0-pre2",
+    "@remkoj/optimizely-cms-api": "workspace:6.0.0-pre3",
     "@rollup/plugin-json": "^6.1.0",
     "@rollup/plugin-typescript": "^12.1.4",
     "@types/node": "^22.16.2",
@@ -31,7 +31,7 @@
   },
   "dependencies": {
     "@inquirer/prompts": "^7.6.0",
-    "@remkoj/optimizely-cms-api": "^6.0.0-pre2",
+    "@remkoj/optimizely-cms-api": "^6.0.0-pre3",
     "chalk": "^5.4.1",
     "cli-table3": "^0.6.5",
     "dotenv": "^17.1.0",
