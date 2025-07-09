@@ -1,4 +1,5 @@
 import type { ContentLink, ContentLinkWithLocale, InlineContentLink, InlineContentLinkWithLocale } from "./types.js"
+export type { ContentLink, ContentLinkWithLocale, InlineContentLink, InlineContentLinkWithLocale } from "./types.js"
 
 /**
  * Transform a locale code (e.g. en-US) to a Optimizely Graph compatible locale
@@ -82,6 +83,14 @@ export function isContentLinkWithLocale(toTest: any): toTest is ContentLinkWithL
   return locale == undefined || locale == null || (typeof (locale) == 'string' && locale.length >= 2 && locale.length <= 5)
 }
 
+export function isContentLinkWithSetLocale<LocaleType = string>(toTest: any): toTest is ContentLink & { locale: LocaleType } {
+  if (!isContentLink(toTest))
+    return false
+
+  const locale = (toTest as ContentLinkWithLocale).locale
+  return typeof (locale) == 'string' && locale.length >= 2 && locale.length <= 5
+}
+
 /**
  * Test if the variable is an inline content link
  * 
@@ -159,8 +168,8 @@ export function normalizeContentLink(toNormalize: Nullable<ContentLink | InlineC
 }
 
 export function normalizeContentLinkWithLocale<LT = string>(toNormalize: Nullable<ContentLinkWithLocale<LT>>): ContentLinkWithLocale<LT> | undefined {
-  const normalized = normalizeContentLink(toNormalize) as ContentLinkWithLocale<LT>
-  if (toNormalize?.locale != undefined && !(typeof (toNormalize?.locale) == 'string' && (toNormalize.locale.length == 2 || toNormalize.locale.length == 5)))
+  const normalized = normalizeContentLink(toNormalize) as ContentLinkWithLocale<LT> | undefined
+  if (normalized && toNormalize?.locale != undefined && !(typeof (toNormalize?.locale) == 'string' && (toNormalize.locale.length == 2 || toNormalize.locale.length == 5)))
     normalized.locale = toNormalize.locale
   return normalized
 }

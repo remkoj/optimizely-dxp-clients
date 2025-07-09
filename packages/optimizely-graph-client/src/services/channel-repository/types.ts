@@ -1,10 +1,32 @@
 import type { ContentLink } from '../types.js'
 
+/**
+ * Domain definition for a Channel Domain
+ */
 export type ChannelDomain = {
+  /**
+   * The domain name, without protocol
+   */
   name: string
+  /**
+   * Marker to set if this is the primary domain, e.g. the domain 
+   * to use if there's no other matching.
+   */
   isPrimary: boolean
+  /**
+   * Marker to set if this is the edit domain, e.g. the domain 
+   * to use if there's no other matching.
+   */
   isEdit: boolean
-  forLocale?: string
+  /**
+   * Marker to set if this domain uses a secure protocol
+   */
+  isSecure?: boolean
+  /**
+   * The locale for this domain. It's to be used for all unmapped
+   * locales when this is `undefined` or `"ALL"`.
+   */
+  forLocale?: "ALL" | string
 }
 export type ChannelLocale = {
   code: string
