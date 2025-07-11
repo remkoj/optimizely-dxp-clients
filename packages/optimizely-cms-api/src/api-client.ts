@@ -160,6 +160,16 @@ class BaseApiClient {
     throw new ApiError(result)
   }
 
+  public async getOpenApiSpec(): Promise<any> {
+    const result = await this._client.get({
+      url: '/docs/content-openapi.json'
+    })
+    if (result.data)
+      return result.data
+
+    throw new ApiError(result)
+  }
+
   protected createClientConfig: CreateClientConfig = (override) => {
     return {
       ...override,

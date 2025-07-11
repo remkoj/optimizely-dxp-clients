@@ -17,24 +17,30 @@ import NextJsComponentsCommand from './nextjs_components.js'
 import NextJsVisualBuilderCommand from './nextjs_visualbuilder.js'
 import NextJsFactoryCommand from './nextjs_factories.js'
 
+// Schema commands
+import SchemaVsCodeCommand from './schema_vscode.js'
+import SchemaValidateCommand from './schema_validate.js'
+
 // Generic
 import CmsVersionCommand from './cms_info.js'
 import CmsResetCommand from './cms_reset.js'
 
-export const commands : CliModuleList = [
-    StylesCreateCommand,
-    StylesPushCommand,
-    StylesListCommand,
-    StylesPullCommand,
-    TypesPullCommand,
-    TypesPushCommand,
-    NextJsCreateCommand,
-    NextJsQueriesCommand,
-    NextJsComponentsCommand,
-    NextJsVisualBuilderCommand,
-    NextJsFactoryCommand,
-    CmsResetCommand,
-    CmsVersionCommand
+export const commands: CliModuleList = [
+  StylesCreateCommand,
+  StylesPushCommand,
+  StylesListCommand,
+  StylesPullCommand,
+  TypesPullCommand,
+  TypesPushCommand,
+  NextJsCreateCommand,
+  NextJsQueriesCommand,
+  NextJsComponentsCommand,
+  NextJsVisualBuilderCommand,
+  NextJsFactoryCommand,
+  CmsResetCommand,
+  CmsVersionCommand,
+  SchemaVsCodeCommand,
+  SchemaValidateCommand
 ]
 
 export default commands

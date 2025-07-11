@@ -9,7 +9,6 @@ The defaults and methods are based upon using a Next.JS application with the con
   - [2.2. Environment variables](#22-environment-variables)
 - [3. Available commands](#3-available-commands)
   - [3.1. Generate React Component Factory](#31-generate-react-component-factory)
-  - [3.2. Check build and CMS Versions](#32-check-build-and-cms-versions)
 
 
 ## 1. Installing
@@ -47,11 +46,15 @@ The following commands are available, you can always run `opti-cms --help` or `o
 
 | Command | Description |
 | --- | --- |
-|`cms:version`| Fetch the version of the CMS from the endpoint. See [3.2. Check build and CMS Versions](#32-check-build-and-cms-versions) |
+|`cms:version`| Fetch and display the version of the CMS from the endpoint, allowing validation of the connection with Optimizely CMS. |
 |`cms:reset` | Reset the CMS instance by removing all Content, Content Types and Display Templates.<br/>***Note:*** This currently requires some manual steps, the CLI will provide the needed guidance on these manual steps. |
+| `schema:vscode` | Updates the `.vscode` folder to include the JSON Schema for both Content Type defintions and Display Templates. This will also create or update the `settings.json` to enable code-completion and validation on `*.opti-style.json` and `*.opti-type.json` files, using these schema's. Rerun this command to ensure that the definitions remain in sync with the OpenAPI specification of the CMS API. |
+| `schema:validate` | Downloads the OpenAPI Specification from the configured Optimizely CMS instance, extracts the appropriate types from it and uses those to validate all `*.opti-style.json` and `*.opti-type.json` files in the project. The output provides detailled error messages for each file that is not valid. |
+| `style:create` | Create a new Style definition file *(and optionally create it immediately within the CMS as well)* using a CLI interface, that will guide you through the process of setting the required properties.<br/>***Visual Studio Code users:*** Running `yarn opti-cms schema:vscode` will enable VS-Code to provide validation and completion for the generated `*.opti-style.json` file. |
 |`types:pull`| Read all existing content types from the Optimizely CMS and create their representation within the codebase. Use the parameters of this method to control which types will be pulled and to allow overwriting of existing files. |
 |`types:push`| Create or overwrite the content type defintions from the codebase into Optimizely CMS, use the parameters of this method to control which types will be transferred and whether destructive changes are allowed. |
 | `nextjs:factory` | Generate the component factories needed for suggested implementation pattern of Optimizely CMS in Next.JS. See [3.1. Generate React Component Factory](#31-generate-react-component-factory) |
+| `nextjs:create` | An conveniance command, that will run the appropriate commands from the CLI in the right order to fully scaffold a frontend based upon the Content Types and Display Templates that already exist within the Optimizely CMS instance.<br/>It runs these commands: `types:pull`, `styles:pull`, `nextjs:fragments` `nextjs:components`, `nextjs:visualbuilder` and `nextjs:factory`. The command line arguments you provide to `nextjs:create` will be forwarded to each of these commands. |
 
 ### 3.1. Generate React Component Factory
 This is a companion method to the ComponentFactory / DefaultComponentFactory implementation within [@remkoj/optimizely-cms-react](https://www.npmjs.com/package/@remkoj/optimizely-cms-react) that is used to resolve content types within Optimizely CMS into React Components. This method will create the needed files to easily construct the factory from the components in the frontend.
@@ -71,12 +74,3 @@ yarn opti-cms nextjs:factory -f
 | --types | -t | Select content types with this key. Add multiple times to build a list | [] |
 | --all | -a | Include non-supported base types, non supported base types are skipped by default | |
 | --force | -f | By default, this method is none-destructive. Set this parameter to overwrite existing files. | |
-
-### 3.2. Check build and CMS Versions
-Connect to the Optimizely CMS Service to fetch service health and version information.
-
-#### Usage & example<!-- omit in toc -->
-Command: `cms:version`
-```Bash
-yarn opti-cms cms:version
-```

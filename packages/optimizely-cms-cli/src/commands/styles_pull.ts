@@ -114,7 +114,7 @@ export const StylesPullCommand: StylesPullModule = {
         // Write Style definition
         const imports: string[] = [
           'import type { LayoutProps } from "@remkoj/optimizely-cms-react"',
-          'import type { ReactNode } from "react"'
+          'import type { ReactNode, JSX } from "react"'
         ]
         const typeContents: string[] = []
         const props: string[] = []

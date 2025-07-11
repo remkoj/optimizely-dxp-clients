@@ -709,6 +709,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@fastify/deepmerge@npm:^3.1.0":
+  version: 3.1.0
+  resolution: "@fastify/deepmerge@npm:3.1.0"
+  checksum: 10c0/57eda9079e9ed6d137f966e8b0d08f219cbca6e79706a1be76fe10ba2b8fd87c33846f1c653299b09a2e8260ffba8c8fc708f9b40b54243648d6821061999c9b
+  languageName: node
+  linkType: hard
+
 "@floating-ui/core@npm:^1.0.0":
   version: 1.6.1
   resolution: "@floating-ui/core@npm:1.6.1"
@@ -1987,7 +1994,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@remkoj/optimizely-cms-api@workspace:6.0.0-pre4, @remkoj/optimizely-cms-api@workspace:packages/optimizely-cms-api":
+"@remkoj/optimizely-cms-api@workspace:6.0.0-pre5, @remkoj/optimizely-cms-api@workspace:packages/optimizely-cms-api":
   version: 0.0.0-use.local
   resolution: "@remkoj/optimizely-cms-api@workspace:packages/optimizely-cms-api"
   dependencies:
@@ -2008,16 +2015,20 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@remkoj/optimizely-cms-cli@workspace:packages/optimizely-cms-cli"
   dependencies:
+    "@fastify/deepmerge": "npm:^3.1.0"
     "@inquirer/prompts": "npm:^7.6.0"
-    "@remkoj/optimizely-cms-api": "workspace:6.0.0-pre4"
+    "@remkoj/optimizely-cms-api": "workspace:6.0.0-pre5"
     "@rollup/plugin-json": "npm:^6.1.0"
     "@rollup/plugin-typescript": "npm:^12.1.4"
     "@types/node": "npm:^22.16.2"
     "@types/yargs": "npm:^17.0.33"
+    ajv: "npm:^8.17.1"
+    ajv-formats: "npm:^3.0.1"
     chalk: "npm:^5.4.1"
     cli-table3: "npm:^0.6.5"
     dotenv: "npm:^17.1.0"
     dotenv-expand: "npm:^12.0.2"
+    fast-deep-equal: "npm:^3.1.3"
     figures: "npm:^6.1.0"
     glob: "npm:^11.0.3"
     rollup: "npm:^4.44.2"
@@ -2036,8 +2047,8 @@ __metadata:
   resolution: "@remkoj/optimizely-cms-nextjs@workspace:packages/optimizely-cms-nextjs"
   dependencies:
     "@formatjs/intl-localematcher": "npm:^0.6.1"
-    "@remkoj/optimizely-cms-react": "workspace:6.0.0-pre4"
-    "@remkoj/optimizely-graph-client": "workspace:6.0.0-pre4"
+    "@remkoj/optimizely-cms-react": "workspace:6.0.0-pre5"
+    "@remkoj/optimizely-graph-client": "workspace:6.0.0-pre5"
     "@types/negotiator": "npm:^0.6.4"
     "@types/node": "npm:^22.16.2"
     "@types/react": "npm:^19.1.8"
@@ -2060,12 +2071,12 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@remkoj/optimizely-cms-react@workspace:6.0.0-pre4, @remkoj/optimizely-cms-react@workspace:packages/optimizely-cms-react":
+"@remkoj/optimizely-cms-react@workspace:6.0.0-pre5, @remkoj/optimizely-cms-react@workspace:packages/optimizely-cms-react":
   version: 0.0.0-use.local
   resolution: "@remkoj/optimizely-cms-react@workspace:packages/optimizely-cms-react"
   dependencies:
     "@graphql-typed-document-node/core": "npm:^3.2.0"
-    "@remkoj/optimizely-graph-client": "workspace:6.0.0-pre4"
+    "@remkoj/optimizely-graph-client": "workspace:6.0.0-pre5"
     "@types/crypto-js": "npm:^4.2.2"
     "@types/node": "npm:^22.16.2"
     "@types/react": "npm:^19.1.8"
@@ -2089,7 +2100,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@remkoj/optimizely-graph-cli@workspace:packages/optimizely-graph-cli"
   dependencies:
-    "@remkoj/optimizely-graph-client": "workspace:6.0.0-pre4"
+    "@remkoj/optimizely-graph-client": "workspace:6.0.0-pre5"
     "@rollup/plugin-commonjs": "npm:^28.0.6"
     "@rollup/plugin-json": "npm:^6.1.0"
     "@rollup/plugin-typescript": "npm:^12.1.4"
@@ -2115,7 +2126,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@remkoj/optimizely-graph-client@workspace:6.0.0-pre4, @remkoj/optimizely-graph-client@workspace:^6.0.0-pre4, @remkoj/optimizely-graph-client@workspace:packages/optimizely-graph-client":
+"@remkoj/optimizely-graph-client@workspace:6.0.0-pre5, @remkoj/optimizely-graph-client@workspace:^6.0.0-pre5, @remkoj/optimizely-graph-client@workspace:packages/optimizely-graph-client":
   version: 0.0.0-use.local
   resolution: "@remkoj/optimizely-graph-client@workspace:packages/optimizely-graph-client"
   dependencies:
@@ -2143,7 +2154,7 @@ __metadata:
     "@graphql-codegen/typescript-graphql-request": "npm:^6.3.0"
     "@graphql-codegen/typescript-operations": "npm:^4.6.1"
     "@graphql-typed-document-node/core": "npm:^3.2.0"
-    "@remkoj/optimizely-graph-client": "workspace:6.0.0-pre4"
+    "@remkoj/optimizely-graph-client": "workspace:6.0.0-pre5"
     "@types/node": "npm:^22.16.2"
     graphql: "npm:^16.11.0"
     graphql-request: "npm:^7.2.0"
@@ -2151,6 +2162,10 @@ __metadata:
     graphql-tag: "npm:^2.12.6"
     tslib: "npm:^2.8.1"
     typescript: "npm:^5.8.3"
+  peerDependencies:
+    "@graphql-typed-document-node/core": "*"
+    graphql-request: "*"
+    graphql-tag: "*"
   bin:
     opti-patch: dist/patch.js
   languageName: unknown
@@ -2162,7 +2177,7 @@ __metadata:
   dependencies:
     "@headlessui/react": "npm:^2.2.4"
     "@heroicons/react": "npm:^2.2.0"
-    "@remkoj/optimizely-graph-client": "workspace:^6.0.0-pre4"
+    "@remkoj/optimizely-graph-client": "workspace:^6.0.0-pre5"
     "@tailwindcss/cli": "npm:^4.1.11"
     "@types/node": "npm:^22.16.2"
     "@types/react": "npm:^19.1.8"
@@ -2904,6 +2919,32 @@ __metadata:
     clean-stack: "npm:^2.0.0"
     indent-string: "npm:^4.0.0"
   checksum: 10c0/a42f67faa79e3e6687a4923050e7c9807db3848a037076f791d10e092677d65c1d2d863b7848560699f40fc0502c19f40963fb1cd1fb3d338a7423df8e45e039
+  languageName: node
+  linkType: hard
+
+"ajv-formats@npm:^3.0.1":
+  version: 3.0.1
+  resolution: "ajv-formats@npm:3.0.1"
+  dependencies:
+    ajv: "npm:^8.0.0"
+  peerDependencies:
+    ajv: ^8.0.0
+  peerDependenciesMeta:
+    ajv:
+      optional: true
+  checksum: 10c0/168d6bca1ea9f163b41c8147bae537e67bd963357a5488a1eaf3abe8baa8eec806d4e45f15b10767e6020679315c7e1e5e6803088dfb84efa2b4e9353b83dd0a
+  languageName: node
+  linkType: hard
+
+"ajv@npm:^8.0.0, ajv@npm:^8.17.1":
+  version: 8.17.1
+  resolution: "ajv@npm:8.17.1"
+  dependencies:
+    fast-deep-equal: "npm:^3.1.3"
+    fast-uri: "npm:^3.0.1"
+    json-schema-traverse: "npm:^1.0.0"
+    require-from-string: "npm:^2.0.2"
+  checksum: 10c0/ec3ba10a573c6b60f94639ffc53526275917a2df6810e4ab5a6b959d87459f9ef3f00d5e7865b82677cb7d21590355b34da14d1d0b9c32d75f95a187e76fff35
   languageName: node
   linkType: hard
 
@@ -3867,6 +3908,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"fast-deep-equal@npm:^3.1.3":
+  version: 3.1.3
+  resolution: "fast-deep-equal@npm:3.1.3"
+  checksum: 10c0/40dedc862eb8992c54579c66d914635afbec43350afbbe991235fdcb4e3a8d5af1b23ae7e79bef7d4882d0ecee06c3197488026998fb19f72dc95acff1d1b1d0
+  languageName: node
+  linkType: hard
+
 "fast-glob@npm:^3.2.2":
   version: 3.3.2
   resolution: "fast-glob@npm:3.3.2"
@@ -3877,6 +3925,13 @@ __metadata:
     merge2: "npm:^1.3.0"
     micromatch: "npm:^4.0.4"
   checksum: 10c0/42baad7b9cd40b63e42039132bde27ca2cb3a4950d0a0f9abe4639ea1aa9d3e3b40f98b1fe31cbc0cc17b664c9ea7447d911a152fa34ec5b72977b125a6fc845
+  languageName: node
+  linkType: hard
+
+"fast-uri@npm:^3.0.1":
+  version: 3.0.6
+  resolution: "fast-uri@npm:3.0.6"
+  checksum: 10c0/74a513c2af0584448aee71ce56005185f81239eab7a2343110e5bad50c39ad4fb19c5a6f99783ead1cac7ccaf3461a6034fda89fffa2b30b6d99b9f21c2f9d29
   languageName: node
   linkType: hard
 
@@ -4638,6 +4693,13 @@ __metadata:
   version: 3.0.1
   resolution: "json-buffer@npm:3.0.1"
   checksum: 10c0/0d1c91569d9588e7eef2b49b59851f297f3ab93c7b35c7c221e288099322be6b562767d11e4821da500f3219542b9afd2e54c5dc573107c1126ed1080f8e96d7
+  languageName: node
+  linkType: hard
+
+"json-schema-traverse@npm:^1.0.0":
+  version: 1.0.0
+  resolution: "json-schema-traverse@npm:1.0.0"
+  checksum: 10c0/71e30015d7f3d6dc1c316d6298047c8ef98a06d31ad064919976583eb61e1018a60a0067338f0f79cabc00d84af3fcc489bd48ce8a46ea165d9541ba17fb30c6
   languageName: node
   linkType: hard
 
@@ -5738,6 +5800,13 @@ __metadata:
   version: 2.1.1
   resolution: "require-directory@npm:2.1.1"
   checksum: 10c0/83aa76a7bc1531f68d92c75a2ca2f54f1b01463cb566cf3fbc787d0de8be30c9dbc211d1d46be3497dac5785fe296f2dd11d531945ac29730643357978966e99
+  languageName: node
+  linkType: hard
+
+"require-from-string@npm:^2.0.2":
+  version: 2.0.2
+  resolution: "require-from-string@npm:2.0.2"
+  checksum: 10c0/aaa267e0c5b022fc5fd4eef49d8285086b15f2a1c54b28240fdf03599cbd9c26049fee3eab894f2e1f6ca65e513b030a7c264201e3f005601e80c49fb2937ce2
   languageName: node
   linkType: hard
 
