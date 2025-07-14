@@ -1,18 +1,19 @@
 {
   "name": "@remkoj/optimizely-graph-cli",
+  "description": "CLI Utility to work with Optimizely Graph",
   "repository": "https://github.com/remkoj/optimizely-dxp-clients.git",
   "author": "Remko Jantzen <693172+remkoj@users.noreply.github.com>",
   "homepage": "https://github.com/remkoj/optimizely-dxp-clients",
   "version": "6.0.0-pre5",
   "license": "Apache-2.0",
   "type": "module",
-  "description": "CLI Utilities for Optimizely DXP",
   "main": "bin/index.js",
   "files": [
     "./bin"
   ],
   "bin": {
-    "opti-graph": "bin/index.js"
+    "opti-graph": "bin/index.js",
+    "@remkoj/optimizely-graph-cli": "bin/index.js"
   },
   "scripts": {
     "watch": "yarn rollup --config rollup.config.js --watch",

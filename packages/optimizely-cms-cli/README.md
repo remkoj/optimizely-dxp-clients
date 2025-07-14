@@ -3,7 +3,9 @@ A collection of Command Line tools used to increase productivity when working wi
 
 The defaults and methods are based upon using a Next.JS application with the conventions introduced by the [Create Next App template](https://github.com/remkoj/optimizely-saas-starter)
 
-- [1. Installing](#1-installing)
+- [1. Installing / using](#1-installing--using)
+  - [1.1. Installing as development dependency](#11-installing-as-development-dependency)
+  - [1.2. Usage through direct execution](#12-usage-through-direct-execution)
 - [2. General usage and parameters](#2-general-usage-and-parameters)
   - [2.1. Global parameters](#21-global-parameters)
   - [2.2. Environment variables](#22-environment-variables)
@@ -11,10 +13,32 @@ The defaults and methods are based upon using a Next.JS application with the con
   - [3.1. Generate React Component Factory](#31-generate-react-component-factory)
 
 
-## 1. Installing
+## 1. Installing / using
+This package has been tested through `npx`, `yarn dlx` as well as development dependency within a Yarn managed project. Though there *should not* be a any dependency on Yarn as package manager for your project it has not been verified.
+
+The usage examples through this readme are assuming the package has been installed as development dependency in a Yarn managed project, you must adjust these based upon your project.
+
+### 1.1. Installing as development dependency
 This package has been designed to work in a Yarn PnP / Zero-install environment, it may or may not work with other package managers.
 ```bash
 yarn add --dev @remkoj/optimizely-cms-cli
+```
+
+### 1.2. Usage through direct execution
+Instead of using the `yarn opti-cms` as shown in the examples, which is available as short-hand after installation as development dependency, you may use one of these as well.
+
+```bash
+# Execution through NPX, latest version
+npx @remkoj/optimizely-cms-cli
+
+# Execution through Yarn DLX, latest version
+yarn dlx @remkoj/optimizely-cms-cli
+
+# Execution through NPX, explicit version 5.1.1
+npx @remkoj/optimizely-cms-cli@5.1.1
+
+# Execution through Yarn DLX, explicit version 5.1.1
+yarn dlx @remkoj/optimizely-cms-cli@5.1.1
 ```
 
 ## 2. General usage and parameters

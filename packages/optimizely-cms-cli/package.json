@@ -1,10 +1,14 @@
 {
   "name": "@remkoj/optimizely-cms-cli",
-  "description": "Optimizely CMS CLI Tools",
+  "description": "CLI Utility to work with Optimizely SaaS CMS.",
+  "license": "Apache-2.0",
+  "author": "Remko Jantzen <693172+remkoj@users.noreply.github.com>",
+  "keywords": ["Optimizely CMS","Optimizely","CMS","CLI"],
   "type": "module",
   "version": "6.0.0-pre5",
   "bin": {
-    "opti-cms": "./dist/index.js"
+    "opti-cms": "./dist/index.js",
+    "@remkoj/optimizely-cms-cli": "./dist/index.js"
   },
   "files": [
     "./dist"
@@ -25,9 +29,6 @@
     "rollup": "^4.44.2",
     "tslib": "^2.8.1",
     "typescript": "^5.8.3"
-  },
-  "peerDependencies": {
-    "@types/node": "*"
   },
   "dependencies": {
     "@fastify/deepmerge": "^3.1.0",
