@@ -51,7 +51,9 @@ BlankExperienceExperience.getDataFragment = () => [
 BlankExperienceExperience.getMetaData = async (contentLink, locale, client) => {
   const sdk = getSdk(client)
   // Add your metadata logic here
-  return {}
+  return {
+    title: 'BLANK EXPERIENCE META TITLE',
+  }
 }
 
 export default BlankExperienceExperience
