@@ -1,4 +1,5 @@
 import { type ComponentFactory } from '@remkoj/optimizely-cms-react'
+import { Utils } from '@remkoj/optimizely-cms-react'
 import createClient, { isOptiGraphClient, type OptimizelyGraphConfig, type IOptiGraphClient, type ContentLink } from '@remkoj/optimizely-graph-client'
 import { Metadata } from 'next'
 import { isOptimizelyNextPageWithMetaData } from './page.js'
@@ -30,7 +31,13 @@ export class MetaDataResolver
         if (locale && locale.includes("-"))
             throw new Error("🟠 [MetaDataResolver] Invalid character detected within the locale")
 
-        const Component = factory.resolve(contentType) as FunctionComponent<any>
+        const normalizedContentType = Utils.normalizeContentType(Array.isArray(contentType) ? [...contentType].reverse() : contentType, true)
+        if (!normalizedContentType) {
+            if (this._cgClient.debug)
+                console.log(`🟠 [MetaDataResolver] Could not normalize content type for ${ contentType.join('/') }`)
+            return {}
+        }
+        const Component = factory.resolve(normalizedContentType) as FunctionComponent<any>
         if (!Component) {
             if (this._cgClient.debug)
                 console.log(`🟠 [MetaDataResolver] No component found for ${ contentType.join('/') }`)
