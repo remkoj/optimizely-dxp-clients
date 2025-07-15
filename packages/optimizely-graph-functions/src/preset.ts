@@ -3,7 +3,7 @@ import { Kind, visit } from 'graphql'
 
 // Import base preset
 import { preset as clientPreset, type ClientPresetConfig as ClientPresetOptions } from '@graphql-codegen/client-preset'
-//import * as GraphQLRequestPlugin from '@graphql-codegen/typescript-graphql-request'
+import * as GraphQLRequestPlugin from '@graphql-codegen/typescript-graphql-request'
 import * as AddPlugin from '@graphql-codegen/add'
 
 // Import injected parts
@@ -115,35 +115,35 @@ export const preset: Types.OutputPreset<PresetOptions> =
     const section: Array<Types.GenerateOptions> = await clientPreset.buildGeneratesSection(options)
 
     // Add GraphQL Request Client
-    /*section.push({
-        filename: `${ options.baseOutputDir}client.ts`,
-        pluginMap: {
-            "add": AddPlugin,
-            "typescript-graphql-request": GraphQLRequestPlugin
+    section.push({
+      filename: `${options.baseOutputDir}client.ts`,
+      pluginMap: {
+        "add": AddPlugin,
+        "typescript-graphql-request": GraphQLRequestPlugin
+      },
+      plugins: [
+        {
+          add: {
+            content: ["import type * as Schema from \"./graphql\";"]
+          },
         },
-        plugins: [
-            {
-                add: {
-                    content: ["import type * as Schema from \"./graphql\";"]
-                },
-            },
-            {
-                'typescript-graphql-request': {
-                    ...options.config,
-                    useTypeImports: true,
-                    importOperationTypesFrom: "Schema",
-                }
-            }
-        ],
-        schema: options.schema,
-        schemaAst: options.schemaAst,
-        config: {
+        {
+          'typescript-graphql-request': {
             ...options.config,
-        },
-        profiler: options.profiler,
-        documents: options.documents,
-        documentTransforms: options.documentTransforms
-    })*/
+            useTypeImports: true,
+            importOperationTypesFrom: "Schema",
+          }
+        }
+      ],
+      schema: options.schema,
+      schemaAst: options.schemaAst,
+      config: {
+        ...options.config,
+      },
+      profiler: options.profiler,
+      documents: options.documents,
+      documentTransforms: options.documentTransforms
+    })
 
     // Add the functions file
     section.push({
