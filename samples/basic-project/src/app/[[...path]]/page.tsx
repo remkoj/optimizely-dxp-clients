@@ -26,8 +26,8 @@ const {
     const client = createClient(undefined, token, {
       nextJsFetchDirectives: true,
     })
-    //if (client.debug)
-    console.log('⚪ [Sample Site] Created new Optimizely Graph client')
+    if (client.debug)
+      console.log('⚪ [Sample Site] Created new Optimizely Graph client')
 
     // Check if we're in request mode, if not the "draft mode" check will fail
     if (mode == 'request') {
