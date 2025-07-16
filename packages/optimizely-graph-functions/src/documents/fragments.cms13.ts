@@ -24,6 +24,10 @@ export default [
   `fragment LinkData on ContentUrl {
   base
   default
+  graph
+  hierarchical
+  internal
+  type
 }`,
   `fragment ReferenceData on ContentReference {
   key
