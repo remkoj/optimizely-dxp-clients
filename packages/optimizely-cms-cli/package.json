@@ -10,7 +10,7 @@
     "CLI"
   ],
   "type": "module",
-  "version": "6.0.0-pre7",
+  "version": "6.0.0-pre8",
   "bin": {
     "opti-cms": "./dist/index.js",
     "optimizely-cms-cli": "./dist/index.js"
@@ -26,19 +26,19 @@
     "opti-cms": "node ./dist/index.js"
   },
   "devDependencies": {
-    "@remkoj/optimizely-cms-api": "workspace:6.0.0-pre7",
+    "@remkoj/optimizely-cms-api": "workspace:6.0.0-pre8",
     "@rollup/plugin-json": "^6.1.0",
     "@rollup/plugin-typescript": "^12.1.4",
     "@types/node": "^22.16.4",
     "@types/yargs": "^17.0.33",
-    "rollup": "^4.45.0",
+    "rollup": "^4.45.1",
     "tslib": "^2.8.1",
     "typescript": "^5.8.3"
   },
   "dependencies": {
     "@fastify/deepmerge": "^3.1.0",
     "@inquirer/prompts": "^7.6.0",
-    "@remkoj/optimizely-cms-api": "^6.0.0-pre7",
+    "@remkoj/optimizely-cms-api": "^6.0.0-pre8",
     "ajv": "^8.17.1",
     "ajv-formats": "^3.0.1",
     "chalk": "^5.4.1",
