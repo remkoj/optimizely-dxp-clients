@@ -20,7 +20,8 @@
     "./preset": "./dist/preset.js",
     "./transform": "./dist/transform.js",
     "./documents": "./dist/documents/index.js",
-    "./loader": "./dist/embedded-loader.js"
+    "./loader": "./dist/embedded-loader.js",
+    "./document-ast": "./dist/document-ast-plugin.js"
   },
   "typesVersions": {
     "*": {
@@ -38,11 +39,14 @@
       ],
       "loader": [
         "./dist/embedded-loader.d.ts"
+      ],
+      "document-ast": [
+        "./dist/document-ast-plugin.d.ts"
       ]
     }
   },
   "devDependencies": {
-    "@types/node": "^22.16.2",
+    "@types/node": "^22.16.4",
     "graphql": "^16.11.0",
     "graphql-request": "^6.1.0",
     "graphql-tag": "^2.12.6",

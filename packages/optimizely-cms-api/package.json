@@ -11,7 +11,7 @@
     "./dist"
   ],
   "devDependencies": {
-    "@types/node": "^22.16.2",
+    "@types/node": "^22.16.4",
     "dotenv": "^16.6.1",
     "glob": "^11.0.3",
     "openapi-typescript-codegen": "^0.29.0",
