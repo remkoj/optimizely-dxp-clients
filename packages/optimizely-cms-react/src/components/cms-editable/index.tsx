@@ -38,9 +38,7 @@ export type CmsEditableProps<FT extends ElementType> = PropsWithChildren<
      * `ctx` property to the 'as' Component, or set to a valid property name to pass into
      * that property.
      */
-    forwardCtx?: ElementProps<FT>['ctx'] extends GenericContext
-      ? boolean | GenericContextProps<FT>
-      : GenericContextProps<FT>
+    forwardCtx?: boolean | GenericContextProps<FT>
 
     /**
      * If set, the `data-epi-block-id` attribute will always be included when the `cmsId`

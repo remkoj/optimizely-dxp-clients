@@ -22,6 +22,7 @@ export default [
   ...IContentData
 }`,
   `fragment LinkData on ContentUrl {
+  type
   base
   default
 }`,
