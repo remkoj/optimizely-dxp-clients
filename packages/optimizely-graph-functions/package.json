@@ -46,7 +46,7 @@
     }
   },
   "devDependencies": {
-    "@types/node": "^22.16.4",
+    "@types/node": "^22.16.5",
     "graphql": "^16.11.0",
     "graphql-request": "^6.1.0",
     "graphql-tag": "^2.12.6",

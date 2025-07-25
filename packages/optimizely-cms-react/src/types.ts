@@ -3,6 +3,7 @@ import type { DocumentNode } from "graphql"
 import type { TypedDocumentNode } from '@graphql-typed-document-node/core'
 import type { ContentLinkWithLocale, ContentLink, InlineContentLinkWithLocale } from "@remkoj/optimizely-graph-client"
 import type { GenericContext } from "./context/types.js"
+import type { CmsEditableProps } from "./components/cms-editable/index.js"
 
 // Export reused content types
 export type ContentType = string[]
@@ -17,9 +18,11 @@ export type {
   ContentLinkWithLocale
 } from "@remkoj/optimizely-graph-client"
 
+export type ComponentCmsEditableProps = Pick<CmsEditableProps<'div'>, 'cmsId' | 'ctx' | 'currentContent'>
+
 export type CmsComponentProps<T, L extends Record<string, any> = Record<string, any>> = PropsWithChildren<{
   /**
-   * The identifier of the content item
+   * The identifier of the content item.
    */
   contentLink: ContentLinkWithLocale | InlineContentLinkWithLocale
 
@@ -30,13 +33,22 @@ export type CmsComponentProps<T, L extends Record<string, any> = Record<string, 
 
   /**
    * Use the Server/Client context instead if you need this information
+   * 
+   * @deprecated
    */
   inEditMode?: boolean
 
   /**
-   * Contextual layout data, if any
+   * Contextual layout data from an Experience. This will be `undefined` if 
+   * there's no layout data attached.
    */
   layoutProps?: L
+
+  /**
+   * The minimal properties needed to render a CmsEditable inside the
+   * component.
+   */
+  editProps?: ComponentCmsEditableProps
 
   /**
    * The context in which this component will be rendered
@@ -92,4 +104,9 @@ export type CmsComponent<T = DocumentNode, L extends Record<string, any> = Recor
   T extends GraphQLFragmentBase ? CmsComponentWithFragment<T, L> :
   T extends GraphQLQueryBase ? CmsComponentWithQuery<T, L> :
   CmsComponentWithOptionalQuery<T, L>
+
+/**
+ * A generic Optimizely CMS Component used to render a layout node from an experience, which cannot
+ * be loaded directly as independent Content Item from Optimizely Graph
+ */
 export type CmsLayoutComponent<L extends Record<string, any> = Record<string, any>, T = never> = ReactComponentType<CmsComponentProps<T, L>>

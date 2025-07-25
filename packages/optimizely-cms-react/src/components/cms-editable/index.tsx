@@ -47,8 +47,15 @@ export type CmsEditableProps<FT extends ElementType> = PropsWithChildren<
     forceBlockId?: boolean
 
     /**
+     * If set `CmsEditable` will output both `cmsId` and `cmsFieldName` (if both are provided)
+     * otherwise it will prioritize `cmsFieldName`.
+     */
+    forceId?: boolean
+
+    /**
      * If set, this will be used to test if the content item being rendered is actually
-     * the one being edited. This allows
+     * the one being edited. This allows conditional output of the edit properties. This will
+     * only affect `cmsFieldName`, not `cmsId`.
      */
     currentContent?: ContentLink
 
@@ -58,7 +65,15 @@ export type CmsEditableProps<FT extends ElementType> = PropsWithChildren<
     editType?: 'floating' | 'inline' | null
   } & Omit<
     ElementProps<FT>,
-    'as' | 'cmsId' | 'cmsFieldName' | 'ctx' | 'forwardCtx'
+    | 'as'
+    | 'cmsId'
+    | 'cmsFieldName'
+    | 'ctx'
+    | 'forwardCtx'
+    | 'forceBlockId'
+    | 'forceId'
+    | 'currentContent'
+    | 'editType'
   >
 >
 
@@ -82,13 +97,14 @@ export const CmsEditable: CmsEditableBaseComponent = <CT extends ElementType>({
   ctx,
   forwardCtx,
   as,
-  cmsId,
-  cmsFieldName,
+  cmsId = null,
+  cmsFieldName = null,
   children,
   key,
-  forceBlockId,
+  forceBlockId = false,
+  forceId = true,
   currentContent,
-  editType,
+  editType = null,
   ...props
 }: PropsWithContext<CmsEditableProps<CT>>) => {
   const {

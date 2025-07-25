@@ -8,7 +8,7 @@
   "license": "Apache-2.0",
   "private": true,
   "devDependencies": {
-    "@types/node": "^22.16.4",
+    "@types/node": "^22.16.5",
     "@yarnpkg/sdks": "^3.2.2",
     "browserslist": "^4.25.1",
     "glob": "^11.0.3",
@@ -34,6 +34,7 @@
   },
   "scripts": {
     "opti-graph": "yarn workspace @remkoj/optimizely-graph-cli opti-graph",
+    "opti-cms": "yarn workspace @remkoj/optimizely-cms-cli opti-cms",
     "clean": "yarn node ./scripts/clean.js",
     "generate": "yarn update-browserslist-db && yarn workspaces foreach -Apt --topological-dev --exclude optimizely-dxp-clients run generate",
     "prepare": "yarn workspaces foreach -Apt --topological-dev --exclude optimizely-dxp-clients run prepare",

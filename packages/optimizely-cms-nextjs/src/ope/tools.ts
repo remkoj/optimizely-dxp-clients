@@ -68,7 +68,7 @@ export function getContentRequest({ params: { path, lang }, searchParams: { prev
                 token,
                 ctx: searchParams.ctx,
                 key: searchParams.key,
-                locale: searchParams.loc,
+                locale: searchParams.ver ? undefined : searchParams.loc, // Ignore locale when an explicit version has been selected
                 version: searchParams.ver,
                 path: searchParams.path ?? null
             }
