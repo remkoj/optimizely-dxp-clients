@@ -19,17 +19,9 @@ export interface GenericContext {
 /**
  * The context information that can cross the React Server/Client boundary
  */
-export interface TransferrableContext {
-  readonly clientConfig?: OptimizelyGraphConfig
-  readonly locale?: string
-  readonly inEditMode: boolean
-  readonly inPreviewMode: boolean
-  readonly isDevelopment: boolean
-  readonly isDebug: boolean
-  readonly isDebugOrDevelopment: boolean
-  readonly editableContent?: ContentLink | null
-  readonly editableContentIsExperience?: boolean
-}
+export type TransferrableContext = {
+  readonly client?: OptimizelyGraphConfig
+} & Readonly<Omit<GenericContext, 'client' | 'factory'>>
 
 export type BaseContext = TransferrableContext | GenericContext
 

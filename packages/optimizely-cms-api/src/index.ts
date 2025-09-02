@@ -1,15 +1,22 @@
 export * from './config'
 export * as IntegrationApi from './client/types.gen'
+export * as Preview2IntegrationApi from './instance.client/types.gen'
 export { ApiClient, ApiError, ApiClient as CoreClient, type ApiClientStatic, type CmsIntegrationApiClient } from './api-client'
 export { OptiCmsVersion } from "./types"
 
 import { type CmsIntegrationApiOptions } from './config'
 import { ApiClient, type CmsIntegrationApiClient } from './api-client'
 
-export { getCmsIntegrationApiConfigFromEnvironment as readEnvConfig } from './config'
+export { readEnvConfig } from './config'
 
 export function createClient(config?: CmsIntegrationApiOptions): CmsIntegrationApiClient {
   return new ApiClient(config)
+}
+
+export function isClientInstance(value?: object): value is CmsIntegrationApiClient {
+  if (typeof value !== 'object' || value === null)
+    return false
+  return typeof (value as CmsIntegrationApiClient)['getInstanceInfo'] === 'function'
 }
 
 export enum ContentRoots {

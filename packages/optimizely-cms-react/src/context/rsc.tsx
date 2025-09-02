@@ -5,7 +5,6 @@ import {
   type IOptiGraphClient,
   type ContentLink,
 } from '@remkoj/optimizely-graph-client'
-import React from 'react'
 import {
   type GenericContext,
   type RenderMode,
@@ -149,22 +148,21 @@ export class ServerContext implements GenericContext {
   }
 
   public toJSON(key?: string): TransferrableContext {
-    /*if (this.isDebugOrDevelopment) {
+    if (this.isDebugOrDevelopment) {
       console.warn(
         '🦺 [ServerContext] Converting Context to JSON, this is typically a side effect of the context being passed between Server & Client components'
       )
-      if (this.isDebug) {
-        console.trace('The conversion happened here')
-      }
-    }*/
+      if (this.isDebug)
+        console.trace()
+    }
 
     return {
+      client: this.client?.toJSON(),
       inEditMode: this.inEditMode,
       inPreviewMode: this.inPreviewMode,
       isDebug: this.isDebug,
       isDebugOrDevelopment: this.isDebugOrDevelopment,
       isDevelopment: this.isDevelopment,
-      clientConfig: this.client?.toJSON(),
       locale: this.locale,
     }
   }
@@ -183,11 +181,9 @@ export class ServerContext implements GenericContext {
  *              components
  */
 export const getServerContext = () => {
-  if (isDebug())
-    console.debug(
-      '🦺 [ServerContext] getServerContext has been deprecated, this provides an instance of the Server Context that is potentially shared between requests'
+    throw new Error(
+      '🦺 [ServerContext] getServerContext has been removed, due to potential leakage across requests'
     )
-  return internalGetServerContext()
 }
 
 /**
@@ -203,48 +199,8 @@ export const getServerContext = () => {
 export function updateSharedServerContext(
   currentCtx: GenericContext
 ): ServerContext {
-  const serverCtx = internalGetServerContext()
-  // Update component factory
-  serverCtx.setComponentFactory(currentCtx.factory)
-
-  // Update Optimizely Graph Client
-  if (currentCtx.client) serverCtx.setOptimizelyGraphClient(currentCtx.client)
-
-  // Update locale
-  if (currentCtx.locale) serverCtx.setLocale(currentCtx.locale)
-
-  // Update mode
-  if (currentCtx.inEditMode) serverCtx.setMode('edit')
-  else if (currentCtx.inPreviewMode) serverCtx.setMode('preview')
-  else if (!currentCtx.inEditMode && !currentCtx.inPreviewMode)
-    serverCtx.setMode('public')
-
-  // Update editable content
-  serverCtx.setEditableContentId(currentCtx.editableContent)
-  return serverCtx
-}
-//#endregion
-
-//#region Internal methods & types
-type CachePlaceHolder = <M extends (...args: any[]) => any>(
-  factory: M
-) => (...args: Parameters<M>) => ReturnType<M>
-const cachePlaceholder: CachePlaceHolder = <M extends (...args: any) => any>(
-  factory: M
-) => {
-  if (isDebug() || isDevelopment())
-    console.warn(
-      '🚧 [React Context] Running client/server react code instead of server context, no cache() available.'
+  throw new Error(
+      '🦺 [ServerContext] getServerContext has been removed, due to potential leakage across requests'
     )
-  return factory
 }
-
-//@ts-ignore React.cache is only available in the react-server context
-const cache = (React.cache || cachePlaceholder) as CachePlaceHolder
-
-const internalGetServerContext = cache(() => {
-  const ctx = new ServerContext({})
-  if (ctx.isDebug) console.log('🦺 [ServerContext] Created new context')
-  return ctx
-})
 //#endregion

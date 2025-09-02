@@ -40,8 +40,8 @@ export const NextJsComponentsCommand: NextJsModule<{ loadedContentTypes: GetCont
 export default NextJsComponentsCommand
 
 
-function createComponent(contentType: IntegrationApi.ContentType, typePath: string, force: boolean, debug: boolean = false) {
-  const componentFile = path.join(typePath, 'index.tsx')
+function createComponent(contentType: IntegrationApi.ContentType, typePathInfo: TypeFolderList[number], force: boolean, debug: boolean = false) {
+  const { componentFile, path: typePath } = typePathInfo
   if (fs.existsSync(componentFile)) {
     if (!force) {
       if (debug)
@@ -99,7 +99,7 @@ function getDisplayTemplateInfo(contentType: IntegrationApi.ContentType, typePat
 
 type TemplateFn = (contentType: IntegrationApi.ContentType, varName: string, displayTemplate?: string, baseDisplayTemplate?: string) => string
 
-const Templates: Record<'default', TemplateFn> & Partial<Record<IntegrationApi.ContentBaseType, TemplateFn>> =
+const Templates: Record<'default', TemplateFn> & Partial<Record<Required<IntegrationApi.ContentType>['baseType'], TemplateFn>> =
 {
   // Default Template for all components without specifics
   default: (contentType, varName, displayTemplate, baseDisplayTemplate) => `import { type CmsComponent } from "@remkoj/optimizely-cms-react";

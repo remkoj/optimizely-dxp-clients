@@ -4,8 +4,9 @@ import { CmsIntegrationApiClient as CmsApiClient, IntegrationApi, OptiCmsVersion
 import { parseArgs } from '../tools/parseArgs.js'
 import chalk from 'chalk'
 import figures from 'figures'
+import path from 'node:path'
 
-import { ContentTypesArgs, contentTypesBuilder } from './contentTypes.js'
+import { ContentTypesArgs, contentTypesBuilder, getAllContentTypes } from './contentTypes.js'
 
 export type StylesArgs = ContentTypesArgs & {
   excludeNodeTypes: string[]
@@ -204,7 +205,7 @@ function isExcluded<T>(value: T, exclusions: Array<T>, inclusions: Array<T>): bo
   return exclusions.includes(value) || (inclusions.length > 0 && !inclusions.includes(value))
 }
 
-export async function getStyleFilePath(definition: IntegrationApi.DisplayTemplate, opts?: { contentBaseType?: IntegrationApi.ContentBaseType, client?: CmsApiClient }): Promise<string> {
+export async function getStyleFilePath(definition: IntegrationApi.DisplayTemplate, opts?: { contentBaseType?: IntegrationApi.ContentType['baseType'], client?: CmsApiClient }): Promise<string> {
   if (definition.nodeType)
     return `nodes/${definition.nodeType}/${definition.key}/${definition.key}.opti-style.json`
   if (definition.baseType)
@@ -216,21 +217,70 @@ export async function getStyleFilePath(definition: IntegrationApi.DisplayTemplat
     if (!opts?.client)
       throw new Error("Neither the contentBaseType, nor the ApiClient has been provided for a definition for a specific ContentType - unable to generate the path")
 
-    const pageSize = 50
-    let resultsPage = await opts.client.contentTypesList({ query: { pageIndex: 0, pageSize } })
-    const contentTypes: (typeof resultsPage)["items"] = resultsPage.items ?? []
-    let pagesRemaining = Math.ceil(resultsPage.totalItemCount / resultsPage.pageSize) - (resultsPage.pageIndex + 1)
+    const contentType: IntegrationApi.ContentType | undefined = await opts.client.contentTypesGet({ path: { key: definition.contentType } }).catch(() => undefined)
+    if (contentType)
+      return `${contentType.baseType}/${definition.contentType}/${definition.key}.opti-style.json`
 
-    while (pagesRemaining > 0 && contentTypes.length < resultsPage.totalItemCount) {
-      resultsPage = await opts.client.contentTypesList({ query: { pageIndex: resultsPage.pageIndex + 1, pageSize: resultsPage.pageSize } })
-      contentTypes.push(...resultsPage.items)
-      pagesRemaining = Math.ceil(resultsPage.totalItemCount / resultsPage.pageSize) - (resultsPage.pageIndex + 1)
+  }
+  throw new Error(`Unable to resolve the target for the DisplayTemplate: ${definition.key}`)
+}
+
+export type StyleFilePaths = {
+  /**
+   * Folder of the style definition file
+   */
+  itemFile: string
+  /**
+   * Folder for the style defintion
+   */
+  itemPath: string
+  /**
+   * Folder for the displayTemplates.ts file
+   */
+  typesPath: string
+  /**
+   * Textual identifier of the style definition
+   */
+  targetType: string
+}
+
+export async function getStyleFilePaths(definition: IntegrationApi.DisplayTemplate, opts?: { contentBaseType?: IntegrationApi.ContentType['baseType'], client?: CmsApiClient }): Promise<StyleFilePaths> {
+  if (definition.nodeType)
+    return {
+      itemFile: path.join('nodes', definition.nodeType, definition.key, definition.key + '.opti-style.json'),
+      itemPath: path.join('nodes', definition.nodeType, definition.key),
+      typesPath: path.join('nodes', definition.nodeType),
+      targetType: 'node/' + definition.nodeType
     }
 
-    const fetchedBaseType = contentTypes.filter(x => x.key == definition.contentType).map(x => x.baseType).at(0)
-    if (fetchedBaseType)
-      return `${fetchedBaseType}/${definition.contentType}/${definition.key}.opti-style.json`
+  if (definition.baseType)
+    return {
+      itemFile: path.join(definition.baseType, 'styles', definition.key, definition.key + '.opti-style.json'),
+      itemPath: path.join(definition.baseType, 'styles', definition.key),
+      typesPath: path.join(definition.baseType, 'styles'),
+      targetType: 'base/' + definition.baseType
+    }
 
+  if (definition.contentType) {
+    if (opts?.contentBaseType)
+      return {
+        itemFile: path.join(opts.contentBaseType, definition.contentType, definition.key + '.opti-style.json'),
+        itemPath: path.join(opts.contentBaseType, definition.contentType),
+        typesPath: path.join(opts.contentBaseType, definition.contentType),
+        targetType: 'content/' + definition.contentType
+      }
+
+    if (!opts?.client)
+      throw new Error("Neither the contentBaseType, nor the ApiClient has been provided for a definition for a specific ContentType - unable to generate the path")
+
+    const contentType: IntegrationApi.ContentType | undefined = await opts.client.contentTypesGet({ path: { key: definition.contentType } }).catch(() => undefined)
+    if (contentType)
+      return {
+        itemFile: path.join(contentType.baseType, definition.contentType, definition.key + '.opti-style.json'),
+        itemPath: path.join(contentType.baseType, definition.contentType),
+        typesPath: path.join(contentType.baseType, definition.contentType),
+        targetType: 'content/' + definition.contentType
+      }
   }
   throw new Error(`Unable to resolve the target for the DisplayTemplate: ${definition.key}`)
 }

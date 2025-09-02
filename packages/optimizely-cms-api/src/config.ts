@@ -1,7 +1,7 @@
 import { OptiCmsVersion } from './types'
 
 export type CmsIntegrationApiOptions = {
-  base: URL
+  base?: URL
   clientId?: string
   clientSecret?: string
   actAs?: string
@@ -12,31 +12,31 @@ export type CmsIntegrationApiOptions = {
    */
   cmsVersion?: OptiCmsVersion
 }
-type ClientCredentials = 'clientId' | 'clientSecret'
+type ClientCredentials = 'clientId' | 'clientSecret' | 'cmsVersion'
 
 export function readPartialEnvConfig(): CmsIntegrationApiOptions {
-  const cmsUrl = getOptional('OPTIMIZELY_CMS_URL', 'https://api.cms.optimizely.com')
+  const cmsUrl = getOptional('OPTIMIZELY_CMS_URL')
   const clientId = getOptional('OPTIMIZELY_CMS_CLIENT_ID')
   const clientSecret = getOptional('OPTIMIZELY_CMS_CLIENT_SECRET')
   const actAs = getOptional('OPTIMIZELY_CMS_USER_ID')
   const debug = getOptional('OPTIMIZELY_DEBUG', "0") == "1"
-  const cmsVersion = getSelection<OptiCmsVersion>('OPTIMIZELY_CMS_SCHEMA', [OptiCmsVersion.CMS12, OptiCmsVersion.CMS13], OptiCmsVersion.CMS13)
+  const cmsVersion = getSelection<OptiCmsVersion>('OPTIMIZELY_CMS_SCHEMA', [OptiCmsVersion.CMS12, OptiCmsVersion.CMS13, OptiCmsVersion.CMSSAAS], OptiCmsVersion.CMSSAAS)
 
-  let baseUrl: URL
-  try {
-    const cmsUrlAdjusted = cmsUrl.includes("://") ? cmsUrl : 'https://' + cmsUrl
-    baseUrl = new URL('/_cms/preview2', cmsUrlAdjusted)
-    if (cmsVersion == OptiCmsVersion.CMS12)
-      baseUrl.pathname = baseUrl.pathname.replace('preview2', 'preview1')
-  } catch (e) {
-    throw new Error("Invalid Optimizely CMS URL provided")
+  // Determine the base, if set by the config
+  let base: URL | undefined
+  if (cmsUrl) {
+    try {
+      base = new URL(cmsUrl.includes("://") ? cmsUrl : 'https://' + cmsUrl)
+    } catch (e) {
+      throw new Error("Invalid Optimizely CMS URL provided")
+    }
   }
 
   if (debug)
-    console.log(`[Optimizely CMS API] Connecting to ${baseUrl} as ${clientId ?? 'Anonymous'}`)
+    console.log(`[Optimizely CMS API] Connecting to ${base || 'CMS API HOST'} as ${clientId ?? 'Anonymous'}`)
 
   return {
-    base: baseUrl,
+    base,
     clientId,
     clientSecret,
     actAs,
@@ -57,37 +57,6 @@ export function readEnvConfig(): Omit<CmsIntegrationApiOptions, ClientCredential
   return partialConfig as Omit<CmsIntegrationApiOptions, ClientCredentials> & Pick<Required<CmsIntegrationApiOptions>, ClientCredentials>
 }
 
-export function getCmsIntegrationApiConfigFromEnvironment(): CmsIntegrationApiOptions {
-  const cmsUrl = getOptional('OPTIMIZELY_CMS_URL', 'https://api.cms.optimizely.com')
-  const clientId = getMandatory('OPTIMIZELY_CMS_CLIENT_ID')
-  const clientSecret = getMandatory('OPTIMIZELY_CMS_CLIENT_SECRET')
-  const actAs = getOptional('OPTIMIZELY_CMS_USER_ID')
-  const debug = getOptional('OPTIMIZELY_DEBUG', "0") == "1"
-  const cmsVersion = getSelection<OptiCmsVersion>('OPTIMIZELY_CMS_SCHEMA', [OptiCmsVersion.CMS12, OptiCmsVersion.CMS13], OptiCmsVersion.CMS13)
-
-  let baseUrl: URL
-  try {
-    const cmsUrlAdjusted = cmsUrl.includes("://") ? cmsUrl : 'https://' + cmsUrl
-    baseUrl = new URL('/_cms/preview2', cmsUrlAdjusted)
-    if (cmsVersion == OptiCmsVersion.CMS12)
-      baseUrl.pathname = baseUrl.pathname.replace('preview2', 'preview1')
-  } catch (e) {
-    throw new Error("Invalid Optimizely CMS URL provided")
-  }
-
-  if (debug)
-    console.log(`[Optimizely CMS API] Connecting to ${baseUrl} as ${clientId}`)
-
-  return {
-    base: baseUrl,
-    clientId,
-    clientSecret,
-    actAs,
-    debug,
-    cmsVersion
-  }
-}
-
 function getOptional<DT extends string | undefined>(variable: string, defaultValue?: DT): DT extends string ? string : string | undefined {
   const envValue = process.env[variable]
   if (!envValue || envValue == "")
@@ -100,7 +69,6 @@ function getMandatory(variable: string): string {
     throw new Error(`The environment variable ${variable} is missing or empty`)
   return envValue
 }
-
 function getSelection<T>(envVarName: string, allowedValues: T[], defaultValue: T): T {
   const rawValue = getOptional(envVarName, defaultValue as string)
   if (!rawValue)

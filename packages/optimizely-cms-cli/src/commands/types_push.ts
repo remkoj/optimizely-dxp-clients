@@ -1,5 +1,6 @@
 import type { CliModule } from '../types.js'
 import { parseArgs } from '../tools/parseArgs.js'
+import { getValidator, loadSchema } from '../tools/loadSchema.js'
 import { createClient, IntegrationApi } from '@remkoj/optimizely-cms-api'
 import path from 'node:path'
 import fs from 'node:fs'
@@ -48,19 +49,53 @@ export const TypesPushCommand: TypesPushModule = {
         (!types || types.length == 0 || types.includes(data.definition.key))
     })
 
+    // Create validator
+    process.stdout.write(chalk.yellowBright(`${figures.arrowRight} Loading OpenAPI Specification for validation\n`))
+    const typeSchema = (await loadSchema(client, 'ContentType')).at(0)?.schema;
+    const typeValidator = await getValidator(typeSchema);
+
     // Output selected types
-    const results: Array<{ key: string, type: IntegrationApi.ContentType, file: string, error?: any }> = await Promise.all(typeDefinitions.map(type => {
+    const results: Array<{ key: string, type: IntegrationApi.ContentType, file: string, error?: any }> = await Promise.all(typeDefinitions.map(async type => {
+      if (!type.definition.key) {
+        process.stdout.write(chalk.yellowBright(`  ${figures.arrowRight} Content Type has no key in ${type.file}\n`))
+        return
+      }
       process.stdout.write(chalk.yellowBright(`  ${figures.arrowRight} Pushing ${type.definition.displayName} from ${type.file}\n`))
+
+      // Filter unwanted fields from the ContentType definition
       const outType = { ...type.definition }
       if (outType.source) delete outType.source
       if (outType.created) delete outType.created
       if (outType.lastModified) delete outType.lastModified
       if (outType.lastModifiedBy || outType.lastModifiedBy == "") delete outType.lastModifiedBy
-      if (outType.features) delete outType.features
-      if (outType.usage) delete outType.usage
-      return client.contentTypesPut({ path: { key: outType.key }, body: outType, query: { ignoreDataLossWarnings: force } })
-        .then(ct => { return { key: type.definition.key, type: ct, file: type.file } })
-        .catch(e => { return { key: type.definition.key, type: type.definition, file: type.file, error: e } })
+      //if (outType.features) delete outType.features
+      //if (outType.usage) delete outType.usage
+
+      const validationResult = typeValidator(outType)
+      if (validationResult || force) {
+        if (!validationResult)
+          process.stdout.write(chalk.yellowBright(`  ${figures.arrowRight} Ignoring validation errors in ${type.file}\n`))
+
+        const currentContentType = (await client.contentTypesGet({ path: { key: type.definition.key } }).catch(() => null)) as IntegrationApi.ContentType | null
+        function buildError(e: any) {
+          return { key: type.definition.key, type: type.definition, file: type.file, error: e }
+        }
+        function buildData(ct: IntegrationApi.ContentType) {
+          return { key: type.definition.key, type: ct, file: type.file }
+        }
+
+        return (currentContentType ?
+          client.contentTypesPatch({ path: { key: type.definition.key }, body: outType }) :
+          client.contentTypesCreate({ body: outType })).then(buildData).catch(buildError)
+
+      } else {
+        return {
+          key: type.definition.key,
+          type: type.definition,
+          file: type.file,
+          error: typeValidator.errors.map(x => x.message).join(', ')
+        }
+      }
     }))
 
     const overview = new Table({

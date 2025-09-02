@@ -1,5 +1,16 @@
 import type { FragmentDefinitionNode, OperationDefinitionNode } from 'graphql'
+import type { CmsIntegrationApiOptions } from '@remkoj/optimizely-cms-api'
 
+// Create preset configuration
+import type { ClientPresetConfig as ClientPresetOptions } from '@graphql-codegen/client-preset'
+
+export type PresetOptions = ClientPresetOptions & PluginOptions & TransformOptions
+
+export type PluginOptions = {
+  functions?: string[],
+  prettyPrintQuery?: boolean,
+  clientPath?: string
+}
 
 export type TransformOptions = {
   /**
@@ -12,6 +23,12 @@ export type TransformOptions = {
    * Enable verbose output
    */
   verbose?: boolean
+
+  /**
+   * Override the keys to login to Optimizely CMS to fully auto-generate
+   * fragments during the compilation process.
+   */
+  cmsClient?: CmsIntegrationApiOptions
 
   /**
    * Disables the recursive validation of GraphQL-Codegen and updates the

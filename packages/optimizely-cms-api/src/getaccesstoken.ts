@@ -1,5 +1,4 @@
-import { type CmsIntegrationApiOptions, getCmsIntegrationApiConfigFromEnvironment } from "./config";
-import { OptiCmsVersion } from "./types";
+import { type CmsIntegrationApiOptions, readEnvConfig } from "./config";
 
 type TokenResponse = { access_token: string, expires_in: number, token_type: string }
 type ErrorResponse = { error: string, error_description: string }
@@ -9,34 +8,38 @@ function isErrorResponse(response: AuthResponse): response is ErrorResponse {
   return typeof ((response as ErrorResponse).error) == 'string'
 }
 
-export async function getAccessToken(config?: CmsIntegrationApiOptions): Promise<string> {
-  const options = config ?? getCmsIntegrationApiConfigFromEnvironment()
-  let authUrl = new URL(`/_cms/preview2/oauth/token`, options.base).href
+export async function getAccessToken(config?: CmsIntegrationApiOptions, baseUrl?: string): Promise<string> {
+  const options = config ?? readEnvConfig()
+  const authUrl = new URL(`oauth/token`, baseUrl ?? options.base ?? 'https://api.cms.optimizely.com/').href
   const headers = new Headers()
-  if (options.cmsVersion == OptiCmsVersion.CMS12)
-    authUrl = authUrl.replace('preview2', 'preview1')
 
-  headers.append('Authorization', `Basic ${base64Encode(`${options.clientId ?? ''}:${options.clientSecret ?? ''}`)}`)
-  headers.append('Content-Type', 'application/x-www-form-urlencoded')
-  headers.append('Connection', 'close')
-
-  if (options.debug) {
-    console.log(`⚪ [CMS API] Using authentication endpoint: ${authUrl}`)
-    console.log(`⚪ [CMS API] Retrieving new credentials for ${options.clientId}, acting as ${options.actAs ?? options.clientId ?? '-'}`)
+  if (!options.clientId || !options.clientSecret) {
+    if (options.debug)
+      console.log(`❌ [CMS API] Skipping authentication due to missing clientId or clientSecret`);
+    return '';
   }
 
-  const body = new URLSearchParams()
-  body.append("grant_type", "client_credentials")
+  headers.append('Authorization', `Basic ${base64Encode(`${options.clientId ?? ''}:${options.clientSecret ?? ''}`)}`);
+  headers.append('Content-Type', 'application/x-www-form-urlencoded');
+  headers.append('Connection', 'close');
+
+  if (options.debug) {
+    console.log(`⚪ [CMS API] Using authentication endpoint: ${authUrl}`);
+    console.log(`⚪ [CMS API] Retrieving new credentials for ${options.clientId ?? '-'}${options.actAs ? ", acting as " + options.actAs : ""}`);
+  }
+
+  const body = new URLSearchParams();
+  body.append("grant_type", "client_credentials");
   if (options.actAs)
-    body.append("act_as", options.actAs)
+    body.append("act_as", options.actAs);
 
   const httpResponse = await fetch(authUrl, {
     method: "POST",
     headers: headers,
     body: body.toString(),
     cache: "no-store"
-  })
-  const response = await httpResponse.json() as AuthResponse
+  });
+  const response = await httpResponse.json() as AuthResponse;
 
   if (isErrorResponse(response))
     throw new Error("Authentication error: " + response.error_description)

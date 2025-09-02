@@ -1,7 +1,7 @@
 {
   "name": "@remkoj/optimizely-graph-client",
   "license": "Apache-2.0",
-  "version": "6.0.0-pre8",
+  "version": "6.0.0-pre9",
   "repository": "https://github.com/remkoj/optimizely-dxp-clients.git",
   "author": "Remko Jantzen <693172+remkoj@users.noreply.github.com>",
   "homepage": "https://github.com/remkoj/optimizely-dxp-clients",
@@ -51,11 +51,11 @@
   },
   "devDependencies": {
     "@types/crypto-js": "^4.2.2",
-    "@types/node": "^22.16.4",
+    "@types/node": "^22.18.0",
     "openapi-typescript-codegen": "^0.29.0",
     "prop-types": "^15.8.1",
     "scheduler": "^0.26.0",
-    "typescript": "^5.8.3"
+    "typescript": "^5.9.2"
   },
   "dependencies": {
     "crypto-js": "^4.2.0",

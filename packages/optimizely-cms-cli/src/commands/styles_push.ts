@@ -48,7 +48,14 @@ export const StylesPushCommand: StylesPushModule = {
       if (cfg.debug)
         process.stdout.write(chalk.gray(`${figures.arrowRight} Pushing: ${styleKey}\n`))
 
-      const newTemplate = await client.displayTemplatesPut({ path: { key: styleKey }, body: styleDefinition })
+      // Try to fetch the current template
+      const currentTemplate = await client.displayTemplatesGet({ path: { key: styleKey } }).catch(() => { return undefined });
+
+      // Create / Replace the current template
+      const newTemplate = await (currentTemplate ?
+        client.displayTemplatesPatch({ path: { key: styleKey }, body: styleDefinition }) :
+        client.displayTemplatesCreate({ body: styleDefinition })
+      )
       return newTemplate
     }))).filter(isNotNullOrUndefined)
 

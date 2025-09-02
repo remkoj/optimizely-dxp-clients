@@ -4,13 +4,12 @@ import figures from 'figures'
 import fs from 'node:fs'
 import path from 'node:path'
 import { globIterate } from 'glob'
-import { Ajv, type AnySchemaObject, type ErrorObject } from 'ajv'
-import addFormats, { FormatsPlugin } from 'ajv-formats'
+import { type ErrorObject } from 'ajv'
 import createDM from '@fastify/deepmerge'
 import deepEqual from 'fast-deep-equal'
 
 import { createCmsClient } from '../tools/cmsClient.js'
-import { loadSchema } from '../tools/loadSchema.js'
+import { loadSchema, getValidator } from '../tools/loadSchema.js'
 
 const deepmerge = createDM()
 
@@ -126,14 +125,6 @@ function groupErrorsByKeyword(errors: ErrorObject[]): { [keyword: string]: Error
   if (toMerge.enum)
     toMerge.enum = [toMerge.enum.reduce((prev, current) => prev ? deepmerge(prev, current) : current, undefined)]
   return toMerge
-}
-
-function getValidator(schemaObject: AnySchemaObject) {
-  const ajv = new Ajv({
-    discriminator: true
-  });
-  (addFormats as unknown as FormatsPlugin)(ajv);
-  return ajv.compile(schemaObject)
 }
 
 export default SchemaValidateCommand

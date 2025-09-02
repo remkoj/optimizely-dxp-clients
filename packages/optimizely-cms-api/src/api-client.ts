@@ -1,19 +1,37 @@
 import * as Operations from './client/sdk.gen'
-import { type CmsIntegrationApiOptions, getCmsIntegrationApiConfigFromEnvironment } from "./config";
+import { createClient, createConfig, type RequestResult, type ResponseStyle } from './client/client';
+import * as InstanceOperations from './instance.client/sdk.gen'
+import {
+  createClient as createInstanceClient,
+  createConfig as createInstanceConfig,
+  type RequestResult as InstanceRequestResult,
+  type ResponseStyle as InstanceResponseStyle
+} from './instance.client/client';
+import { type CmsIntegrationApiOptions, readEnvConfig } from "./config";
 import { type InstanceApiVersionInfo, OptiCmsVersion } from "./types";
-import { createClient, type RequestResult, type ResponseStyle } from './client/client';
-import type { CreateClientConfig } from './client/client.gen';
+import { createClientConfig } from './client-config'
 import buildInfo from "./version.json"
-import { getAccessToken as getAccessTokenImpl } from './getaccesstoken'
 
 type OperationsType = { -readonly [KT in keyof typeof Operations]: (typeof Operations)[KT] }
 type OperationsNames = keyof OperationsType
 type OperationReturnType<RT extends (...args: any) => any> = ReturnType<RT> extends RequestResult<any, any, boolean, ResponseStyle> ? Promise<NonNullable<Awaited<ReturnType<RT>>['data']>> : never
-type ApiClientFunctions = {
+
+type InstanceOperationsType = { -readonly [KT in keyof typeof InstanceOperations]: (typeof InstanceOperations)[KT] }
+type InstanceOperationsNames = keyof InstanceOperationsType
+type InstanceOperationReturnType<RT extends (...args: any) => any> = ReturnType<RT> extends InstanceRequestResult<any, any, boolean, InstanceResponseStyle> ? Promise<NonNullable<Awaited<ReturnType<RT>>['data']>> : never
+
+type BaseApiClientFunctions = {
   readonly [KT in OperationsNames]: OperationsType[KT] extends Function ?
   (options?: Parameters<OperationsType[KT]>[0]) => OperationReturnType<OperationsType[KT]> :
   never
 }
+type InstanceClientFunctions = {
+  readonly [KT in InstanceOperationsNames as InstanceOperationsType[KT] extends Function ? `preview2${Capitalize<KT>}` : never]: InstanceOperationsType[KT] extends Function ?
+  (options?: Parameters<InstanceOperationsType[KT]>[0]) => InstanceOperationReturnType<InstanceOperationsType[KT]> :
+  never
+}
+type ApiClientFunctions = BaseApiClientFunctions & InstanceClientFunctions
+type FunctionList<T extends Object> = keyof { [PN in keyof T as T[PN] extends Function ? PN : never]: T[PN] }
 
 type BaseClass = {
   new(...args: any[]): BaseApiClient
@@ -34,7 +52,7 @@ function applyOperations<TBase extends BaseClass>(Base: TBase): ClassWithMixin<T
   }
 
   // Bind the operations
-  Object.getOwnPropertyNames(Operations).filter(isApiClientFunction).forEach((propName) => {
+  Object.getOwnPropertyNames(Operations).filter(isApiClientFunction).forEach(propName => {
     type PropNameKey = typeof propName
     type MethodArgs = NonNullable<Parameters<typeof Operations[PropNameKey]>[0]> extends Operations.Options<infer TData, boolean> ? TData : never
 
@@ -56,50 +74,82 @@ function applyOperations<TBase extends BaseClass>(Base: TBase): ClassWithMixin<T
     NewClass.prototype[propName] = wrapper
   })
 
+  // Bind the older Preview2 operations
+  Object.getOwnPropertyNames(InstanceOperations).filter(isInstanceClientFunction).forEach(propName => {
+    type PropNameKey = typeof propName
+    type MethodArgs = NonNullable<Parameters<typeof InstanceOperations[PropNameKey]>[0]> extends Operations.Options<infer TData, boolean> ? TData : never
+
+    async function wrapper(args: Omit<MethodArgs, 'url'>) {
+      const operationArgs: Omit<Operations.Options<MethodArgs>, 'headers'> = {
+        throwOnError: false,
+        ...args,
+        //@ts-expect-error
+        client: this._instanceClient
+      }
+      //@ts-expect-error
+      const result = await InstanceOperations[propName](operationArgs)
+      if (result.data)
+        return result.data
+      throw new ApiError(result)
+    }
+
+    const fnName: keyof InstanceClientFunctions = `preview2${toCapitalized(propName)}`
+
+    //@ts-expect-error
+    NewClass.prototype[fnName] = wrapper
+  })
+
   // Return the new class
   return NewClass as unknown as ClassWithMixin<TBase, ApiClientFunctions>
 }
 
-function isApiClientFunction(propName: string): propName is keyof ApiClientFunctions {
-  return typeof (Operations[propName as keyof OperationsType]) == 'function'
+function toCapitalized<S extends string>(toCapitalize: S): Capitalize<S> {
+  return (toCapitalize.substring(0, 1).toUpperCase() + toCapitalize.substring(1)) as Capitalize<S>
 }
+
+function createIsFunctionValidator<T extends Object>(baseType: T): (propName: string) => propName is FunctionList<T> {
+  return (propName: string): propName is FunctionList<T> => {
+    return typeof (baseType[propName as keyof T]) == 'function'
+  }
+}
+
+const isApiClientFunction = createIsFunctionValidator(Operations)
+const isInstanceClientFunction = createIsFunctionValidator(InstanceOperations)
 
 class BaseApiClient {
   protected _config: CmsIntegrationApiOptions
   protected _client: ReturnType<typeof createClient>
-  private _token: Promise<string> | undefined
-
-  protected getAccessToken(): Promise<string> {
-    if (!this._token)
-      this._token = getAccessTokenImpl(this._config)
-    return this._token
-  }
+  protected _instanceClient: ReturnType<typeof createInstanceClient>
 
   public constructor(config?: CmsIntegrationApiOptions) {
-    // Prepare config
-    const options = config ?? getCmsIntegrationApiConfigFromEnvironment()
-    options.base = new URL("/_cms/preview2", options.base)
-    if (options.cmsVersion == OptiCmsVersion.CMS12)
-      options.base.pathname = options.base.pathname.replace('preview2', 'preview1')
-
     // Store instance variables
-    this._config = options
-    this._client = createClient(this.createClientConfig())
+    this._config = config ?? readEnvConfig()
+    this._client = createClient(createClientConfig(createConfig({
+      baseUrl: 'https://api.cms.optimizely.com/preview3'
+    }), this._config));
+    this._instanceClient = createInstanceClient(createClientConfig(createInstanceConfig({
+      baseUrl: new URL('/_cms/preview2', this._config.base).href
+    })));
 
     // Configure Client
-    this._client.interceptors.request.use(async (request) => {
-      const token = await this.getAccessToken()
-      request.headers.set('Authorization', 'Bearer ' + token);
-      if (this._config.debug) {
-        console.log(`🔍 Sending ${request.method} request to ${request.url}`)
-      }
-      return request
-    })
-    if (this._config.debug)
+    if (this._config.debug) {
+      this._client.interceptors.request.use(async (request) => {
+        console.log(`🔍 [CMS API] Sending ${request.method} request to ${request.url}`)
+        return request
+      })
       this._client.interceptors.response.use((response, request) => {
-        console.log(`✨ Received response ${response.status} ${response.statusText} of type ${response.headers.get('Content-Type') ?? 'unknown'} for ${request.url}`)
+        console.log(`✨ [CMS API] Received response ${response.status} ${response.statusText} of type ${response.headers.get('Content-Type') ?? 'unknown'} for ${request.url}`)
         return response
       })
+      this._instanceClient.interceptors.request.use(async (request) => {
+        console.log(`🔍 [CMS API] Sending ${request.method} request to ${request.url}`)
+        return request
+      })
+      this._instanceClient.interceptors.response.use((response, request) => {
+        console.log(`✨ [CMS API] Received response ${response.status} ${response.statusText} of type ${response.headers.get('Content-Type') ?? 'unknown'} for ${request.url}`)
+        return response
+      })
+    }
   }
 
   /**
@@ -107,16 +157,21 @@ class BaseApiClient {
    * 
    * If this differs from the cmsVersion the client may not work fully or not
    * at all.
+   * 
+   * @deprecated  This is based on the OPTIMIZELY_CMS_SCHEMA environment that is ignored by API client
    */
   public get runtimeCmsVersion(): OptiCmsVersion {
-    return this._config.cmsVersion ?? OptiCmsVersion.CMS13
+    return this._config.cmsVersion ?? OptiCmsVersion.CMSSAAS
   }
 
   /**
    * The URL of the CMS instance
    */
-  public get cmsUrl(): URL {
-    return this._config.base
+  public get cmsUrl(): URL | undefined {
+    if (this._config.base)
+      return this._config.base
+    const baseUrl = this._client.getConfig().baseUrl
+    return baseUrl ? new URL(baseUrl) : undefined
   }
 
   /**
@@ -126,8 +181,14 @@ class BaseApiClient {
     return this._config.debug ?? false
   }
 
+  /**
+   * Detect the API Version from the URL, returning the runtime version. When
+   * this version differs from the `apiVersion` property errors can be expected.
+   */
   public get version(): string {
-    return this._config.cmsVersion == OptiCmsVersion.CMS12 ? 'preview1' : 'preview2'
+    const baseUrl = this._client.getConfig().baseUrl
+    const detectedVersion = baseUrl?.match(/^https{0,1}:\/\/.+?\/(_cms\/){0,1}([a-z0-9\.]+)(\/|$)/)?.at(2)
+    return detectedVersion || ""
   }
 
   /**
@@ -150,31 +211,36 @@ class BaseApiClient {
    * @returns The version information from the running instance
    */
   public async getInstanceInfo(): Promise<InstanceApiVersionInfo> {
-
     const result = await this._client.get({
       url: '/info'
     })
-    if (result.data)
-      return result.data as InstanceApiVersionInfo
+    const instanceResult = await this._instanceClient.get({
+      url: '/info'
+    })
+    if (result.data) {
+      const data = result.data as InstanceApiVersionInfo
+      data.baseUrl = this._client.getConfig().baseUrl;
+      data.results = {
+        preview2Data: {
+          baseUrl: this._instanceClient.getConfig().baseUrl,
+          ...instanceResult?.data ?? {}
+        },
+        ...data.results,
+      }
+      return data;
+    }
 
     throw new ApiError(result)
   }
 
   public async getOpenApiSpec(): Promise<any> {
     const result = await this._client.get({
-      url: '/docs/content-openapi.json'
+      url: '/docs/content-openapi.json',
     })
     if (result.data)
       return result.data
 
     throw new ApiError(result)
-  }
-
-  protected createClientConfig: CreateClientConfig = (override) => {
-    return {
-      ...override,
-      baseUrl: this._config.base.href
-    }
   }
 }
 

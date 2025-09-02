@@ -2,9 +2,8 @@ import type { CliModule } from '../types.js'
 import { type IntegrationApi } from '@remkoj/optimizely-cms-api'
 import chalk from 'chalk'
 import figures from 'figures'
-import { type ContentTypesArgs, contentTypesBuilder } from '../tools/contentTypes.js'
+import { type ContentTypesArgs, contentTypesBuilder, getContentTypePaths } from '../tools/contentTypes.js'
 import fs from 'node:fs'
-import path from 'node:path'
 
 export type NextJsCommandArgs = ContentTypesArgs & {
   force: boolean
@@ -15,6 +14,9 @@ export type NextJsModule<A = any> = CliModule<NextJsCommandArgs, A>
 export type TypeFolderList = Array<{
   type: IntegrationApi.ContentType['key'],
   path: string,
+  componentFile: string,
+  fragmentFile: string,
+  propertyFragmentFile: string
 }>
 
 export const builder: NextJsModule['builder'] = yargs => {
@@ -27,11 +29,9 @@ export type Promised<T> = T extends PromiseLike<infer R> ? R : T
 
 export function createTypeFolders(contentTypes: Array<IntegrationApi.ContentType>, basePath: string, debug: boolean = false): TypeFolderList {
   const folders = contentTypes.map(contentType => {
-
-    const baseType = contentType.baseType ?? 'default'
+    const { typePath, componentFile, fragmentFile, propertyFragmentFile } = getContentTypePaths(contentType, basePath)
 
     // Create the type folder
-    const typePath = path.join(basePath, baseType, contentType.key)
     if (!fs.existsSync(typePath)) {
       fs.mkdirSync(typePath, { recursive: true })
       if (debug)
@@ -45,12 +45,15 @@ export function createTypeFolders(contentTypes: Array<IntegrationApi.ContentType
     return {
       type: contentType.key,
       path: typePath,
+      componentFile,
+      fragmentFile,
+      propertyFragmentFile
     }
   })
 
   return folders
 }
 
-export function getTypeFolder(list: TypeFolderList, type: string): string | undefined {
-  return list.filter(x => x.type == type).at(0)?.path
+export function getTypeFolder(list: TypeFolderList, type: string): TypeFolderList[number] | undefined {
+  return list.filter(x => x.type == type).at(0)
 }

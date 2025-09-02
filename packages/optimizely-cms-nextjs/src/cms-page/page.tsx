@@ -20,7 +20,6 @@ import { type IOptiGraphClient } from '@remkoj/optimizely-graph-client/client'
 import {
   CmsContent,
   ServerContext,
-  updateSharedServerContext,
   type GenericContext,
   type ComponentFactory,
 } from '@remkoj/optimizely-cms-react/rsc'
@@ -124,10 +123,9 @@ export type CreatePageOptions<
    *                draftMode in configuring the client
    * @returns       The client instance
    */
-  client: (
-    token?: string,
-    scope?: 'request' | 'metadata'
-  ) => IOptiGraphClient | Promise<IOptiGraphClient>
+  client:
+    ((token?: string, scope?: 'request' | 'metadata') => IOptiGraphClient) |
+    ((token?: string, scope?: 'request' | 'metadata') => Promise<IOptiGraphClient>)
 
   /**
    * The channel information used to resolve locales, domains and more.
@@ -289,7 +287,7 @@ export function createPage<
         propsToCmsPath({ params, searchParams }),
         paramsToLocale(params, ifChannelDefinition(channel)),
       ])
-      if (!requestPath) return Promise.resolve({})
+      if (!requestPath) return {}
       if (initialLocale) context.setLocale(initialLocale)
 
       const awaitedParams = await params
@@ -310,7 +308,7 @@ export function createPage<
       if (!routeInfo || !routeInfo[0]) {
         if (context.isDebug)
           console.log('⚪ [CmsPage.generateMetadata] No data received')
-        return Promise.resolve({})
+        return {}
       }
       const [route, contentLink, contentType, graphLocale] = routeInfo
       if (context.isDebug)
@@ -321,9 +319,6 @@ export function createPage<
 
       // Update context from route
       context.setLocale(route.locale)
-
-      // Make the shared server context available
-      updateSharedServerContext(context)
 
       // Fetch the metadata based upon the actual content type and resolve parent
       const metaResolver = new MetaDataResolver(context.client)
@@ -407,9 +402,6 @@ export function createPage<
         lookupData
 
       if (contentLink?.locale) context.setLocale(contentLink.locale as string)
-
-      // Make the shared server context available
-      updateSharedServerContext(context)
 
       // Render the content link
       return (

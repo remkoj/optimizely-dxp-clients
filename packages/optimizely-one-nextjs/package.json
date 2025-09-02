@@ -1,7 +1,7 @@
 {
   "name": "@remkoj/optimizely-one-nextjs",
   "license": "Apache-2.0",
-  "version": "6.0.0-pre8",
+  "version": "6.0.0-pre9",
   "repository": "https://github.com/remkoj/optimizely-dxp-clients.git",
   "author": "Remko Jantzen <693172+remkoj@users.noreply.github.com>",
   "homepage": "https://github.com/remkoj/optimizely-dxp-clients",
@@ -39,20 +39,20 @@
     }
   },
   "devDependencies": {
-    "@remkoj/optimizely-graph-client": "workspace:^6.0.0-pre8",
-    "@tailwindcss/cli": "^4.1.11",
-    "@types/node": "^22.16.4",
-    "@types/react": "^19.1.8",
-    "@types/react-dom": "19.1.6",
+    "@remkoj/optimizely-graph-client": "workspace:^6.0.0-pre9",
+    "@tailwindcss/cli": "^4.1.12",
+    "@types/node": "^22.18.0",
+    "@types/react": "^19.1.11",
+    "@types/react-dom": "19.1.8",
     "@types/uuid": "^10.0.0",
-    "browserslist": "^4.25.1",
-    "next": "^15.4.1",
+    "browserslist": "^4.25.3",
+    "next": "^15.5.0",
     "prop-types": "^15.8.1",
-    "react": "^19.1.0",
-    "react-dom": "^19.1.0",
+    "react": "^19.1.1",
+    "react-dom": "^19.1.1",
     "scheduler": "^0.26.0",
-    "tailwindcss": "^4.1.11",
-    "typescript": "^5.8.3",
+    "tailwindcss": "^4.1.12",
+    "typescript": "^5.9.2",
     "update-browserslist-db": "^1.1.3"
   },
   "peerDependencies": {
@@ -61,10 +61,10 @@
     "react-dom": "^19"
   },
   "dependencies": {
-    "@headlessui/react": "^2.2.4",
+    "@headlessui/react": "^2.2.7",
     "@heroicons/react": "^2.2.0",
-    "@remkoj/optimizely-graph-client": "^6.0.0-pre8",
-    "swr": "^2.3.4",
+    "@remkoj/optimizely-graph-client": "^6.0.0-pre9",
+    "swr": "^2.3.6",
     "uuid": "^11.1.0"
   },
   "scripts": {

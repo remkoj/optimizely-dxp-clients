@@ -103,7 +103,7 @@ export const StylesCreateCommand: CliModule<StylesCreateParams> = {
     process.stdout.write(chalk.yellowBright(chalk.bold(`\nWritten style defintion template to: ${path.normalize(path.join(basePath, styleFilePath))}\n`)))
 
     if (await confirm({ message: "Do you want to publish this style into Optimizely CMS?" })) {
-      const response: IntegrationApi.DisplayTemplate | undefined = await client.displayTemplatesPut({ body: definition, path: { key: definition.key } }).catch(_ => undefined)
+      const response: IntegrationApi.DisplayTemplate | undefined = await client.displayTemplatesCreate({ body: definition }).catch(_ => undefined)
       if (!response) {
         process.stderr.write(chalk.redBright(chalk.bold(`\[ERROR] Unable to create style definition ${definition.displayName} in Optimizely CMS\n`)))
       } else {

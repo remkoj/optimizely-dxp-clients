@@ -2,6 +2,8 @@ import { type CmsIntegrationApiClient as CmsApiClient } from '@remkoj/optimizely
 import figures from 'figures'
 import createDeepMerge from '@fastify/deepmerge'
 import { SchemaObject } from 'ajv'
+import { Ajv, type AnySchemaObject } from 'ajv'
+import addFormats, { FormatsPlugin } from 'ajv-formats'
 
 type RefSchema = { "$ref": string }
 type BaseSchema = {
@@ -40,7 +42,7 @@ export async function loadSchema(client: CmsApiClient, schemaName: string | stri
     const processedSchema = processSchema(specSchemas[schema], definitions, spec)
     const jsonSchema: TypedSchema = {
       //"$schema": "https://json-schema.org/draft-07/schema",
-      "$id": `https://api.cms.optimizely.com/schema/${schema}`,
+      "$id": `${client.cmsUrl}/schema/${schema}`,
       type: "object",
       title: schema,
       ...processedSchema,
@@ -53,6 +55,14 @@ export async function loadSchema(client: CmsApiClient, schemaName: string | stri
     process.stdout.write(`  ${figures.tick} Constructed schema of ${schema}\n`)
   }
   return result
+}
+
+export function getValidator(schemaObject: AnySchemaObject) {
+  const ajv = new Ajv({
+    discriminator: true
+  });
+  (addFormats as unknown as FormatsPlugin)(ajv);
+  return ajv.compile(schemaObject)
 }
 
 export default loadSchema
@@ -154,6 +164,10 @@ function processSchema(schema: BaseSchema | BaseSchema[], defs: { [name: string]
         if (keyVal !== undefined)
           newSchema[key] = keyVal
       }
+    }
+    if (newSchema['oneOf'] && Array.isArray(newSchema['oneOf']) && newSchema['nullable']) {
+      delete newSchema['nullable']
+
     }
     return newSchema
   }

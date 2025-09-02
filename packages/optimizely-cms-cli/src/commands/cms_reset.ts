@@ -1,5 +1,5 @@
 import type { CliModule } from '../types.js'
-import { CmsIntegrationApiClient, IntegrationApi, ContentRoots, ApiError } from '@remkoj/optimizely-cms-api'
+import { CmsIntegrationApiClient, IntegrationApi, Preview2IntegrationApi, ContentRoots, ApiError } from '@remkoj/optimizely-cms-api'
 import createClient from '../tools/cmsClient.js'
 import chalk from 'chalk'
 import figures from 'figures'
@@ -130,7 +130,7 @@ async function deleteContentItem(client: CmsIntegrationApiClient, key: string, o
     return removedCount
   }
 
-  const deleteResult = await client.contentDelete({ path: { key }, query: { permanent: true } }).then(r => r.key).catch((e: ApiError) => {
+  const deleteResult = await client.preview2ContentDelete({ path: { key }, query: { permanent: true } }).then(r => r.key).catch((e: ApiError) => {
     if (e.status == 404)
       return key
     throw e
@@ -159,8 +159,7 @@ async function resetSystemTypes(client: CmsIntegrationApiClient): Promise<number
       body: {
         key: systemType,
         properties: {}
-      },
-      query: { ignoreDataLossWarnings: true }
+      }
     }).catch((e: ApiError) => e.status == 404 ? undefined : null)
 
     if (newType)
@@ -271,14 +270,14 @@ async function getAllTypes(client: CmsIntegrationApiClient, batchSize: number = 
   return actualItems
 }
 
-async function getAllAssets(client: CmsIntegrationApiClient, parentKey: string, batchSize: number = 100): Promise<IntegrationApi.ContentMetadata[]> {
-  const items = await client.contentListAssets({ path: { key: parentKey }, query: { pageIndex: 0, pageSize: batchSize } }).catch((e: ApiError) => {
+async function getAllAssets(client: CmsIntegrationApiClient, parentKey: string, batchSize: number = 100): Promise<Preview2IntegrationApi.ContentMetadata[]> {
+  const items = await client.preview2ContentListAssets({ path: { key: parentKey }, query: { pageIndex: 0, pageSize: batchSize } }).catch((e: ApiError) => {
     if (e.status == 404) {
       return {
         items: [],
         totalItemCount: 0,
         pageSize: batchSize,
-      } as IntegrationApi.ContentMetadataPage
+      } as Preview2IntegrationApi.ContentMetadataPage
     }
     throw e
   })
@@ -288,13 +287,13 @@ async function getAllAssets(client: CmsIntegrationApiClient, parentKey: string, 
   const pageCount = Math.ceil(totalItemCount / pageSize)
 
   for (let pageNr = 1; pageNr < pageCount; pageNr++) {
-    const pageData = await client.contentListAssets({ path: { key: parentKey }, query: { pageIndex: pageNr, pageSize } }).catch((e: ApiError) => {
+    const pageData = await client.preview2ContentListAssets({ path: { key: parentKey }, query: { pageIndex: pageNr, pageSize } }).catch((e: ApiError) => {
       if (e.status == 404) {
         return {
           items: [],
           totalItemCount: 0,
           pageSize: batchSize,
-        } as IntegrationApi.ContentMetadataPage
+        } as Preview2IntegrationApi.ContentMetadataPage
       }
       throw e
     })
@@ -304,14 +303,14 @@ async function getAllAssets(client: CmsIntegrationApiClient, parentKey: string, 
   return actualItems
 }
 
-async function getAllItems(client: CmsIntegrationApiClient, parentKey: string, batchSize: number = 100): Promise<IntegrationApi.ContentMetadata[]> {
-  const items = await client.contentListItems({ path: { key: parentKey }, query: { pageIndex: 0, pageSize: batchSize } }).catch((e: ApiError) => {
+async function getAllItems(client: CmsIntegrationApiClient, parentKey: string, batchSize: number = 100): Promise<Preview2IntegrationApi.ContentMetadata[]> {
+  const items = await client.preview2ContentListItems({ path: { key: parentKey }, query: { pageIndex: 0, pageSize: batchSize } }).catch((e: ApiError) => {
     if (e.status == 404) {
       return {
         items: [],
         totalItemCount: 0,
         pageSize: batchSize,
-      } as IntegrationApi.ContentMetadataPage
+      } as Preview2IntegrationApi.ContentMetadataPage
     }
     throw e
   })
@@ -321,13 +320,13 @@ async function getAllItems(client: CmsIntegrationApiClient, parentKey: string, b
   const pageCount = Math.ceil(totalItemCount / pageSize)
 
   for (let pageNr = 1; pageNr < pageCount; pageNr++) {
-    const pageData = await client.contentListItems({ path: { key: parentKey }, query: { pageIndex: pageNr, pageSize } }).catch((e: ApiError) => {
+    const pageData = await client.preview2ContentListItems({ path: { key: parentKey }, query: { pageIndex: pageNr, pageSize } }).catch((e: ApiError) => {
       if (e.status == 404) {
         return {
           items: [],
           totalItemCount: 0,
           pageSize: batchSize,
-        } as IntegrationApi.ContentMetadataPage
+        } as Preview2IntegrationApi.ContentMetadataPage
       }
       throw e
     })

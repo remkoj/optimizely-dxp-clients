@@ -4,6 +4,8 @@ import { IntegrationApi, type CmsIntegrationApiClient as CmsApiClient } from '@r
 import { parseArgs } from '../tools/parseArgs.js'
 import chalk from 'chalk'
 import figures from 'figures'
+import path from 'node:path'
+import { typeToSlug } from './paths.js'
 
 export type ContentTypesArgs = {
   excludeBaseTypes: string[]
@@ -18,16 +20,20 @@ export const contentTypesBuilder: (yargs: Argv<OptiCmsArgs>) => Argv<OptiCmsArgs
   yargs.option('excludeBaseTypes', { alias: 'ebt', description: "Exclude these base types", string: true, type: 'array', demandOption: false, default: ['folder', 'media', 'image', 'video'] })
   yargs.option("baseTypes", { alias: 'b', description: "Select only these base types", string: true, type: 'array', demandOption: false, default: [] })
   yargs.option("types", { alias: 't', description: "Select only these types", string: true, type: 'array', demandOption: false, default: [] })
-  yargs.option('all', { alias: 'a', description: "Include non-supported base types", boolean: true, type: 'boolean', demandOption: false, default: false })
+  yargs.option('all', { alias: 'a', description: "Include non-supported types", boolean: true, type: 'boolean', demandOption: false, default: false })
   return yargs as Argv<OptiCmsArgs<ContentTypesArgs>>
 }
 
 export type GetContentTypesResult = { all: Array<IntegrationApi.ContentType>, contentTypes: Array<IntegrationApi.ContentType> }
 
-function getEnumOptions<T extends object>(enumObject: T): Array<keyof T> {
-  return (Object.keys(enumObject) as Array<keyof T>).filter((item) => {
-    return isNaN(Number(item));
-  });
+export function getContentTypePaths(contentType: IntegrationApi.ContentType, basePath: string) {
+  const baseTypeSlug = typeToSlug(contentType.baseType);
+  const typePath = path.join(basePath, baseTypeSlug, contentType.key);
+  const typeFile = path.join(typePath, `${contentType.key}.opti-type.json`);
+  const fragmentFile = path.join(typePath, `${contentType.key}.${baseTypeSlug}.graphql`);
+  const propertyFragmentFile = path.join(typePath, `${contentType.key}.property.graphql`);
+  const componentFile = path.join(typePath, `index.tsx`);
+  return { typePath, typeFile, fragmentFile, componentFile, propertyFragmentFile }
 }
 
 export async function getContentTypes(
@@ -38,56 +44,57 @@ export async function getContentTypes(
   customFilter?: (currentType: IntegrationApi.ContentType) => boolean | Promise<boolean>
 ): Promise<GetContentTypesResult> {
   const { _config: cfg, excludeBaseTypes, excludeTypes, baseTypes, types, all } = parseArgs(args)
-
-  const validBaseTypes = getEnumOptions(IntegrationApi.ContentBaseType).map(x => x.toLowerCase())
   const allContentTypes: Array<IntegrationApi.ContentType> = []
   const filteredContentTypes: Array<IntegrationApi.ContentType> = []
 
   for await (const contentType of getAllContentTypes(client, cfg.debug, pageSize)) {
-    const normalizedContentType = { ...contentType, baseType: contentType.baseType ?? 'default' as IntegrationApi.ContentBaseType }
-
-    // Build the "All" data set
-    if (all)
-      allContentTypes.push(normalizedContentType)
-    else if (validBaseTypes.includes(normalizedContentType.baseType.toLowerCase()))
-      allContentTypes.push(normalizedContentType)
-    else if (cfg.debug) {
-      process.stdout.write(chalk.gray(`${figures.arrowRight} Skipping ${normalizedContentType.key} as it has an unsupported base type: ${normalizedContentType.baseType}\n`))
-      continue
-    } else {
+    // Skip content types mapped against Graph data, these should be used with their source type in Graph, not the reference in CMS
+    if (!all && contentType.key.toLowerCase().startsWith('graph:')) {
+      if (cfg.debug)
+        process.stdout.write(chalk.gray(`${figures.arrowRight} Skipping ${contentType.key} as it is a reference to external data in Optimizely Graph\n`))
       continue
     }
 
+    // Build the unfiltered array
+    allContentTypes.push(contentType)
+
     // Skip based upon base type filters
-    if (!shouldInclude(normalizedContentType.baseType, baseTypes, excludeBaseTypes)) {
+    if (!shouldInclude(contentType.baseType, baseTypes, excludeBaseTypes)) {
       if (cfg.debug)
-        process.stdout.write(chalk.gray(`${figures.arrowRight} Skipping ${normalizedContentType.key} as it has a restricted base type: ${normalizedContentType.baseType}\n`))
+        process.stdout.write(chalk.gray(`${figures.arrowRight} Skipping ${contentType.key} as it has a restricted base type: ${contentType.baseType}\n`))
+      continue
+    }
+
+    // Skip based upon normalized base type filters (i.e. without "_" prefix and lowercased)
+    if (!shouldInclude(typeToSlug(contentType.baseType), baseTypes, excludeBaseTypes)) {
+      if (cfg.debug)
+        process.stdout.write(chalk.gray(`${figures.arrowRight} Skipping ${contentType.key} as it has a restricted base type: ${contentType.baseType}\n`))
       continue
     }
 
     // Skip based upon type filters
-    if (!shouldInclude(normalizedContentType.key, types, excludeTypes)) {
+    if (!shouldInclude(contentType.key, types, excludeTypes)) {
       if (cfg.debug)
-        process.stdout.write(chalk.gray(`${figures.arrowRight} Skipping ${normalizedContentType.key} as it has a restricted type: ${normalizedContentType.key}\n`))
+        process.stdout.write(chalk.gray(`${figures.arrowRight} Skipping ${contentType.key} as it has a restricted type: ${contentType.key}\n`))
       continue
     }
 
     // Skip based upon system filter
-    if (normalizedContentType.source == 'system' && !allowSystem) {
+    if (contentType.source == 'system' && !allowSystem) {
       if (cfg.debug)
-        process.stdout.write(chalk.gray(`${figures.arrowRight} Skipping Content-Type ${normalizedContentType.key} due to it being a system type\n`))
+        process.stdout.write(chalk.gray(`${figures.arrowRight} Skipping Content-Type ${contentType.key} due to it being a system type\n`))
       continue
     }
 
     // Skip based upon custom filter
-    if (customFilter && !await customFilter(normalizedContentType)) {
+    if (customFilter && !await customFilter(contentType)) {
       if (cfg.debug)
-        process.stdout.write(chalk.gray(`${figures.arrowRight} Skipping Content-Type ${normalizedContentType.key} due to the custom filter\n`))
+        process.stdout.write(chalk.gray(`${figures.arrowRight} Skipping Content-Type ${contentType.key} due to the custom filter\n`))
       continue
     }
 
     // Add to list
-    filteredContentTypes.push(normalizedContentType)
+    filteredContentTypes.push(contentType)
   }
 
   if (cfg.debug)

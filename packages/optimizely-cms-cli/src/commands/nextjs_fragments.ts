@@ -6,9 +6,9 @@ import figures from 'figures'
 
 import { parseArgs } from '../tools/parseArgs.js'
 import { createCmsClient } from '../tools/cmsClient.js'
-import { getContentTypes, type GetContentTypesResult } from '../tools/contentTypes.js'
+import { getContentTypes, getContentTypePaths, type GetContentTypesResult } from '../tools/contentTypes.js'
 import { type NextJsModule, builder, createTypeFolders, getTypeFolder, type TypeFolderList } from './_nextjs_base.js'
-import { ListPropertyItem } from '@remkoj/optimizely-cms-api/dist/client/types.gen.js'
+
 
 /**
  * Keep track of all generated properties
@@ -31,8 +31,7 @@ export const NextJsQueriesCommand: NextJsModule<{ loadedContentTypes: GetContent
     process.stdout.write(chalk.yellowBright(`${figures.arrowRight} Generating GraphQL fragments for ${contentTypes.map(x => x.key).join(', ')}\n`))
     const typeFolders = createdTypeFolders ?? createTypeFolders(contentTypes, basePath, debug)
     const updatedTypes = contentTypes.map(contentType => {
-      const typePath = getTypeFolder(typeFolders, contentType.key)
-      return createGraphFragments(contentType, typePath, basePath, force, debug, allContentTypes, client.runtimeCmsVersion == OptiCmsVersion.CMS12)
+      return createGraphFragments(contentType, typeFolders, basePath, force, debug, allContentTypes, false)
     }).filter(x => x).flat()
 
     // Report outcome
@@ -46,10 +45,13 @@ export const NextJsQueriesCommand: NextJsModule<{ loadedContentTypes: GetContent
   }
 }
 
-function createGraphFragments(contentType: IntegrationApi.ContentType, typePath: string, basePath: string, force: boolean, debug: boolean, contentTypes: IntegrationApi.ContentType[], forCms12: boolean = false): Array<string> | undefined {
+function createGraphFragments(contentType: IntegrationApi.ContentType, typeFolders: TypeFolderList, basePath: string, force: boolean, debug: boolean, contentTypes: IntegrationApi.ContentType[], forCms12: boolean = false): Array<string> | undefined {
   const returnValue: Array<string> = []
-  const baseType = contentType.baseType ?? 'default'
-  const baseQueryFile = path.join(typePath, `${contentType.key}.${baseType}.graphql`)
+  const typePath = getTypeFolder(typeFolders, contentType.key)
+  const baseQueryFile = typePath.fragmentFile
+  const { fragment, propertyTypes } = createInitialFragment(contentType, false, undefined, forCms12)
+
+  let writeFragment: boolean = true;
   if (fs.existsSync(baseQueryFile)) {
     if (force) {
       if (debug)
@@ -57,15 +59,16 @@ function createGraphFragments(contentType: IntegrationApi.ContentType, typePath:
     } else {
       if (debug)
         process.stdout.write(chalk.gray(`${figures.arrowRight} Skipping ${contentType.displayName} (${contentType.key}) base fragment - file already exists\n`))
-      return undefined
+      writeFragment = false
     }
   } else if (debug) {
     process.stdout.write(chalk.gray(`${figures.arrowRight} Creating ${contentType.displayName} (${contentType.key}) base fragment\n`))
   }
 
-  const { fragment, propertyTypes } = createInitialFragment(contentType, false, undefined, forCms12)
-  fs.writeFileSync(baseQueryFile, fragment)
-  returnValue.push(contentType.key)
+  if (writeFragment) {
+    fs.writeFileSync(baseQueryFile, fragment)
+    returnValue.push(contentType.key)
+  }
 
   let dependencies = Array.isArray(propertyTypes) ? [...propertyTypes] : []
   while (Array.isArray(dependencies) && dependencies.length > 0) {
@@ -76,8 +79,12 @@ function createGraphFragments(contentType: IntegrationApi.ContentType, typePath:
         console.warn(`🟠 The content type ${dep[0]} has been referenced, but is not found in the Optimizely CMS instance`)
         return
       }
-      const fullTypeName = forCms12 ? contentType.key + propContentType.key : propContentType.key
-      const propertyFragmentFile = path.join(basePath, propContentType.baseType, propContentType.key, `${fullTypeName}.property.graphql`)
+      const depFolder = getTypeFolder(typeFolders, propContentType.key) ?? getTypeFolder(createTypeFolders([propContentType], basePath), propContentType.key)
+      if (!propContentType) {
+        console.warn(`🟠 The content type ${dep[0]} cannot be stored in the project`)
+        return
+      }
+      const propertyFragmentFile = depFolder.propertyFragmentFile
       const propertyFragmentDir = path.dirname(propertyFragmentFile)
 
       if (!fs.existsSync(propertyFragmentDir))
@@ -104,7 +111,7 @@ function createInitialFragment(contentType: IntegrationApi.ContentType, forPrope
   const typeProps = contentType.properties ?? {}
   Object.getOwnPropertyNames(typeProps).forEach(propKey => {
     // Exclude system properties, which are not present in Optimizely Graph
-    if (['experience', 'section'].includes(contentType.baseType) && ['AdditionalData', 'UnstructuredData', 'Layout'].includes(propKey))
+    if (['_experience', '_section'].includes(contentType.baseType) && ['AdditionalData', 'UnstructuredData', 'Layout'].includes(propKey))
       return
 
     // Exclude CMS 12 System Properties
@@ -117,26 +124,26 @@ function createInitialFragment(contentType: IntegrationApi.ContentType, forPrope
 
     // Write the property
     switch (propType) {
-      case IntegrationApi.PropertyDataType.ARRAY:
+      case 'array':
         {
-          const typeData = typeProps[propKey] as { items: ListPropertyItem & { contentType: string }, format: string | null }
+          const typeData = typeProps[propKey] as { items: IntegrationApi.ArrayItem & { contentType: string }, format: string | null }
           switch (typeData.items.type) {
-            case IntegrationApi.PropertyDataType.INTEGER:
+            case 'integer':
               if (typeData.format == 'categorization')
                 fragmentFields.push(`${propName} { Id, Name, Description }`)
               else
                 fragmentFields.push(propName)
               break
-            case IntegrationApi.PropertyDataType.STRING:
+            case 'string':
               fragmentFields.push(propName)
               break;
-            case IntegrationApi.PropertyDataType.CONTENT:
+            case 'content':
               if (contentType.baseType == 'page' || (contentType.baseType as string) == 'experience')
                 fragmentFields.push(`${propName} { ...${forCms12 ? 'PageIContentListItem' : 'BlockData'} }`)
               else
                 fragmentFields.push(`${propName} { ...IContentListItem }`)
               break;
-            case IntegrationApi.PropertyDataType.COMPONENT:
+            case 'component':
               const componentType = typeData.items.contentType
               switch (componentType) {
                 case 'link':
@@ -151,7 +158,7 @@ function createInitialFragment(contentType: IntegrationApi.ContentType, forPrope
                   }
               }
               break;
-            case IntegrationApi.PropertyDataType.CONTENT_REFERENCE:
+            case 'contentReference':
               fragmentFields.push(`${propName} { ...ReferenceData }`)
               break;
             default:
@@ -160,7 +167,7 @@ function createInitialFragment(contentType: IntegrationApi.ContentType, forPrope
           }
           break;
         }
-      case IntegrationApi.PropertyDataType.STRING: {
+      case 'string': {
         const propDetails = typeProps[propKey] as { format: string | null }
         switch (propDetails.format ?? "") {
           case 'html':
@@ -178,13 +185,13 @@ function createInitialFragment(contentType: IntegrationApi.ContentType, forPrope
         }
         break;
       }
-      case IntegrationApi.PropertyDataType.URL:
+      case 'url':
         fragmentFields.push(forCms12 ? propName : `${propName} { ...LinkData }`)
         break;
-      case IntegrationApi.PropertyDataType.CONTENT_REFERENCE:
+      case 'contentReference':
         fragmentFields.push(`${propName} { ...ReferenceData }`)
         break;
-      case IntegrationApi.PropertyDataType.COMPONENT: {
+      case 'component': {
         const componentType = (typeProps[propKey] as { contentType: string }).contentType
         if (forCms12 && componentType == "link") {
           fragmentFields.push(`${propName} { ...LinkItemData }`)
@@ -195,7 +202,7 @@ function createInitialFragment(contentType: IntegrationApi.ContentType, forPrope
         }
         break;
       }
-      case IntegrationApi.PropertyDataType.BINARY:
+      case 'binary':
         fragmentFields.push(`${propName} { ...BinaryData }`)
         break;
       default:

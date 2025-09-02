@@ -15,5 +15,5 @@ import { createClientConfig } from '../client-config';
 export type CreateClientConfig<T extends DefaultClientOptions = ClientOptions> = (override?: Config<DefaultClientOptions & T>) => Config<Required<DefaultClientOptions> & T>;
 
 export const client = createClient(createClientConfig(createConfig<ClientOptions>({
-    baseUrl: '/_cms/preview2'
+    baseUrl: 'https://api.cms.optimizely.com/preview3'
 })));

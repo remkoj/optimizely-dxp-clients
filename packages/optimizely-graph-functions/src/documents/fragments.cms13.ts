@@ -2,23 +2,50 @@ export default [
   `fragment IContentData on _IContent
 {
   _metadata {
-    ...IContentInfo
+    key
+    locale
+    types
+    displayName
+    version
+    url {
+      type
+      base
+      default
+    }
   }
   _type: __typename
 }`,
   `fragment IElementData on _IComponent {
   _metadata {
-    ...IContentInfo
+    key
+    locale
+    types
+    displayName
+    version
+    url {
+      type
+      base
+      default
+    }
   }
   _type: __typename
 }`,
   `fragment ElementData on _IComponent  {
   ...IElementData
 }`,
+  `fragment ComponentData on _IComponent  {
+  ...IContentData
+}`,
   `fragment BlockData on _IComponent  {
   ...IContentData
 }`,
   `fragment PageData on _IContent {
+  ...IContentData
+}`,
+  `fragment SectionData on _ISection {
+  ...IContentData
+}`,
+  `fragment FormElementData on _ISection {
   ...IContentData
 }`,
   `fragment LinkData on ContentUrl {
@@ -29,7 +56,9 @@ export default [
   `fragment ReferenceData on ContentReference {
   key
   url {
-    ...LinkData
+    type
+    base
+    default
   }
 }`,
   `fragment IContentInfo on IContentMetadata {
@@ -39,7 +68,9 @@ export default [
   displayName
   version
   url {
-    ...LinkData
+    type
+    base
+    default
   }
 }`,
   `fragment IContentListItem on _IContent {
@@ -64,14 +95,36 @@ export default [
                 nodes {
                   # Element level
                   ...CompositionNodeData
-                  ...CompositionComponentNodeData
+                  ... on ICompositionComponentNode {
+                    component {
+                      ...BlockData
+                      ...ElementData
+                    }
+                  }
+                  ... on ICompositionStructureNode {
+                    nodes {
+                      # Form Field level
+                      ...CompositionNodeData
+                      ... on ICompositionComponentNode {
+                        component {
+                          ...BlockData
+                          ...FormElementData
+                        }
+                      }
+                    }
+                  }
                 }
               }
             }
           }
         }
       }
-      ...CompositionComponentNodeData
+      ... on ICompositionComponentNode {
+        component {
+          ...BlockData
+          ...SectionData
+        }
+      }
     }
   }
 }`,
@@ -88,7 +141,6 @@ export default [
 }`,
   `fragment CompositionComponentNodeData on ICompositionComponentNode {
   component {
-    ...BlockData
     ...ElementData
   }
 }`,
@@ -97,7 +149,9 @@ export default [
   text
   target
   url {
-    ...LinkData
+    type
+    base
+    default
   }
 }`
 ]

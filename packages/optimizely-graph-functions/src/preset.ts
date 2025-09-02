@@ -7,12 +7,12 @@ import * as GraphQLRequestPlugin from '@graphql-codegen/typescript-graphql-reque
 import * as AddPlugin from '@graphql-codegen/add'
 
 // Import injected parts
-import plugin, { pickPluginOptions, type PluginOptions } from './index'
-import transform, { pickTransformOptions } from './transform'
+import plugin, { pickPluginOptions } from './index'
+import transform, { pickTransformOptions, cleanFragments, normalizeFragmentNames, injectComponentDocuments } from './transform'
 import { type TransformOptions } from './types'
+import * as OptiCMS from "./cms"
+import type { PresetOptions, PluginOptions } from './types'
 
-// Create preset configuration
-export type PresetOptions = ClientPresetOptions & PluginOptions & TransformOptions
 
 export const preset: Types.OutputPreset<PresetOptions> =
 {
@@ -86,30 +86,8 @@ export const preset: Types.OutputPreset<PresetOptions> =
       }
     ]
 
-    // The packages contain quite a few utility fragments, however these 
-    // can cause errors if there're no Content Types using the types 
-    // targeted by these fragments as they won't be available in Optimizely
-    // Graph - so we're removing them first
-    options.documents = options.documents.map(doc => {
-      if (doc.document) {
-        const newDocument = visit(doc.document, {
-          FragmentDefinition: {
-            enter: (node) => {
-              if (!options.schema.definitions.some(x => (x.kind == Kind.OBJECT_TYPE_DEFINITION || x.kind == Kind.INTERFACE_TYPE_DEFINITION) && x.name.value == node.typeCondition.name.value)) {
-                if (options.presetConfig.verbose)
-                  console.log(`⚠ Removing fragment ${node.name.value} from the documents, as its target ${node.typeCondition.name.value} is not available in the schema`)
-                return null
-              }
-            }
-          }
-        })
-        return {
-          ...doc,
-          document: newDocument
-        }
-      }
-      return doc
-    })
+    // Apply all changes to the document set, prior to validating it
+    options.documents = await injectComponentDocuments(normalizeFragmentNames(cleanFragments(options.documents, options), options), options)
 
     // Build the preset files
     const section: Array<Types.GenerateOptions> = await clientPreset.buildGeneratesSection(options)

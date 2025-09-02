@@ -1,7 +1,13 @@
-import json from '@rollup/plugin-json'
-import commonjs from '@rollup/plugin-commonjs'
+import json from '@rollup/plugin-json';
+import commonjs from '@rollup/plugin-commonjs';
 import typescript from '@rollup/plugin-typescript';
+import packageInfo from './package.json' with { type: "json"};
 
+function getExternals() {
+  const deps = Object.getOwnPropertyNames(packageInfo.dependencies ?? {})
+  const peerDeps = Object.getOwnPropertyNames(packageInfo.peerDependencies ?? {})
+  return [...[...deps, ...peerDeps].map(x => new RegExp(`^${ x }(\/.+){0,1}$`)), /^node\:[a-z\_\/]+$/]
+}
 const year = new Date().getFullYear();
 
 const intro =`#!/usr/bin/env node
@@ -21,7 +27,8 @@ export default {
         intro,
         format: 'es',
         sourcemap: true
-    },
+  },
+    external: getExternals(),
     plugins: [
         typescript({
             outDir: "./bin"
@@ -32,6 +39,5 @@ export default {
         commonjs({
             extensions: ['.js','.cjs']
         })
-    ],
-    external: [/^node\:[a-z]+$/]
+    ]
 }
