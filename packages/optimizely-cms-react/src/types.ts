@@ -56,11 +56,12 @@ export type CmsComponentProps<T, L extends Record<string, any> = Record<string, 
   ctx?: GenericContext
 }>
 
-export type ContentQueryProps<LocaleType = string> = ContentLink & {
+export type ContentQueryProps<LocaleType = string> = Omit<ContentLink, 'isInline'> & {
   locale?: Array<LocaleType> | LocaleType | null
   path?: string | null
   domain?: string | null
   changeset?: string | null
+  variant?: string | null
 }
 
 /**
@@ -68,7 +69,21 @@ export type ContentQueryProps<LocaleType = string> = ContentLink & {
  */
 export type ResponseDataType<T extends DocumentNode> = T extends TypedDocumentNode<infer DataType> ? DataType : { [key: string]: any };
 
-export type GetDataQuery<T> = () => TypedDocumentNode<T, ContentQueryProps> | DocumentNode
+export type GetDataQueryResponseTemplate = {
+  __typename?: 'Query' | null,
+  data?: {
+    __typename?: string | null;
+    item?: {
+      __typename?: string | null;
+      _metadata?: {
+        key?: string | null
+      } | null,
+      [key: string]: any
+    } | null
+  } | null
+}
+export type ProcessQueryResponse<T> = T extends GetDataQueryResponseTemplate ? NonNullable<NonNullable<Required<T>['data']>['item']> : T
+export type GetDataQuery<T> = () => TypedDocumentNode<T, Omit<ContentQueryProps, 'path' | 'domain'>> | DocumentNode
 export type GetDataFragment<T> = () => [string, TypedDocumentNode<T, never> | DocumentNode | string]
 
 export type WithGqlFragment<BaseComponent, DataType> = BaseComponent & {
@@ -79,8 +94,8 @@ export type WithGqlQuery<B, T> = B & {
   getDataQuery: GetDataQuery<T>
 }
 export type BaseCmsComponent<T = {}, L extends Record<string, any> = Record<string, any>> = T extends never | TypedDocumentNode | DocumentNode ?
-  DynamicCmsComponent<T> :
-  ReactComponentType<CmsComponentProps<T, L>>
+  DynamicCmsComponent<ProcessQueryResponse<T>> :
+  ReactComponentType<CmsComponentProps<ProcessQueryResponse<T>, L>>
 
 export type DynamicCmsComponent<T extends TypedDocumentNode | DocumentNode = DocumentNode, L extends Record<string, any> = Record<string, any>> = ReactComponentType<CmsComponentProps<ResponseDataType<T>, L>>
 export type GraphQLFragmentBase = { ' $fragmentName'?: string }

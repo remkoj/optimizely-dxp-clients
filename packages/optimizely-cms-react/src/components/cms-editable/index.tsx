@@ -143,16 +143,22 @@ export const CmsEditable: CmsEditableBaseComponent = <CT extends ElementType>({
     ? undefined
     : (cmsFieldName ?? undefined)
 
+  const showBlockId =
+    cmsId && cmsId?.length != 32 && (forceBlockId || !dataEpiPropertyName)
+  const showContentId =
+    cmsId?.length == 32 && (forceBlockId || !dataEpiPropertyName)
+
   const itemProps: Record<string, any> = addEditProps
     ? {
         ...props,
         // We assume GUIDs are represented as 32 char long strings, all other values are IDs
-        'data-epi-block-id':
-          cmsId && (cmsId.length != 32 || forceBlockId) ? cmsId : undefined,
+        'data-epi-block-id': showBlockId ? cmsId : undefined,
         // We assume GUIDs are represented as 32 char long strings
-        'data-epi-content-id': cmsId && cmsId.length == 32 ? cmsId : undefined,
+        'data-epi-content-id': showContentId ? cmsId : undefined,
         // We pass through the property name if provided
         'data-epi-property-name': dataEpiPropertyName,
+        // We pass through the property name if provided
+        'data-epi-edit': dataEpiPropertyName,
         // Configure the rendition of the property editor
         'data-epi-property-edittype': editType ?? undefined,
       }

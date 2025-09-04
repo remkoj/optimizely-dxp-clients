@@ -13,7 +13,8 @@ import TypesPushCommand from './types_push.js'
 
 // Framework specific logic
 import NextJsCreateCommand from './nextjs_create.js'
-import NextJsQueriesCommand from './nextjs_fragments.js'
+import NextJsFragmentsCommand from './nextjs_fragments.js'
+import NextJsQueriesCommand from './nextjs_queries.js'
 import NextJsComponentsCommand from './nextjs_components.js'
 import NextJsVisualBuilderCommand from './nextjs_visualbuilder.js'
 import NextJsFactoryCommand from './nextjs_factories.js'
@@ -30,11 +31,12 @@ export const commands: CliModuleList = [
   StylesPushCommand,
   TypesPullCommand,
   TypesPushCommand,
-  NextJsCreateCommand,
-  NextJsQueriesCommand,
   NextJsComponentsCommand,
-  NextJsVisualBuilderCommand,
+  NextJsCreateCommand,
   NextJsFactoryCommand,
+  NextJsFragmentsCommand,
+  NextJsQueriesCommand,
+  NextJsVisualBuilderCommand,
   CmsResetCommand,
   CmsVersionCommand
 ]
