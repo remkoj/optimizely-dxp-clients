@@ -57,14 +57,26 @@ function createSpecificNode(template: IntegrationApi.DisplayTemplate, templatePa
   if (!fs.existsSync(templatePath))
     fs.mkdirSync(templatePath, { recursive: true })
 
-  const displayTemplateName = getDisplayTemplateInfo(template, templatePath)
+  const baseType = template.nodeType ?? template.baseType ?? 'unknown';
+  const displayTemplateName = getDisplayTemplateInfo(template, templatePath);
+  const imports: string[] = ['import { extractSettings, type CmsLayoutComponent } from "@remkoj/optimizely-cms-react/rsc";'];
+  const componentProps = [`className="vb:${baseType} vb:${baseType}:${template.key}"`]
+  const componentArgs = ['layoutProps', 'children']
+  let componentType = 'div'
+  if (displayTemplateName)
+    imports.push(`import { ${displayTemplateName} } from "../displayTemplates";`)
+  if (baseType.toLowerCase() == 'section') {
+    imports.push('import { CmsEditable } from "@remkoj/optimizely-cms-react/rsc";')
+    componentType = 'CmsEditable'
+    componentProps.push('{ ...editProps }')
+    componentArgs.push('editProps')
+  }
 
-  const component = `import { extractSettings, type CmsLayoutComponent } from "@remkoj/optimizely-cms-react/rsc";${displayTemplateName ? `
-import { ${displayTemplateName} } from "../displayTemplates";` : ''}
+  const component = `${imports.join("\n")}
 
-export const ${template.key} : CmsLayoutComponent<${displayTemplateName ?? '{}'}> = ({ contentLink, layoutProps, children }) => {
+export const ${template.key} : CmsLayoutComponent<${displayTemplateName ?? '{}'}> = ({ ${componentArgs.join(', ')} }) => {
     const layout = extractSettings(layoutProps);
-    return (<div className="vb:${template.nodeType} vb:${template.nodeType}:${template.key}">{ children }</div>);
+    return (<${componentType} ${componentProps.join(' ')}>{ children }</${componentType}>);
 }
 
 export default ${template.key};`
@@ -87,11 +99,11 @@ function createGenericNode(basePath: string, force: boolean, debug: boolean) {
 
   const nodeContent = `import { CmsEditable, type CmsLayoutComponent } from '@remkoj/optimizely-cms-react/rsc'
 
-export const VisualBuilderNode : CmsLayoutComponent = ({ contentLink, layoutProps, children, ctx }) =>
+export const VisualBuilderNode : CmsLayoutComponent = ({ editProps, layoutProps, children }) =>
 {
     let className = \`vb:\${layoutProps?.layoutType}\`
     if (layoutProps && layoutProps.layoutType == "section")
-        return <CmsEditable as="div" className={ className } cmsId={ contentLink.key } ctx={ctx}>{ children }</CmsEditable>
+        return <CmsEditable as="div" className={ className } {...editProps}>{ children }</CmsEditable>
     return <div className={ className }>{ children }</div>
 }
 

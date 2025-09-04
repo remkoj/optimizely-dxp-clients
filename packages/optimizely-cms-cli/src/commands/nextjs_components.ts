@@ -102,7 +102,7 @@ type TemplateFn = (contentType: IntegrationApi.ContentType, varName: string, dis
 const Templates: Record<'default', TemplateFn> & Partial<Record<Required<IntegrationApi.ContentType>['baseType'], TemplateFn>> =
 {
   // Default Template for all components without specifics
-  default: (contentType, varName, displayTemplate, baseDisplayTemplate) => `import { type CmsComponent } from "@remkoj/optimizely-cms-react";
+  default: (contentType, varName, displayTemplate, baseDisplayTemplate) => `import { CmsEditable, type CmsComponent } from "@remkoj/optimizely-cms-react/rsc";
 import { ${contentType.key}DataFragmentDoc, type ${contentType.key}DataFragment } from "@/gql/graphql";${displayTemplate ? `
 import { ${displayTemplate} } from "./displayTemplates";` : ''}${baseDisplayTemplate ? `
 import { ${baseDisplayTemplate} } from "../styles/displayTemplates";` : ''}
@@ -111,15 +111,14 @@ import { ${baseDisplayTemplate} } from "../styles/displayTemplates";` : ''}
  * ${contentType.displayName}
  * ${contentType.description}
  */
-export const ${varName} : CmsComponent<${contentType.key}DataFragment${(displayTemplate || baseDisplayTemplate) ? ', ' + [displayTemplate, baseDisplayTemplate].filter(x => x).join(" | ") : ''}> = ({ data${(displayTemplate || baseDisplayTemplate) ? ', layoutProps' : ''}, children }) => {
+export const ${varName} : CmsComponent<${contentType.key}DataFragment${(displayTemplate || baseDisplayTemplate) ? ', ' + [displayTemplate, baseDisplayTemplate].filter(x => x).join(" | ") : ''}> = ({ data${(displayTemplate || baseDisplayTemplate) ? ', layoutProps' : ''}, editProps }) => {
     const componentName = '${contentType.displayName}'
     const componentInfo = '${contentType.description?.replaceAll("'", "\\'") ?? ''}'
-    return <div className="w-full border-y border-y-solid border-y-slate-900 py-2 mb-4">
+    return <CmsEditable className="w-full border-y border-y-solid border-y-slate-900 py-2 mb-4" {...editProps}>
         <div className="font-bold italic">{ componentName }</div>
         <div>{ componentInfo }</div>
         { Object.getOwnPropertyNames(data).length > 0 && <pre className="w-full overflow-x-hidden font-mono text-sm bg-slate-200 p-2 rounded-sm border border-solid border-slate-900 text-slate-900">{ JSON.stringify(data, undefined, 4) }</pre> }
-        { children && <div className="mt-4 mx-4 flex flex-col">{ children }</div>}
-    </div>
+    </CmsEditable>
 }
 ${varName}.displayName = "${contentType.displayName} (${ucFirst(contentType.baseType)}/${contentType.key})"
 ${varName}.getDataFragment = () => ['${contentType.key}Data', ${contentType.key}DataFragmentDoc]
@@ -136,14 +135,13 @@ import { getSdk } from "@/gql"
  * ${contentType.displayName}
  * ${contentType.description}
  */
-export const ${varName} : CmsComponent<${contentType.key}DataFragment${displayTemplate ? ', ' + displayTemplate : ''}> = ({ data${displayTemplate ? ', layoutProps' : ''}, children }) => {
+export const ${varName} : CmsComponent<${contentType.key}DataFragment${displayTemplate ? ', ' + displayTemplate : ''}> = ({ data${displayTemplate ? ', layoutProps' : ''} }) => {
     const componentName = '${contentType.displayName}'
     const componentInfo = '${contentType.description?.replaceAll("'", "\\'") ?? ''}'
     return <div className="mx-auto px-2 container">
         <div className="font-bold italic">{ componentName }</div>
         <div>{ componentInfo }</div>
         { Object.getOwnPropertyNames(data).length > 0 && <pre className="w-full overflow-x-hidden font-mono text-sm bg-slate-200 p-2 rounded-sm border border-solid border-slate-900 text-slate-900">{ JSON.stringify(data, undefined, 4) }</pre> }
-        { children && <div className="flex flex-col mt-4 mx-4">{ children }</div>}
     </div>
 }
 ${varName}.displayName = "${contentType.displayName} (${ucFirst(contentType.baseType)}/${contentType.key})"

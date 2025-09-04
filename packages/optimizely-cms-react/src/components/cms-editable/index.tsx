@@ -47,8 +47,15 @@ export type CmsEditableProps<FT extends ElementType> = PropsWithChildren<
     forceBlockId?: boolean
 
     /**
+     * If set `CmsEditable` will output both `cmsId` and `cmsFieldName` (if both are provided)
+     * otherwise it will prioritize `cmsFieldName`.
+     */
+    forceId?: boolean
+
+    /**
      * If set, this will be used to test if the content item being rendered is actually
-     * the one being edited. This allows
+     * the one being edited. This allows conditional output of the edit properties. This will
+     * only affect `cmsFieldName`, not `cmsId`.
      */
     currentContent?: ContentLink
 
@@ -58,7 +65,15 @@ export type CmsEditableProps<FT extends ElementType> = PropsWithChildren<
     editType?: 'floating' | 'inline' | null
   } & Omit<
     ElementProps<FT>,
-    'as' | 'cmsId' | 'cmsFieldName' | 'ctx' | 'forwardCtx'
+    | 'as'
+    | 'cmsId'
+    | 'cmsFieldName'
+    | 'ctx'
+    | 'forwardCtx'
+    | 'forceBlockId'
+    | 'forceId'
+    | 'currentContent'
+    | 'editType'
   >
 >
 
@@ -82,13 +97,14 @@ export const CmsEditable: CmsEditableBaseComponent = <CT extends ElementType>({
   ctx,
   forwardCtx,
   as,
-  cmsId,
-  cmsFieldName,
+  cmsId = null,
+  cmsFieldName = null,
   children,
   key,
-  forceBlockId,
+  forceBlockId = false,
+  forceId = true,
   currentContent,
-  editType,
+  editType = null,
   ...props
 }: PropsWithContext<CmsEditableProps<CT>>) => {
   const {
@@ -127,16 +143,22 @@ export const CmsEditable: CmsEditableBaseComponent = <CT extends ElementType>({
     ? undefined
     : (cmsFieldName ?? undefined)
 
+  const showBlockId =
+    cmsId && cmsId?.length != 32 && (forceBlockId || !dataEpiPropertyName)
+  const showContentId =
+    cmsId?.length == 32 && (forceBlockId || !dataEpiPropertyName)
+
   const itemProps: Record<string, any> = addEditProps
     ? {
         ...props,
         // We assume GUIDs are represented as 32 char long strings, all other values are IDs
-        'data-epi-block-id':
-          cmsId && (cmsId.length != 32 || forceBlockId) ? cmsId : undefined,
+        'data-epi-block-id': showBlockId ? cmsId : undefined,
         // We assume GUIDs are represented as 32 char long strings
-        'data-epi-content-id': cmsId && cmsId.length == 32 ? cmsId : undefined,
+        'data-epi-content-id': showContentId ? cmsId : undefined,
         // We pass through the property name if provided
         'data-epi-property-name': dataEpiPropertyName,
+        // We pass through the property name if provided
+        'data-epi-edit': dataEpiPropertyName,
         // Configure the rendition of the property editor
         'data-epi-property-edittype': editType ?? undefined,
       }

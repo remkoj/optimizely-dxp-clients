@@ -1,12 +1,12 @@
 'use server'
 import { type ReactNode } from 'react'
 import type { BaseCmsContentProps } from './types.js'
+import type { ComponentCmsEditableProps } from '../../types.js'
 import getContentType from './get-content-type.js'
 import getContent from './get-content.js'
 import {
   AuthMode,
   normalizeContentLink,
-  contentLinkToString,
   type ContentLink,
 } from '@remkoj/optimizely-graph-client'
 import resolveComponent, {
@@ -33,6 +33,7 @@ export async function CmsContent<LocalesType = string>({
   noDataLoad,
   variant,
   ctx,
+  editorComponentId,
 }: BaseCmsContentProps<LocalesType>): Promise<ReactNode> {
   // Prepare context
   const graphClient = ctx.client
@@ -96,6 +97,12 @@ export async function CmsContent<LocalesType = string>({
     noDataLoad
   )
 
+  const editProps: ComponentCmsEditableProps = {
+    ctx,
+    currentContent: ctx.editableContent || undefined,
+    cmsId: editorComponentId || contentLink?.key,
+  }
+
   // Output the actual component
   return (
     <Component
@@ -103,6 +110,7 @@ export async function CmsContent<LocalesType = string>({
       data={data}
       inEditMode={ctx.inEditMode}
       layoutProps={layoutProps}
+      editProps={editProps}
       ctx={ctx}
     >
       {children}

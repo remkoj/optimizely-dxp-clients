@@ -9,6 +9,8 @@ import { ApiClient, type CmsIntegrationApiClient } from './api-client'
 
 export { readEnvConfig } from './config'
 
+export type ApiClientInstance = CmsIntegrationApiClient
+
 export function createClient(config?: CmsIntegrationApiOptions): CmsIntegrationApiClient {
   return new ApiClient(config)
 }

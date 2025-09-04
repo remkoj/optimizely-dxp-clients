@@ -107,7 +107,14 @@ export function createEditPageComponent<LocaleType = string>(
     try {
       const contentInfo = await getContentById(client, {
         ...contentRequest,
-        locale: localeToGraphLocale(contentRequest.locale),
+        locale:
+          contentRequest.locale && contentRequest.locale.length > 0
+            ? localeToGraphLocale(
+                Array.isArray(contentRequest.locale)
+                  ? contentRequest.locale.at(0)
+                  : contentRequest.locale
+              )
+            : undefined,
         changeset: client.getChangeset(),
       })
       if ((contentInfo?.content?.total ?? 0) > 1) {

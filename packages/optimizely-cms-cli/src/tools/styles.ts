@@ -6,7 +6,7 @@ import chalk from 'chalk'
 import figures from 'figures'
 import path from 'node:path'
 
-import { ContentTypesArgs, contentTypesBuilder, getAllContentTypes } from './contentTypes.js'
+import { ContentTypesArgs, contentTypesBuilder } from './contentTypes.js'
 
 export type StylesArgs = ContentTypesArgs & {
   excludeNodeTypes: string[]

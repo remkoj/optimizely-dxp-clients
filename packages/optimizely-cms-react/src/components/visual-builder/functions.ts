@@ -72,7 +72,7 @@ export const defaultPropsFactory: LeafPropsFactory = <ET extends Record<string, 
     settings: node.settings,
   }
 
-  return [contentLink, contentType, node.component, layoutData]
+  return [contentLink, contentType, node.key || undefined, node.component, layoutData]
 }
 
 export const defaultNodePropsFactory: NodePropsFactory = <ET extends Record<string, any>, LT = string>(node: CompositionStructureNode) => {
@@ -104,7 +104,7 @@ export const defaultNodePropsFactory: NodePropsFactory = <ET extends Record<stri
   if (!(isContentLink(contentLink) || isInlineContentLink(contentLink)))
     throw new Error("🔴 [VisualBuilder] Invalid content link: " + JSON.stringify(contentLink) + " - Node: " + JSON.stringify(node))
 
-  return [contentLink, componentTypes, componentData, layoutData]
+  return [contentLink, componentTypes, node.key || undefined, componentData, layoutData]
 }
 
 export function ucFirst(input: string | undefined | null): string | null {
