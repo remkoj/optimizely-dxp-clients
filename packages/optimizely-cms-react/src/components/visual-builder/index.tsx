@@ -28,7 +28,7 @@ export function OptimizelyComposition({
       console.log(
         `⚪ [VisualBuilder] Rendering element node ${JSON.stringify(node)}`
       )
-    const [contentLink, contentType, fragmentData, layoutProps] =
+    const [contentLink, contentType, nodeId, fragmentData, layoutProps] =
       leafPropsFactory(node)
     return (
       <CmsContent
@@ -36,6 +36,7 @@ export function OptimizelyComposition({
         contentType={contentType}
         fragmentData={fragmentData}
         layoutProps={layoutProps}
+        editorComponentId={nodeId || contentLink.key || undefined}
         ctx={ctx}
       />
     )
@@ -53,7 +54,7 @@ export function OptimizelyComposition({
       '🟡 [VisualBuilder] [OptimizelyComposition] The factory must be defined within the serverContext'
     )
 
-  const [contentLink, contentTypes, fragmentData, layoutProps] =
+  const [contentLink, contentTypes, nodeId, fragmentData, layoutProps] =
     nodePropsFactory(node)
   const firstExistingType = contentTypes
     .map((ct) => factory.has([...ct].reverse()))
@@ -70,6 +71,7 @@ export function OptimizelyComposition({
       contentLink={contentLink}
       fragmentData={fragmentData}
       layoutProps={layoutProps}
+      editorComponentId={nodeId || contentLink.key || undefined}
       noDataLoad
       ctx={ctx}
     >

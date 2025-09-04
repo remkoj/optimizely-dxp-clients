@@ -15,6 +15,15 @@ export type CmsContentProps<LocalesType = string> = PropsWithChildren<PropsWithO
   contentLink: ContentLinkWithLocale<LocalesType> | InlineContentLinkWithLocale<LocalesType>
 
   /**
+   * When provided this value will override the value for the `cmsId` field in
+   * the `editProps` the CmsComponent will provide to the component.
+   * 
+   * This value is only needed when there's a difference between the Data ID and
+   * the ID expected by the editor.
+   */
+  editorComponentId?: string
+
+  /**
    * The initial, pre-loaded data. If set this will be used instead of having the
    * component fetching its' own data. So be sure that this leverages the fragment
    * specified by the component.

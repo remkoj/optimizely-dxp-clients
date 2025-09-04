@@ -1,7 +1,7 @@
 import { ASTNode, print } from 'graphql'
 import { ComponentType } from 'react';
 import { type ContentLink, type InlineContentLink, type IOptiGraphClient, isContentLink, isInlineContentLink, OptiCmsSchema } from "@remkoj/optimizely-graph-client";
-import { CmsComponent, CmsComponentWithFragment } from "../../types.js";
+import { CmsComponent, CmsComponentWithFragment, CmsComponentWithQuery, ProcessQueryResponse } from "../../types.js";
 import { CmsContentFragments } from "../../data/queries.js";
 import { validatesFragment, contentLinkToRequestVariables, isCmsComponentWithFragment, isCmsComponentWithDataQuery } from "../../utilities.js";
 
@@ -63,16 +63,8 @@ export function getContent<NDL extends boolean = false>(client: IOptiGraphClient
   if (isCmsComponentWithFragment<any>(Component))
     return getComponentDataFromFragment<any>(Component, contentLink, client).then(data => (data || {}) as Record<string, any>)
 
-  if (isCmsComponentWithDataQuery<any>(Component)) {
-    const gqlQuery = Component.getDataQuery()
-    const gqlVariables = contentLinkToRequestVariables(contentLink as ContentLink)
-    // If the CMS Preview mode has been enabled, make sure we include that in the query
-    if (client.isPreviewEnabled())
-      gqlVariables.changeset = client.getChangeset()
-    if (client.debug)
-      console.log("⚪ [CmsContent][getContent] Component fetching data using query, provided variables:", gqlVariables)
-    return client.request<{}>(gqlQuery, gqlVariables)
-  }
+  if (isCmsComponentWithDataQuery<any>(Component))
+    return getComponentDataFromQuery<Record<string, any>>(Component, contentLink, client)
 
   // Assume there's no data load required for the component
   if (client.debug)
@@ -82,6 +74,31 @@ export function getContent<NDL extends boolean = false>(client: IOptiGraphClient
 
 export default getContent
 
+async function getComponentDataFromQuery<T extends Record<string, any>>(Component: CmsComponentWithQuery<T, Record<string, any>>, contentLink: ContentLink | undefined, client: IOptiGraphClient): Promise<ProcessQueryResponse<T> | Record<string, any>> {
+  const gqlQuery = Component.getDataQuery()
+  const gqlVariables = contentLinkToRequestVariables(contentLink as ContentLink)
+  // If the CMS Preview mode has been enabled, make sure we include that in the query
+  if (client.isPreviewEnabled())
+    gqlVariables.changeset = client.getChangeset()
+  if (client.debug)
+    console.log("⚪ [CmsContent][getContent] Component fetching data using query, using provided variables:", gqlVariables)
+  const responseData = await client.request<Record<string, any>>(gqlQuery, gqlVariables);
+  const responseItem = responseData?.data?.item;
+  if (!responseItem) return responseData;
+  if (client.debug)
+    console.log(
+      '⚪ [CmsContent][getContent] ResponseData has expected structure (data > item), filtering response'
+    )
+  const responseItemKey = responseItem?._metadata?.key;
+  if (responseItemKey === null) {
+    if (client.debug)
+      console.log(
+        '⚪ [CmsContent][getContent] Item is empty, returning empty object'
+      )
+    return {}
+  }
+  return responseItemKey ? responseItem : responseItem;
+}
 
 async function getComponentDataFromFragment<T extends any = any>(Component: CmsComponentWithFragment<T, Record<string, any>>, contentLink: ContentLink, client: IOptiGraphClient) {
 
