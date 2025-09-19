@@ -25,9 +25,9 @@
   "devDependencies": {
     "@remkoj/optimizely-graph-client": "workspace:6.0.0-pre9",
     "@types/crypto-js": "^4.2.2",
-    "@types/node": "^22.18.0",
-    "@types/react": "^19.1.11",
-    "@types/react-dom": "^19.1.8",
+    "@types/node": "^22.18.5",
+    "@types/react": "^19.1.13",
+    "@types/react-dom": "^19.1.9",
     "prop-types": "^15.8.1",
     "react": "^19.1.1",
     "react-dom": "^19.1.1",
@@ -38,7 +38,7 @@
     "@graphql-typed-document-node/core": "^3.2.0",
     "@remkoj/optimizely-graph-client": "^6.0.0-pre9",
     "crypto-js": "^4.2.0",
-    "entities": "^6.0.1",
+    "entities": "^7.0.0",
     "graphql": "^16.11.0",
     "graphql-request": "^7.2.0"
   },

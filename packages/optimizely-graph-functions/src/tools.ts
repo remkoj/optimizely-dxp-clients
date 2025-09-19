@@ -10,3 +10,7 @@ export function trimStart(target: string, toTrim: string = ' '): string {
   const regex = new RegExp(`/^(${toTrim})+/`)
   return target.replace(regex, '')
 }
+
+export function isNonEmptyString<S extends string>(toTest: S | null | undefined | object | number | boolean): toTest is S {
+  return typeof toTest === 'string' && toTest.length > 0
+}

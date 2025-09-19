@@ -18,7 +18,7 @@ export const NextJsVisualBuilderCommand: NextJsModule = {
     const { components: basePath, _config: { debug }, force } = parseArgs(args)
 
     // Create the fall-back node and style defintions
-    await createStyles.handler({ ...args, excludeNodeTypes: [], excludeTemplates: [], nodes: [], templates: [], templateTypes: ['node'], definitions: true })
+    await createStyles.handler({ ...args, excludeNodeTypes: [], excludeTemplates: [], nodes: [], templates: [], templateTypes: ['node', 'base'], definitions: true })
     createGenericNode(basePath, force, debug)
 
     // Get all styles
@@ -32,7 +32,8 @@ export const NextJsVisualBuilderCommand: NextJsModule = {
 
     // Process base styles
     styles.filter(x => typeof (x.baseType) == 'string' && x.baseType.length > 0).map(styleDefinition => {
-      const templatePath = path.join(basePath, styleDefinition.baseType, 'styles', styleDefinition.key)
+      const baseType = (styleDefinition.baseType ?? '').startsWith('_') ? (styleDefinition.baseType ?? '').substring(1) : styleDefinition.baseType
+      const templatePath = path.join(basePath, baseType, 'styles', styleDefinition.key)
       createSpecificNode(styleDefinition, templatePath, force, debug)
     })
 
@@ -72,11 +73,17 @@ function createSpecificNode(template: IntegrationApi.DisplayTemplate, templatePa
     componentArgs.push('editProps')
   }
 
+  let style: string = ''
+  if (baseType == "row")
+    style = ` style={{ display: "flex", flexDirection: "row", justifyContent: "space-between", alignItems: "stretch" }}`
+  if (baseType == "column")
+    style = ` style={{ display: "flex", flexDirection: "column", flexGrow: 1 }}`
+
   const component = `${imports.join("\n")}
 
 export const ${template.key} : CmsLayoutComponent<${displayTemplateName ?? '{}'}> = ({ ${componentArgs.join(', ')} }) => {
     const layout = extractSettings(layoutProps);
-    return (<${componentType} ${componentProps.join(' ')}>{ children }</${componentType}>);
+    return (<${componentType} ${componentProps.join(' ')}${style}>{ children }</${componentType}>);
 }
 
 export default ${template.key};`
@@ -98,13 +105,19 @@ function createGenericNode(basePath: string, force: boolean, debug: boolean) {
     process.stdout.write(chalk.gray(`${figures.arrowRight} Creating generic node component\n`))
 
   const nodeContent = `import { CmsEditable, type CmsLayoutComponent } from '@remkoj/optimizely-cms-react/rsc'
+import { type CSSProperties } from 'react';
 
 export const VisualBuilderNode : CmsLayoutComponent = ({ editProps, layoutProps, children }) =>
 {
-    let className = \`vb:\${layoutProps?.layoutType}\`
-    if (layoutProps && layoutProps.layoutType == "section")
-        return <CmsEditable as="div" className={ className } {...editProps}>{ children }</CmsEditable>
-    return <div className={ className }>{ children }</div>
+  let className = \`vb:\${layoutProps?.layoutType}\`;
+  let style : CSSProperties | undefined = undefined;
+  if (layoutProps?.layoutType == "row")
+    style = {display: "flex", flexDirection: "row"}
+  if (layoutProps?.layoutType == "column")
+    style = {display: "flex", flexDirection: "column"}
+  if (layoutProps && layoutProps.layoutType == "section")
+    return <CmsEditable as="div" className={ className } {...editProps}>{ children }</CmsEditable>
+  return <div className={ className } style={ style }>{ children }</div>
 }
 
 export default VisualBuilderNode`

@@ -8,9 +8,9 @@
   "license": "Apache-2.0",
   "private": true,
   "devDependencies": {
-    "@types/node": "^22.18.0",
+    "@types/node": "^22.18.5",
     "@yarnpkg/sdks": "^3.2.3",
-    "browserslist": "^4.25.3",
+    "browserslist": "^4.26.2",
     "glob": "^11.0.3",
     "prettier": "^3.6.2",
     "tslib": "^2.8.1",

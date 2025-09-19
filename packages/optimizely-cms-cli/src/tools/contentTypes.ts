@@ -4,8 +4,7 @@ import { IntegrationApi, type CmsIntegrationApiClient as CmsApiClient } from '@r
 import { parseArgs } from '../tools/parseArgs.js'
 import chalk from 'chalk'
 import figures from 'figures'
-import path from 'node:path'
-import { typeToSlug } from './paths.js'
+import { typeToSlug } from './project.js'
 
 export type ContentTypesArgs = {
   excludeBaseTypes: string[]
@@ -15,31 +14,30 @@ export type ContentTypesArgs = {
   all: boolean
 }
 
-export const contentTypesBuilder: (yargs: Argv<OptiCmsArgs>) => Argv<OptiCmsArgs<ContentTypesArgs>> = yargs => {
-  yargs.option('excludeTypes', { alias: 'ect', description: "Exclude these content types", string: true, type: 'array', demandOption: false, default: [] })
-  yargs.option('excludeBaseTypes', { alias: 'ebt', description: "Exclude these base types", string: true, type: 'array', demandOption: false, default: ['folder', 'media', 'image', 'video'] })
-  yargs.option("baseTypes", { alias: 'b', description: "Select only these base types", string: true, type: 'array', demandOption: false, default: [] })
-  yargs.option("types", { alias: 't', description: "Select only these types", string: true, type: 'array', demandOption: false, default: [] })
-  yargs.option('all', { alias: 'a', description: "Include non-supported types", boolean: true, type: 'boolean', demandOption: false, default: false })
+export const ContentTypesArgsDefaults: Readonly<ContentTypesArgs> = {
+  excludeBaseTypes: ['folder', 'media', 'image', 'video'],
+  excludeTypes: [],
+  baseTypes: [],
+  types: [],
+  all: false
+}
+
+export const contentTypesBuilder: (yargs: Argv<OptiCmsArgs>, defaults?: ContentTypesArgs) => Argv<OptiCmsArgs<ContentTypesArgs>> = (yargs, defaults = ContentTypesArgsDefaults) => {
+  yargs.option('excludeTypes', { alias: 'ect', description: "Exclude these content types", string: true, type: 'array', demandOption: false, default: defaults.excludeTypes })
+  yargs.option('excludeBaseTypes', { alias: 'ebt', description: "Exclude these base types", string: true, type: 'array', demandOption: false, default: defaults.excludeBaseTypes })
+  yargs.option("baseTypes", { alias: 'b', description: "Select only these base types", string: true, type: 'array', demandOption: false, default: defaults.baseTypes })
+  yargs.option("types", { alias: 't', description: "Select only these types", string: true, type: 'array', demandOption: false, default: defaults.types })
+  yargs.option('all', { alias: 'a', description: "Include non-supported base types", boolean: true, type: 'boolean', demandOption: false, default: defaults.all })
   return yargs as Argv<OptiCmsArgs<ContentTypesArgs>>
 }
 
 export type GetContentTypesResult = { all: Array<IntegrationApi.ContentType>, contentTypes: Array<IntegrationApi.ContentType> }
 
-export function getContentTypePaths(contentType: IntegrationApi.ContentType, basePath: string) {
-  const baseTypeSlug = typeToSlug(contentType.baseType);
-  const typePath = path.join(basePath, baseTypeSlug, contentType.key);
-  const typeFile = path.join(typePath, `${contentType.key}.opti-type.json`);
-  const fragmentFile = path.join(typePath, `${contentType.key}.${baseTypeSlug}.graphql`);
-  const propertyFragmentFile = path.join(typePath, `${contentType.key}.property.graphql`);
-  const componentFile = path.join(typePath, `index.tsx`);
-  return { typePath, typeFile, fragmentFile, componentFile, propertyFragmentFile }
-}
 
 export async function getContentTypes(
   client: CmsApiClient,
   args: ArgumentsCamelCase<OptiCmsArgs<ContentTypesArgs>>,
-  pageSize: number = 5,
+  pageSize: number = 25,
   allowSystem: boolean = false,
   customFilter?: (currentType: IntegrationApi.ContentType) => boolean | Promise<boolean>
 ): Promise<GetContentTypesResult> {
@@ -59,14 +57,7 @@ export async function getContentTypes(
     allContentTypes.push(contentType)
 
     // Skip based upon base type filters
-    if (!shouldInclude(contentType.baseType, baseTypes, excludeBaseTypes)) {
-      if (cfg.debug)
-        process.stdout.write(chalk.gray(`${figures.arrowRight} Skipping ${contentType.key} as it has a restricted base type: ${contentType.baseType}\n`))
-      continue
-    }
-
-    // Skip based upon normalized base type filters (i.e. without "_" prefix and lowercased)
-    if (!shouldInclude(typeToSlug(contentType.baseType), baseTypes, excludeBaseTypes)) {
+    if (!shouldInclude(typeToSlug(contentType.baseType), baseTypes.map(x => typeToSlug(x)), excludeBaseTypes.map(x => typeToSlug(x)))) {
       if (cfg.debug)
         process.stdout.write(chalk.gray(`${figures.arrowRight} Skipping ${contentType.key} as it has a restricted base type: ${contentType.baseType}\n`))
       continue

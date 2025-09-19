@@ -52,7 +52,11 @@ export class ClientContextInstance implements GenericContext {
     cfg: TransferrableContext,
     components: ComponentTypeDictionary
   ) {
-    if (cfg.clientConfig) this.client = createClient(cfg.clientConfig)
+    this.client = isOptiGraphClient(cfg.client)
+      ? cfg.client
+      : isOptiGraphConfig(cfg.client)
+        ? createClient(cfg.client)
+        : createClient()
     this.factory = new DefaultComponentFactory(components)
     this.inEditMode = cfg.inEditMode
     this.inPreviewMode = cfg.inPreviewMode

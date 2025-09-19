@@ -56,8 +56,9 @@ function createComponent(contentType: IntegrationApi.ContentType, typePathInfo: 
   // Get type information & short-hands
   const displayTemplate = getDisplayTemplateInfo(contentType, typePath)
   const baseDisplayTemplate = getBaseTypeTemplateInfo(contentType, typePath)
-  const varName = `${contentType.key}${ucFirst(contentType.baseType ?? 'part')}`
-  const tplFn = Templates[contentType.baseType] ?? Templates['default']
+  const normalizedBaseType = normalizeBaseType(contentType.baseType ?? 'part')
+  const varName = `${contentType.key}${ucFirst(normalizedBaseType)}`
+  const tplFn = Templates[normalizedBaseType] ?? Templates['default']
 
   if (!tplFn) {
     if (debug)
@@ -85,6 +86,12 @@ function getBaseTypeTemplateInfo(contentType: IntegrationApi.ContentType, typePa
   return undefined
 }
 
+function normalizeBaseType(baseType: string): string {
+  if (baseType.startsWith('_'))
+    return baseType.substring(1)
+  return baseType
+}
+
 function getDisplayTemplateInfo(contentType: IntegrationApi.ContentType, typePath: string) {
   const displayTemplatesFile = path.join(typePath, 'displayTemplates.ts')
   if (fs.existsSync(displayTemplatesFile)) {
@@ -109,6 +116,7 @@ import { ${baseDisplayTemplate} } from "../styles/displayTemplates";` : ''}
 
 /**
  * ${contentType.displayName}
+ * ---
  * ${contentType.description}
  */
 export const ${varName} : CmsComponent<${contentType.key}DataFragment${(displayTemplate || baseDisplayTemplate) ? ', ' + [displayTemplate, baseDisplayTemplate].filter(x => x).join(" | ") : ''}> = ({ data${(displayTemplate || baseDisplayTemplate) ? ', layoutProps' : ''}, editProps }) => {
@@ -125,17 +133,51 @@ ${varName}.getDataFragment = () => ['${contentType.key}Data', ${contentType.key}
 
 export default ${varName}`,
 
+  // Default Template for all section types
+  section: (contentType, varName, displayTemplate, baseDisplayTemplate) => `import { CmsEditable, type CmsComponent } from "@remkoj/optimizely-cms-react/rsc";
+import { ${contentType.key}DataFragmentDoc, type ${contentType.key}DataFragment } from "@/gql/graphql";${displayTemplate ? `
+import { ${displayTemplate} } from "./displayTemplates";` : ''}${baseDisplayTemplate ? `
+import { ${baseDisplayTemplate} } from "../styles/displayTemplates";` : ''}
+
+/**
+ * ${contentType.displayName}
+ * ---
+ * ${contentType.description}
+ */
+export const ${varName} : CmsComponent<${contentType.key}DataFragment${(displayTemplate || baseDisplayTemplate) ? ', ' + [displayTemplate, baseDisplayTemplate].filter(x => x).join(" | ") : ''}> = ({ data${(displayTemplate || baseDisplayTemplate) ? ', layoutProps' : ''}, editProps, children }) => {
+    const componentName = '${contentType.displayName}'
+    const componentInfo = '${contentType.description?.replaceAll("'", "\\'") ?? ''}'
+    return <CmsEditable className="w-full border-y border-y-solid border-y-slate-900 py-2 mb-4" {...editProps}>
+        <div className="font-bold italic">{ componentName }</div>
+        <div>{ componentInfo }</div>
+        { Object.getOwnPropertyNames(data).length > 0 && <pre className="w-full overflow-x-hidden font-mono text-sm bg-slate-200 p-2 rounded-sm border border-solid border-slate-900 text-slate-900">{ JSON.stringify(data, undefined, 4) }</pre> }
+        ${(displayTemplate || baseDisplayTemplate) ? '<pre className="w-full overflow-x-hidden font-mono text-sm bg-slate-200 p-2 rounded-sm border border-solid border-slate-900 text-slate-900">{ JSON.stringify(layoutProps, undefined, 4) }</pre>' : '{/* This component doesn\'t have layout options */}'}
+        <div>{ children }</div>
+    </CmsEditable>
+}
+${varName}.displayName = "${contentType.displayName} (${ucFirst(contentType.baseType)}/${contentType.key})"
+${varName}.getDataFragment = () => ['${contentType.key}Data', ${contentType.key}DataFragmentDoc]
+
+export default ${varName}`,
+
   // Template for all page component types
   page: (contentType, varName, displayTemplate) => `import { type OptimizelyNextPage as CmsComponent } from "@remkoj/optimizely-cms-nextjs";
-import { ${contentType.key}DataFragmentDoc, type ${contentType.key}DataFragment } from "@/gql/graphql";${displayTemplate ? `
+import { get${contentType.key}DataDocument, type get${contentType.key}DataQuery } from '@/gql/graphql'${displayTemplate ? `
 import { ${displayTemplate} } from "./displayTemplates";` : ''}
 import { getSdk } from "@/gql"
 
 /**
  * ${contentType.displayName}
+ * ---
  * ${contentType.description}
+ * 
+ * This component uses the content query that is auto-generated with the Optimizely CMS Preset for GraphQL Codegen, if you need 
+ * to override this query create a GraphQL file (for example: \`get${contentType.key}Data.query.graphql\`) in the same folder as
+ * this file. This file must include a GraphQL query with the name \`get${contentType.key}Data\`. 
+ * 
+ * [Documentation: Customizing queries](https://github.com/remkoj/optimizely-dxp-clients/blob/main/packages/optimizely-graph-functions/docs/customizing_queries.md)
  */
-export const ${varName} : CmsComponent<${contentType.key}DataFragment${displayTemplate ? ', ' + displayTemplate : ''}> = ({ data${displayTemplate ? ', layoutProps' : ''} }) => {
+export const ${varName} : CmsComponent<get${contentType.key}DataQuery${displayTemplate ? ', ' + displayTemplate : ''}> = ({ data${displayTemplate ? ', layoutProps' : ''} }) => {
     const componentName = '${contentType.displayName}'
     const componentInfo = '${contentType.description?.replaceAll("'", "\\'") ?? ''}'
     return <div className="mx-auto px-2 container">
@@ -145,7 +187,7 @@ export const ${varName} : CmsComponent<${contentType.key}DataFragment${displayTe
     </div>
 }
 ${varName}.displayName = "${contentType.displayName} (${ucFirst(contentType.baseType)}/${contentType.key})"
-${varName}.getDataFragment = () => ['${contentType.key}Data', ${contentType.key}DataFragmentDoc]
+${varName}.getDataQuery = () => get${contentType.key}DataDocument
 ${varName}.getMetaData = async (contentLink, locale, client) => {
     const sdk = getSdk(client);
     // Add your metadata logic here
@@ -156,23 +198,36 @@ export default ${varName}`,
 
   // Template for all experience component types
   experience: (contentType, varName, displayTemplate) => `import { type OptimizelyNextPage as CmsComponent } from "@remkoj/optimizely-cms-nextjs";
-import { ${contentType.key}DataFragmentDoc, type ExperienceDataFragment, type ${contentType.key}DataFragment } from "@/gql/graphql";
+import { ExperienceDataFragmentDoc, get${contentType.key}DataDocument, type get${contentType.key}DataQuery } from '@/gql/graphql'
+import { getFragmentData } from '@/gql/fragment-masking'
 import { OptimizelyComposition, isNode, CmsEditable } from "@remkoj/optimizely-cms-react/rsc";${displayTemplate ? `
 import { ${displayTemplate} } from "./displayTemplates";` : ''}
 import { getSdk } from "@/gql/client"
 
 /**
  * ${contentType.displayName}
+ * ---
  * ${contentType.description}
+ * 
+ * This component uses the content query that is auto-generated with the Optimizely CMS Preset for GraphQL Codegen, if you need 
+ * to override this query create the file \`${contentType.key}.query.graphql\` in the same folder as this file. This file then
+ * must include a GraphQL query with the name \`get${contentType.key} Data\`. 
+ * 
+ * [Documentation: Customizing queries](https://github.com/remkoj/optimizely-dxp-clients/blob/main/packages/optimizely-graph-functions/docs/customizing_queries.md)
  */
-export const ${varName} : CmsComponent<${contentType.key}DataFragment${displayTemplate ? ', ' + displayTemplate : ''}> = ({ data${displayTemplate ? ', layoutProps' : ''}, ctx }) => {
-    const composition = (data as ExperienceDataFragment)?.composition
-    return <CmsEditable as="div" className="mx-auto px-2 container" cmsFieldName="unstructuredData" ctx={ctx}>
-        { composition && isNode(composition) && <OptimizelyComposition node={composition} ctx={ctx} /> }
-    </CmsEditable>
+export const ${varName} : CmsComponent<get${contentType.key}DataQuery${displayTemplate ? ', ' + displayTemplate : ''}> = ({ data${displayTemplate ? ', layoutProps' : ''}, ctx }) => {
+  if (ctx) ctx.editableContentIsExperience = true
+  const composition = getFragmentData(ExperienceDataFragmentDoc, data).composition
+  const componentName = '${contentType.displayName}'
+  const componentInfo = '${contentType.description?.replaceAll("'", "\\'") ?? ''}'
+  return <CmsEditable as="div" className="mx-auto px-2 container" cmsFieldName="unstructuredData" ctx={ctx}>
+      <div className="font-bold italic">{ componentName }</div>
+      <div>{ componentInfo }</div>
+      { composition && isNode(composition) && <OptimizelyComposition node={composition} ctx={ctx} /> }
+  </CmsEditable>
 }
 ${varName}.displayName = "${contentType.displayName} (${ucFirst(contentType.baseType)}/${contentType.key})"
-${varName}.getDataFragment = () => ['${contentType.key}Data', ${contentType.key}DataFragmentDoc]
+${varName}.getDataQuery = () => get${contentType.key}DataDocument
 ${varName}.getMetaData = async (contentLink, locale, client) => {
     const sdk = getSdk(client);
     // Add your metadata logic here

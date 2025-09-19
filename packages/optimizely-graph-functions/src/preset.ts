@@ -1,5 +1,4 @@
 import { type Types } from '@graphql-codegen/plugin-helpers'
-import { Kind, visit } from 'graphql'
 
 // Import base preset
 import { preset as clientPreset, type ClientPresetConfig as ClientPresetOptions } from '@graphql-codegen/client-preset'
@@ -8,11 +7,18 @@ import * as AddPlugin from '@graphql-codegen/add'
 
 // Import injected parts
 import plugin, { pickPluginOptions } from './index'
-import transform, { pickTransformOptions, cleanFragments, normalizeFragmentNames, injectComponentDocuments } from './transform'
-import { type TransformOptions } from './types'
-import * as OptiCMS from "./cms"
-import type { PresetOptions, PluginOptions } from './types'
+import {
+  executeDocumentTransforms,
+  cleanFragments,
+  normalizeFragmentNames,
+  normalizeQueryNames,
+  injectComponentDocuments,
+  injectPageQueries,
+  performInjections
+} from './transform'
+import type { PresetOptions } from './types'
 
+export type { PresetOptions } from './types'
 
 export const preset: Types.OutputPreset<PresetOptions> =
 {
@@ -72,27 +78,20 @@ export const preset: Types.OutputPreset<PresetOptions> =
       }
     }
 
-    // Extend the document transforms in order to apply the transformations
-    // needed to automatically inject Block, Page & Element fragments
-    options.documentTransforms = [
-      ...(options.documentTransforms || []),
-      {
-        name: 'optly-transform',
-        transformObject: transform,
-        config: {
-          ...options.config,
-          ...pickTransformOptions(options.presetConfig)
-        }
-      }
-    ]
-
-    // Apply all changes to the document set, prior to validating it
-    options.documents = await injectComponentDocuments(normalizeFragmentNames(cleanFragments(options.documents, options), options), options)
+    // Apply all changes to the document set, prior to validating it. They're executed in the order of the array
+    options.documents = await executeDocumentTransforms(options.documents, [
+      cleanFragments,           // Remove fragments that target non-existing types
+      normalizeFragmentNames,   // Allow overriding of built-in fragments
+      normalizeQueryNames,      // Allow overriding of built-in queries
+      injectComponentDocuments, // Inject fragments to fetch component data
+      injectPageQueries,        // Inject queries to fetch page/experience data
+      performInjections         // Run injections of component fragments adjacent to placeholder fragments
+    ], options);
 
     // Build the preset files
     const section: Array<Types.GenerateOptions> = await clientPreset.buildGeneratesSection(options)
 
-    // Add GraphQL Request Client
+    // Add GraphQL Request Client. 
     section.push({
       filename: `${options.baseOutputDir}client.ts`,
       pluginMap: {
@@ -123,7 +122,8 @@ export const preset: Types.OutputPreset<PresetOptions> =
       documentTransforms: options.documentTransforms
     })
 
-    // Add the functions file
+    // Add the functions file, which will materialize the defined 
+    // functions. 
     section.push({
       filename: `${options.baseOutputDir}functions.ts`,
       pluginMap: {
@@ -145,8 +145,9 @@ export const preset: Types.OutputPreset<PresetOptions> =
       documentTransforms: options.documentTransforms
     })
 
-    // Update all sections for Optimizely Graph
+    // Update file generation configs
     section.forEach((fileConfig, idx) => {
+
       // Modify index.ts with additional exports
       if (fileConfig.filename.endsWith("index.ts")) {
         section[idx].plugins.unshift({

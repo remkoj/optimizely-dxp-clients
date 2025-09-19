@@ -1,5 +1,5 @@
 import { isContentType } from '../../utilities.js'
-import { isContentLink, ContentLinkWithLocale, isInlineContentLink, InlineContentLinkWithLocale } from '@remkoj/optimizely-graph-client'
+import { isContentLink, ContentLinkWithLocale, isInlineContentLink } from '@remkoj/optimizely-graph-client'
 import type { CompositionNode, LeafPropsFactory, CompositionComponentNode, NodePropsFactory, CompositionStructureNode } from './types.js'
 
 /**
@@ -93,7 +93,7 @@ export const defaultNodePropsFactory: NodePropsFactory = <ET extends Record<stri
     ["Node", "Component", "Content"]
   ].filter(x => x) as Array<Array<string>>
   const contentLink: ContentLinkWithLocale<LT> = { key: node.key ?? '', isInline: true }
-  const componentData: ET = { __name: node.name } as unknown as ET
+  const componentData: ET = { __name: node.name, ...node.component } as unknown as ET
   const layoutData = {
     type: node.type,
     layoutType: node.layoutType,

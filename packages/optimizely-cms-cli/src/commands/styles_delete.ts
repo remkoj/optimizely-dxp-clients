@@ -101,7 +101,7 @@ export const StylesDeleteCommand: StylesDeleteModule = {
 
       // Actually remove from CMS
       process.stdout.write(chalk.yellowBright(`${figures.arrowRight} Removing the display template ${displayTemplate.displayName} [${displayTemplate.key}] from Optimizely CMS\n`));
-      const deleteResult = await client.displayTemplates.displayTemplatesDelete(displayTemplate.key)
+      const deleteResult = await client.displayTemplatesDelete({ path: { key: displayTemplate.key } })
     }
 
     process.stdout.write("\n" + chalk.green(chalk.bold(figures.tick + " Done")) + "\n")

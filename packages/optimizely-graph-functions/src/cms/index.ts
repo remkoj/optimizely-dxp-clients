@@ -50,15 +50,18 @@ export async function getContentType(contentTypeKey: string, clientOrConfig?: Cm
   return contentType
 }
 
+export type ContentTypeFilter = (contentType: IntegrationApi.ContentType) => Promise<boolean> | boolean
+const DefaultContentTypeFilter: ContentTypeFilter = () => true
+
 /**
  * Retrieve all content types as an Async Generator, allowing processing of entries whilest they are being loaded from the CMS instance.
  * 
- * @param client 
- * @param args 
+ * @param clientOrConfig 
  * @param pageSize 
+ * @param filter
  */
-export async function* getAllContentTypes(clientOrConfig?: CmsIntegrationApiClient | CmsIntegrationApiOptions, pageSize: number = 25): AsyncGenerator<IntegrationApi.ContentType> {
-  const client = isClientInstance(clientOrConfig) ? clientOrConfig : createClient(clientOrConfig)
+export async function* getAllContentTypes(clientOrConfig?: CmsIntegrationApiClient | CmsIntegrationApiOptions, pageSize: number = 25, filter: ContentTypeFilter = DefaultContentTypeFilter): AsyncGenerator<IntegrationApi.ContentType> {
+  const client = isClientInstance(clientOrConfig) ? clientOrConfig : await getClient(clientOrConfig)
   let requestPageSize = pageSize;
   let requestPageIndex = 0
   let totalItemCount = 0
@@ -81,7 +84,8 @@ export async function* getAllContentTypes(clientOrConfig?: CmsIntegrationApiClie
 
     // Yield items
     for (const contentType of (resultsPage.items ?? [])) {
-      yield contentType
+      if (await filter(contentType))
+        yield contentType
     }
 
   } while (requestPageIndex < totalPages)

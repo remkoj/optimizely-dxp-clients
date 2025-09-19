@@ -10,6 +10,8 @@ import type { PresetOptions } from '../types'
  * @returns 
  */
 export function cleanFragments(files: Types.DocumentFile[], options: Types.PresetFnArgs<PresetOptions>): Types.DocumentFile[] {
+  if (options.presetConfig.verbose)
+    console.log(`✨ [Optimizely] Removing fragments that target non-existing types from the documents`)
   return files.map(doc => {
     if (doc.document) {
       let isModified = false

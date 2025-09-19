@@ -2,10 +2,12 @@
 // @not-modified => When this line is removed, the "force" parameter of the CLI tool is required to overwrite this file
 import { type ComponentTypeDictionary } from "@remkoj/optimizely-cms-react";
 import NodeComponent from "./node";
+import SectionFactory from "./section";
 import ExperienceFactory from "./experience";
 import ComponentFactory from "./component";
 
 // Prefix entries - if needed
+prefixDictionaryEntries(SectionFactory, "Section");
 prefixDictionaryEntries(ExperienceFactory, "Experience");
 prefixDictionaryEntries(ExperienceFactory, "Page");
 prefixDictionaryEntries(ComponentFactory, "Component");
@@ -16,6 +18,7 @@ export const CmsFactory : ComponentTypeDictionary = [
         type: "Node", 
         component: NodeComponent 
     },
+    ...SectionFactory,
     ...ExperienceFactory,
     ...ComponentFactory
 ];

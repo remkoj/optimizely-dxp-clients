@@ -1,5 +1,5 @@
 export default [
-  `fragment IContentData on _IContent
+  `fragment _IContentData on _IContent
 {
   _metadata {
     key
@@ -15,7 +15,7 @@ export default [
   }
   _type: __typename
 }`,
-  `fragment IElementData on _IComponent {
+  `fragment _IElementData on _IComponent {
   _metadata {
     key
     locale
@@ -30,30 +30,12 @@ export default [
   }
   _type: __typename
 }`,
-  `fragment ElementData on _IComponent  {
-  ...IElementData
-}`,
-  `fragment ComponentData on _IComponent  {
-  ...IContentData
-}`,
-  `fragment BlockData on _IComponent  {
-  ...IContentData
-}`,
-  `fragment PageData on _IContent {
-  ...IContentData
-}`,
-  `fragment SectionData on _ISection {
-  ...IContentData
-}`,
-  `fragment FormElementData on _ISection {
-  ...IContentData
-}`,
-  `fragment LinkData on ContentUrl {
+  `fragment _LinkData on ContentUrl {
   type
   base
   default
 }`,
-  `fragment ReferenceData on ContentReference {
+  `fragment _ReferenceData on ContentReference {
   key
   url {
     type
@@ -61,7 +43,7 @@ export default [
     default
   }
 }`,
-  `fragment IContentInfo on IContentMetadata {
+  `fragment _IContentInfo on IContentMetadata {
   key
   locale
   types
@@ -73,62 +55,49 @@ export default [
     default
   }
 }`,
-  `fragment IContentListItem on _IContent {
+  `fragment _IContentListItem on _IContent {
   ...IContentData
 }`,
-  `fragment ExperienceData on _IExperience {
+  `fragment _ExperienceData on _IExperience {
   composition {
-    # Experience level
     ...CompositionNodeData
     nodes {
-      # Section level
       ...CompositionNodeData
-      ... on ICompositionStructureNode {
-        nodes {
-          # Row level
-          ...CompositionNodeData
-          ... on ICompositionStructureNode {
-            nodes {
-              # Column level
-              ...CompositionNodeData
-              ... on ICompositionStructureNode {
-                nodes {
-                  # Element level
-                  ...CompositionNodeData
-                  ... on ICompositionComponentNode {
-                    component {
-                      ...BlockData
-                      ...ElementData
-                    }
-                  }
-                  ... on ICompositionStructureNode {
-                    nodes {
-                      # Form Field level
-                      ...CompositionNodeData
-                      ... on ICompositionComponentNode {
-                        component {
-                          ...BlockData
-                          ...FormElementData
-                        }
-                      }
-                    }
-                  }
-                }
-              }
-            }
-          }
+      ... on CompositionComponentNode {
+        component {
+          ...IContentData
+          ...SectionElementData
         }
       }
-      ... on ICompositionComponentNode {
+      ... on CompositionStructureNode {
+        nodes {
+          ...CompositionNodeData
+          ...CompositionStructureNode
+          ...CompositionComponentNode
+        }
         component {
-          ...BlockData
           ...SectionData
         }
       }
     }
   }
 }`,
-  `fragment CompositionNodeData on ICompositionNode {
+  `fragment _CompositionStructureNode on ICompositionStructureNode {
+  nodes {
+    ...CompositionNodeData
+    ...CompositionStructureNode
+    ...CompositionComponentNode
+  }
+}`,
+  `fragment _CompositionComponentNode on CompositionComponentNode {
+  component {
+    ...IContentData
+    ...BlockData
+    ...ElementData
+    ...FormElementData
+  }
+}`,
+  `fragment _CompositionNodeData on ICompositionNode {
   name: displayName
   layoutType: nodeType
   type
@@ -139,12 +108,7 @@ export default [
     value
   }
 }`,
-  `fragment CompositionComponentNodeData on ICompositionComponentNode {
-  component {
-    ...ElementData
-  }
-}`,
-  `fragment LinkItemData on Link {
+  `fragment _LinkItemData on Link {
   title
   text
   target

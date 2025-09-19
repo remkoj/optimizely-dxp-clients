@@ -47,20 +47,21 @@
   },
   "devDependencies": {
     "@graphql-typed-document-node/core": "^3.2.0",
+    "@remkoj/optimizely-cms-api": "workspace:6.0.0-pre9",
     "@remkoj/optimizely-graph-client": "workspace:6.0.0-pre9",
-    "@types/node": "^22.18.0",
+    "@types/node": "^22.18.5",
     "graphql-request": "^7.2.0",
     "graphql-tag": "^2.12.6",
     "typescript": "^5.9.2"
   },
   "dependencies": {
-    "@graphql-codegen/add": "^5.0.3",
-    "@graphql-codegen/client-preset": "^4.8.3",
-    "@graphql-codegen/plugin-helpers": "^5.1.1",
-    "@graphql-codegen/typescript": "^4.1.6",
+    "@graphql-codegen/add": "^6.0.0",
+    "@graphql-codegen/client-preset": "^5.0.1",
+    "@graphql-codegen/plugin-helpers": "^6.0.0",
+    "@graphql-codegen/typescript": "^5.0.0",
     "@graphql-codegen/typescript-graphql-request": "^6.3.0",
-    "@graphql-codegen/typescript-operations": "^4.6.1",
-    "@remkoj/optimizely-cms-api": "workspace:^",
+    "@graphql-codegen/typescript-operations": "^5.0.0",
+    "@remkoj/optimizely-cms-api": "^6.0.0-pre9",
     "@remkoj/optimizely-graph-client": "^6.0.0-pre9",
     "graphql": "^16.11.0",
     "graphql-sock": "^1.0.1",
@@ -74,10 +75,5 @@
     "watch": "yarn tsc --watch",
     "opti-patch": "yarn node dist/patch.js"
   },
-  "stableVersion": "5.1.0",
-  "peerDependencies": {
-    "@graphql-typed-document-node/core": "*",
-    "graphql-request": "*",
-    "graphql-tag": "*"
-  }
+  "stableVersion": "5.1.0"
 }

@@ -6,7 +6,6 @@ import {
 import { createPage } from '@remkoj/optimizely-cms-nextjs/page'
 import { factory } from '@/components/factory'
 import { draftMode } from 'next/headers'
-import { getContentByPath } from '@/gql/functions'
 
 // Create the page components and functions
 const {
@@ -14,7 +13,6 @@ const {
   generateStaticParams,
   CmsPage: Page,
 } = createPage(factory, {
-  //getContentByPath,
   /**
    * The factory to use to create the GraphQL Client to fetch data from Optimizely
    * CMS.
@@ -29,6 +27,7 @@ const {
     const client = createClient(undefined, token, {
       nextJsFetchDirectives: true,
     })
+    console.log(`⚪ [Sample Site] Debug has been ${ client.debug ? 'enabled' : 'disabled' }`)
     if (client.debug)
       console.log('⚪ [Sample Site] Created new Optimizely Graph client')
 

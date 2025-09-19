@@ -7,7 +7,7 @@ console.log(`  - Environments: ${loadEnvResult.loadedEnvFiles.map(x => x.path).j
 // Actual code generation setup
 import type { CodegenConfig } from '@graphql-codegen/cli'
 import getSchemaInfo from '@remkoj/optimizely-graph-client/codegen'
-import OptimizelyGraphPreset, { type PresetOptions as OptimizelyGraphPresetOptions } from '@remkoj/optimizely-graph-functions/preset'
+import { preset as OptimizelyGraphPreset, type PresetOptions as OptimizelyGraphPresetOptions } from '@remkoj/optimizely-graph-functions/preset'
 
 // Create the configuration itself
 const config: CodegenConfig = {
@@ -21,11 +21,15 @@ const config: CodegenConfig = {
       //documents: ['opti-cms:/queries/13', 'opti-cms:/fragments/13'],
       preset: OptimizelyGraphPreset,
       presetConfig: {
+        functions: ['getContentType', 'getContentByPath', 'getContentById', 'getBlankExperienceData'],
         // By default the preset will generate recursive queries
         // untill multiple recursions are supported, this needs to
         // be disabled when there's more then one component that
         // will use recursion
         recursion: true,
+
+        // Enable debugging output for the Optimizely Code Generation
+        verbose: false,
 
         // The GQL tag to be used to identify inline GraphQL queries
         gqlTagName: 'gql',
@@ -70,7 +74,7 @@ const config: CodegenConfig = {
       } as OptimizelyGraphPresetOptions
     }
   },
-  ignoreNoDocuments: false
+  ignoreNoDocuments: true
 }
 
 export default config

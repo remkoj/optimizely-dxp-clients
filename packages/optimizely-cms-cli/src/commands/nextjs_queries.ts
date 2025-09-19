@@ -1,5 +1,4 @@
-import { IntegrationApi, OptiCmsVersion } from '@remkoj/optimizely-cms-api'
-import path from 'node:path'
+import { IntegrationApi } from '@remkoj/optimizely-cms-api'
 import fs from 'node:fs'
 import chalk from 'chalk'
 import figures from 'figures'
@@ -7,13 +6,9 @@ import figures from 'figures'
 import { parseArgs } from '../tools/parseArgs.js'
 import { createCmsClient } from '../tools/cmsClient.js'
 import { getContentTypes, contentTypesBuilder, ContentTypesArgsDefaults, type GetContentTypesResult } from '../tools/contentTypes.js'
-import { type NextJsModule, createTypeFolders, getTypeFolder, type TypeFolderList } from './_nextjs_base.js'
-import { renderProperties, createInitialFragment } from './nextjs_fragments.js'
-
-/**
- * Keep track of all generated properties
- */
-let generatedProps: Array<{ propType: string, propName: string }> = []
+import { type NextJsModule, createTypeFolders, getTypeFolder, type TypeFolderList, getContentTypePaths } from './_nextjs_base.js'
+import { createPropertyFragments } from './nextjs_fragments.js'
+import GraphQLGen from "@remkoj/optimizely-graph-functions/contenttype-loader"
 
 export const NextJsQueriesCommand: NextJsModule<{ loadedContentTypes: GetContentTypesResult, createdTypeFolders: TypeFolderList }> = {
   command: "nextjs:queries",
@@ -24,7 +19,6 @@ export const NextJsQueriesCommand: NextJsModule<{ loadedContentTypes: GetContent
     return updatedArgs
   },
   handler: async (args, opts) => {
-    generatedProps = []
     // Prepare
     const { loadedContentTypes, createdTypeFolders } = opts || {}
     const { components: basePath, _config: { debug }, force } = parseArgs(args)
@@ -32,29 +26,54 @@ export const NextJsQueriesCommand: NextJsModule<{ loadedContentTypes: GetContent
     const { contentTypes, all: allContentTypes } = loadedContentTypes ?? await getContentTypes(client, args)
 
     // Start process
-    process.stdout.write(chalk.yellowBright(`${figures.arrowRight} Generating GraphQL fragments for ${contentTypes.map(x => x.key).join(', ')}\n`))
+    process.stdout.write(chalk.yellowBright(`${figures.arrowRight} Generating GraphQL queries\n`))
+    const dependencies: string[] = []
     const typeFolders = createdTypeFolders ?? createTypeFolders(contentTypes, basePath, debug)
     const updatedTypes = contentTypes.map(contentType => {
       const typePath = getTypeFolder(typeFolders, contentType.key)
-      return createGraphQueries(contentType, typePath, basePath, force, debug, allContentTypes, client.runtimeCmsVersion == OptiCmsVersion.CMS12)
+      const { written, propertyTypes } = createGraphQueries(contentType, typePath, force, debug)
+      dependencies.push(...propertyTypes)
+      return written ? contentType.key : undefined
     }).filter(x => x).flat()
 
     // Report outcome
     if (updatedTypes.length > 0)
-      process.stdout.write(chalk.yellowBright(`${figures.arrowRight} Created/updated GraphQL fragments for ${updatedTypes.join(', ')}\n`))
+      process.stdout.write(chalk.yellowBright(`${figures.arrowRight} Created/updated GraphQL queries for ${updatedTypes.join(', ')}\n`))
     else
-      process.stdout.write(chalk.yellowBright(`${figures.arrowRight} No GraphQL fragments created/updated\n`))
-    if (!opts) process.stdout.write(chalk.green(chalk.bold(figures.tick + " Done")) + "\n")
+      process.stdout.write(chalk.yellowBright(`${figures.arrowRight} No GraphQL queries created/updated\n`))
 
-    generatedProps = []
+    process.stdout.write(chalk.yellowBright(`${figures.arrowRight} Generating GraphQL property fragments\n`))
+    const generatedProps: string[] = createPropertyFragments(dependencies, allContentTypes, (contentType) => {
+      if (!contentType.key) return undefined
+      let tf = getTypeFolder(typeFolders, contentType.key)
+      if (!tf) {
+        tf = getContentTypePaths(contentType, basePath, true, debug)
+        typeFolders.push(tf)
+      }
+      return tf
+    }, force, debug)
+
+    // Report outcome
+    if (generatedProps.length > 0)
+      process.stdout.write(chalk.yellowBright(`${figures.arrowRight} Created/updated GraphQL property fragments for ${generatedProps.join(', ')}\n`))
+    else
+      process.stdout.write(chalk.yellowBright(`${figures.arrowRight} No GraphQL property fragments created/updated\n`))
+
+    if (!opts) process.stdout.write(chalk.green(chalk.bold(figures.tick + " Done")) + "\n")
   }
 }
 
 export default NextJsQueriesCommand
 
-export function createGraphQueries(contentType: IntegrationApi.ContentType, typePath: string, basePath: string, force: boolean, debug: boolean, contentTypes: IntegrationApi.ContentType[], forCms12: boolean = false): Array<string> | undefined {
-  const returnValue: Array<string> = []
-  const baseQueryFile = path.join(typePath, `${contentType.key}.query.graphql`)
+export function createGraphQueries(
+  contentType: IntegrationApi.ContentType,
+  typePath: TypeFolderList[number],
+  force: boolean,
+  debug: boolean,
+): { written: boolean, propertyTypes: string[] } {
+  const baseQueryFile = typePath.queryFile
+
+  let mustWrite: boolean = true
   if (fs.existsSync(baseQueryFile)) {
     if (force) {
       if (debug)
@@ -62,72 +81,19 @@ export function createGraphQueries(contentType: IntegrationApi.ContentType, type
     } else {
       if (debug)
         process.stdout.write(chalk.gray(`${figures.arrowRight} Skipping ${contentType.displayName} (${contentType.key}) base fragment - file already exists\n`))
-      return undefined
+      mustWrite = false
     }
   } else if (debug) {
     process.stdout.write(chalk.gray(`${figures.arrowRight} Creating ${contentType.displayName} (${contentType.key}) base fragment\n`))
   }
 
-  const { fragment, propertyTypes } = createInitialQuery(contentType, false, undefined, forCms12)
-  fs.writeFileSync(baseQueryFile, fragment)
-  returnValue.push(contentType.key)
-
-  let dependencies = Array.isArray(propertyTypes) ? [...propertyTypes] : []
-  while (Array.isArray(dependencies) && dependencies.length > 0) {
-    let newDependencies: [string, boolean][] = []
-    dependencies.forEach(dep => {
-      const propContentType = contentTypes.filter(x => x.key == dep[0])[0]
-      if (!propContentType) {
-        console.warn(`🟠 The content type ${dep[0]} has been referenced, but is not found in the Optimizely CMS instance`)
-        return
-      }
-      const fullTypeName = forCms12 ? contentType.key + propContentType.key : propContentType.key
-      const propertyFragmentFile = path.join(basePath, propContentType.baseType, propContentType.key, `${fullTypeName}.property.graphql`)
-      const propertyFragmentDir = path.dirname(propertyFragmentFile)
-
-      if (!fs.existsSync(propertyFragmentDir))
-        fs.mkdirSync(propertyFragmentDir, { recursive: true });
-
-      if (!fs.existsSync(propertyFragmentFile) || force) {
-        if (debug)
-          process.stdout.write(chalk.gray(`${figures.arrowRight} Writing ${propContentType.displayName} (${propContentType.key}) property fragment\n`))
-        const propContentTypeInfo = createInitialFragment(propContentType, true, contentType, forCms12)
-        fs.writeFileSync(propertyFragmentFile, propContentTypeInfo.fragment)
-        returnValue.push(propContentType.key)
-        if (Array.isArray(propContentTypeInfo.propertyTypes))
-          newDependencies.push(...propContentTypeInfo.propertyTypes)
-      }
-    })
-    dependencies = newDependencies
+  if (mustWrite) {
+    const fragment = GraphQLGen.buildGetQuery(contentType, undefined, new Map())
+    fs.writeFileSync(baseQueryFile, fragment)
   }
-  return returnValue.length > 0 ? returnValue : undefined
-}
 
-function createInitialQuery(contentType: IntegrationApi.ContentType, forProperty: boolean = false, forBaseType?: IntegrationApi.ContentType, forCms12: boolean = false): { fragment: string, propertyTypes: ([string, boolean][] | null) } {
-  const { fragmentFields, propertyTypes } = renderProperties(contentType, forCms12);
-  const fragmentTarget = forProperty ? (forCms12 ? (forBaseType?.key ?? '') + contentType.key : contentType.key + 'Property') : contentType.key
-  const tpl = `query get${fragmentTarget}Data($key: String!, $locale: [Locales], $version: String, $changeset: String, $variation: String) {
-  data: ${fragmentTarget} (
-    where: {
-      _metadata: {
-        version: { eq: $version }
-        changeset: { eq: $changeset }
-        variation: { eq: $variation }
-      }
-    }
-    locale: $locale
-    ids: [$key]
-  ) {
-    item {
-      _metadata {
-      	key
-    	}
-      ${fragmentFields.join("\n      ")}
-    }
-  }
-}`
   return {
-    fragment: tpl,
-    propertyTypes: propertyTypes.length == 0 ? null : propertyTypes
+    written: mustWrite,
+    propertyTypes: GraphQLGen.getReferencedPropertyComponents(contentType)
   }
 }

@@ -20,6 +20,7 @@ export type CompositionNodeBase = {
 export type CompositionStructureNode = CompositionNodeBase & {
   layoutType: "experience" | "section" | "row" | "column"
   nodes?: Array<CompositionNode>
+  component?: Record<string, any>
 }
 export type CompositionComponentNode<E extends Record<string, any> = Record<string, any>> = CompositionNodeBase & {
   layoutType: "component"

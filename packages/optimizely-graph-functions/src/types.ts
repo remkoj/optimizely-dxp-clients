@@ -20,6 +20,17 @@ export type TransformOptions = {
   injections?: Injection[],
 
   /**
+   * Define whether the injection process should cleanup targeted fragments
+   * from the affected queries & fragments. Defaults to "true".
+   * 
+   * Possible options:
+   * - `true`: Clean the targeted fragment spreads and proceed to remove the following fragment spreads: BlockData, PageData
+   * - `false`: Do not perform any cleaning
+   * - string[]: Remove the listed fragment spreads after processing
+   */
+  cleanup?: boolean | string[]
+
+  /**
    * Enable verbose output
    */
   verbose?: boolean

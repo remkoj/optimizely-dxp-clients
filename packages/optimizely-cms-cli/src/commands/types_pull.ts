@@ -5,7 +5,8 @@ import chalk from 'chalk'
 import figures from 'figures'
 
 import { createCmsClient } from '../tools/cmsClient.js'
-import { getContentTypes, ContentTypesArgs, contentTypesBuilder, getContentTypePaths } from '../tools/contentTypes.js'
+import { getContentTypes, ContentTypesArgs, contentTypesBuilder } from '../tools/contentTypes.js'
+import { getContentTypePaths } from '../tools/project.js'
 
 type TypesPullModule = CliModule<{
   force: boolean

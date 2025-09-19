@@ -1,5 +1,5 @@
 export default [
-  `query getContentById($key: String!, $version: String, $locale: [Locales!], $path: String = "-", $domain: String, $changeset: String) {
+  `query _getContentById($key: String!, $version: String, $locale: [Locales!], $path: String = "-", $domain: String, $changeset: String) {
       content: _Content(
         variation: { include: ALL }
         where: {
@@ -21,10 +21,14 @@ export default [
           ...IContentData
           ...BlockData
           ...PageData
+          ...ElementData
+          ...ComponentData
+          ...SectionData
+          ...FormElementData
         }
       }
     }`,
-  `query getContentByPath($path: [String!]!, $locale: [Locales!], $siteId: String, $changeset: String = null) {
+  `query _getContentByPath($path: [String!]!, $locale: [Locales!], $siteId: String, $changeset: String = null) {
       content: _Content(
         where: {
           _metadata: {
@@ -41,7 +45,7 @@ export default [
         }
       }
     }`,
-  `query getContentType($key: String!, $version: String, $locale: [Locales!], $path: String = "-", $domain: String) {
+  `query _getContentType($key: String!, $version: String, $locale: [Locales!], $path: String = "-", $domain: String) {
         content: _Content(
             variation: { include: ALL }
             where: {

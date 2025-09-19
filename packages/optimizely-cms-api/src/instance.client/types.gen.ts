@@ -14,9 +14,7 @@ export type BinaryProperty = ContentTypeProperty & {
  */
 export type BooleanProperty = ContentTypeProperty & {
     type: 'BooleanProperty';
-} & {
-    [key: string]: never;
-};
+} & {};
 
 /**
  * Changesets are used to group work on several content items together.
@@ -121,26 +119,12 @@ export type ComponentProperty = ContentTypeProperty & {
 /**
  * Represent a Composition behavior for a ContentType.
  */
-export enum CompositionBehavior {
-    SECTION_ENABLED = 'sectionEnabled',
-    ELEMENT_ENABLED = 'elementEnabled',
-    FORMS_ELEMENT_ENABLED = 'formsElementEnabled'
-}
+export type CompositionBehavior = 'sectionEnabled' | 'elementEnabled' | 'formsElementEnabled';
 
 /**
  * Represent the base type of a ContentType.
  */
-export enum ContentBaseType {
-    PAGE = 'page',
-    COMPONENT = 'component',
-    MEDIA = 'media',
-    IMAGE = 'image',
-    VIDEO = 'video',
-    FOLDER = 'folder',
-    EXPERIENCE = 'experience',
-    SECTION = 'section',
-    ELEMENT = 'element'
-}
+export type ContentBaseType = 'page' | 'component' | 'media' | 'image' | 'video' | 'folder' | 'experience' | 'section' | 'element';
 
 /**
  * Represents a content component.
@@ -553,13 +537,7 @@ export type ContentType = {
 /**
  * Represent different features that a content type can have.
  */
-export enum ContentTypeFeature {
-    LOCALIZATION = 'localization',
-    VERSIONING = 'versioning',
-    PUBLISH_PERIOD = 'publishPeriod',
-    ROUTING = 'routing',
-    BINARY = 'binary'
-}
+export type ContentTypeFeature = 'localization' | 'versioning' | 'publishPeriod' | 'routing' | 'binary';
 
 export type ContentTypePage = {
     /**
@@ -633,10 +611,7 @@ export type ContentTypeProperty = {
 /**
  * Represent the usage types for a ContentType.
  */
-export enum ContentTypeUsage {
-    PROPERTY = 'property',
-    INSTANCE = 'instance'
-}
+export type ContentTypeUsage = 'property' | 'instance';
 
 /**
  * Options for copying content.
@@ -878,11 +853,7 @@ export type ImageDescriptor = {
 /**
  * Represents the indexing type of a content type property.
  */
-export enum IndexingType {
-    DISABLED = 'disabled',
-    QUERYABLE = 'queryable',
-    SEARCHABLE = 'searchable'
-}
+export type IndexingType = 'disabled' | 'queryable' | 'searchable';
 
 /**
  * Enumeration settings for a property or format.
@@ -947,9 +918,7 @@ export type IntegerProperty = ContentTypeProperty & {
  */
 export type JsonStringProperty = ContentTypeProperty & {
     type: 'JsonStringProperty';
-} & {
-    [key: string]: never;
-};
+} & {};
 
 /**
  * A property in the CMS that may hold a list of items.
@@ -1001,10 +970,7 @@ export type ListPropertyItem = {
 /**
  * Represent the different status values of a content locale.
  */
-export enum LocaleStatus {
-    DRAFT = 'draft',
-    PUBLISHED = 'published'
-}
+export type LocaleStatus = 'draft' | 'published';
 
 /**
  * Represents an OAuth JSON Web Token (JWT) and
@@ -1080,20 +1046,7 @@ export type ProblemDetails = {
  * Represent the basic type that a PropertyFormat
  * is using for data storage and data transport.
  */
-export enum PropertyDataType {
-    STRING = 'string',
-    URL = 'url',
-    BOOLEAN = 'boolean',
-    INTEGER = 'integer',
-    FLOAT = 'float',
-    DATE_TIME = 'dateTime',
-    CONTENT_REFERENCE = 'contentReference',
-    CONTENT = 'content',
-    BINARY = 'binary',
-    JSON = 'json',
-    ARRAY = 'array',
-    COMPONENT = 'component'
-}
+export type PropertyDataType = 'string' | 'url' | 'boolean' | 'integer' | 'float' | 'dateTime' | 'contentReference' | 'content' | 'binary' | 'json' | 'array' | 'component';
 
 /**
  * Represent the definition of semantic property formats for content items.
@@ -1267,31 +1220,19 @@ export type StringProperty = ContentTypeProperty & {
  */
 export type UrlListItem = ListPropertyItem & {
     type: 'UrlListItem';
-} & {
-    [key: string]: never;
-};
+} & {};
 
 /**
  * Describes a property that can contain URLs.
  */
 export type UrlProperty = ContentTypeProperty & {
     type: 'UrlProperty';
-} & {
-    [key: string]: never;
-};
+} & {};
 
 /**
  * Represent the different status values of a content version.
  */
-export enum VersionStatus {
-    DRAFT = 'draft',
-    READY = 'ready',
-    PUBLISHED = 'published',
-    PREVIOUS = 'previous',
-    SCHEDULED = 'scheduled',
-    REJECTED = 'rejected',
-    IN_REVIEW = 'inReview'
-}
+export type VersionStatus = 'draft' | 'ready' | 'published' | 'previous' | 'scheduled' | 'rejected' | 'inReview';
 
 export type ChangesetsListData = {
     body?: never;

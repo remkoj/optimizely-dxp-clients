@@ -159,7 +159,7 @@ export async function getStylesOld(client: CmsApiClient, args: ArgumentsCamelCas
     const templateType: string = data.baseType ? 'base' : data.nodeType ? 'node' : data.contentType ? 'component' : 'unknown'
     if (isExcluded(templateType, [], templateTypes)) {
       if (cfg.debug)
-        process.stdout.write(chalk.gray(`${figures.arrowRight} Skipping Style-Defintion ${data.key} - Style type filtering is active\n`))
+        process.stdout.write(chalk.gray(`${figures.arrowRight} Skipping Style-Defintion ${data.key} - Style type filtering is active (${templateType} is not in ${templateTypes.join(", ")}\n`))
       return false
     }
     if (data.baseType && isExcluded(data.baseType, excludeBaseTypes, baseTypes)) {
