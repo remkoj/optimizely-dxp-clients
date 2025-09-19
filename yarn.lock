@@ -2073,7 +2073,7 @@ __metadata:
     "@fastify/deepmerge": "npm:^3.1.0"
     "@inquirer/prompts": "npm:^7.8.6"
     "@remkoj/optimizely-cms-api": "workspace:6.0.0-pre9"
-    "@remkoj/optimizely-graph-functions": "npm:6.0.0-pre9"
+    "@remkoj/optimizely-graph-functions": "workspace:6.0.0-pre9"
     "@rollup/plugin-json": "npm:^6.1.0"
     "@rollup/plugin-typescript": "npm:^12.1.4"
     "@types/node": "npm:^22.18.5"
@@ -2199,7 +2199,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@remkoj/optimizely-graph-functions@npm:6.0.0-pre9, @remkoj/optimizely-graph-functions@workspace:packages/optimizely-graph-functions":
+"@remkoj/optimizely-graph-functions@workspace:6.0.0-pre9, @remkoj/optimizely-graph-functions@workspace:packages/optimizely-graph-functions":
   version: 0.0.0-use.local
   resolution: "@remkoj/optimizely-graph-functions@workspace:packages/optimizely-graph-functions"
   dependencies:
