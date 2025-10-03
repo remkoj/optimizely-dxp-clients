@@ -95,7 +95,7 @@ export type CmsEditableBaseComponent = <CT extends ElementType>(
  */
 export const CmsEditable: CmsEditableBaseComponent = <CT extends ElementType>({
   ctx,
-  forwardCtx,
+  forwardCtx = false,
   as,
   cmsId = null,
   cmsFieldName = null,
@@ -166,9 +166,11 @@ export const CmsEditable: CmsEditableBaseComponent = <CT extends ElementType>({
         ...props,
       }
 
-  if (forwardCtx === true) itemProps['ctx'] = ctx
-  if (typeof forwardCtx == 'string' && forwardCtx.length > 0)
-    itemProps[forwardCtx] = ctx
+  if (typeof DefaultElement !== 'string') {
+    if (forwardCtx === true) itemProps['ctx'] = ctx
+    if (typeof forwardCtx === 'string' && forwardCtx.length > 0)
+      itemProps[forwardCtx] = ctx
+  }
 
   return <DefaultElement {...itemProps}>{children}</DefaultElement>
 }

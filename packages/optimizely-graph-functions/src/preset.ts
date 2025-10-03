@@ -14,7 +14,8 @@ import {
   normalizeQueryNames,
   injectComponentDocuments,
   injectPageQueries,
-  performInjections
+  performInjections,
+  cleanFragmentSpreads
 } from './transform'
 import type { PresetOptions } from './types'
 
@@ -85,7 +86,8 @@ export const preset: Types.OutputPreset<PresetOptions> =
       normalizeQueryNames,      // Allow overriding of built-in queries
       injectComponentDocuments, // Inject fragments to fetch component data
       injectPageQueries,        // Inject queries to fetch page/experience data
-      performInjections         // Run injections of component fragments adjacent to placeholder fragments
+      performInjections,        // Run injections of component fragments adjacent to placeholder fragments
+      cleanFragmentSpreads      // Remove all fragment spreads that target a fragment that does not exist in the documents
     ], options);
 
     // Build the preset files

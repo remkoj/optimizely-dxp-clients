@@ -242,6 +242,13 @@ class BaseApiClient {
 
     throw new ApiError(result)
   }
+
+  public getSchemaItemBase(): URL | undefined {
+    let baseUrl = this._client.getConfig().baseUrl
+    if (typeof (baseUrl) === 'string' && !baseUrl.endsWith('/'))
+      baseUrl = baseUrl + '/'
+    return baseUrl ? new URL(baseUrl) : undefined
+  }
 }
 
 export class ApiError extends Error {

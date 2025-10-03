@@ -167,7 +167,7 @@ export function createEditPageComponent<LocaleType = string>(
       if (contentLink.locale) context.setLocale(contentLink.locale)
 
       // Make the shared server context available
-      updateSharedServerContext(context)
+      //updateSharedServerContext(context)
 
       // Render the content, with edit mode context
       const isPage =

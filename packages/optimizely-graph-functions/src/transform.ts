@@ -10,6 +10,7 @@ export { normalizeQueryNames } from "./_transform/normalizeQueryNames"
 export { pickTransformOptions } from "./_transform/options"
 export { injectPageQueries } from "./_transform/injectPageQueries"
 export { performInjections } from "./_transform/performInjections"
+export { cleanFragmentSpreads } from "./_transform/cleanSpreads"
 
 export type TransformFn<T = any> = (files: Types.DocumentFile[], options: Types.PresetFnArgs<T>) => Promise<Types.DocumentFile[]> | Types.DocumentFile[]
 export async function executeDocumentTransforms<T = any>(files: Types.DocumentFile[], transforms: Array<TransformFn<T>>, options: Types.PresetFnArgs<T>): Promise<Types.DocumentFile[]> {

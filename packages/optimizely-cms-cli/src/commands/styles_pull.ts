@@ -222,8 +222,8 @@ export async function createDisplayTemplateHelper(typeFile: TypeFilesListEntry, 
 
   // Write Style definition
   const imports: string[] = [
-    'import type { LayoutProps } from "@remkoj/optimizely-cms-react"',
-    'import type { JSX, ReactNode } from "react"'
+    'import type { LayoutProps, LayoutPropsSettingKeys, LayoutPropsSettingValues, CmsComponentProps } from "@remkoj/optimizely-cms-react"',
+    'import type { JSX, ComponentType } from "react"'
   ]
   const typeContents: string[] = []
   const props: string[] = []
@@ -232,11 +232,10 @@ export async function createDisplayTemplateHelper(typeFile: TypeFilesListEntry, 
     const importPath = path.relative(path.dirname(typeFilePath), displayTemplateFile).replaceAll('\\', '/')
     imports.push(`import type ${displayTemplate.key}Styles from "./${importPath}"`)
     typeContents.push(`export type ${displayTemplate.key}Props = LayoutProps<typeof ${displayTemplate.key}Styles>`)
-    typeContents.push(`export type ${displayTemplate.key}ComponentProps<DT extends Record<string, any> = Record<string, any>> = {
-    data: DT
-    layoutProps: ${displayTemplate.key}Props | undefined
-} & JSX.IntrinsicElements['div']`)
-    typeContents.push(`export type ${displayTemplate.key}Component<DT extends Record<string, any> = Record<string, any>> = (props: ${displayTemplate.key}ComponentProps<DT>) => ReactNode`)
+    typeContents.push(`export type ${displayTemplate.key}Keys = LayoutPropsSettingKeys<${displayTemplate.key}Props>`)
+    typeContents.push(`export type ${displayTemplate.key}Options<K extends ${displayTemplate.key}Keys> = LayoutPropsSettingValues<${displayTemplate.key}Props, K>`)
+    typeContents.push(`export type ${displayTemplate.key}ComponentProps<DT extends Record<string, any> = Record<string, any>> = Omit<CmsComponentProps<DT, ${displayTemplate.key}Props>,'children'> & JSX.IntrinsicElements['div']`)
+    typeContents.push(`export type ${displayTemplate.key}Component<DT extends Record<string, any> = Record<string, any>> = ComponentType<${displayTemplate.key}ComponentProps<DT>>`)
     typeContents.push('')
     props.push(`${displayTemplate.key}Props`)
     if (!typeId)
@@ -245,14 +244,11 @@ export async function createDisplayTemplateHelper(typeFile: TypeFilesListEntry, 
 
   if (typeId) {
     typeId = ucFirst(typeId)
-    typeContents.push('')
     typeContents.push(`export type ${typeId}LayoutProps = ${props.join(' | ')}
-export type ${typeId}ComponentProps<DT extends Record<string, any> = Record<string, any>, LP extends ${typeId}LayoutProps = ${typeId}LayoutProps> = {
-    data: DT
-    layoutProps: LP | undefined
-} & JSX.IntrinsicElements['div']
-
-export type ${typeId}Component<DT extends Record<string, any> = Record<string, any>, LP extends ${typeId}LayoutProps = ${typeId}LayoutProps> = (props: ${typeId}ComponentProps<DT,LP>) => ReactNode`)
+export type ${typeId}LayoutKeys = LayoutPropsSettingKeys<${typeId}LayoutProps>
+export type ${typeId}LayoutOptions<K extends ${typeId}LayoutKeys> = LayoutPropsSettingValues<${typeId}LayoutProps,K>
+export type ${typeId}ComponentProps<DT extends Record<string, any> = Record<string, any>> = Omit<CmsComponentProps<DT, ${typeId}LayoutProps>,'children'> & JSX.IntrinsicElements['div']
+export type ${typeId}Component<DT extends Record<string, any> = Record<string, any>> = ComponentType<${typeId}ComponentProps<DT>>`)
 
     const defaultTemplate = templates.find(t => t.data.isDefault)
     if (defaultTemplate) {

@@ -42,7 +42,7 @@ export async function loadSchema(client: CmsApiClient, schemaName: string | stri
     const processedSchema = processSchema(specSchemas[schema], definitions, spec)
     const jsonSchema: TypedSchema = {
       //"$schema": "https://json-schema.org/draft-07/schema",
-      "$id": `${client.cmsUrl}/schema/${schema}`,
+      "$id": new URL(`schema/${schema}`,client.getSchemaItemBase()).href,
       type: "object",
       title: schema,
       ...processedSchema,
