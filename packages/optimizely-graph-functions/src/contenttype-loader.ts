@@ -173,27 +173,18 @@ export function buildGetQuery(contentType: IntegrationApi.ContentType, queryName
     properties.unshift("...ExperienceData")
 
   //Render query
-  const query = `query ${renderedQueryName}($key: String!, $locale: [Locales], $changeset: String, $variation: [String], $version: String) {
+  const query = `query ${renderedQueryName}($key: [String!]!, $locale: [Locales], $changeset: String, $variation: VariationInput, $version: String) {
   data: ${graphType}(
-    ids: [$key]
+    ids: $key
     locale: $locale
-    variation: { include: SOME, value: $variation, includeOriginal: true }
-    where: {
-      _and: [
-        {
-          _or: [
-            { _metadata: { variation: { in: $variation, exist: true } } }
-            { _metadata: { variation: { notIn: $variation, exist: false } } }
-          ]
-        }
-        { _metadata: { changeset: { eq: $changeset }, version: { eq: $version } } }
-      ]
-    }
+    variation: $variation
+    where: { _metadata: { changeset: { eq: $changeset }, version: { eq: $version } } }
   ) {
     total
     item {
       _metadata {
         key
+        version
         locale
         changeset
         variation

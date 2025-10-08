@@ -149,27 +149,31 @@ type Nullable<T> = {
 } | null | undefined
 
 /**
- * Take the normalizable value
+ * Take the input object and ensure that only the properties within ContentLink are actually 
+ * retained.
  * 
- * @param toNormalize 
- * @returns 
+ * @param     toNormalize 
+ * @returns   
  */
 export function normalizeContentLink(toNormalize: Nullable<ContentLink | InlineContentLink>): ContentLink | InlineContentLink | undefined {
-  if (!(isContentLink(toNormalize) || isInlineContentLink(toNormalize)))
-    return undefined
-
-  const newLink: ContentLink | InlineContentLink = {
-    key: toNormalize.key
-  }
-  if (toNormalize.version)
-    newLink.version = toNormalize.version.toString()
-
-  return toNormalize
+  const newLink = isContentLink(toNormalize) ? {
+    key: toNormalize.key,
+    isInline: false,
+    changeset: toNormalize.changeset ?? undefined,
+    variation: toNormalize.variation ?? undefined,
+    version: toNormalize.version ? toNormalize.version.toString() : undefined
+  } as ContentLink : (isInlineContentLink(toNormalize) ? {
+    key: null,
+    isInline: true,
+    changeset: toNormalize.changeset ?? undefined,
+    variation: toNormalize.variation ?? undefined
+  } as InlineContentLink : undefined)
+  return newLink
 }
 
-export function normalizeContentLinkWithLocale<LT = string>(toNormalize: Nullable<ContentLinkWithLocale<LT>>): ContentLinkWithLocale<LT> | undefined {
-  const normalized = normalizeContentLink(toNormalize) as ContentLinkWithLocale<LT> | undefined
-  if (normalized && toNormalize?.locale != undefined && !(typeof (toNormalize?.locale) == 'string' && (toNormalize.locale.length == 2 || toNormalize.locale.length == 5)))
+export function normalizeContentLinkWithLocale<LT = string>(toNormalize: Nullable<ContentLinkWithLocale<LT>>): ContentLinkWithLocale<LT> | InlineContentLinkWithLocale<LT> | undefined {
+  const normalized = normalizeContentLink(toNormalize) as ContentLinkWithLocale<LT> | InlineContentLinkWithLocale<LT> | undefined
+  if (normalized && typeof (toNormalize?.locale) == 'string' && (toNormalize.locale.length == 2 || toNormalize.locale.length == 5))
     normalized.locale = toNormalize.locale
   return normalized
 }

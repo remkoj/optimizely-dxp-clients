@@ -8,7 +8,17 @@ export type Route = {
   changed: Date | null
   contentType: string[]
   version?: string | null
+  changeset?: string | null
+  variation?: string | null
   key: string
+}
+
+export type VariationInput = {
+  include: "ALL" | "NONE"
+} | {
+  include: "SOME"
+  value: Array<string>
+  includeOriginal?: boolean | null
 }
 
 /**
@@ -40,9 +50,11 @@ export interface IRouteResolver {
    * @param       onlyWithDomain      If set/kept to `undefined` will only filter by domain. When
    *                                  set to `true`, requires the domain (CMS SaaS/13 only) to be 
    *                                  set. This allows to get all routes bound to a domain.
+   * @param       includeVariants     If set to `true` the output will include all variants for 
+   *                                  each item in the CMS.
    * @returns     The list of routes
    */
-  getRoutes(domainOrChannelId?: string, onlyWithDomain?: boolean): Promise<Route[]>
+  getRoutes(domainOrChannelId?: string, onlyWithDomain?: boolean, includeVariants?: boolean): Promise<Route[]>
 
   /**
    * Resolve a path to route information, either from string or from URL
@@ -50,11 +62,12 @@ export interface IRouteResolver {
    * 
    * @param       path        The path to resolve for
    * @param       domain      The domain to filter the results by
+   * @param       variation   The name of the variation to filter the routes by
    * @returns     The route information for the path
    */
   getContentInfoByPath(path: URL): Promise<undefined | Route>
-  getContentInfoByPath(path: string, domain?: string): Promise<undefined | Route>
-  getContentInfoByPath(path: URL | string, domain?: string): Promise<undefined | Route>
+  getContentInfoByPath(path: string, domain?: string, variation?: string): Promise<undefined | Route>
+  getContentInfoByPath(path: URL | string, domain?: string, variation?: string): Promise<undefined | Route>
 
   /**
    * Extract a content link from a route definition

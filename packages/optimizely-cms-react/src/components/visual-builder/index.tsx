@@ -24,10 +24,10 @@ export function OptimizelyComposition({
 
   // Render the element
   if (isComponentNode(node)) {
-    if (isDebug)
+    /*if (isDebug)
       console.log(
         `⚪ [VisualBuilder] Rendering element node ${JSON.stringify(node)}`
-      )
+      )*/
     const [contentLink, contentType, nodeId, fragmentData, layoutProps] =
       leafPropsFactory(node)
     return (
@@ -43,10 +43,10 @@ export function OptimizelyComposition({
   }
 
   // Debug
-  if (isDebug)
+  /*if (isDebug)
     console.log(
       `⚪ [VisualBuilder] Rendering structure node ${JSON.stringify(node)}`
-    )
+    )*/
 
   // Ensure we've got a factory
   if (!factory)

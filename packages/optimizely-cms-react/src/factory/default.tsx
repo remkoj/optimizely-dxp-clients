@@ -44,23 +44,18 @@ export class DefaultComponentFactory implements ComponentFactory {
     loader?: ComponentType
   ): void {
     const registryKey = processComponentTypeHandle(type)
-    if (this.dbg)
-      console.log(`➕ [DefaultComponentFactory] Registering ${registryKey}`)
     this.registry.set(registryKey, { type, component, useSuspense, loader })
   }
 
   registerAll(components: ComponentTypeDictionary): void {
     components.forEach((c) => {
       const registryKey = processComponentTypeHandle(c.type)
-      if (this.dbg)
-        console.log(`➕ [DefaultComponentFactory] Registering ${registryKey}`)
       this.registry.set(registryKey, c)
     })
   }
 
   has(type: ComponentTypeHandle): boolean {
     const registryKey = processComponentTypeHandle(type)
-    //if (this.dbg) console.log(`🔎 [DefaultComponentFactory] Checking for ${ registryKey }`)
     return this.registry.has(registryKey)
   }
 

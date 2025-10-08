@@ -1,10 +1,11 @@
 import { gql } from "graphql-request"
-import { type Route } from "./getAllRoutes.js"
+import type { Route, VariationInput } from "./types.js"
 
 export type Variables = {
   path: string | string[]
   domain?: string | null
   changeset?: string | null
+  variation?: VariationInput | null
 }
 
 export type Result = {
@@ -14,14 +15,20 @@ export type Result = {
   }
 }
 
-export const query = gql`query getRouteByPath($path: [String!]!, $domain: String, $changeset: String) {
+export const query = gql`query getRouteByPath($path: [String!]!, $domain: String, $changeset: String, $variation: VariationInput) {
   getRouteByPath: _Page(
     where: {
-      _metadata: {
-        url: { default: { in: $path }, base: { endsWith: $domain } }
-        changeset: { eq: $changeset }
-      }
+      _and: [
+        {
+          _metadata: {
+            url: { default: { in: $path }, base: { endsWith: $domain } }
+            changeset: { eq: $changeset }
+            status: { eq: "Published" }
+          }
+        }
+      ]
     }
+    variation: $variation
     orderBy: { _metadata: { url: { default: ASC } } }
   ) {
     total
@@ -31,6 +38,7 @@ export const query = gql`query getRouteByPath($path: [String!]!, $domain: String
         version
         locale
         displayName
+        variation
         types
         url {
           path: default

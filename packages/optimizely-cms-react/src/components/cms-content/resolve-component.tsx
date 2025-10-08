@@ -63,10 +63,10 @@ export function resolveComponent(
     )
   }
 
-  if (isDebug)
+  /*if (isDebug)
     console.log(
       `⚪ [CmsContent][resolveComponent] Normalized content type ${JSON.stringify(contentType)} to ${myContentType}`
-    )
+    )*/
 
   // Resolve component
   const Component = Utils.resolveComponentType(
@@ -106,11 +106,11 @@ export function resolveComponent(
   }
 
   // Return the component
-  if (isDebug)
+  /*if (isDebug)
     console.log(
       '⚪ [CmsContent] Rendering item using component:',
       getComponentLabel(Component as ComponentType)
-    )
+    )*/
   return Component
 }
 

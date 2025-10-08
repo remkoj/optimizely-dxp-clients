@@ -4,6 +4,9 @@ import type { TypedDocumentNode } from '@graphql-typed-document-node/core'
 import type { ContentLinkWithLocale, ContentLink, InlineContentLinkWithLocale } from "@remkoj/optimizely-graph-client"
 import type { GenericContext } from "./context/types.js"
 import type { CmsEditableProps } from "./components/cms-editable/index.js"
+import type { VariationInput } from "@remkoj/optimizely-graph-client/router"
+
+export type { VariationInput } from "@remkoj/optimizely-graph-client/router"
 
 // Export reused content types
 export type ContentType = string[]
@@ -56,12 +59,11 @@ export type CmsComponentProps<T, L extends Record<string, any> = Record<string, 
   ctx?: GenericContext
 }>
 
-export type ContentQueryProps<LocaleType = string> = Omit<ContentLink, 'isInline'> & {
+export type ContentQueryProps<LocaleType = string> = Omit<ContentLink, 'isInline' | 'variation'> & {
   locale?: Array<LocaleType> | LocaleType | null
   path?: string | null
   domain?: string | null
-  changeset?: string | null
-  variant?: string | null
+  variation?: VariationInput | null
 }
 
 /**
@@ -77,6 +79,7 @@ export type GetDataQueryResponseTemplate = {
       __typename?: string | null;
       _metadata?: {
         key?: string | null
+        locale?: any | null
       } | null,
       [key: string]: any
     } | null

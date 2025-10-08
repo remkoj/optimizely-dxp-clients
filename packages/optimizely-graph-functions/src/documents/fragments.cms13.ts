@@ -7,6 +7,8 @@ export default [
     types
     displayName
     version
+    changeset
+    variation
     url {
       type
       base

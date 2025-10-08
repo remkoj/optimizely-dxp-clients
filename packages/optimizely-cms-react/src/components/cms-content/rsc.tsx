@@ -6,7 +6,7 @@ import getContentType from './get-content-type.js'
 import getContent from './get-content.js'
 import {
   AuthMode,
-  normalizeContentLink,
+  normalizeContentLinkWithLocale,
   type ContentLink,
 } from '@remkoj/optimizely-graph-client'
 import resolveComponent, {
@@ -39,7 +39,7 @@ export async function CmsContent<LocalesType = string>({
   const graphClient = ctx.client
 
   // Normalize the ContentLink
-  const contentLink = normalizeContentLink(rawContentLink)
+  const contentLink = normalizeContentLinkWithLocale(rawContentLink)
 
   // Ensure we have the contentType
   let myContentType = resolveContentType(contentType, fragmentData)
@@ -66,9 +66,6 @@ export async function CmsContent<LocalesType = string>({
       : ctx.inPreviewMode
         ? 'Preview'
         : 'Public'
-    /*console.log(
-      `👔 [CmsContent] ${mode} mode active for content with id: ${contentLinkToString(contentLink)} of type ${myContentType?.join('/') ?? 'unknown'}`
-    )*/
     if (
       (ctx.inEditMode || ctx.inPreviewMode) &&
       graphClient.currentAuthMode == AuthMode.Public

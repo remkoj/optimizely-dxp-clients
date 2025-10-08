@@ -28,7 +28,7 @@ export default [
         }
       }
     }`,
-  `query _getContentByPath($path: [String!]!, $locale: [Locales!], $siteId: String, $changeset: String = null) {
+  `query _getContentByPath($path: [String!]!, $locale: [Locales!], $siteId: String, $changeset: String = null, $variation: VariationInput) {
       content: _Content(
         where: {
           _metadata: {
@@ -37,6 +37,7 @@ export default [
           }
         }
         locale: $locale
+        variation:$variation
       ) {
         total
         items: item {

@@ -1,5 +1,5 @@
 import { gql } from "graphql-request"
-import { type Route } from "./getAllRoutes.js"
+import { type Route } from "./types.js"
 
 export type Variables = {
   key: string,
@@ -21,6 +21,7 @@ export const query = gql`query GetRouteById($key: String!, $version: String, $lo
       _metadata: { key: { eq: $key }, version: { eq: $version }, changeset: { eq: $changeset } }
     }
     locale: $locale
+    variation: { include: ALL, includeOriginal: true }
   ) {
     total
     items {
@@ -29,6 +30,8 @@ export const query = gql`query GetRouteById($key: String!, $version: String, $lo
         version
         locale
         displayName
+        variation
+        changeset
         types
         url {
           path: hierarchical

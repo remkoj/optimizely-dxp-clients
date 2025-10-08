@@ -1,10 +1,9 @@
 import type { GetContentByIdMethod, GetContentByIdData } from './types.js'
 import type { ContentQueryProps } from '@remkoj/optimizely-cms-react/rsc'
-import { type GraphQLClient , gql } from 'graphql-request'
+import { type GraphQLClient, gql } from 'graphql-request'
 
-export const getContentById : GetContentByIdMethod = async <LocaleType = string>(client: GraphQLClient, variables: ContentQueryProps<LocaleType>) =>
-{
-    return await client.request<GetContentByIdData, ContentQueryProps<LocaleType>>(gqlQuery, variables)
+export const getContentById: GetContentByIdMethod = async <LocaleType = string>(client: GraphQLClient, variables: ContentQueryProps<LocaleType>) => {
+  return await client.request<GetContentByIdData, ContentQueryProps<LocaleType>>(gqlQuery, variables)
 }
 
 const gqlQuery = gql`query getContentByIdBase($key: String!, $version: String, $locale: [Locales!], $path: String, $domain: String) {
@@ -16,6 +15,7 @@ const gqlQuery = gql`query getContentByIdBase($key: String!, $version: String, $
             ]
         }
         locale: $locale
+        variation: {include: ALL}
     ) {
         total
         items {
@@ -25,6 +25,8 @@ const gqlQuery = gql`query getContentByIdBase($key: String!, $version: String, $
                 types
                 displayName
                 version
+                changeset
+                variation
             }
             _type: __typename
         }

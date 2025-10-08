@@ -109,12 +109,12 @@ export const CmsContentArea: CmsContentAreaBaseComponent = <
       const contentAreaItemContainerProps: any = {
         'data-epi-block-id':
           inEditMode && fieldName
-            ? Utils.getContentEditId(contentLink) || undefined
+            ? Utils.getContentEditId(contentLink)
             : undefined,
         'data-displayoption': item.displayOption || undefined,
         'data-tag': item.tag || undefined,
         'data-component': contentType?.at(0),
-        ...contentItemElementProps,
+        ...Utils.filterCmsComponentProps(contentItemElementProps),
         className: `opti-content-area-item opti-content-area-item-${idx}${contentAreaItemClassName ? ' ' + contentAreaItemClassName : ''} ${classMapper ? classMapper(item.displayOption ?? 'default', contentType ?? null, idx) : ''}`,
       }
       const contentAraeItemContent: JSX.Element = useSuspense ? (
@@ -164,7 +164,7 @@ export const CmsContentArea: CmsContentAreaBaseComponent = <
       `opti-content-area ${Array.isArray(additionalProps.className) ? additionalProps.className.join(' ') : (additionalProps.className ?? '')}`.trim(),
     'data-epi-edit': inEditMode && fieldName ? fieldName : undefined,
     'data-component': 'ContentArea',
-    ...additionalProps,
+    ...Utils.filterCmsComponentProps(additionalProps),
   }
   const contentAreaContainerChildrenTarget = itemsProperty ?? 'children'
   let contentAreaContainerChildren = undefined

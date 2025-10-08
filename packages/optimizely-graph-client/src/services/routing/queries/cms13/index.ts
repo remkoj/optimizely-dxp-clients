@@ -1,6 +1,7 @@
 import * as GetAllRoutes from './getAllRoutes.js'
 import * as GetRouteById from './getRouteById.js'
 import * as GetRouteByPath from './getRouteByPath.js'
+import type { Route as GraphRoute } from './types.js'
 import type { Route } from '../../types.js'
 import { type IOptiGraphClient as GraphQLClient } from '../../../../client/types.js'
 import { type OptimizelyCmsRoutingApi } from '../types.js'
@@ -16,15 +17,15 @@ export class OptimizelyCms13Client implements OptimizelyCmsRoutingApi {
     this._changeset = null
   }
 
-  async getRoutes(client: GraphQLClient, siteId?: string, onlyWithDomain?: boolean): Promise<Route[]> {
+  async getRoutes(client: GraphQLClient, siteId?: string, onlyWithDomain?: boolean, includeVariants?: boolean): Promise<Route[]> {
     if (client.debug)
       console.log(`⚪ [RouteResolver] Loading routes for ${siteId ?? 'all applications'}${!siteId && onlyWithDomain ? ' that have a domain defined.' : ''}`)
 
     let totalRoutes: number = 0
     let retrievedRoutes: number = 0
     let currentPage: number = 0
-    let pageSize: number = 50
-    const graphRoutes: GetAllRoutes.Route[] = []
+    let pageSize: number = 100
+    const graphRoutes: GraphRoute[] = []
 
     do {
       if (client.debug)
@@ -34,7 +35,8 @@ export class OptimizelyCms13Client implements OptimizelyCmsRoutingApi {
         mustHaveDomain: onlyWithDomain ? true : null,
         pageSize: pageSize,
         skip: currentPage * pageSize,
-        changeset: this._changeset || client.getChangeset()
+        changeset: this._changeset || client.getChangeset(),
+        variation: includeVariants ? { include: "ALL" } : undefined
       }).catch(e => {
         if (client.debug)
           console.error("🔴 [RouteResolver] Error while fetching routes", e)
@@ -55,7 +57,7 @@ export class OptimizelyCms13Client implements OptimizelyCmsRoutingApi {
     return graphRoutes.map(this.tryConvertResponse.bind(this)).filter(this.isNotNullOrUndefined)
   }
 
-  async getRouteByPath(client: GraphQLClient, path: string, siteId?: string): Promise<undefined | Route> {
+  async getRouteByPath(client: GraphQLClient, path: string, siteId?: string, variant?: string): Promise<undefined | Route> {
     if (client.debug)
       console.log(`⚪ [RouteResolver] Resolving content info for ${path} on ${siteId ? siteId : "all domains"}`)
 
@@ -63,7 +65,12 @@ export class OptimizelyCms13Client implements OptimizelyCmsRoutingApi {
 
     const resultSet = await client.request<GetRouteByPath.Result, GetRouteByPath.Variables>({
       document: GetRouteByPath.query,
-      variables: { path: paths, domain: siteId, changeset: this._changeset || client.getChangeset() }
+      variables: {
+        path: paths,
+        domain: siteId,
+        changeset: this._changeset || client.getChangeset(),
+        variation: variant && variant.length > 0 ? { include: "SOME", value: [variant] } : undefined
+      }
     })
 
     if ((resultSet.getRouteByPath?.total ?? 0) === 0) {
@@ -95,15 +102,19 @@ export class OptimizelyCms13Client implements OptimizelyCmsRoutingApi {
     })
 
     if (resultSet.Content?.total >= 1) {
-      if (client.debug && resultSet.Content?.total > 1)
-        console.warn(`🟠 [RouteResolver] Received multiple entries with this ID, returning the first one from: ${(resultSet.Content?.items || []).map(x => { return `${x._metadata.key} (version: ${x._metadata.version}, locale: ${x._metadata.locale})` }).join('; ')}`)
-      return this.convertResponse(resultSet.Content.items[0])
+      let selectedItem = resultSet.Content.items[0]
+      if (client.debug && resultSet.Content?.total > 1) {
+        let firstEmptyVariantItem = resultSet.Content?.items?.filter(x => x._metadata?.variation === null || x._metadata?.variation === undefined)?.at(0)
+        selectedItem = firstEmptyVariantItem ?? selectedItem
+      }
+      console.warn(`🟠 [RouteResolver] Received multiple entries with this ID, returning the first default variant from: ${(resultSet.Content?.items || []).map(x => { return `${x._metadata.key} (version: ${x._metadata.version}, locale: ${x._metadata.locale}, changeset: ${x._metadata.changeset}, variant: ${x._metadata.variation})` }).join('; ')}`)
+      return this.convertResponse(selectedItem)
     }
 
     return undefined
   }
 
-  private convertResponse(item: GetAllRoutes.Route): Route {
+  private convertResponse(item: GraphRoute): Route {
     if (!item)
       throw new Error("RouteResolver.convertResponse(): mandatory parameter \"item\" not provided!")
     const itemUrl = new URL(item._metadata?.url?.path ?? '/', item._metadata?.url?.domain ?? 'https://example.com')
@@ -115,11 +126,13 @@ export class OptimizelyCms13Client implements OptimizelyCmsRoutingApi {
       changed: item.changed ? new Date(item.changed) : null,
       contentType: item._metadata.types,
       version: item._metadata.version,
-      key: item._metadata.key
+      key: item._metadata.key,
+      changeset: item._metadata.changeset,
+      variation: item._metadata.variation
     }
   }
 
-  private tryConvertResponse(item: GetAllRoutes.Route): Route | undefined {
+  private tryConvertResponse(item: GraphRoute): Route | undefined {
     try {
       return this.convertResponse(item)
     } catch (e) {

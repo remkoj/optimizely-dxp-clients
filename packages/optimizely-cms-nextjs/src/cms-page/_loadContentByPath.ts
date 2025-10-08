@@ -15,7 +15,8 @@ export async function loadContentByPath<LocaleEnum = SystemLocales>(
   getContentByPath: GetContentByPathMethod<LocaleEnum>,
   requestPath: string,
   channel?: ChannelDefinition | string,
-  locale?: LocaleEnum | LocaleEnum[]
+  locale?: LocaleEnum | LocaleEnum[],
+  variation?: string
 ): Promise<LookupResponse | undefined | null> {
   if (client.debug)
     console.log(
@@ -33,6 +34,7 @@ export async function loadContentByPath<LocaleEnum = SystemLocales>(
     path: pathForRequest,
     siteId: channelId,
     locale,
+    variation: variation ? { include: "SOME", value: [variation] } : undefined
   }
   if (client.isPreviewEnabled()) requestVars.changeset = client?.getChangeset()
   if (client.debug)

@@ -1,11 +1,13 @@
 //import { gql } from "graphql-request"
-import { type IOptiGraphClient } from "@remkoj/optimizely-graph-client"
+import type { IOptiGraphClient, VariationInput } from "@remkoj/optimizely-graph-client"
+export type { VariationInput } from "@remkoj/optimizely-graph-client"
 
 export type GetContentByPathVariables<LocaleType = string> = {
   path: string | string[],
   locale?: Array<LocaleType> | LocaleType,
   siteId?: string,
   changeset?: string | null
+  variation?: VariationInput | null
 }
 
 type MayBe<T> = T extends Array<infer R> ? Array<R | null> | null : T | null

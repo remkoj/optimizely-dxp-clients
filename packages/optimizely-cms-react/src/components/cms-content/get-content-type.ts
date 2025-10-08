@@ -5,9 +5,8 @@ import { contentLinkToRequestVariables, normalizeContentType } from "../../utili
 
 export type ContentTypeResolver = (type: ContentType | null | undefined, link: ContentLink, gqlClient: IOptiGraphClient) => PromiseLike<ContentType | undefined>
 
-export function valueToPromiseLike<T>(value: T) : PromiseLike<T>
-{
-  const pl : PromiseLike<T> = {
+export function valueToPromiseLike<T>(value: T): PromiseLike<T> {
+  const pl: PromiseLike<T> = {
     then: <TResult1 = T>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | null | undefined) => {
       if (!onfulfilled)
         return value as unknown as PromiseLike<TResult1>
@@ -24,68 +23,57 @@ export function valueToPromiseLike<T>(value: T) : PromiseLike<T>
  * @param       gqlClient   The GraphQL client to use
  * @returns     The ContentType, or undefined if it cannot be resolved
  */
-export async function getContentType(link: ContentLink | InlineContentLink, gqlClient: IOptiGraphClient) : Promise<ContentType | undefined>
-{
-    if (isInlineContentLink(link)) {
-        console.error(`🔴 [CmsContent][getContentType] Unable to dynamically resolve the content type for inline content items: ${ contentLinkToString(link) }`)
-        throw new Error(`Unable to dynamically resolve the content type for inline content items: ${ contentLinkToString(link) }`)
-    }
+export async function getContentType(link: ContentLink | InlineContentLink, gqlClient: IOptiGraphClient): Promise<ContentType | undefined> {
+  if (isInlineContentLink(link)) {
+    console.error(`🔴 [CmsContent][getContentType] Unable to dynamically resolve the content type for inline content items: ${contentLinkToString(link)}`)
+    throw new Error(`Unable to dynamically resolve the content type for inline content items: ${contentLinkToString(link)}`)
+  }
 
-    if (!isContentLink(link)) {
-        console.error(`🔴 [CmsContent][getContentType] The provided link is not a valid content link: ${ contentLinkToString(link) }`)
-        throw new Error(`The provided link is not a valid content link: ${ contentLinkToString(link) }`)
-    }
+  if (!isContentLink(link)) {
+    console.error(`🔴 [CmsContent][getContentType] The provided link is not a valid content link: ${contentLinkToString(link)}`)
+    throw new Error(`The provided link is not a valid content link: ${contentLinkToString(link)}`)
+  }
 
-    const gqlQueryVars = contentLinkToRequestVariables(link)
-    const gqlResponse = await gqlClient.request<GetContentTypeResponse>(getContentTypeQuery, gqlQueryVars)
-    if (gqlResponse.Content?.total != 1) {
-        if (gqlClient.debug) 
-            console.error(`🔴 [CmsContent][getContentType] Expected exactly one type, received ${ gqlResponse.Content?.total ?? 0 } types for`, gqlQueryVars)
-        return undefined
-    }
-    
-    const items = gqlResponse.Content?.items
-    if (!items || items.length == 0) {
-        console.error(`🔴 [CmsContent][getContentType] The content item could not be found! (${ contentLinkToString(link) })`)
-        throw new Error("The content item could not be found!")
-    }
+  const gqlQueryVars = contentLinkToRequestVariables(link, gqlClient)
+  const gqlResponse = await gqlClient.request<GetContentTypeResponse>(getContentTypeQuery, gqlQueryVars)
+  if (gqlResponse.Content?.total != 1) {
+    if (gqlClient.debug)
+      console.error(`🔴 [CmsContent][getContentType] Expected exactly one type, received ${gqlResponse.Content?.total ?? 0} types for`, gqlQueryVars)
+    return undefined
+  }
 
-    const contentType = normalizeContentType(items[0]?._metadata?.types)
-    if (!contentType) {
-        console.error(`🔴 [CmsContent][getContentType] The item did not contain type information! (${ contentLinkToString(link) })`)
-        throw new Error("The item did not contain type information")
-    }
+  const contentType = normalizeContentType(gqlResponse.Content?.item?._metadata?.types)
+  if (!contentType) {
+    console.error(`🔴 [CmsContent][getContentType] The item did not contain type information! (${contentLinkToString(link)})`)
+    throw new Error("The item did not contain type information")
+  }
 
-    return contentType
+  return contentType
 }
 
 export default getContentType
 
 type GetContentTypeResponse = {
-    Content: {
-        items: Partial<{
-            _metadata: Partial<{
-              types: string[]
-            }>
-        }>[]
-        total: number
-    }
+  Content: {
+    item: Partial<{
+      _metadata: Partial<{
+        types: string[]
+      }>
+    }>
+    total: number
+  }
 }
 
-const getContentTypeQuery = gql`query getContentType($key: String!, $version: String, $locale: [Locales])
+const getContentTypeQuery = gql`query getContentType($key: [String!]!, $version: String, $locale: [Locales!], $changeset: String, $variation: VariationInput)
 {
   Content: _Content(
-    where: {
-      _metadata: {
-        key: { eq: $key }
-        version: { eq: $version }
-      }
-    },
+    ids: $key
     locale: $locale
-    limit: 1
+    variation: $variation
+    where: { _metadata: { changeset: { eq: $changeset }, version: { eq: $version } } }
   ) {
-    items {
-    	_metadata {
+    item {
+    	metadata: _metadata {
         types
       }
     },

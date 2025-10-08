@@ -13,12 +13,16 @@
   ],
   "exports": {
     ".": "./dist/index.js",
-    "./rsc": "./dist/rsc.js"
+    "./rsc": "./dist/rsc.js",
+    "./utils": "./dist/utilities.js"
   },
   "typesVersions": {
     "*": {
       "rsc": [
         "dist/rsc.d.ts"
+      ],
+      "utils": [
+        "dist/utilities.d.ts"
       ]
     }
   },

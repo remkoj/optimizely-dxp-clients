@@ -82,14 +82,16 @@ export class RouteResolver implements IRouteResolver {
   /**
    * Retrieve all registered routes for the provided domain - all domains if none specified
    * 
-   * @param       domain          The domain to filter on
-   * @param       onlyWithDomain  If set/kept to `undefined` will only filter by domain. When set
-   *                              to `true`, requires the domain (CMS SaaS/13 only) to be set. This
-   *                              allows to get all routes bound to a domain.
+   * @param       domainOrChannelId   The domain to filter on
+   * @param       onlyWithDomain      If set/kept to `undefined` will only filter by domain. When
+   *                                  set to `true`, requires the domain (CMS SaaS/13 only) to be 
+   *                                  set. This allows to get all routes bound to a domain.
+   * @param       includeVariants     If set to `true` the output will include all variants for 
+   *                                  each item in the CMS.
    * @returns     The list of routes
    */
-  public async getRoutes(domain?: string, onlyWithDomain?: boolean): Promise<Route[]> {
-    return (await this.getResolver()).getRoutes(this._cgClient, domain, onlyWithDomain)
+  public async getRoutes(domain?: string, onlyWithDomain?: boolean, includeVariants?: boolean): Promise<Route[]> {
+    return (await this.getResolver()).getRoutes(this._cgClient, domain, onlyWithDomain, includeVariants)
   }
 
   /**
@@ -98,15 +100,16 @@ export class RouteResolver implements IRouteResolver {
    * 
    * @param       path        The path to resolve for
    * @param       domain      The domain to filter the results by
+   * @param       variation   The name of the variation to filter the routes by
    * @returns     The route information for the path
    */
   public async getContentInfoByPath(path: URL): Promise<undefined | Route>
-  public async getContentInfoByPath(path: string, domain?: string): Promise<undefined | Route>
-  public async getContentInfoByPath(path: URL | string, domain?: string): Promise<undefined | Route> {
+  public async getContentInfoByPath(path: string, domain?: string, variation?: string): Promise<undefined | Route>
+  public async getContentInfoByPath(path: URL | string, domain?: string, variation?: string): Promise<undefined | Route> {
     const queryPath = typeof path == 'object' && path != null ? path.pathname : path
     const queryDomain = typeof path == 'object' && path != null ? path.protocol + '//' + path.host : domain
 
-    return (await this.getResolver()).getRouteByPath(this._cgClient, queryPath, queryDomain)
+    return (await this.getResolver()).getRouteByPath(this._cgClient, queryPath, queryDomain, variation)
   }
 
   public async getContentInfoById(key: string, locale?: string, version?: string | number): Promise<undefined | Route> {
@@ -123,7 +126,10 @@ export class RouteResolver implements IRouteResolver {
     return {
       key: route.key,
       version: route.version,
-      locale: route.locale
+      locale: route.locale,
+      isInline: false,
+      variation: route.variation,
+      changeset: route.changeset
     }
   }
 }

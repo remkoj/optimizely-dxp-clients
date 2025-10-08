@@ -147,18 +147,18 @@ export class ServerContext implements GenericContext {
     this._editableIsExperience = isExperience
   }
 
-  private _hasWarned: boolean = false;
+  //private _hasWarned: boolean = false;
   public toJSON(key?: string): TransferrableContext {
-    if (this.isDebugOrDevelopment) {
+    /*if (this.isDebugOrDevelopment) {
       if (!this._hasWarned || this.isDebug) {
         console.warn(
-          '🦺 [ServerContext] Converting Context to JSON, this is typically a side effect of the context being passed between Server & Client components'
+          '🦺 [ServerContext] Converting Context to JSON, this is typically a side effect of the context being passed between Server & Client components', key
         )
         this._hasWarned = true
       }
       if (this.isDebug)
         console.trace()
-    }
+    }*/
 
     return {
       client: this.client?.toJSON(),

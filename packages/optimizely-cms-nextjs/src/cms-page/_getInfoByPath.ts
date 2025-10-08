@@ -12,15 +12,12 @@ export async function getInfoByPath(
   client: IOptiGraphClient,
   routerFactory: (client?: IOptiGraphClient) => IRouteResolver,
   requestPath: string,
-  channel?: ChannelDefinition | string
+  channel?: ChannelDefinition | string,
+  variation?: string
 ) {
-  if (client.debug)
-    console.log(
-      `⚪ [CmsPage.getInfoByPath] Loading content for path "${requestPath}" using RouteResolver`
-    )
   const channelId = getChannelId(client, channel)
   const router = routerFactory(client)
-  const route = await router.getContentInfoByPath(requestPath, channelId)
+  const route = await router.getContentInfoByPath(requestPath, channelId, variation)
   if (!route) {
     if (client.debug)
       console.warn(
@@ -31,5 +28,9 @@ export async function getInfoByPath(
   const contentLink = router.routeToContentLink(route)
   const contentType = route.contentType
   const graphLocale = localeToGraphLocale(route.locale, ifChannelDefinition(channel))
+  if (client.debug)
+    console.log(
+      `⚪ [CmsPage.getInfoByPath] Resolved path "${requestPath}"${variation ? ` in variation ${variation}` : ""} to content ${JSON.stringify(contentLink)} of type ${contentType.join('/')} using RouteResolver`
+    )
   return [route, contentLink, contentType, graphLocale, null] as LookupResponse
 }
