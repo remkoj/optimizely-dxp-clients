@@ -5,7 +5,7 @@
 export type PinnedItemResult = {
     phrases: string;
     targetKey: string;
-    language: string | null;
+    language?: string | null;
     priority?: number;
     isActive?: boolean;
     id: string;

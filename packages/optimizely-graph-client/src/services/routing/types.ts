@@ -1,4 +1,4 @@
-import type { ContentLinkWithLocale } from '../types.js'
+import type { AnyContentLink, ContentLinkWithLocale } from '../types.js'
 
 export type Route = {
   locale: string
@@ -68,6 +68,14 @@ export interface IRouteResolver {
   getContentInfoByPath(path: URL): Promise<undefined | Route>
   getContentInfoByPath(path: string, domain?: string, variation?: string): Promise<undefined | Route>
   getContentInfoByPath(path: URL | string, domain?: string, variation?: string): Promise<undefined | Route>
+
+  /**
+   * Retrieve all route information based upon the contentLink given
+   * 
+   * @param contentLink 
+   * @returns The route information for the given contentLink
+   */
+  getRouteByLink(contentLink: AnyContentLink): Promise<undefined | Route>
 
   /**
    * Extract a content link from a route definition

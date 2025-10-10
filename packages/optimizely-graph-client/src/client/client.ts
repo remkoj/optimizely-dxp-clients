@@ -367,6 +367,23 @@ export class ContentGraphClient extends GraphQLClient implements IOptiGraphClien
   public getChangeset(): string | null {
     return this._changeset
   }
+
+
+  isDevelopment() {
+    try {
+      return process?.env?.NODE_ENV === 'development'
+    } catch {
+      return false
+    }
+  }
+
+  isDebug() {
+    return this._config.debug ?? false
+  }
+
+  isDebugOrDevelopment() {
+    return this.isDebug() || this.isDevelopment()
+  }
 }
 
 export default ContentGraphClient

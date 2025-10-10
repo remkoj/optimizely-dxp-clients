@@ -25,6 +25,20 @@ export {
   isElementNode,
 } from './visual-builder/functions.js'
 
+export type { 
+  CompositionNode,
+  CompositionNodeBase,
+  CompositionComponentNode,
+  CompositionStructureNode,
+  CompositionComponentType,
+  LeafPropsFactory,
+  NodePropsFactory,
+} from './visual-builder/types.js'
+
+export { 
+  StructureNodeTypes,
+} from './visual-builder/types.js'
+
 export type {
   RichTextComponent,
   RichTextProps,

@@ -4,6 +4,7 @@ import * as GetRouteByPath from './getRouteByPath.js'
 import type { Route } from '../../types.js'
 import { type IOptiGraphClient as GraphQLClient } from '../../../../client/types.js'
 import { type OptimizelyCmsRoutingApi } from '../types.js'
+import { AnyContentLink } from '../../../types.js'
 
 export class OptimizelyCms12Client implements OptimizelyCmsRoutingApi {
 
@@ -87,6 +88,9 @@ export class OptimizelyCms12Client implements OptimizelyCmsRoutingApi {
     }
 
     return undefined
+  }
+  async getRouteByLink(client: GraphQLClient, contentLink: AnyContentLink): Promise<undefined | Route> {
+    throw new Error("Not supported on CMS 12")
   }
 
   protected parseIdString(id: string): [number, number | null] {

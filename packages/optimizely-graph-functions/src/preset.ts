@@ -13,6 +13,7 @@ import {
   normalizeFragmentNames,
   normalizeQueryNames,
   injectComponentDocuments,
+  injectSectionQueries,
   injectPageQueries,
   performInjections,
   cleanFragmentSpreads
@@ -86,6 +87,7 @@ export const preset: Types.OutputPreset<PresetOptions> =
       normalizeQueryNames,      // Allow overriding of built-in queries
       injectComponentDocuments, // Inject fragments to fetch component data
       injectPageQueries,        // Inject queries to fetch page/experience data
+      injectSectionQueries,     // Inject queries to fetch section data
       performInjections,        // Run injections of component fragments adjacent to placeholder fragments
       cleanFragmentSpreads      // Remove all fragment spreads that target a fragment that does not exist in the documents
     ], options);

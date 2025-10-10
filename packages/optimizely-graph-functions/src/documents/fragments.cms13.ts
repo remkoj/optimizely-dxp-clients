@@ -84,6 +84,30 @@ export default [
     }
   }
 }`,
+  `fragment _SectionCompositionData on _ISection {
+  composition {
+    ...CompositionNodeData
+    nodes {
+      ...CompositionNodeData
+      ... on CompositionComponentNode {
+        component {
+          ...IContentData
+          ...SectionElementData
+        }
+      }
+      ... on CompositionStructureNode {
+        nodes {
+          ...CompositionNodeData
+          ...CompositionStructureNode
+          ...CompositionComponentNode
+        }
+        component {
+          ...SectionData
+        }
+      }
+    }
+  }
+}`,
   `fragment _CompositionStructureNode on ICompositionStructureNode {
   nodes {
     ...CompositionNodeData

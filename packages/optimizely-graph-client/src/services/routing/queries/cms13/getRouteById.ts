@@ -1,11 +1,12 @@
 import { gql } from "graphql-request"
-import { type Route } from "./types.js"
+import { VariationInput, type Route } from "./types.js"
 
 export type Variables = {
   key: string,
   version?: string | null,
   locale?: Array<string | null> | string | null
   changeset?: string | null
+  variation?: VariationInput | null
 }
 
 export type Result = {
@@ -15,13 +16,14 @@ export type Result = {
   }
 }
 
-export const query = gql`query GetRouteById($key: String!, $version: String, $locale: [Locales], $changeset: String) {
+export const query = gql`query GetRouteById($key: [String!]!, $version: String, $locale: [Locales], $changeset: String, $variation:VariationInput) {
   Content: _Content(
-    where: {
-      _metadata: { key: { eq: $key }, version: { eq: $version }, changeset: { eq: $changeset } }
-    }
+    ids: $key
     locale: $locale
-    variation: { include: ALL, includeOriginal: true }
+    variation: $variation
+    where: {
+      _metadata: { changeset: { eq: $changeset }, version: { eq: $version } }
+    }
   ) {
     total
     items {
@@ -34,7 +36,7 @@ export const query = gql`query GetRouteById($key: String!, $version: String, $lo
         changeset
         types
         url {
-          path: hierarchical
+          path: default
           domain: base
         }
         ... on IInstanceMetadata {

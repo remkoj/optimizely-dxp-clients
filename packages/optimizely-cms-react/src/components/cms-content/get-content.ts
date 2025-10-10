@@ -55,11 +55,11 @@ export function getContent<NDL extends boolean = false>(client: IOptiGraphClient
     throw new Error(`Data loading for "${componentLabel}" requires a GraphQL Client`)
   }
 
-  if (isCmsComponentWithFragment<any>(Component))
-    return getComponentDataFromFragment<any>(Component, contentLink, client).then(data => (data || {}) as Record<string, any>)
-
   if (isCmsComponentWithDataQuery<any>(Component))
     return getComponentDataFromQuery<Record<string, any>>(Component, contentLink, client)
+
+  if (isCmsComponentWithFragment<any>(Component))
+    return getComponentDataFromFragment<any>(Component, contentLink, client).then(data => (data || {}) as Record<string, any>)
 
   return Promise.resolve({})
 }

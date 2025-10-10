@@ -25,6 +25,7 @@ export default [
           ...ComponentData
           ...SectionData
           ...FormElementData
+          ...SectionCompositionData
         }
       }
     }`,

@@ -5,7 +5,7 @@
 export type PinnedItemPayload = {
     phrases: string;
     targetKey: string;
-    language: string | null;
+    language?: string | null;
     priority?: number;
     isActive?: boolean;
 };

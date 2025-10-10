@@ -14,7 +14,9 @@ import {
   ServerContext,
   Utils,
   CmsContent,
-  updateSharedServerContext,
+  OptimizelyComposition,
+  isNode,
+  type CompositionNode,
   type ComponentFactory,
 } from '@remkoj/optimizely-cms-react/rsc'
 import { notFound } from 'next/navigation.js'
@@ -162,6 +164,7 @@ export function createEditPageComponent<LocaleType = string>(
         )
       }
 
+
       // Store the editable content so it can be tested
       context.setEditableContentId(contentLink)
       if (contentLink.locale) context.setLocale(contentLink.locale)
@@ -172,6 +175,13 @@ export function createEditPageComponent<LocaleType = string>(
       // Render the content, with edit mode context
       const isPage =
         contentType.some((x) => x?.toLowerCase() == 'page') ?? false
+      const isSection = contentType.some(x => x?.toLowerCase() == 'section') ?? false
+      const sectionData = isSection && contentItem['composition'] && isNode(contentItem['composition']) ? contentItem['composition'] as CompositionNode : undefined
+      if (sectionData) {
+        delete contentItem['composition']
+        sectionData.component = contentItem
+      }
+      
       const Layout = isPage ? PageLayout : React.Fragment
       const output = (
         <>
@@ -186,12 +196,7 @@ export function createEditPageComponent<LocaleType = string>(
             <OnPageEdit refreshTimeout={refreshTimeout}>
               <RefreshNotice />
             </OnPageEdit>
-            <CmsContent
-              contentType={contentType}
-              contentLink={contentLink}
-              fragmentData={contentItem}
-              ctx={context}
-            />
+            {sectionData ? <OptimizelyComposition node={sectionData} ctx={context} /> : <CmsContent contentType={contentType} contentLink={contentLink} fragmentData={contentItem} ctx={context} />}
           </Layout>
           {context.isDebug && (
             <div className="optly-contentLink">

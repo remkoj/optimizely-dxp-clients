@@ -4,7 +4,7 @@ import { type OptimizelyGraphConfig } from '../../types.js'
 
 // Import Routing specific types
 import type { Route, IRouteResolver } from "./types.js"
-import type { ContentLinkWithLocale } from '../types.js'
+import type { AnyContentLink, ContentLinkWithLocale } from '../types.js'
 
 import type { OptimizelyCmsRoutingApi, OptimizelyCmsRoutingApiClass } from './queries/types.js'
 
@@ -114,6 +114,10 @@ export class RouteResolver implements IRouteResolver {
 
   public async getContentInfoById(key: string, locale?: string, version?: string | number): Promise<undefined | Route> {
     return (await this.getResolver()).getRouteById(this._cgClient, key, locale, version)
+  }
+
+  public async getRouteByLink(contentLink: AnyContentLink): Promise<undefined | Route> {
+    return (await this.getResolver()).getRouteByLink(this._cgClient, contentLink)
   }
 
   /**

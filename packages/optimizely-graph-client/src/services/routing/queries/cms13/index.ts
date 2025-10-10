@@ -5,6 +5,8 @@ import type { Route as GraphRoute } from './types.js'
 import type { Route } from '../../types.js'
 import { type IOptiGraphClient as GraphQLClient } from '../../../../client/types.js'
 import { type OptimizelyCmsRoutingApi } from '../types.js'
+import { AnyContentLink } from '../../../types.js'
+import { isContentLinkWithLocale, isInlineContentLink, localeToGraphLocale } from '../../../utils.js'
 
 export class OptimizelyCms13Client implements OptimizelyCmsRoutingApi {
   private _changeset: string | null = null
@@ -91,7 +93,13 @@ export class OptimizelyCms13Client implements OptimizelyCmsRoutingApi {
   }
 
   async getRouteById(client: GraphQLClient, contentId: string, locale: string, version: string | number): Promise<undefined | Route> {
-    const variables: GetRouteById.Variables = { key: contentId, version: version?.toString(), locale: locale?.replaceAll('-', '_'), changeset: this._changeset || client.getChangeset() }
+    const variables: GetRouteById.Variables = {
+      key: contentId,
+      version: version?.toString(),
+      locale: localeToGraphLocale(locale),
+      changeset: this._changeset || client.getChangeset(),
+      variation: version ? { include: "ALL" } : undefined
+    }
 
     if (client.debug)
       console.log("⚪ [RouteResolver] Resolving content by id:", JSON.stringify(variables))
@@ -106,9 +114,43 @@ export class OptimizelyCms13Client implements OptimizelyCmsRoutingApi {
       if (client.debug && resultSet.Content?.total > 1) {
         let firstEmptyVariantItem = resultSet.Content?.items?.filter(x => x._metadata?.variation === null || x._metadata?.variation === undefined)?.at(0)
         selectedItem = firstEmptyVariantItem ?? selectedItem
+        console.warn(`🟠 [RouteResolver] Received multiple entries with this ID, returning the first default variant from: ${(resultSet.Content?.items || []).map(x => { return `${x._metadata.key} (version: ${x._metadata.version}, locale: ${x._metadata.locale}, changeset: ${x._metadata.changeset}, variant: ${x._metadata.variation})` }).join('; ')}`)
       }
-      console.warn(`🟠 [RouteResolver] Received multiple entries with this ID, returning the first default variant from: ${(resultSet.Content?.items || []).map(x => { return `${x._metadata.key} (version: ${x._metadata.version}, locale: ${x._metadata.locale}, changeset: ${x._metadata.changeset}, variant: ${x._metadata.variation})` }).join('; ')}`)
       return this.convertResponse(selectedItem)
+    }
+
+    return undefined
+  }
+  async getRouteByLink(client: GraphQLClient, contentLink: AnyContentLink): Promise<undefined | Route> {
+    if (!isContentLinkWithLocale(contentLink))
+      return undefined;
+
+    const variables: GetRouteById.Variables = {
+      key: contentLink.key,
+      version: contentLink.version?.toString(),
+      locale: contentLink.locale ? localeToGraphLocale(contentLink.locale) : undefined,
+      changeset: contentLink.changeset || this._changeset || client.getChangeset(),
+      variation: contentLink.variation ? { include: "SOME", value: [contentLink.variation] } : (contentLink.version ? { include: "ALL" } : undefined)
+    }
+
+    if (client.debug)
+      console.log("⚪ [RouteResolver] Resolving content by link:", JSON.stringify(variables))
+
+    const resultSet = await client.request<GetRouteById.Result, GetRouteById.Variables>({
+      document: GetRouteById.query,
+      variables
+    })
+
+    if (resultSet.Content?.total >= 1) {
+      let selectedItem = resultSet.Content.items[0]
+      if (client.debug && resultSet.Content?.total > 1) {
+        let firstEmptyVariantItem = resultSet.Content?.items?.filter(x => x._metadata?.variation === null || x._metadata?.variation === undefined)?.at(0)
+        selectedItem = firstEmptyVariantItem ?? selectedItem
+        console.warn(`🟠 [RouteResolver] Received multiple entries with this ID, returning the first default variant from: ${(resultSet.Content?.items || []).map(x => { return `${x._metadata.key} (version: ${x._metadata.version}, locale: ${x._metadata.locale}, changeset: ${x._metadata.changeset}, variant: ${x._metadata.variation})` }).join('; ')}`)
+      }
+      return this.convertResponse(selectedItem)
+    } else {
+      console.warn(`🟠 [RouteResolver] Unable to locate the requested item (${JSON.stringify(variables)}) in Optimizely Graph`)
     }
 
     return undefined

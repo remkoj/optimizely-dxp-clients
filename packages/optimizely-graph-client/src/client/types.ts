@@ -264,6 +264,22 @@ export interface IOptiGraphClient extends ClientInstanceType {
    * Get the current changeset for this client
    */
   getChangeset(): string | null
+
+  /**
+   * Method to check if the current runtime is in
+   * development mode.
+   */
+  isDevelopment(): boolean
+  /**
+   * Method to check if this client is in
+   * debug mode.
+   */
+  isDebug(): boolean
+  /**
+   * Method to check if this client is in
+   * debug or development mode.
+   */
+  isDebugOrDevelopment(): boolean
 }
 
 // Factory service

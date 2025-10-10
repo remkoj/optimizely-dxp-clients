@@ -1,9 +1,10 @@
 export type ContentLink = {
   key: string
-  version?: string | null,
+  version?: string | null
   isInline?: boolean
   variation?: string | null
   changeset?: string | null
+  status?: string | null
 }
 
 export type InlineContentLink = {
@@ -12,7 +13,11 @@ export type InlineContentLink = {
   isInline?: true
   variation?: string | null
   changeset?: string | null
+  status?: string | null
 }
 
 export type ContentLinkWithLocale<LocaleType = string> = ContentLink & { locale?: LocaleType }
+
 export type InlineContentLinkWithLocale<LocaleType = string> = InlineContentLink & { locale?: LocaleType }
+
+export type AnyContentLink = ContentLink | ContentLinkWithLocale | InlineContentLink | InlineContentLinkWithLocale
