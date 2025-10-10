@@ -169,10 +169,7 @@ export function createEditPageComponent<LocaleType = string>(
       context.setEditableContentId(contentLink)
       if (contentLink.locale) context.setLocale(contentLink.locale)
 
-      // Make the shared server context available
-      //updateSharedServerContext(context)
-
-      // Render the content, with edit mode context
+      // Determine rendering flow controls
       const isPage =
         contentType.some((x) => x?.toLowerCase() == 'page') ?? false
       const isSection = contentType.some(x => x?.toLowerCase() == 'section') ?? false
@@ -180,23 +177,26 @@ export function createEditPageComponent<LocaleType = string>(
       if (sectionData) {
         delete contentItem['composition']
         sectionData.component = contentItem
+        context.setEditableContentIsExperience(true)
       }
-      
+
+      // Prepare communication injector
+      const injectorUrl = new URL(communicationInjectorPath, client.siteInfo.cmsURL).href
+
+      // Render edit page
       const Layout = isPage ? PageLayout : React.Fragment
       const output = (
         <>
           {/* @ts-expect-error */}
-          <Script
-            src={
-              new URL(communicationInjectorPath, client.siteInfo.cmsURL).href
-            }
-            strategy="afterInteractive"
-          />
+          <Script src={ injectorUrl } strategy="afterInteractive"/>
           <Layout locale={contentItem.locale?.name ?? ''}>
             <OnPageEdit refreshTimeout={refreshTimeout}>
               <RefreshNotice />
             </OnPageEdit>
-            {sectionData ? <OptimizelyComposition node={sectionData} ctx={context} /> : <CmsContent contentType={contentType} contentLink={contentLink} fragmentData={contentItem} ctx={context} />}
+            { sectionData ?
+              <OptimizelyComposition node={sectionData} ctx={context} /> :
+              <CmsContent contentType={contentType} contentLink={contentLink} fragmentData={contentItem} ctx={context} />
+            }
           </Layout>
           {context.isDebug && (
             <div className="optly-contentLink">
