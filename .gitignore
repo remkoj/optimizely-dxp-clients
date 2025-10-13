@@ -16,9 +16,10 @@
 node_modules/
 artefacts/*.tgz
 
-# IDE Configuration
+# IDE/OS Artefacts
 .idea
 .vscode
+.DS_Store
 
 # Exclude local files
 *.local

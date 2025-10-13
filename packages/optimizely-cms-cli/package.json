@@ -10,7 +10,7 @@
     "CLI"
   ],
   "type": "module",
-  "version": "6.0.0-pre9",
+  "version": "6.0.0-pre10",
   "bin": {
     "opti-cms": "./dist/index.js",
     "optimizely-cms-cli": "./dist/index.js"
@@ -26,11 +26,11 @@
     "opti-cms": "node ./dist/index.js"
   },
   "devDependencies": {
-    "@remkoj/optimizely-cms-api": "workspace:6.0.0-pre9",
-    "@remkoj/optimizely-graph-functions": "workspace:6.0.0-pre9",
+    "@remkoj/optimizely-cms-api": "workspace:6.0.0-pre10",
+    "@remkoj/optimizely-graph-functions": "workspace:6.0.0-pre10",
     "@rollup/plugin-json": "^6.1.0",
     "@rollup/plugin-typescript": "^12.1.4",
-    "@types/node": "^22.18.8",
+    "@types/node": "^22.18.10",
     "@types/yargs": "^17.0.33",
     "rollup": "^4.52.4",
     "tslib": "^2.8.1",
@@ -39,8 +39,8 @@
   "dependencies": {
     "@fastify/deepmerge": "^3.1.0",
     "@inquirer/prompts": "^7.8.6",
-    "@remkoj/optimizely-cms-api": "^6.0.0-pre9",
-    "@remkoj/optimizely-graph-functions": "6.0.0-pre9",
+    "@remkoj/optimizely-cms-api": "^6.0.0-pre10",
+    "@remkoj/optimizely-graph-functions": "6.0.0-pre10",
     "ajv": "^8.17.1",
     "ajv-formats": "^3.0.1",
     "chalk": "^5.6.2",
