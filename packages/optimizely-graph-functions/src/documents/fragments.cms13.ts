@@ -65,6 +65,13 @@ export default [
                   # Element level
                   ...CompositionNodeData
                   ...CompositionComponentNodeData
+                  ... on ICompositionStructureNode {
+                    nodes {
+                      # Form element level level
+                      ...CompositionNodeData
+                      ...CompositionComponentNodeData
+                    }
+                  }
                 }
               }
             }
