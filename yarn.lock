@@ -1119,9 +1119,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@hey-api/openapi-ts@npm:^0.85.1":
-  version: 0.85.1
-  resolution: "@hey-api/openapi-ts@npm:0.85.1"
+"@hey-api/openapi-ts@npm:^0.85.2":
+  version: 0.85.2
+  resolution: "@hey-api/openapi-ts@npm:0.85.2"
   dependencies:
     "@hey-api/codegen-core": "npm:^0.2.0"
     "@hey-api/json-schema-ref-parser": "npm:1.2.0"
@@ -1136,7 +1136,7 @@ __metadata:
     typescript: ">=5.5.3"
   bin:
     openapi-ts: bin/index.cjs
-  checksum: 10c0/a2de318c560381f32dabc46798b9d249df66d4d837be8732ea95e2cd6750d90cea326e41df441b34324af1ea4e0f74d382b0c37c723ca169c51839122a657218
+  checksum: 10c0/a4935b32917e143729dc8f25668289529e8b9662d1d52690b957840bc86ff9bec3f719257803e63ec878fedce46440de78e9c9c905c9b126ec5feae479090197
   languageName: node
   linkType: hard
 
@@ -2054,7 +2054,7 @@ __metadata:
   resolution: "@remkoj/optimizely-cms-api@workspace:packages/optimizely-cms-api"
   dependencies:
     "@hey-api/client-fetch": "npm:^0.13.1"
-    "@hey-api/openapi-ts": "npm:^0.85.1"
+    "@hey-api/openapi-ts": "npm:^0.85.2"
     "@types/node": "npm:^22.18.10"
     dotenv: "npm:^17.2.3"
     dotenv-expand: "npm:^12.0.3"

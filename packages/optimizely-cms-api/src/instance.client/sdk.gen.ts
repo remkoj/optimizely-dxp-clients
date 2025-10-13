@@ -21,6 +21,7 @@ export type Options<TData extends TDataShape = TDataShape, ThrowOnError extends 
 
 /**
  * List changeset
+ *
  * Lists all changeset using the provided options.
  */
 export const changesetsList = <ThrowOnError extends boolean = false>(options?: Options<ChangesetsListData, ThrowOnError>) => {
@@ -33,6 +34,7 @@ export const changesetsList = <ThrowOnError extends boolean = false>(options?: O
 
 /**
  * Create changeset
+ *
  * Creates a new changeset.
  */
 export const changesetsCreate = <ThrowOnError extends boolean = false>(options: Options<ChangesetsCreateData, ThrowOnError>) => {
@@ -49,6 +51,7 @@ export const changesetsCreate = <ThrowOnError extends boolean = false>(options: 
 
 /**
  * Delete changeset
+ *
  * Deletes the changeset with the provided key. If a changeset with the provided key does not exist an error is returned.
  */
 export const changesetsDelete = <ThrowOnError extends boolean = false>(options: Options<ChangesetsDeleteData, ThrowOnError>) => {
@@ -61,6 +64,7 @@ export const changesetsDelete = <ThrowOnError extends boolean = false>(options: 
 
 /**
  * Get changeset
+ *
  * Gets the changeset with the provided key.
  */
 export const changesetsGet = <ThrowOnError extends boolean = false>(options: Options<ChangesetsGetData, ThrowOnError>) => {
@@ -73,6 +77,7 @@ export const changesetsGet = <ThrowOnError extends boolean = false>(options: Opt
 
 /**
  * Create or replace changeset
+ *
  * Creates or replaces a changeset. If a changeset with the provided key exist it is replaced.
  * Otherwise a new changeset is created.
  */
@@ -90,6 +95,7 @@ export const changesetsPut = <ThrowOnError extends boolean = false>(options: Opt
 
 /**
  * Delete changeset item
+ *
  * Deletes the specified changeset item from the changeset.
  */
 export const changesetsDeleteItem = <ThrowOnError extends boolean = false>(options: Options<ChangesetsDeleteItemData, ThrowOnError>) => {
@@ -101,6 +107,7 @@ export const changesetsDeleteItem = <ThrowOnError extends boolean = false>(optio
 
 /**
  * Get changeset item
+ *
  * Gets the changeset item for the specified content reference.
  */
 export const changesetsGetItem = <ThrowOnError extends boolean = false>(options: Options<ChangesetsGetItemData, ThrowOnError>) => {
@@ -112,6 +119,7 @@ export const changesetsGetItem = <ThrowOnError extends boolean = false>(options:
 
 /**
  * List changeset items
+ *
  * Lists the available changeset items for the specified changeset using
  * the provided options.
  */
@@ -124,6 +132,7 @@ export const changesetsListItems = <ThrowOnError extends boolean = false>(option
 
 /**
  * Create changeset item
+ *
  * Creates the given changeset item.
  */
 export const changesetsCreateItem = <ThrowOnError extends boolean = false>(options: Options<ChangesetsCreateItemData, ThrowOnError>) => {
@@ -139,6 +148,7 @@ export const changesetsCreateItem = <ThrowOnError extends boolean = false>(optio
 
 /**
  * Update changeset item
+ *
  * Updates the given changeset item.
  */
 export const changesetsUpdateItem = <ThrowOnError extends boolean = false>(options: Options<ChangesetsUpdateItemData, ThrowOnError>) => {
@@ -154,6 +164,7 @@ export const changesetsUpdateItem = <ThrowOnError extends boolean = false>(optio
 
 /**
  * Create content
+ *
  * Create a new content item.
  */
 export const contentCreate = <ThrowOnError extends boolean = false>(options: Options<ContentCreateData, ThrowOnError>) => {
@@ -170,6 +181,7 @@ export const contentCreate = <ThrowOnError extends boolean = false>(options: Opt
 
 /**
  * Delete content
+ *
  * Deletes the content item with the provided key. If a content item with the provided key does not exist an error is returned.
  */
 export const contentDelete = <ThrowOnError extends boolean = false>(options: Options<ContentDeleteData, ThrowOnError>) => {
@@ -182,6 +194,7 @@ export const contentDelete = <ThrowOnError extends boolean = false>(options: Opt
 
 /**
  * Get content
+ *
  * Get shared metadata about the content instance with the provided key.
  */
 export const contentGetMetadata = <ThrowOnError extends boolean = false>(options: Options<ContentGetMetadataData, ThrowOnError>) => {
@@ -194,6 +207,7 @@ export const contentGetMetadata = <ThrowOnError extends boolean = false>(options
 
 /**
  * Update content
+ *
  * Update an existing content item. If a content item with the provided key does not exist an error is returned.
  */
 export const contentPatchMetadata = <ThrowOnError extends boolean = false>(options: Options<ContentPatchMetadataData, ThrowOnError>) => {
@@ -210,6 +224,7 @@ export const contentPatchMetadata = <ThrowOnError extends boolean = false>(optio
 
 /**
  * Get content path
+ *
  * Get the content path with the provided key.
  */
 export const contentGetPath = <ThrowOnError extends boolean = false>(options: Options<ContentGetPathData, ThrowOnError>) => {
@@ -222,6 +237,7 @@ export const contentGetPath = <ThrowOnError extends boolean = false>(options: Op
 
 /**
  * List content in container
+ *
  * List the content items located in a specific container.
  */
 export const contentListItems = <ThrowOnError extends boolean = false>(options: Options<ContentListItemsData, ThrowOnError>) => {
@@ -234,6 +250,7 @@ export const contentListItems = <ThrowOnError extends boolean = false>(options: 
 
 /**
  * List assets
+ *
  * List the assets that belongs to a content instance.
  */
 export const contentListAssets = <ThrowOnError extends boolean = false>(options: Options<ContentListAssetsData, ThrowOnError>) => {
@@ -246,6 +263,7 @@ export const contentListAssets = <ThrowOnError extends boolean = false>(options:
 
 /**
  * Copy content
+ *
  * Create a copy of the content item with the provided key.
  */
 export const contentCopy = <ThrowOnError extends boolean = false>(options: Options<ContentCopyData, ThrowOnError>) => {
@@ -262,6 +280,7 @@ export const contentCopy = <ThrowOnError extends boolean = false>(options: Optio
 
 /**
  * Restore content
+ *
  * Restore the deleted content item with the provided key. If a content item with the provided key is not deleted an error is returned.
  */
 export const contentUndelete = <ThrowOnError extends boolean = false>(options: Options<ContentUndeleteData, ThrowOnError>) => {
@@ -274,6 +293,7 @@ export const contentUndelete = <ThrowOnError extends boolean = false>(options: O
 
 /**
  * Query versions
+ *
  * List content versions based on the provided query options.
  */
 export const contentListAllVersions = <ThrowOnError extends boolean = false>(options?: Options<ContentListAllVersionsData, ThrowOnError>) => {
@@ -286,6 +306,7 @@ export const contentListAllVersions = <ThrowOnError extends boolean = false>(opt
 
 /**
  * Delete locale
+ *
  * Deletes the content item with the provided key. If a content item with the provided key does not exist an error is returned.
  */
 export const contentDeleteLocale = <ThrowOnError extends boolean = false>(options: Options<ContentDeleteLocaleData, ThrowOnError>) => {
@@ -298,6 +319,7 @@ export const contentDeleteLocale = <ThrowOnError extends boolean = false>(option
 
 /**
  * List versions
+ *
  * List versions of the content item with the provided key and the provided options.
  */
 export const contentListVersions = <ThrowOnError extends boolean = false>(options: Options<ContentListVersionsData, ThrowOnError>) => {
@@ -310,6 +332,7 @@ export const contentListVersions = <ThrowOnError extends boolean = false>(option
 
 /**
  * Create version
+ *
  * Create a new version of a content item.
  */
 export const contentCreateVersion = <ThrowOnError extends boolean = false>(options: Options<ContentCreateVersionData, ThrowOnError>) => {
@@ -326,6 +349,7 @@ export const contentCreateVersion = <ThrowOnError extends boolean = false>(optio
 
 /**
  * Delete version
+ *
  * Deletes the content item with the provided key. If a content item with the provided key does not exist an error is returned.
  */
 export const contentDeleteVersion = <ThrowOnError extends boolean = false>(options: Options<ContentDeleteVersionData, ThrowOnError>) => {
@@ -338,6 +362,7 @@ export const contentDeleteVersion = <ThrowOnError extends boolean = false>(optio
 
 /**
  * Get version
+ *
  * Get the content item with the provided key and version.
  */
 export const contentGetVersion = <ThrowOnError extends boolean = false>(options: Options<ContentGetVersionData, ThrowOnError>) => {
@@ -350,6 +375,7 @@ export const contentGetVersion = <ThrowOnError extends boolean = false>(options:
 
 /**
  * Update version
+ *
  * Update an existing content item. If a content item with the provided key does not exist an error is returned.
  */
 export const contentPatchVersion = <ThrowOnError extends boolean = false>(options: Options<ContentPatchVersionData, ThrowOnError>) => {
@@ -366,6 +392,7 @@ export const contentPatchVersion = <ThrowOnError extends boolean = false>(option
 
 /**
  * List content types
+ *
  * List content types using the provided options.
  */
 export const contentTypesList = <ThrowOnError extends boolean = false>(options?: Options<ContentTypesListData, ThrowOnError>) => {
@@ -378,6 +405,7 @@ export const contentTypesList = <ThrowOnError extends boolean = false>(options?:
 
 /**
  * Create content type
+ *
  * Create a new content type.
  */
 export const contentTypesCreate = <ThrowOnError extends boolean = false>(options: Options<ContentTypesCreateData, ThrowOnError>) => {
@@ -394,6 +422,7 @@ export const contentTypesCreate = <ThrowOnError extends boolean = false>(options
 
 /**
  * Delete content type
+ *
  * Deletes the content type with the provided key. If a content type with the provided key does not exist an error is returned.
  */
 export const contentTypesDelete = <ThrowOnError extends boolean = false>(options: Options<ContentTypesDeleteData, ThrowOnError>) => {
@@ -406,6 +435,7 @@ export const contentTypesDelete = <ThrowOnError extends boolean = false>(options
 
 /**
  * Get content type
+ *
  * Get the content type with the provided key.
  */
 export const contentTypesGet = <ThrowOnError extends boolean = false>(options: Options<ContentTypesGetData, ThrowOnError>) => {
@@ -418,6 +448,7 @@ export const contentTypesGet = <ThrowOnError extends boolean = false>(options: O
 
 /**
  * Update content type
+ *
  * Update an existing content type. If a content type with the provided key does not exist an error is returned.
  */
 export const contentTypesPatch = <ThrowOnError extends boolean = false>(options: Options<ContentTypesPatchData, ThrowOnError>) => {
@@ -434,6 +465,7 @@ export const contentTypesPatch = <ThrowOnError extends boolean = false>(options:
 
 /**
  * Create or replace content type
+ *
  * Create or replace a content type. If a content type with the provided key exist it is replaced.
  * Otherwise a new content type is created.
  */
@@ -451,6 +483,7 @@ export const contentTypesPut = <ThrowOnError extends boolean = false>(options: O
 
 /**
  * List display templates
+ *
  * List display templates using the provided options.
  */
 export const displayTemplatesList = <ThrowOnError extends boolean = false>(options?: Options<DisplayTemplatesListData, ThrowOnError>) => {
@@ -463,6 +496,7 @@ export const displayTemplatesList = <ThrowOnError extends boolean = false>(optio
 
 /**
  * Create display template
+ *
  * Create a new display template.
  */
 export const displayTemplatesCreate = <ThrowOnError extends boolean = false>(options: Options<DisplayTemplatesCreateData, ThrowOnError>) => {
@@ -479,6 +513,7 @@ export const displayTemplatesCreate = <ThrowOnError extends boolean = false>(opt
 
 /**
  * Delete display template
+ *
  * Deletes the display template with the provided key.
  */
 export const displayTemplatesDelete = <ThrowOnError extends boolean = false>(options: Options<DisplayTemplatesDeleteData, ThrowOnError>) => {
@@ -491,6 +526,7 @@ export const displayTemplatesDelete = <ThrowOnError extends boolean = false>(opt
 
 /**
  * Get display template
+ *
  * Get the display template with the provided key.
  */
 export const displayTemplatesGet = <ThrowOnError extends boolean = false>(options: Options<DisplayTemplatesGetData, ThrowOnError>) => {
@@ -503,6 +539,7 @@ export const displayTemplatesGet = <ThrowOnError extends boolean = false>(option
 
 /**
  * Update display template
+ *
  * Update an existing display template.
  */
 export const displayTemplatesPatch = <ThrowOnError extends boolean = false>(options: Options<DisplayTemplatesPatchData, ThrowOnError>) => {
@@ -519,6 +556,7 @@ export const displayTemplatesPatch = <ThrowOnError extends boolean = false>(opti
 
 /**
  * Create or replace a display template
+ *
  * Create or replace a display template. If a display template with the provided key exist it is replaced.
  * Otherwise a new display template is created.
  */
@@ -536,6 +574,7 @@ export const displayTemplatesPut = <ThrowOnError extends boolean = false>(option
 
 /**
  * Request access token
+ *
  * Request an access token. This endpoint only supports the 'client_credentials' grant type
  * and will only issue short-lived tokens.
  */
@@ -552,6 +591,7 @@ export const oauthToken = <ThrowOnError extends boolean = false>(options: Option
 
 /**
  * List property formats
+ *
  * List all property formats using the provided options.
  */
 export const propertyFormatsList = <ThrowOnError extends boolean = false>(options?: Options<PropertyFormatsListData, ThrowOnError>) => {
@@ -563,6 +603,7 @@ export const propertyFormatsList = <ThrowOnError extends boolean = false>(option
 
 /**
  * Get property format
+ *
  * Get the property format with the provided key.
  */
 export const propertyFormatsGet = <ThrowOnError extends boolean = false>(options: Options<PropertyFormatsGetData, ThrowOnError>) => {
@@ -574,6 +615,7 @@ export const propertyFormatsGet = <ThrowOnError extends boolean = false>(options
 
 /**
  * List property groups
+ *
  * List property groups using the provided options.
  */
 export const propertyGroupsList = <ThrowOnError extends boolean = false>(options?: Options<PropertyGroupsListData, ThrowOnError>) => {
@@ -585,6 +627,7 @@ export const propertyGroupsList = <ThrowOnError extends boolean = false>(options
 
 /**
  * Create property group
+ *
  * Create a new property group.
  */
 export const propertyGroupsCreate = <ThrowOnError extends boolean = false>(options: Options<PropertyGroupsCreateData, ThrowOnError>) => {
@@ -600,6 +643,7 @@ export const propertyGroupsCreate = <ThrowOnError extends boolean = false>(optio
 
 /**
  * Delete property group
+ *
  * Deletes the property group with the provided key.
  */
 export const propertyGroupsDelete = <ThrowOnError extends boolean = false>(options: Options<PropertyGroupsDeleteData, ThrowOnError>) => {
@@ -611,6 +655,7 @@ export const propertyGroupsDelete = <ThrowOnError extends boolean = false>(optio
 
 /**
  * Get property group
+ *
  * Get the property group with the provided key.
  */
 export const propertyGroupsGet = <ThrowOnError extends boolean = false>(options: Options<PropertyGroupsGetData, ThrowOnError>) => {
@@ -622,6 +667,7 @@ export const propertyGroupsGet = <ThrowOnError extends boolean = false>(options:
 
 /**
  * Update property group
+ *
  * Update an existing property group.
  */
 export const propertyGroupsPatch = <ThrowOnError extends boolean = false>(options: Options<PropertyGroupsPatchData, ThrowOnError>) => {
@@ -637,6 +683,7 @@ export const propertyGroupsPatch = <ThrowOnError extends boolean = false>(option
 
 /**
  * Create or replace property group
+ *
  * Create or replace a property group. If a property group with the provided key exist it is replaced.
  * Otherwise a new property group is created.
  */

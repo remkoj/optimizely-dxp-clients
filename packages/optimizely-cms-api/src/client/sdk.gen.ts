@@ -21,6 +21,7 @@ export type Options<TData extends TDataShape = TDataShape, ThrowOnError extends 
 
 /**
  * List content types
+ *
  * List content types using the provided parameters.
  */
 export const contentTypesList = <ThrowOnError extends boolean = false>(options?: Options<ContentTypesListData, ThrowOnError>) => {
@@ -33,6 +34,7 @@ export const contentTypesList = <ThrowOnError extends boolean = false>(options?:
 
 /**
  * Create content type
+ *
  * Create a new content type.
  */
 export const contentTypesCreate = <ThrowOnError extends boolean = false>(options: Options<ContentTypesCreateData, ThrowOnError>) => {
@@ -49,6 +51,7 @@ export const contentTypesCreate = <ThrowOnError extends boolean = false>(options
 
 /**
  * Delete content type
+ *
  * Deletes the content type with the provided key. If a content type with the provided key does not exist an error is returned.
  */
 export const contentTypesDelete = <ThrowOnError extends boolean = false>(options: Options<ContentTypesDeleteData, ThrowOnError>) => {
@@ -61,6 +64,7 @@ export const contentTypesDelete = <ThrowOnError extends boolean = false>(options
 
 /**
  * Get content type
+ *
  * Get the content type with the provided key.
  */
 export const contentTypesGet = <ThrowOnError extends boolean = false>(options: Options<ContentTypesGetData, ThrowOnError>) => {
@@ -73,6 +77,7 @@ export const contentTypesGet = <ThrowOnError extends boolean = false>(options: O
 
 /**
  * Patch content type
+ *
  * Patch an existing content type. If a content type with the provided key does not exist an error is returned.
  */
 export const contentTypesPatch = <ThrowOnError extends boolean = false>(options: Options<ContentTypesPatchData, ThrowOnError>) => {
@@ -89,6 +94,7 @@ export const contentTypesPatch = <ThrowOnError extends boolean = false>(options:
 
 /**
  * List display templates
+ *
  * List display templates using the provided parameters.
  */
 export const displayTemplatesList = <ThrowOnError extends boolean = false>(options?: Options<DisplayTemplatesListData, ThrowOnError>) => {
@@ -101,6 +107,7 @@ export const displayTemplatesList = <ThrowOnError extends boolean = false>(optio
 
 /**
  * Create display template
+ *
  * Create a new display template.
  */
 export const displayTemplatesCreate = <ThrowOnError extends boolean = false>(options: Options<DisplayTemplatesCreateData, ThrowOnError>) => {
@@ -117,6 +124,7 @@ export const displayTemplatesCreate = <ThrowOnError extends boolean = false>(opt
 
 /**
  * Delete display template
+ *
  * Deletes the display template with the provided key.
  */
 export const displayTemplatesDelete = <ThrowOnError extends boolean = false>(options: Options<DisplayTemplatesDeleteData, ThrowOnError>) => {
@@ -129,6 +137,7 @@ export const displayTemplatesDelete = <ThrowOnError extends boolean = false>(opt
 
 /**
  * Get display template
+ *
  * Get the display template with the provided key.
  */
 export const displayTemplatesGet = <ThrowOnError extends boolean = false>(options: Options<DisplayTemplatesGetData, ThrowOnError>) => {
@@ -141,6 +150,7 @@ export const displayTemplatesGet = <ThrowOnError extends boolean = false>(option
 
 /**
  * Patch display template
+ *
  * Patch an existing display template.
  */
 export const displayTemplatesPatch = <ThrowOnError extends boolean = false>(options: Options<DisplayTemplatesPatchData, ThrowOnError>) => {
@@ -157,6 +167,7 @@ export const displayTemplatesPatch = <ThrowOnError extends boolean = false>(opti
 
 /**
  * List property formats
+ *
  * List all property formats using the provided options.
  */
 export const propertyFormatsList = <ThrowOnError extends boolean = false>(options?: Options<PropertyFormatsListData, ThrowOnError>) => {
@@ -169,6 +180,7 @@ export const propertyFormatsList = <ThrowOnError extends boolean = false>(option
 
 /**
  * Get property format
+ *
  * Get the property format with the provided key.
  */
 export const propertyFormatsGet = <ThrowOnError extends boolean = false>(options: Options<PropertyFormatsGetData, ThrowOnError>) => {
@@ -181,6 +193,7 @@ export const propertyFormatsGet = <ThrowOnError extends boolean = false>(options
 
 /**
  * List property groups
+ *
  * List property groups using the provided options.
  */
 export const propertyGroupsList = <ThrowOnError extends boolean = false>(options?: Options<PropertyGroupsListData, ThrowOnError>) => {
@@ -193,6 +206,7 @@ export const propertyGroupsList = <ThrowOnError extends boolean = false>(options
 
 /**
  * Create property group
+ *
  * Create a new property group.
  */
 export const propertyGroupsCreate = <ThrowOnError extends boolean = false>(options: Options<PropertyGroupsCreateData, ThrowOnError>) => {
@@ -209,6 +223,7 @@ export const propertyGroupsCreate = <ThrowOnError extends boolean = false>(optio
 
 /**
  * Delete property group
+ *
  * Deletes the property group with the provided key.
  */
 export const propertyGroupsDelete = <ThrowOnError extends boolean = false>(options: Options<PropertyGroupsDeleteData, ThrowOnError>) => {
@@ -221,6 +236,7 @@ export const propertyGroupsDelete = <ThrowOnError extends boolean = false>(optio
 
 /**
  * Get property group
+ *
  * Get the property group with the provided key.
  */
 export const propertyGroupsGet = <ThrowOnError extends boolean = false>(options: Options<PropertyGroupsGetData, ThrowOnError>) => {
@@ -233,6 +249,7 @@ export const propertyGroupsGet = <ThrowOnError extends boolean = false>(options:
 
 /**
  * Patch property group
+ *
  * Patch an existing property group.
  */
 export const propertyGroupsPatch = <ThrowOnError extends boolean = false>(options: Options<PropertyGroupsPatchData, ThrowOnError>) => {
