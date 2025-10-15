@@ -4,6 +4,7 @@ import WebExperimenationService from '../products/web-experimentation/client'
 import DataPlatformService from '../products/data-platform/client'
 import ContentRecsService from '../products/content-recs/client'
 import * as ClientApi from '../client-types'
+import { SupportedProductNames } from "./types"
 
 /**
  * The data stored within the OptimizelyOne context
@@ -157,13 +158,13 @@ function useOptimizelyOne() : OptimizelyOneHookResult
     }, [ ctx ])
     return result
 }
-const OptimizelyOneProvider : FunctionComponent<OptimizelyOneProviderProps> = ({ value, children }) => 
+const OptimizelyOneProvider : FunctionComponent<OptimizelyOneProviderProps & { enabledOptimizelyServices?: Array<SupportedProductNames> }> = ({ value, children, enabledOptimizelyServices }) => 
 {
     const [ ctxDebug, setCtxDebug ] = useState<boolean>(value?.debug ?? false)
     const [ services, setServices ] = useState<ClientApi.OptimizelyOneService[]>([
-        new WebExperimenationService(),
-        new DataPlatformService(),
-        new ContentRecsService(),
+        new WebExperimenationService(enabledOptimizelyServices),
+        new DataPlatformService(enabledOptimizelyServices),
+        new ContentRecsService(enabledOptimizelyServices),
         ...(value?.services || [])
     ].sort((a, b) => a.order - b.order))
     services.forEach(service => service.debug = ctxDebug)

@@ -4,7 +4,7 @@ import dynamic from 'next/dynamic'
 import { Suspense } from 'react'
 import 'server-only'
 
-const OptimizelyOneClientGadget = dynamic(() => import('./gadget'))
+const OptimizelyOneClientGadget = dynamic(() => import('./gadget'), { ssr: false })
 
 export const OptimizelyOneGadget = ({
   refreshInterval = 0,

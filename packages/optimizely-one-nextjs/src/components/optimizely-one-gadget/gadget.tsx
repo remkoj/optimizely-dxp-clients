@@ -4,8 +4,10 @@ import {
   Fragment,
   useLayoutEffect,
   useCallback,
+  useMemo,
   type FunctionComponent,
   type ComponentType,
+  useEffect,
 } from 'react'
 import useCookie from '../use-cookie'
 import {
@@ -37,12 +39,13 @@ import '../../styles.css'
 
 // Prepare panel imports
 import dynamic from 'next/dynamic'
-const Panels: Array<{
+type PanelList = Array<{
   id: string
   Tab: ComponentType<{}>
   Panel: ComponentType<{ servicePrefix?: string; refreshInterval?: number }>
   products: Array<string>
-}> = [
+}>
+const Panels: PanelList = [
   {
     id: 'Profile',
     Tab: () => (
@@ -167,10 +170,18 @@ export const OptimizelyOneGadget: FunctionComponent<
   const wxProjectIdParam = searchParams.get('pid')
   const [projectIdCookie, setProjectIdCookie, removeProjectIdCookie] =
     useCookie('wx.projectid')
-  const enabledProducts: Array<string> = []
-  if (showContentRecs) enabledProducts.push('crecs')
-  if (showDataPlatform) enabledProducts.push('odp')
-  if (showWebEx) enabledProducts.push('webex')
+  const enabledProducts: Array<string> = useMemo(() => {
+    const enabledProducts: Array<string> = []
+    if (showContentRecs) enabledProducts.push('crecs')
+    if (showDataPlatform) enabledProducts.push('odp')
+    if (showWebEx) enabledProducts.push('webex')
+    return enabledProducts
+  }, [showContentRecs, showDataPlatform, showWebEx])
+  const { forceHidden, forceShown } = useMemo(() => {
+    const forceHidden = show != undefined && show == false
+    const forceShown = show != undefined && show == true
+    return { forceHidden, forceShown }
+  }, [show])
 
   const removeQueryParam = useCallback(
     (paramName: string) => {
@@ -190,7 +201,7 @@ export const OptimizelyOneGadget: FunctionComponent<
     [pathname, searchParams]
   )
 
-  useLayoutEffect(() => {
+  useEffect(() => {
     if (wxProjectIdParam != null && wxProjectIdParam != projectIdCookie) {
       if (wxProjectIdParam == '') removeProjectIdCookie()
       else setProjectIdCookie(wxProjectIdParam)
@@ -205,20 +216,19 @@ export const OptimizelyOneGadget: FunctionComponent<
     setProjectIdCookie,
   ])
 
-  const forceHidden = show != undefined && show == false
-  const forceShown = show != undefined && show == true
+  useEffect(() => {
+    console.groupCollapsed(
+      `🔎 [Optimizely One Gadget] Initializing Optimizely Demo Gadget`
+    )
+    console.log(`Optimizely One Demo API: ${servicePrefix}`)
+    console.log(
+      `Refresh interval: ${refreshInterval == 0 ? 'DISABLED' : refreshInterval + 'ms'}`
+    )
+    console.log(`Enabled products: ${enabledProducts.join(', ')}`)
+    console.groupEnd()
+  },[servicePrefix, refreshInterval,enabledProducts])
 
   if (forceHidden || (!forceShown && !inTestMode)) return <></>
-
-  console.groupCollapsed(
-    `🔎 [Optimizely One Gadget] Initializing Optimizely Demo Gadget`
-  )
-  console.log(`Optimizely One Demo API: ${servicePrefix}`)
-  console.log(
-    `Refresh interval: ${refreshInterval == 0 ? 'DISABLED' : refreshInterval + 'ms'}`
-  )
-  console.log(`Enabled products: ${enabledProducts.join(', ')}`)
-  console.groupEnd()
 
   return (
     <Popover className="oo:md:fixed oo:md:bottom-0 oo:z-[500]">

@@ -6,12 +6,16 @@ import type { Route } from '../../types.js'
 import { type IOptiGraphClient as GraphQLClient } from '../../../../client/types.js'
 import { type OptimizelyCmsRoutingApi } from '../types.js'
 import { AnyContentLink } from '../../../types.js'
-import { isContentLinkWithLocale, isInlineContentLink, localeToGraphLocale } from '../../../utils.js'
+import {
+  isContentLinkWithLocale,
+  isInlineContentLink,
+  localeToGraphLocale,
+} from '../../../utils.js'
 
 export class OptimizelyCms13Client implements OptimizelyCmsRoutingApi {
   private _changeset: string | null = null
 
-  enablePreview(changeset: string = "default"): void {
+  enablePreview(changeset: string = 'default'): void {
     this._changeset = changeset
   }
 
@@ -19,9 +23,16 @@ export class OptimizelyCms13Client implements OptimizelyCmsRoutingApi {
     this._changeset = null
   }
 
-  async getRoutes(client: GraphQLClient, siteId?: string, onlyWithDomain?: boolean, includeVariants?: boolean): Promise<Route[]> {
+  async getRoutes(
+    client: GraphQLClient,
+    siteId?: string,
+    onlyWithDomain?: boolean,
+    includeVariants?: boolean
+  ): Promise<Route[]> {
     if (client.debug)
-      console.log(`⚪ [RouteResolver] Loading routes for ${siteId ?? 'all applications'}${!siteId && onlyWithDomain ? ' that have a domain defined.' : ''}`)
+      console.log(
+        `⚪ [RouteResolver] Loading routes for ${siteId ?? 'all applications'}${!siteId && onlyWithDomain ? ' that have a domain defined.' : ''}`
+      )
 
     let totalRoutes: number = 0
     let retrievedRoutes: number = 0
@@ -31,19 +42,26 @@ export class OptimizelyCms13Client implements OptimizelyCmsRoutingApi {
 
     do {
       if (client.debug)
-        console.log(`⚪ [RouteResolver] Fetching page ${currentPage + 1} with ${pageSize} routes, of ${totalRoutes > 0 ? Math.ceil(totalRoutes / pageSize) : 'unknown'}`)
-      const page = await client.request<GetAllRoutes.Result, GetAllRoutes.Variables>(GetAllRoutes.query, {
-        domain: siteId,
-        mustHaveDomain: onlyWithDomain ? true : null,
-        pageSize: pageSize,
-        skip: currentPage * pageSize,
-        changeset: this._changeset || client.getChangeset(),
-        variation: includeVariants ? { include: "ALL" } : undefined
-      }).catch(e => {
-        if (client.debug)
-          console.error("🔴 [RouteResolver] Error while fetching routes", e)
-        return undefined
-      })
+        console.log(
+          `⚪ [RouteResolver] Fetching page ${currentPage + 1} with ${pageSize} routes, of ${totalRoutes > 0 ? Math.ceil(totalRoutes / pageSize) : 'unknown'}`
+        )
+      const page = await client
+        .request<GetAllRoutes.Result, GetAllRoutes.Variables>(
+          GetAllRoutes.query,
+          {
+            domain: siteId,
+            mustHaveDomain: onlyWithDomain ? true : null,
+            pageSize: pageSize,
+            skip: currentPage * pageSize,
+            changeset: this._changeset || client.getChangeset(),
+            variation: includeVariants ? { include: 'ALL' } : undefined,
+          }
+        )
+        .catch((e) => {
+          if (client.debug)
+            console.error('🔴 [RouteResolver] Error while fetching routes', e)
+          return undefined
+        })
 
       if (page) {
         totalRoutes = page.Content.total
@@ -54,103 +72,203 @@ export class OptimizelyCms13Client implements OptimizelyCmsRoutingApi {
         totalRoutes = 0
         retrievedRoutes = 0
       }
-    } while (totalRoutes > 0 && retrievedRoutes > 0 && graphRoutes.length < totalRoutes && retrievedRoutes == pageSize)
+    } while (
+      totalRoutes > 0 &&
+      retrievedRoutes > 0 &&
+      graphRoutes.length < totalRoutes &&
+      retrievedRoutes == pageSize
+    )
 
-    return graphRoutes.map(this.tryConvertResponse.bind(this)).filter(this.isNotNullOrUndefined)
+    return graphRoutes
+      .map(this.tryConvertResponse.bind(this))
+      .filter(this.isNotNullOrUndefined)
   }
 
-  async getRouteByPath(client: GraphQLClient, path: string, siteId?: string, variant?: string): Promise<undefined | Route> {
+  async getRouteByPath(
+    client: GraphQLClient,
+    path: string,
+    siteId?: string,
+    variant?: string
+  ): Promise<undefined | Route> {
     if (client.debug)
-      console.log(`⚪ [RouteResolver] Resolving content info for ${path} on ${siteId ? siteId : "all domains"}`)
+      console.log(
+        `⚪ [RouteResolver] Resolving content info for ${path} on ${siteId ? siteId : 'all domains'}`
+      )
 
-    const paths = [path, path.endsWith('/') ? path.substring(0, path.length - 1) : path + '/'].filter(p => p)
+      // Calculate the paths
+    const paths = [
+      path,
+      path.endsWith('/') ? path.substring(0, path.length - 1) : path + '/',
+    ].filter((p) => p)
 
-    const resultSet = await client.request<GetRouteByPath.Result, GetRouteByPath.Variables>({
+    // Determine the changeset & status filters
+    const changeset = this._changeset || client.getChangeset();
+    const status = changeset ? null : "Published"
+
+    // Create the request variables
+    const variables: GetRouteByPath.Variables = {
+      path: paths,
+      domain: siteId,
+      changeset,
+      status,
+      variation:
+        variant && variant.length > 0
+          ? { include: 'SOME', value: [variant] }
+          : undefined,
+    }
+
+    const resultSet = await client.request<
+      GetRouteByPath.Result,
+      GetRouteByPath.Variables
+    >({
       document: GetRouteByPath.query,
-      variables: {
-        path: paths,
-        domain: siteId,
-        changeset: this._changeset || client.getChangeset(),
-        variation: variant && variant.length > 0 ? { include: "SOME", value: [variant] } : undefined
-      }
+      variables,
+    }).catch(e => {
+      console.error(e)
+      return {
+        getRouteByPath: {
+          total: 0,
+          item: {}
+        }
+      } as GetRouteByPath.Result
     })
 
     if ((resultSet.getRouteByPath?.total ?? 0) === 0) {
       if (client.debug)
-        console.warn("🟠 [RouteResolver] No items in the resultset");
+        console.warn('🟠 [RouteResolver] No items in the resultset, request parameters', JSON.stringify(variables))
       return undefined
     }
 
     if ((resultSet.getRouteByPath?.total ?? 0) > 1) {
       if (client.debug)
-        console.warn("🟠 [RouteResolver] Ambiguous URL provided - picking first match, did you omit the domain in a multi-site setup?")
+        console.warn(
+          '🟠 [RouteResolver] Ambiguous URL provided - picking first match, did you omit the domain in a multi-site setup?'
+        )
     }
 
     if (client.debug)
-      console.log(`⚪ [RouteResolver] Resolved content info for ${path} to: ${JSON.stringify(resultSet.getRouteByPath.items)}`)
+      console.log(
+        `⚪ [RouteResolver] Resolved content info for ${path} to: ${JSON.stringify(resultSet.getRouteByPath.item)}`
+      )
 
-    return this.convertResponse(resultSet.getRouteByPath.items)
+    return this.convertResponse(resultSet.getRouteByPath.item)
   }
 
-  async getRouteById(client: GraphQLClient, contentId: string, locale: string, version: string | number): Promise<undefined | Route> {
+  async getRouteById(
+    client: GraphQLClient,
+    contentId: string,
+    locale: string,
+    version: string | number
+  ): Promise<undefined | Route> {
     const variables: GetRouteById.Variables = {
       key: contentId,
       version: version?.toString(),
       locale: localeToGraphLocale(locale),
       changeset: this._changeset || client.getChangeset(),
-      variation: version ? { include: "ALL" } : undefined
+      variation: version ? { include: 'ALL' } : undefined,
     }
 
     if (client.debug)
-      console.log("⚪ [RouteResolver] Resolving content by id:", JSON.stringify(variables))
+      console.log(
+        '⚪ [RouteResolver] Resolving content by id:',
+        JSON.stringify(variables)
+      )
 
-    const resultSet = await client.request<GetRouteById.Result, GetRouteById.Variables>({
+    const resultSet = await client.request<
+      GetRouteById.Result,
+      GetRouteById.Variables
+    >({
       document: GetRouteById.query,
-      variables
+      variables,
     })
 
     if (resultSet.Content?.total >= 1) {
       let selectedItem = resultSet.Content.items[0]
       if (client.debug && resultSet.Content?.total > 1) {
-        let firstEmptyVariantItem = resultSet.Content?.items?.filter(x => x._metadata?.variation === null || x._metadata?.variation === undefined)?.at(0)
+        let firstEmptyVariantItem = resultSet.Content?.items
+          ?.filter(
+            (x) =>
+              x._metadata?.variation === null ||
+              x._metadata?.variation === undefined
+          )
+          ?.at(0)
         selectedItem = firstEmptyVariantItem ?? selectedItem
-        console.warn(`🟠 [RouteResolver] Received multiple entries with this ID, returning the first default variant from: ${(resultSet.Content?.items || []).map(x => { return `${x._metadata.key} (version: ${x._metadata.version}, locale: ${x._metadata.locale}, changeset: ${x._metadata.changeset}, variant: ${x._metadata.variation})` }).join('; ')}`)
+        console.warn(
+          `🟠 [RouteResolver] Received multiple entries with this ID, returning the first default variant from: ${(
+            resultSet.Content?.items || []
+          )
+            .map((x) => {
+              return `${x._metadata.key} (version: ${x._metadata.version}, locale: ${x._metadata.locale}, changeset: ${x._metadata.changeset}, variant: ${x._metadata.variation})`
+            })
+            .join('; ')}`
+        )
       }
       return this.convertResponse(selectedItem)
     }
 
     return undefined
   }
-  async getRouteByLink(client: GraphQLClient, contentLink: AnyContentLink): Promise<undefined | Route> {
-    if (!isContentLinkWithLocale(contentLink))
-      return undefined;
+  async getRouteByLink(
+    client: GraphQLClient,
+    contentLink: AnyContentLink
+  ): Promise<undefined | Route> {
+    if (!isContentLinkWithLocale(contentLink)) return undefined
 
     const variables: GetRouteById.Variables = {
       key: contentLink.key,
       version: contentLink.version?.toString(),
-      locale: contentLink.locale ? localeToGraphLocale(contentLink.locale) : undefined,
-      changeset: contentLink.changeset || this._changeset || client.getChangeset(),
-      variation: contentLink.variation ? { include: "SOME", value: [contentLink.variation] } : (contentLink.version ? { include: "ALL" } : undefined)
+      locale: contentLink.locale
+        ? localeToGraphLocale(contentLink.locale)
+        : undefined,
+      changeset:
+        contentLink.changeset || this._changeset || client.getChangeset(),
+      variation: contentLink.variation
+        ? { include: 'SOME', value: [contentLink.variation] }
+        : contentLink.version
+          ? { include: 'ALL' }
+          : undefined,
     }
 
     if (client.debug)
-      console.log("⚪ [RouteResolver] Resolving content by link:", JSON.stringify(variables))
+      console.log(
+        '⚪ [RouteResolver] Resolving content by link:',
+        JSON.stringify(variables)
+      )
 
-    const resultSet = await client.request<GetRouteById.Result, GetRouteById.Variables>({
+    const resultSet = await client.request<
+      GetRouteById.Result,
+      GetRouteById.Variables
+    >({
       document: GetRouteById.query,
-      variables
+      variables,
     })
 
     if (resultSet.Content?.total >= 1) {
       let selectedItem = resultSet.Content.items[0]
       if (client.debug && resultSet.Content?.total > 1) {
-        let firstEmptyVariantItem = resultSet.Content?.items?.filter(x => x._metadata?.variation === null || x._metadata?.variation === undefined)?.at(0)
+        let firstEmptyVariantItem = resultSet.Content?.items
+          ?.filter(
+            (x) =>
+              x._metadata?.variation === null ||
+              x._metadata?.variation === undefined
+          )
+          ?.at(0)
         selectedItem = firstEmptyVariantItem ?? selectedItem
-        console.warn(`🟠 [RouteResolver] Received multiple entries with this ID, returning the first default variant from: ${(resultSet.Content?.items || []).map(x => { return `${x._metadata.key} (version: ${x._metadata.version}, locale: ${x._metadata.locale}, changeset: ${x._metadata.changeset}, variant: ${x._metadata.variation})` }).join('; ')}`)
+        console.warn(
+          `🟠 [RouteResolver] Received multiple entries with this ID, returning the first default variant from: ${(
+            resultSet.Content?.items || []
+          )
+            .map((x) => {
+              return `${x._metadata.key} (version: ${x._metadata.version}, locale: ${x._metadata.locale}, changeset: ${x._metadata.changeset}, variant: ${x._metadata.variation})`
+            })
+            .join('; ')}`
+        )
       }
       return this.convertResponse(selectedItem)
     } else {
-      console.warn(`🟠 [RouteResolver] Unable to locate the requested item (${JSON.stringify(variables)}) in Optimizely Graph`)
+      console.warn(
+        `🟠 [RouteResolver] Unable to locate the requested item (${JSON.stringify(variables)}) in Optimizely Graph`
+      )
     }
 
     return undefined
@@ -158,19 +276,24 @@ export class OptimizelyCms13Client implements OptimizelyCmsRoutingApi {
 
   private convertResponse(item: GraphRoute): Route {
     if (!item)
-      throw new Error("RouteResolver.convertResponse(): mandatory parameter \"item\" not provided!")
-    const itemUrl = new URL(item._metadata?.url?.path ?? '/', item._metadata?.url?.domain ?? 'https://example.com')
+      throw new Error(
+        'RouteResolver.convertResponse(): mandatory parameter "item" not provided!'
+      )
+    const itemUrl = new URL(
+      item._metadata?.url?.path ?? '/',
+      item._metadata?.url?.domain ?? 'https://example.com'
+    )
     return {
       locale: item._metadata.locale,
       path: item._metadata.url.path,
       url: itemUrl,
-      slug: item._metadata?.slug ?? "",
+      slug: item._metadata?.slug ?? '',
       changed: item.changed ? new Date(item.changed) : null,
       contentType: item._metadata.types,
       version: item._metadata.version,
       key: item._metadata.key,
       changeset: item._metadata.changeset,
-      variation: item._metadata.variation
+      variation: item._metadata.variation,
     }
   }
 
@@ -178,7 +301,10 @@ export class OptimizelyCms13Client implements OptimizelyCmsRoutingApi {
     try {
       return this.convertResponse(item)
     } catch (e) {
-      console.error(`🔴 [RouteResolver] Unable to convert ${JSON.stringify(item)} to Route`, e)
+      console.error(
+        `🔴 [RouteResolver] Unable to convert ${JSON.stringify(item)} to Route`,
+        e
+      )
       return undefined
     }
   }

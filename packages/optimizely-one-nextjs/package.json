@@ -43,10 +43,10 @@
     "@tailwindcss/cli": "^4.1.14",
     "@types/node": "^22.18.10",
     "@types/react": "^19.2.2",
-    "@types/react-dom": "19.2.1",
+    "@types/react-dom": "19.2.2",
     "@types/uuid": "^11.0.0",
     "browserslist": "^4.26.3",
-    "next": "^15.5.4",
+    "next": "^15.5.5",
     "prop-types": "^15.8.1",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
@@ -61,6 +61,7 @@
     "react-dom": "^19"
   },
   "dependencies": {
+    "@fastify/deepmerge": "^3.1.0",
     "@headlessui/react": "^2.2.9",
     "@heroicons/react": "^2.2.0",
     "@remkoj/optimizely-graph-client": "^6.0.0-pre10",

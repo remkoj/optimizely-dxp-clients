@@ -22,7 +22,7 @@ export function getContent<NDL extends boolean = false>(client: IOptiGraphClient
       // Preview mode, so load data for changeset
     } else if (client?.isPreviewEnabled() && isContentLink(contentLink) && !isInlineContentLink(contentLink)) {
       if (debug)
-        console.warn("🔴 [CmsContent][getContent] Rendering shared instance, while in preview mode, falling back to loading for ", componentLabel);
+        console.warn(`🔴 [CmsContent][getContent] Rendering shared instance (${ JSON.stringify(contentLink)}), while in preview mode, falling back to loading for ${componentLabel}`);
       contentLink.version = null;
 
       // Default mode, use fragment

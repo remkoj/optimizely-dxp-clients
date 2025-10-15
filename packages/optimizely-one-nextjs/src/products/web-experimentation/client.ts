@@ -1,18 +1,26 @@
 'use client'
 
 import * as ClientApi from '../../client-types'
+import * as GlobalClientTypes from '../../components/types'
 
 export class WebExperimenationService implements ClientApi.OptimizelyOneService<ClientApi.OptimizelyWebExperimentationApi>
 {
+    private _wxEnabled : boolean = true
+    constructor(enabledServices?: Array<GlobalClientTypes.SupportedProductNames>) {
+        if (enabledServices) 
+            this._wxEnabled = enabledServices.includes("dataPlatform")
+    }
+
     public order : Readonly<number> = 100
     public code : Readonly<string> = "webex"
     public debug: boolean = false
     public get isActive() : boolean {
-        return this.getBrowserApi() != undefined
+        return this._wxEnabled
     }
 
     public activatePage()
     {
+        if (!this._wxEnabled) return
         const webex = this.getBrowserApi()
         if (!webex) return
         webex.push({ type: 'activate' })
@@ -21,6 +29,7 @@ export class WebExperimenationService implements ClientApi.OptimizelyOneService<
 
     public trackEvent(event: ClientApi.OptimizelyOneEvent)
     {
+        if (!this._wxEnabled) return
         const webex = this.getBrowserApi()
         if (!webex) return
         const eventName = `${event.event}_${event.action}`
@@ -35,6 +44,7 @@ export class WebExperimenationService implements ClientApi.OptimizelyOneService<
     public getBrowserApi()
     {
         try {
+            if (!this._wxEnabled) return undefined
             if (!window.optimizely)
                 window.optimizely = [] as unknown as ClientApi.OptimizelyWebExperimentationApi
             return window.optimizely
@@ -45,6 +55,7 @@ export class WebExperimenationService implements ClientApi.OptimizelyOneService<
 
     public updateProfile(profileData: ClientApi.OptimizelyOneProfileData)
     {
+        if (!this._wxEnabled) return
         const webex = this.getBrowserApi()
         if (!webex) return
         if (this.debug) console.log("🚀 Web Experimentation - Tracking attributes:", { type: 'user', attributes: profileData.custom })

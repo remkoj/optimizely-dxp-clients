@@ -38,7 +38,7 @@
   },
   "dependencies": {
     "@fastify/deepmerge": "^3.1.0",
-    "@inquirer/prompts": "^7.8.6",
+    "@inquirer/prompts": "^7.9.0",
     "@remkoj/optimizely-cms-api": "^6.0.0-pre10",
     "@remkoj/optimizely-graph-functions": "6.0.0-pre10",
     "ajv": "^8.17.1",

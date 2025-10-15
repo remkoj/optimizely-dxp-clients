@@ -31,7 +31,7 @@
     "@types/crypto-js": "^4.2.2",
     "@types/node": "^22.18.10",
     "@types/react": "^19.2.2",
-    "@types/react-dom": "^19.2.1",
+    "@types/react-dom": "^19.2.2",
     "prop-types": "^15.8.1",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
@@ -44,7 +44,7 @@
     "crypto-js": "^4.2.0",
     "entities": "^7.0.0",
     "graphql": "^16.11.0",
-    "graphql-request": "^7.2.0"
+    "graphql-request": "^7.3.0"
   },
   "peerDependencies": {
     "react": "^19",

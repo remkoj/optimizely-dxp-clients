@@ -71,6 +71,10 @@ export function isContentLink(toTest: any): toTest is ContentLink {
   if (typeof (toTest) != 'object' || toTest == null)
     return false
 
+  // Check if this is an explicit inline content item
+  if ((toTest as ContentLink).isInline === true)
+    return false
+
   // The object must have a key, string, miniumum length 1 char
   return typeof ((toTest as ContentLink).key) == 'string' && ((toTest as ContentLink).key as string).length > 0
 }

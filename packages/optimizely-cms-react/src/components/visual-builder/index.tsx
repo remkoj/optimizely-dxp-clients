@@ -51,7 +51,7 @@ export function OptimizelyComposition({
   // Ensure we've got a factory
   if (!factory)
     throw new Error(
-      '🟡 [VisualBuilder] [OptimizelyComposition] The factory must be defined within the serverContext'
+      '🟡 [VisualBuilder] [OptimizelyComposition] The factory must be defined within the Context'
     )
 
   const [contentLink, contentTypes, nodeId, fragmentData, layoutProps] =

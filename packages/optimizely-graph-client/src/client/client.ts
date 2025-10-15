@@ -99,7 +99,7 @@ export class ContentGraphClient extends GraphQLClient implements IOptiGraphClien
       credentials: "include",
       redirect: "manual",
       requestMiddleware: async <V extends Variables = Variables>(request: RequestExtendedInit<V>) => {
-        if (this._flags.nextJsFetchDirectives && request.operationName) {
+        if (this.currentAuthMode == AuthMode.Public && this._flags.nextJsFetchDirectives && request.operationName) {
           if (!Array.isArray(request.next?.tags)) {
             if (!request.next)
               request.next = {};
@@ -123,7 +123,7 @@ export class ContentGraphClient extends GraphQLClient implements IOptiGraphClien
       },
       responseMiddleware: response => {
         if (isError(response)) {
-          console.error(`❌ [Optimizely Graph] [Error] ${response.name} => ${response.message}`)
+          console.error(`❌ [Optimizely Graph] [Error] ${response.name} => ${response.message}`, (response as any).response, (response as any).request)
         } else if (response.errors) {
           response.errors.forEach(
             ({ message, locations, path, name, source }) => {
@@ -136,6 +136,7 @@ export class ContentGraphClient extends GraphQLClient implements IOptiGraphClien
               console.error(`❌ [Optimizely Graph] [GraphQL${errorName} error${sourceName}]:\n  Message: ${message}\n  Location: ${locationList}\n  Path: ${path}\n  Query: ${sourceInfo}`)
             }
           );
+          throw new Error("[Optimizely Graph] Error received from Optimizely Graph, see console for details")
         } else if (QUERY_LOG) {
           console.log(`📦 [Optimizely Graph] [Response Data] ${JSON.stringify(response.data)}`)
           console.log(`🔖 [Optimizely Graph] [Response Cost] ${JSON.stringify((response.extensions as { cost?: number } | undefined)?.cost || 0)}`)
@@ -267,10 +268,7 @@ export class ContentGraphClient extends GraphQLClient implements IOptiGraphClien
     }
 
     // Update fetch configuration
-    if (this.cacheEnabled)
-      this.requestConfig.cache = undefined
-    else
-      this.requestConfig.cache = "no-store"
+    this.requestConfig.cache = this.cacheEnabled ? undefined : "no-store"
 
     // Apply Next.JS Fetch directives
     if (this._flags.nextJsFetchDirectives) {

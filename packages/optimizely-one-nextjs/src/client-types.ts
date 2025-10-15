@@ -57,6 +57,7 @@ type NavigationSearchEvent = {
 }
 
 export type OptimizelyOneProfileData = {
+    feature_experimentation_id?: string,
     content_intelligence_id?: string,
     custom: Record<string, string | number | boolean>
 }

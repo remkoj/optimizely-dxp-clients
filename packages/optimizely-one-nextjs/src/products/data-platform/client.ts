@@ -1,18 +1,26 @@
 'use client'
 
 import * as ClientApi from '../../client-types'
+import * as GlobalClientTypes from '../../components/types'
 
 export class DataPlatformService implements ClientApi.OptimizelyOneService<ClientApi.OptimizelyDataPlatformApi>
 {
+    private _odpEnabled : boolean = true
+    constructor(enabledServices?: Array<GlobalClientTypes.SupportedProductNames>) {
+        if (enabledServices) 
+            this._odpEnabled = enabledServices.includes("dataPlatform")
+    }
+
     public order : Readonly<number> = 200
     public code : Readonly<string> = "odp"
     public debug: boolean = false
     public get isActive() : boolean {
-        return this.getBrowserApi() != undefined
+        return this._odpEnabled
     }
 
     public trackPage()
     {
+        if (!this._odpEnabled) return
         const zaius = this.getBrowserApi()
         if (!zaius) return
         if (this.debug) console.log("🏬 Data platform - Tracking page view")
@@ -27,6 +35,7 @@ export class DataPlatformService implements ClientApi.OptimizelyOneService<Clien
 
     public trackEvent(event: ClientApi.OptimizelyOneEvent)
     {
+        if (!this._odpEnabled) return
         const zaius = this.getBrowserApi()
         if (!zaius) return
         const event_name = event.event
@@ -41,10 +50,31 @@ export class DataPlatformService implements ClientApi.OptimizelyOneService<Clien
     public getBrowserApi()
     {
         try {
+            if (!this._odpEnabled) return undefined
             return window.zaius
         } catch {
             return undefined
         }
+    }
+
+    /**
+     * Discover the visitorId cookie and make it available to the systems as identifier
+     * 
+     * @returns The partial profile data
+     */
+    public discoverProfileData() : Promise<ClientApi.OptimizelyOneProfileData>
+    {
+        return new Promise((resolve) => {
+            try {
+                const cookies = document.cookie.split(';').map(x=>x.trim().split('=',2)).reduce((obj,cData) => { obj[cData[0]] = cData[1]; return obj; }, {} as Record<string,string>)
+                const visitorId = cookies['visitorId']
+                if (visitorId)
+                    return resolve({ feature_experimentation_id: visitorId, custom: {} })
+            } catch {
+                //Ignore errors on purpose
+            }
+            return resolve({ custom: {} })
+        })
     }
 
     public updateProfile(profileData: ClientApi.OptimizelyOneProfileData)
@@ -54,6 +84,8 @@ export class DataPlatformService implements ClientApi.OptimizelyOneService<Clien
         const ids : Record<string,string> = {}
         if (profileData.content_intelligence_id)
             ids.content_intelligence_id = profileData.content_intelligence_id
+        if (profileData.feature_experimentation_id)
+            ids.fs_user_id = profileData.feature_experimentation_id
         if (this.debug) console.log("🏬 Data platform - Updating profile (ids, attributes):", ids, profileData.custom)
         zaius.customer(ids, profileData.custom)
     }
