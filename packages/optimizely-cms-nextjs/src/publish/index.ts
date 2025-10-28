@@ -212,7 +212,7 @@ export function createPublishApi(options?: Partial<PublishApiOptions>): PublishA
     });
 
     // Publish the tags te published
-    targetTags.forEach(tag => revalidateTag(tag))
+    targetTags.forEach(tag => revalidateTag(tag, 'max'))
 
     // Build the outcome
     return { revalidated: { paths: publishedPathAndScopes, tags: targetTags }, optimized }

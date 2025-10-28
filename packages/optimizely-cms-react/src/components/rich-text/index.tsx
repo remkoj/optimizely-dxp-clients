@@ -1,4 +1,4 @@
-import type { ComponentProps, FunctionComponent, JSX } from 'react'
+import type { ComponentProps, FunctionComponent, JSX, ReactNode } from 'react'
 import type { RichTextElementProps, RichTextImplProps } from './types.js'
 import * as Utils from './utils.js'
 import { DefaultComponentFactory } from '../../factory/default.js'
@@ -33,7 +33,7 @@ export const RichText = <ET extends ElementWithChildrenType>({
 
   try {
     const data = Utils.processNodeInput(text)
-    const textContent =
+    const textContent : ReactNode =
       data?.children?.map((child, idx) => {
         const elementId = id + '::' + idx
         return (
@@ -47,10 +47,16 @@ export const RichText = <ET extends ElementWithChildrenType>({
         )
       }) || children
 
+    if (noWrapper || !Wrapper) {
+      if (isDebug)
+        console.warn('🟠 [Rich Text] Text without wrapper, make sure you add your own `CmsEditable` as one of the parents of this component')
+      return textContent
+    }
+
     if (cmsId || cmsFieldName)
       return (
         <CmsEditable
-          as={(Wrapper ?? 'div') as ComponentProps<typeof CmsEditable>['as']}
+          as={Wrapper as ComponentProps<typeof CmsEditable>['as']}
           className={className}
           cmsId={cmsId || undefined}
           cmsFieldName={cmsFieldName || undefined}
@@ -60,8 +66,6 @@ export const RichText = <ET extends ElementWithChildrenType>({
           {textContent}
         </CmsEditable>
       )
-
-    if (noWrapper || !Wrapper) return <>{textContent}</>
 
     return (
       //@ts-expect-error

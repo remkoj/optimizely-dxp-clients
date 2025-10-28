@@ -311,22 +311,17 @@ export function buildProperty(propertyName: string, propertyConfig?: Integration
     }
   }`;
     case 'contentReference': {
-      const pick: string[] = (propertyItemConfig?.allowedTypes ?? []).filter(x => !x.startsWith('_'))
-      const hide: string[] = (propertyItemConfig?.restrictedTypes ?? []).filter(x => !x.startsWith('_'))
-      const pickAll = pick.length == 0 || (pick.length == 1 && pick.at(0) === '*')
-      if (hide.length > 0)
-        console.log("Negative filtering isn't reflected in the Graph Queries")
-      //const fragments = pick.map(x => "..." + x + "Data")
-      /*
-    item {
-      ...IContentData${pickAll ? '\n    ...BlockData' : '\n    ' + fragments.join('\n    ')}
-    }*/
       return outputPropertyName + ` {
     key
     url {
       type
       base
       default
+    }
+    item {
+      __typename
+      ...CmpImageAssetInfo
+      ...CmpVideoAssetInfo
     }
   }`
     }

@@ -61,6 +61,22 @@ export class OptimizelyGraphAdminApi extends BaseOptimizelyGraphAdminApi {
             mediaType: 'application/x-ndjson',
         });
     }
+
+    /**
+     * Retrieve the OpenAPI Specification of the Optimizely Graph management
+     * API, that is wrapped by this client. This will fetch the OpenAPI spec
+     * from the service, so it might be ahead of the OpenAPI spec that was 
+     * used to generate this client.
+     * 
+     * @returns     The OpenAPI spec
+     */
+    public getOpenApiSpec() : CancelablePromise<any>
+    {
+        return this.request.request({
+            method: 'GET',
+            url: '/app/swagger/swagger.json'
+        })
+    }
 }
 
 /**

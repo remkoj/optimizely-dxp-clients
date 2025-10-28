@@ -12,11 +12,11 @@
   ],
   "devDependencies": {
     "@hey-api/client-fetch": "^0.13.1",
-    "@hey-api/openapi-ts": "^0.85.2",
+    "@hey-api/openapi-ts": "^0.86.7",
     "rimraf": "^6.0.1"
   },
   "dependencies": {
-    "@types/node": "^22.18.10",
+    "@types/node": "^22.18.12",
     "dotenv": "^17.2.3",
     "dotenv-expand": "^12.0.3",
     "glob": "^11.0.3",

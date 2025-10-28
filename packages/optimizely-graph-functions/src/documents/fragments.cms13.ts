@@ -74,10 +74,37 @@ export default [
       ... on CompositionStructureNode {
         nodes {
           ...CompositionNodeData
-          ...CompositionStructureNode
-          ...CompositionComponentNode
+          ... on CompositionStructureNode {
+            nodes {
+              ...CompositionNodeData
+              ... on CompositionStructureNode {
+                nodes {
+                  ...CompositionNodeData
+                  ... on CompositionComponentNode {
+                    component {
+                      ...IContentData
+                      ...BlockData
+                      ...ElementData
+                    }
+                  }
+                  ... on CompositionStructureNode {
+                    nodes {
+                      ...CompositionNodeData
+                      ... on CompositionComponentNode {
+                        component {
+                          ...IContentData
+                          ...FormElementData
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
         }
         component {
+          ...IContentData
           ...SectionData
         }
       }
@@ -89,20 +116,32 @@ export default [
     ...CompositionNodeData
     nodes {
       ...CompositionNodeData
-      ... on CompositionComponentNode {
-        component {
-          ...IContentData
-          ...SectionElementData
-        }
-      }
       ... on CompositionStructureNode {
         nodes {
           ...CompositionNodeData
-          ...CompositionStructureNode
-          ...CompositionComponentNode
-        }
-        component {
-          ...SectionData
+          ... on CompositionStructureNode {
+            nodes {
+              ...CompositionNodeData
+              ... on CompositionComponentNode {
+                component {
+                  ...IContentData
+                  ...BlockData
+                  ...ElementData
+                }
+              }
+              ... on CompositionStructureNode {
+                nodes {
+                  ...CompositionNodeData
+                  ... on CompositionComponentNode {
+                    component {
+                      ...IContentData
+                      ...FormElementData
+                    }
+                  }
+                }
+              }
+            }
+          }
         }
       }
     }
@@ -142,6 +181,31 @@ export default [
     type
     base
     default
+  }
+}`,
+`fragment _CmpImageAssetInfo on cmp_PublicImageAsset {
+  __typename
+  Title
+  AltText
+  Width
+  Height
+  Url
+  Renditions {
+    Name
+    Width
+    Height
+    Url
+  }
+}`,
+`fragment _CmpVideoAssetInfo on cmp_PublicVideoAsset {
+  Title
+  AltText
+  Url
+  Renditions {
+    Name
+    Width
+    Height
+    Url
   }
 }`
 ]

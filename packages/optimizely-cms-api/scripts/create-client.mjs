@@ -25,23 +25,19 @@ const CMS_PATHS = {
   const plugins = createPluginConfig();
 
   process.stdout.write(`➡ Creating Preview3 & Preview2 CMS API Client\n`);
-  await Promise.allSettled(
-    [
-      createClient({
+  void await createClient({
         input: openApiSpecV3,
         output: createOutputConfig(path.resolve(path.join(process.cwd(), 'src', 'client'))),
         plugins,
-      }),
-      createClient({
+      });
+  void await createClient({
         input: openApiSpecV2,
         output: createOutputConfig(path.resolve(path.join(process.cwd(), 'src', 'instance.client'))),
         plugins,
-      })
-    ]
-  )
+      });
 
   process.stdout.write(`⚓ Tracking CMS instance version\n`);
-  await createVersionFile(accessToken);
+  void await createVersionFile(accessToken);
   process.stdout.write(`🏁 Done\n`);
 })()
 

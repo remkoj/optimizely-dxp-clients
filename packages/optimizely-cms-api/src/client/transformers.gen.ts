@@ -2,11 +2,6 @@
 
 import type { ContentTypesCreateResponse, ContentTypesDeleteResponse, ContentTypesGetResponse, ContentTypesListResponse, ContentTypesPatchResponse, DisplayTemplatesCreateResponse, DisplayTemplatesDeleteResponse, DisplayTemplatesGetResponse, DisplayTemplatesListResponse, DisplayTemplatesPatchResponse, PropertyFormatsGetResponse, PropertyFormatsListResponse, PropertyGroupsCreateResponse, PropertyGroupsDeleteResponse, PropertyGroupsGetResponse, PropertyGroupsListResponse, PropertyGroupsPatchResponse } from './types.gen';
 
-export const contentTypesListResponseTransformer = async (data: any): Promise<ContentTypesListResponse> => {
-    data = contentTypePageSchemaResponseTransformer(data);
-    return data;
-};
-
 const contentTypePageSchemaResponseTransformer = (data: any) => {
     if (data.items) {
         data.items = data.items.map((item: any) => {
@@ -23,6 +18,11 @@ const contentTypeSchemaResponseTransformer = (data: any) => {
     if (data.lastModified) {
         data.lastModified = new Date(data.lastModified);
     }
+    return data;
+};
+
+export const contentTypesListResponseTransformer = async (data: any): Promise<ContentTypesListResponse> => {
+    data = contentTypePageSchemaResponseTransformer(data);
     return data;
 };
 
@@ -46,11 +46,6 @@ export const contentTypesPatchResponseTransformer = async (data: any): Promise<C
     return data;
 };
 
-export const displayTemplatesListResponseTransformer = async (data: any): Promise<DisplayTemplatesListResponse> => {
-    data = displayTemplatePageSchemaResponseTransformer(data);
-    return data;
-};
-
 const displayTemplatePageSchemaResponseTransformer = (data: any) => {
     if (data.items) {
         data.items = data.items.map((item: any) => {
@@ -67,6 +62,11 @@ const displayTemplateSchemaResponseTransformer = (data: any) => {
     if (data.lastModified) {
         data.lastModified = new Date(data.lastModified);
     }
+    return data;
+};
+
+export const displayTemplatesListResponseTransformer = async (data: any): Promise<DisplayTemplatesListResponse> => {
+    data = displayTemplatePageSchemaResponseTransformer(data);
     return data;
 };
 
@@ -90,11 +90,6 @@ export const displayTemplatesPatchResponseTransformer = async (data: any): Promi
     return data;
 };
 
-export const propertyFormatsListResponseTransformer = async (data: any): Promise<PropertyFormatsListResponse> => {
-    data = propertyFormatPageSchemaResponseTransformer(data);
-    return data;
-};
-
 const propertyFormatPageSchemaResponseTransformer = (data: any) => {
     if (data.items) {
         data.items = data.items.map((item: any) => {
@@ -114,13 +109,13 @@ const propertyFormatSchemaResponseTransformer = (data: any) => {
     return data;
 };
 
-export const propertyFormatsGetResponseTransformer = async (data: any): Promise<PropertyFormatsGetResponse> => {
-    data = propertyFormatSchemaResponseTransformer(data);
+export const propertyFormatsListResponseTransformer = async (data: any): Promise<PropertyFormatsListResponse> => {
+    data = propertyFormatPageSchemaResponseTransformer(data);
     return data;
 };
 
-export const propertyGroupsListResponseTransformer = async (data: any): Promise<PropertyGroupsListResponse> => {
-    data = propertyGroupPageSchemaResponseTransformer(data);
+export const propertyFormatsGetResponseTransformer = async (data: any): Promise<PropertyFormatsGetResponse> => {
+    data = propertyFormatSchemaResponseTransformer(data);
     return data;
 };
 
@@ -140,6 +135,11 @@ const propertyGroupSchemaResponseTransformer = (data: any) => {
     if (data.lastModified) {
         data.lastModified = new Date(data.lastModified);
     }
+    return data;
+};
+
+export const propertyGroupsListResponseTransformer = async (data: any): Promise<PropertyGroupsListResponse> => {
+    data = propertyGroupPageSchemaResponseTransformer(data);
     return data;
 };
 
