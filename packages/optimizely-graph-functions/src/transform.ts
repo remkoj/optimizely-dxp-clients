@@ -12,6 +12,7 @@ export { injectPageQueries } from "./_transform/injectPageQueries"
 export { injectSectionQueries } from "./_transform/injectSectionQueries"
 export { performInjections } from "./_transform/performInjections"
 export { cleanFragmentSpreads } from "./_transform/cleanSpreads"
+export { handleDependDirective } from "./_transform/handleDependDirective"
 
 export type TransformFn<T = any> = (files: Types.DocumentFile[], options: Types.PresetFnArgs<T>) => Promise<Types.DocumentFile[]> | Types.DocumentFile[]
 export async function executeDocumentTransforms<T = any>(files: Types.DocumentFile[], transforms: Array<TransformFn<T>>, options: Types.PresetFnArgs<T>): Promise<Types.DocumentFile[]> {

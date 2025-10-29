@@ -39,9 +39,7 @@ export const TypesPullCommand: TypesPullModule = {
 
       const outContentType = { ...contentType }
       if (outContentType.source || outContentType.source == "") delete outContentType.source
-      //if (outContentType.features) delete outContentType.features
-      //if (outContentType.usage) delete outContentType.usage
-      if (outContentType.lastModifiedBy) delete outContentType.lastModifiedBy
+      if (outContentType.lastModifiedBy || outContentType.lastModifiedBy == "") delete outContentType.lastModifiedBy
       if (outContentType.lastModified) delete outContentType.lastModified
       if (outContentType.created) delete outContentType.created
 

@@ -318,7 +318,7 @@ export function buildProperty(propertyName: string, propertyConfig?: Integration
       base
       default
     }
-    item {
+    item @depend(on: "ContentReference.item") {
       __typename
       ...CmpImageAssetInfo
       ...CmpVideoAssetInfo

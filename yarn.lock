@@ -1119,9 +1119,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@hey-api/openapi-ts@npm:^0.86.7":
-  version: 0.86.7
-  resolution: "@hey-api/openapi-ts@npm:0.86.7"
+"@hey-api/openapi-ts@npm:^0.86.8":
+  version: 0.86.8
+  resolution: "@hey-api/openapi-ts@npm:0.86.8"
   dependencies:
     "@hey-api/codegen-core": "npm:^0.3.1"
     "@hey-api/json-schema-ref-parser": "npm:1.2.1"
@@ -1136,7 +1136,7 @@ __metadata:
     typescript: ">=5.5.3"
   bin:
     openapi-ts: bin/run.js
-  checksum: 10c0/7b8b36baac85b29900b33949c26b1522412da85327953ca3f572d15ff5466429501f5c6f1a8bf301d70232ebba2b11247daede08f3428b222bbd531fe893186c
+  checksum: 10c0/431cf5b512a86db12a01ddbaf4e5e842fb49b079d1f7ed9603133e96f8ef77f9011b1708d1ba927024f05416c66e4b54314071370fd2c101d88fde344f62999f
   languageName: node
   linkType: hard
 
@@ -1695,65 +1695,65 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@next/env@npm:16.0.0":
-  version: 16.0.0
-  resolution: "@next/env@npm:16.0.0"
-  checksum: 10c0/bc6b85d48373a207f95373c5b350e0766774a8453982c8e045539393e165bc25ef3f6aaaf44036c8f2f4a98e857e0ccc7f84da6ea92116bd50f672e06f987750
+"@next/env@npm:16.0.1":
+  version: 16.0.1
+  resolution: "@next/env@npm:16.0.1"
+  checksum: 10c0/f993bd72f91a3617d2d91c984d0d63c0a94a6e132787c9f93a43425125fe8ab8568928e4c1acd47e76c3acf6e9065296984e06ba8227a52e85b323b197c4e1c1
   languageName: node
   linkType: hard
 
-"@next/swc-darwin-arm64@npm:16.0.0":
-  version: 16.0.0
-  resolution: "@next/swc-darwin-arm64@npm:16.0.0"
+"@next/swc-darwin-arm64@npm:16.0.1":
+  version: 16.0.1
+  resolution: "@next/swc-darwin-arm64@npm:16.0.1"
   conditions: os=darwin & cpu=arm64
   languageName: node
   linkType: hard
 
-"@next/swc-darwin-x64@npm:16.0.0":
-  version: 16.0.0
-  resolution: "@next/swc-darwin-x64@npm:16.0.0"
+"@next/swc-darwin-x64@npm:16.0.1":
+  version: 16.0.1
+  resolution: "@next/swc-darwin-x64@npm:16.0.1"
   conditions: os=darwin & cpu=x64
   languageName: node
   linkType: hard
 
-"@next/swc-linux-arm64-gnu@npm:16.0.0":
-  version: 16.0.0
-  resolution: "@next/swc-linux-arm64-gnu@npm:16.0.0"
+"@next/swc-linux-arm64-gnu@npm:16.0.1":
+  version: 16.0.1
+  resolution: "@next/swc-linux-arm64-gnu@npm:16.0.1"
   conditions: os=linux & cpu=arm64 & libc=glibc
   languageName: node
   linkType: hard
 
-"@next/swc-linux-arm64-musl@npm:16.0.0":
-  version: 16.0.0
-  resolution: "@next/swc-linux-arm64-musl@npm:16.0.0"
+"@next/swc-linux-arm64-musl@npm:16.0.1":
+  version: 16.0.1
+  resolution: "@next/swc-linux-arm64-musl@npm:16.0.1"
   conditions: os=linux & cpu=arm64 & libc=musl
   languageName: node
   linkType: hard
 
-"@next/swc-linux-x64-gnu@npm:16.0.0":
-  version: 16.0.0
-  resolution: "@next/swc-linux-x64-gnu@npm:16.0.0"
+"@next/swc-linux-x64-gnu@npm:16.0.1":
+  version: 16.0.1
+  resolution: "@next/swc-linux-x64-gnu@npm:16.0.1"
   conditions: os=linux & cpu=x64 & libc=glibc
   languageName: node
   linkType: hard
 
-"@next/swc-linux-x64-musl@npm:16.0.0":
-  version: 16.0.0
-  resolution: "@next/swc-linux-x64-musl@npm:16.0.0"
+"@next/swc-linux-x64-musl@npm:16.0.1":
+  version: 16.0.1
+  resolution: "@next/swc-linux-x64-musl@npm:16.0.1"
   conditions: os=linux & cpu=x64 & libc=musl
   languageName: node
   linkType: hard
 
-"@next/swc-win32-arm64-msvc@npm:16.0.0":
-  version: 16.0.0
-  resolution: "@next/swc-win32-arm64-msvc@npm:16.0.0"
+"@next/swc-win32-arm64-msvc@npm:16.0.1":
+  version: 16.0.1
+  resolution: "@next/swc-win32-arm64-msvc@npm:16.0.1"
   conditions: os=win32 & cpu=arm64
   languageName: node
   linkType: hard
 
-"@next/swc-win32-x64-msvc@npm:16.0.0":
-  version: 16.0.0
-  resolution: "@next/swc-win32-x64-msvc@npm:16.0.0"
+"@next/swc-win32-x64-msvc@npm:16.0.1":
+  version: 16.0.1
+  resolution: "@next/swc-win32-x64-msvc@npm:16.0.1"
   conditions: os=win32 & cpu=x64
   languageName: node
   linkType: hard
@@ -2052,8 +2052,8 @@ __metadata:
   resolution: "@remkoj/optimizely-cms-api@workspace:packages/optimizely-cms-api"
   dependencies:
     "@hey-api/client-fetch": "npm:^0.13.1"
-    "@hey-api/openapi-ts": "npm:^0.86.7"
-    "@types/node": "npm:^22.18.12"
+    "@hey-api/openapi-ts": "npm:^0.86.8"
+    "@types/node": "npm:^22.18.13"
     dotenv: "npm:^17.2.3"
     dotenv-expand: "npm:^12.0.3"
     glob: "npm:^11.0.3"
@@ -2074,7 +2074,7 @@ __metadata:
     "@remkoj/optimizely-graph-functions": "workspace:6.0.0-pre11"
     "@rollup/plugin-json": "npm:^6.1.0"
     "@rollup/plugin-typescript": "npm:^12.3.0"
-    "@types/node": "npm:^22.18.12"
+    "@types/node": "npm:^22.18.13"
     "@types/yargs": "npm:^17.0.34"
     ajv: "npm:^8.17.1"
     ajv-formats: "npm:^3.0.1"
@@ -2103,7 +2103,7 @@ __metadata:
     "@remkoj/optimizely-cms-react": "workspace:6.0.0-pre11"
     "@remkoj/optimizely-graph-client": "workspace:6.0.0-pre11"
     "@types/negotiator": "npm:^0.6.4"
-    "@types/node": "npm:^22.18.12"
+    "@types/node": "npm:^22.18.13"
     "@types/react": "npm:^19.2.2"
     "@types/react-dom": "npm:19.2.2"
     deepmerge: "npm:^4.3.1"
@@ -2111,7 +2111,7 @@ __metadata:
     graphql: "npm:^16.11.0"
     graphql-request: "npm:^7.3.1"
     negotiator: "npm:^1.0.0"
-    next: "npm:^16.0.0"
+    next: "npm:^16.0.1"
     prop-types: "npm:^15.8.1"
     react: "npm:^19.2.0"
     react-dom: "npm:^19.2.0"
@@ -2131,7 +2131,7 @@ __metadata:
     "@graphql-typed-document-node/core": "npm:^3.2.0"
     "@remkoj/optimizely-graph-client": "workspace:6.0.0-pre11"
     "@types/crypto-js": "npm:^4.2.2"
-    "@types/node": "npm:^22.18.12"
+    "@types/node": "npm:^22.18.13"
     "@types/react": "npm:^19.2.2"
     "@types/react-dom": "npm:^19.2.2"
     crypto-js: "npm:^4.2.0"
@@ -2159,7 +2159,7 @@ __metadata:
     "@rollup/plugin-typescript": "npm:^12.3.0"
     "@rollup/pluginutils": "npm:^5.3.0"
     "@types/crypto-js": "npm:^4.2.2"
-    "@types/node": "npm:^22.18.12"
+    "@types/node": "npm:^22.18.13"
     "@types/source-map-support": "npm:^0.5.10"
     "@types/yargs": "npm:^17.0.34"
     chalk: "npm:^5.6.2"
@@ -2180,12 +2180,12 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@remkoj/optimizely-graph-client@workspace:6.0.0-pre11, @remkoj/optimizely-graph-client@workspace:^6.0.0-pre11, @remkoj/optimizely-graph-client@workspace:packages/optimizely-graph-client":
+"@remkoj/optimizely-graph-client@workspace:6.0.0-pre11, @remkoj/optimizely-graph-client@workspace:packages/optimizely-graph-client":
   version: 0.0.0-use.local
   resolution: "@remkoj/optimizely-graph-client@workspace:packages/optimizely-graph-client"
   dependencies:
     "@types/crypto-js": "npm:^4.2.2"
-    "@types/node": "npm:^22.18.12"
+    "@types/node": "npm:^22.18.13"
     crypto-js: "npm:^4.2.0"
     graphql: "npm:^16.11.0"
     graphql-request: "npm:^7.3.1"
@@ -2210,7 +2210,7 @@ __metadata:
     "@graphql-typed-document-node/core": "npm:^3.2.0"
     "@remkoj/optimizely-cms-api": "workspace:6.0.0-pre11"
     "@remkoj/optimizely-graph-client": "workspace:6.0.0-pre11"
-    "@types/node": "npm:^22.18.12"
+    "@types/node": "npm:^22.18.13"
     graphql: "npm:^16.11.0"
     graphql-request: "npm:^7.3.1"
     graphql-sock: "npm:^1.0.1"
@@ -2230,14 +2230,14 @@ __metadata:
     "@fastify/deepmerge": "npm:^3.1.0"
     "@headlessui/react": "npm:^2.2.9"
     "@heroicons/react": "npm:^2.2.0"
-    "@remkoj/optimizely-graph-client": "workspace:^6.0.0-pre11"
+    "@remkoj/optimizely-graph-client": "workspace:6.0.0-pre11"
     "@tailwindcss/cli": "npm:^4.1.16"
-    "@types/node": "npm:^22.18.12"
+    "@types/node": "npm:^22.18.13"
     "@types/react": "npm:^19.2.2"
     "@types/react-dom": "npm:19.2.2"
     "@types/uuid": "npm:^11.0.0"
     browserslist: "npm:^4.27.0"
-    next: "npm:^16.0.0"
+    next: "npm:^16.0.1"
     prop-types: "npm:^15.8.1"
     react: "npm:^19.2.0"
     react-dom: "npm:^19.2.0"
@@ -2761,12 +2761,21 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/node@npm:*, @types/node@npm:^22.18.12":
+"@types/node@npm:*":
   version: 22.18.12
   resolution: "@types/node@npm:22.18.12"
   dependencies:
     undici-types: "npm:~6.21.0"
   checksum: 10c0/13a4638f2baba3efba2b8bc369dd6f950dccbfca78f318f9c9f2c7adc11fce14fc119723c38567dada2d57a873c092b7356c024924d5974a08f3c1f93dc706c6
+  languageName: node
+  linkType: hard
+
+"@types/node@npm:^22.18.13":
+  version: 22.18.13
+  resolution: "@types/node@npm:22.18.13"
+  dependencies:
+    undici-types: "npm:~6.21.0"
+  checksum: 10c0/4d97b447274f6e566fc5afb464146e9db77b5892c318364eb927b13441e6dbf9fe0ec9d1ed2cb6b5e7e85f5154a5ff52913d2cfc4b952bcf19fb0ddaaff5e533
   languageName: node
   linkType: hard
 
@@ -5203,19 +5212,19 @@ __metadata:
   languageName: node
   linkType: hard
 
-"next@npm:^16.0.0":
-  version: 16.0.0
-  resolution: "next@npm:16.0.0"
+"next@npm:^16.0.1":
+  version: 16.0.1
+  resolution: "next@npm:16.0.1"
   dependencies:
-    "@next/env": "npm:16.0.0"
-    "@next/swc-darwin-arm64": "npm:16.0.0"
-    "@next/swc-darwin-x64": "npm:16.0.0"
-    "@next/swc-linux-arm64-gnu": "npm:16.0.0"
-    "@next/swc-linux-arm64-musl": "npm:16.0.0"
-    "@next/swc-linux-x64-gnu": "npm:16.0.0"
-    "@next/swc-linux-x64-musl": "npm:16.0.0"
-    "@next/swc-win32-arm64-msvc": "npm:16.0.0"
-    "@next/swc-win32-x64-msvc": "npm:16.0.0"
+    "@next/env": "npm:16.0.1"
+    "@next/swc-darwin-arm64": "npm:16.0.1"
+    "@next/swc-darwin-x64": "npm:16.0.1"
+    "@next/swc-linux-arm64-gnu": "npm:16.0.1"
+    "@next/swc-linux-arm64-musl": "npm:16.0.1"
+    "@next/swc-linux-x64-gnu": "npm:16.0.1"
+    "@next/swc-linux-x64-musl": "npm:16.0.1"
+    "@next/swc-win32-arm64-msvc": "npm:16.0.1"
+    "@next/swc-win32-x64-msvc": "npm:16.0.1"
     "@swc/helpers": "npm:0.5.15"
     caniuse-lite: "npm:^1.0.30001579"
     postcss: "npm:8.4.31"
@@ -5258,7 +5267,7 @@ __metadata:
       optional: true
   bin:
     next: dist/bin/next
-  checksum: 10c0/8e93f45b7a6261417c10d8f1f5b53265e7d4dc0223b541c087a2726230ee5b11d767a6b436e69f345150606cb4aec646abfc741384083b19d62f41b11d20d790
+  checksum: 10c0/91390fe601d39e54306f303f0d53cd20b7eef6f1496a0e32246dcb87ddba212a20e3aa887c96ff51ed27e8585892dfb639a4f3210af1b43f5f9018740ac2795f
   languageName: node
   linkType: hard
 
@@ -5437,7 +5446,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "optimizely-dxp-clients@workspace:."
   dependencies:
-    "@types/node": "npm:^22.18.12"
+    "@types/node": "npm:^22.18.13"
     "@yarnpkg/sdks": "npm:^3.2.3"
     browserslist: "npm:^4.27.0"
     glob: "npm:^11.0.3"

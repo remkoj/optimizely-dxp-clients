@@ -1,7 +1,7 @@
 import { type Types } from '@graphql-codegen/plugin-helpers'
 
 // Import base preset
-import { preset as clientPreset, type ClientPresetConfig as ClientPresetOptions } from '@graphql-codegen/client-preset'
+import { preset as clientPreset } from '@graphql-codegen/client-preset'
 import * as GraphQLRequestPlugin from '@graphql-codegen/typescript-graphql-request'
 import * as AddPlugin from '@graphql-codegen/add'
 
@@ -16,7 +16,8 @@ import {
   injectSectionQueries,
   injectPageQueries,
   performInjections,
-  cleanFragmentSpreads
+  cleanFragmentSpreads,
+  handleDependDirective
 } from './transform'
 import type { PresetOptions } from './types'
 
@@ -81,7 +82,25 @@ export const preset: Types.OutputPreset<PresetOptions> =
     }
 
     // Apply all changes to the document set, prior to validating it. They're executed in the order of the array
-    options.documents = await executeDocumentTransforms(options.documents, [
+    const dt = options.documentTransforms || []
+    dt.unshift({
+      name: "Optimizely CMS Document Transforms",
+      transformObject: {
+        transform: (tOpts) => executeDocumentTransforms(tOpts.documents, [
+          cleanFragments,           // Remove fragments that target non-existing types
+          normalizeFragmentNames,   // Allow overriding of built-in fragments
+          normalizeQueryNames,      // Allow overriding of built-in queries
+          injectComponentDocuments, // Inject fragments to fetch component data
+          injectPageQueries,        // Inject queries to fetch page/experience data
+          injectSectionQueries,     // Inject queries to fetch section data
+          performInjections,        // Run injections of component fragments adjacent to placeholder fragments
+          cleanFragmentSpreads,     // Remove all fragment spreads that target a fragment that does not exist in the documents
+          handleDependDirective     // Remove the "item" field in queries and fragments from the "ContentReference" type if it's not in the schema
+        ], options)
+      }
+    })
+    options.documentTransforms = dt;
+    /*options.documents = await executeDocumentTransforms(options.documents, [
       cleanFragments,           // Remove fragments that target non-existing types
       normalizeFragmentNames,   // Allow overriding of built-in fragments
       normalizeQueryNames,      // Allow overriding of built-in queries
@@ -89,12 +108,13 @@ export const preset: Types.OutputPreset<PresetOptions> =
       injectPageQueries,        // Inject queries to fetch page/experience data
       injectSectionQueries,     // Inject queries to fetch section data
       performInjections,        // Run injections of component fragments adjacent to placeholder fragments
-      cleanFragmentSpreads      // Remove all fragment spreads that target a fragment that does not exist in the documents
-    ], options);
+      cleanFragmentSpreads,     // Remove all fragment spreads that target a fragment that does not exist in the documents
+      handleDependDirective     // Remove the "item" field in queries and fragments from the "ContentReference" type if it's not in the schema
+    ], options);*/
 
     // Build the preset files
     const section: Array<Types.GenerateOptions> = await clientPreset.buildGeneratesSection(options)
-
+    
     // Add GraphQL Request Client. 
     section.push({
       filename: `${options.baseOutputDir}client.ts`,

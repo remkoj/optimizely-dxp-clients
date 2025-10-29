@@ -49,7 +49,7 @@
     "@graphql-typed-document-node/core": "^3.2.0",
     "@remkoj/optimizely-cms-api": "workspace:6.0.0-pre11",
     "@remkoj/optimizely-graph-client": "workspace:6.0.0-pre11",
-    "@types/node": "^22.18.12",
+    "@types/node": "^22.18.13",
     "typescript": "^5.9.3"
   },
   "dependencies": {
@@ -59,8 +59,8 @@
     "@graphql-codegen/typescript": "^5.0.2",
     "@graphql-codegen/typescript-graphql-request": "^6.3.0",
     "@graphql-codegen/typescript-operations": "^5.0.2",
-    "@remkoj/optimizely-cms-api": "^6.0.0-pre11",
-    "@remkoj/optimizely-graph-client": "^6.0.0-pre11",
+    "@remkoj/optimizely-cms-api": "6.0.0-pre11",
+    "@remkoj/optimizely-graph-client": "6.0.0-pre11",
     "graphql": "^16.11.0",
     "graphql-request": "^7.3.1",
     "graphql-sock": "^1.0.1",
