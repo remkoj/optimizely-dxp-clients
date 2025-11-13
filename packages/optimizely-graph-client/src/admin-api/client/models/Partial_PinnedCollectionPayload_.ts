@@ -2,12 +2,12 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-export type PinnedCollectionResult = {
-    title: string;
-    key: string;
+/**
+ * Make all properties in T optional
+ */
+export type Partial_PinnedCollectionPayload_ = {
+    title?: string;
+    key?: string;
     isActive?: boolean;
-    id: string;
-    createdAt: string;
-    updatedAt: string;
 };
 

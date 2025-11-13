@@ -2,10 +2,12 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-export type MatchingPinnedSelector = {
+export type PinnedResultMatchParams = {
     phrase: string;
     collectionIds?: Array<string>;
-    languages?: Array<string>;
+    collectionKeys?: Array<string>;
+    languages?: Array<string | null> | null;
+    onlyActive?: boolean;
     limit?: number;
 };
 

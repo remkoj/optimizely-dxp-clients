@@ -2,7 +2,7 @@
 
 import type { Client, Options as Options2, TDataShape } from './client';
 import { client } from './client.gen';
-import { changesetsCreateItemResponseTransformer, changesetsCreateResponseTransformer, changesetsDeleteItemResponseTransformer, changesetsDeleteResponseTransformer, changesetsGetItemResponseTransformer, changesetsGetResponseTransformer, changesetsListItemsResponseTransformer, changesetsListResponseTransformer, changesetsPutResponseTransformer, changesetsUpdateItemResponseTransformer, contentCopyResponseTransformer, contentCreateResponseTransformer, contentCreateVersionResponseTransformer, contentDeleteLocaleResponseTransformer, contentDeleteResponseTransformer, contentDeleteVersionResponseTransformer, contentGetMetadataResponseTransformer, contentGetPathResponseTransformer, contentGetVersionResponseTransformer, contentListAllVersionsResponseTransformer, contentListAssetsResponseTransformer, contentListItemsResponseTransformer, contentListVersionsResponseTransformer, contentPatchMetadataResponseTransformer, contentPatchVersionResponseTransformer, contentTypesCreateResponseTransformer, contentTypesDeleteResponseTransformer, contentTypesGetResponseTransformer, contentTypesListResponseTransformer, contentTypesPatchResponseTransformer, contentTypesPutResponseTransformer, contentUndeleteResponseTransformer, displayTemplatesCreateResponseTransformer, displayTemplatesDeleteResponseTransformer, displayTemplatesGetResponseTransformer, displayTemplatesListResponseTransformer, displayTemplatesPatchResponseTransformer, displayTemplatesPutResponseTransformer, oauthTokenResponseTransformer, propertyFormatsGetResponseTransformer, propertyFormatsListResponseTransformer, propertyGroupsCreateResponseTransformer, propertyGroupsDeleteResponseTransformer, propertyGroupsGetResponseTransformer, propertyGroupsListResponseTransformer, propertyGroupsPatchResponseTransformer, propertyGroupsPutResponseTransformer } from './transformers.gen';
+import { changesetsCreateResponseTransformer, changesetsDeleteResponseTransformer, changesetsGetResponseTransformer, changesetsListResponseTransformer, changesetsPutResponseTransformer, contentCopyResponseTransformer, contentCreateResponseTransformer, contentCreateVersionResponseTransformer, contentDeleteLocaleResponseTransformer, contentDeleteResponseTransformer, contentDeleteVersionResponseTransformer, contentGetMetadataResponseTransformer, contentGetPathResponseTransformer, contentGetVersionResponseTransformer, contentListAllVersionsResponseTransformer, contentListAssetsResponseTransformer, contentListItemsResponseTransformer, contentListVersionsResponseTransformer, contentPatchMetadataResponseTransformer, contentPatchVersionResponseTransformer, contentTypesCreateResponseTransformer, contentTypesDeleteResponseTransformer, contentTypesGetResponseTransformer, contentTypesListResponseTransformer, contentTypesPatchResponseTransformer, contentTypesPutResponseTransformer, contentUndeleteResponseTransformer, displayTemplatesCreateResponseTransformer, displayTemplatesDeleteResponseTransformer, displayTemplatesGetResponseTransformer, displayTemplatesListResponseTransformer, displayTemplatesPatchResponseTransformer, displayTemplatesPutResponseTransformer } from './transformers.gen';
 import type { ChangesetsCreateData, ChangesetsCreateErrors, ChangesetsCreateItemData, ChangesetsCreateItemErrors, ChangesetsCreateItemResponses, ChangesetsCreateResponses, ChangesetsDeleteData, ChangesetsDeleteErrors, ChangesetsDeleteItemData, ChangesetsDeleteItemErrors, ChangesetsDeleteItemResponses, ChangesetsDeleteResponses, ChangesetsGetData, ChangesetsGetErrors, ChangesetsGetItemData, ChangesetsGetItemErrors, ChangesetsGetItemResponses, ChangesetsGetResponses, ChangesetsListData, ChangesetsListErrors, ChangesetsListItemsData, ChangesetsListItemsErrors, ChangesetsListItemsResponses, ChangesetsListResponses, ChangesetsPutData, ChangesetsPutErrors, ChangesetsPutResponses, ChangesetsUpdateItemData, ChangesetsUpdateItemErrors, ChangesetsUpdateItemResponses, ContentCopyData, ContentCopyErrors, ContentCopyResponses, ContentCreateData, ContentCreateErrors, ContentCreateResponses, ContentCreateVersionData, ContentCreateVersionErrors, ContentCreateVersionResponses, ContentDeleteData, ContentDeleteErrors, ContentDeleteLocaleData, ContentDeleteLocaleErrors, ContentDeleteLocaleResponses, ContentDeleteResponses, ContentDeleteVersionData, ContentDeleteVersionErrors, ContentDeleteVersionResponses, ContentGetMetadataData, ContentGetMetadataErrors, ContentGetMetadataResponses, ContentGetPathData, ContentGetPathErrors, ContentGetPathResponses, ContentGetVersionData, ContentGetVersionErrors, ContentGetVersionResponses, ContentListAllVersionsData, ContentListAllVersionsErrors, ContentListAllVersionsResponses, ContentListAssetsData, ContentListAssetsErrors, ContentListAssetsResponses, ContentListItemsData, ContentListItemsErrors, ContentListItemsResponses, ContentListVersionsData, ContentListVersionsErrors, ContentListVersionsResponses, ContentPatchMetadataData, ContentPatchMetadataErrors, ContentPatchMetadataResponses, ContentPatchVersionData, ContentPatchVersionErrors, ContentPatchVersionResponses, ContentTypesCreateData, ContentTypesCreateErrors, ContentTypesCreateResponses, ContentTypesDeleteData, ContentTypesDeleteErrors, ContentTypesDeleteResponses, ContentTypesGetData, ContentTypesGetErrors, ContentTypesGetResponses, ContentTypesListData, ContentTypesListErrors, ContentTypesListResponses, ContentTypesPatchData, ContentTypesPatchErrors, ContentTypesPatchResponses, ContentTypesPutData, ContentTypesPutErrors, ContentTypesPutResponses, ContentUndeleteData, ContentUndeleteErrors, ContentUndeleteResponses, DisplayTemplatesCreateData, DisplayTemplatesCreateErrors, DisplayTemplatesCreateResponses, DisplayTemplatesDeleteData, DisplayTemplatesDeleteErrors, DisplayTemplatesDeleteResponses, DisplayTemplatesGetData, DisplayTemplatesGetErrors, DisplayTemplatesGetResponses, DisplayTemplatesListData, DisplayTemplatesListErrors, DisplayTemplatesListResponses, DisplayTemplatesPatchData, DisplayTemplatesPatchErrors, DisplayTemplatesPatchResponses, DisplayTemplatesPutData, DisplayTemplatesPutErrors, DisplayTemplatesPutResponses, OauthTokenData, OauthTokenErrors, OauthTokenResponses, PropertyFormatsGetData, PropertyFormatsGetErrors, PropertyFormatsGetResponses, PropertyFormatsListData, PropertyFormatsListErrors, PropertyFormatsListResponses, PropertyGroupsCreateData, PropertyGroupsCreateErrors, PropertyGroupsCreateResponses, PropertyGroupsDeleteData, PropertyGroupsDeleteErrors, PropertyGroupsDeleteResponses, PropertyGroupsGetData, PropertyGroupsGetErrors, PropertyGroupsGetResponses, PropertyGroupsListData, PropertyGroupsListErrors, PropertyGroupsListResponses, PropertyGroupsPatchData, PropertyGroupsPatchErrors, PropertyGroupsPatchResponses, PropertyGroupsPutData, PropertyGroupsPutErrors, PropertyGroupsPutResponses } from './types.gen';
 
 export type Options<TData extends TDataShape = TDataShape, ThrowOnError extends boolean = boolean> = Options2<TData, ThrowOnError> & {
@@ -100,7 +100,6 @@ export const changesetsPut = <ThrowOnError extends boolean = false>(options: Opt
  */
 export const changesetsDeleteItem = <ThrowOnError extends boolean = false>(options: Options<ChangesetsDeleteItemData, ThrowOnError>) => {
     return (options.client ?? client).delete<ChangesetsDeleteItemResponses, ChangesetsDeleteItemErrors, ThrowOnError>({
-        responseTransformer: changesetsDeleteItemResponseTransformer,
         url: '/changesets/{changeset}/items/{key}/versions/{version}',
         ...options
     });
@@ -113,7 +112,6 @@ export const changesetsDeleteItem = <ThrowOnError extends boolean = false>(optio
  */
 export const changesetsGetItem = <ThrowOnError extends boolean = false>(options: Options<ChangesetsGetItemData, ThrowOnError>) => {
     return (options.client ?? client).get<ChangesetsGetItemResponses, ChangesetsGetItemErrors, ThrowOnError>({
-        responseTransformer: changesetsGetItemResponseTransformer,
         url: '/changesets/{changeset}/items/{key}/versions/{version}',
         ...options
     });
@@ -127,7 +125,6 @@ export const changesetsGetItem = <ThrowOnError extends boolean = false>(options:
  */
 export const changesetsListItems = <ThrowOnError extends boolean = false>(options: Options<ChangesetsListItemsData, ThrowOnError>) => {
     return (options.client ?? client).get<ChangesetsListItemsResponses, ChangesetsListItemsErrors, ThrowOnError>({
-        responseTransformer: changesetsListItemsResponseTransformer,
         url: '/changesets/{changeset}/items',
         ...options
     });
@@ -140,7 +137,6 @@ export const changesetsListItems = <ThrowOnError extends boolean = false>(option
  */
 export const changesetsCreateItem = <ThrowOnError extends boolean = false>(options: Options<ChangesetsCreateItemData, ThrowOnError>) => {
     return (options.client ?? client).post<ChangesetsCreateItemResponses, ChangesetsCreateItemErrors, ThrowOnError>({
-        responseTransformer: changesetsCreateItemResponseTransformer,
         url: '/changesets/{changeset}/items',
         ...options,
         headers: {
@@ -157,7 +153,6 @@ export const changesetsCreateItem = <ThrowOnError extends boolean = false>(optio
  */
 export const changesetsUpdateItem = <ThrowOnError extends boolean = false>(options: Options<ChangesetsUpdateItemData, ThrowOnError>) => {
     return (options.client ?? client).put<ChangesetsUpdateItemResponses, ChangesetsUpdateItemErrors, ThrowOnError>({
-        responseTransformer: changesetsUpdateItemResponseTransformer,
         url: '/changesets/{changeset}/items/{contentKey}/versions/{contentVersion}',
         ...options,
         headers: {
@@ -585,7 +580,6 @@ export const displayTemplatesPut = <ThrowOnError extends boolean = false>(option
  */
 export const oauthToken = <ThrowOnError extends boolean = false>(options: Options<OauthTokenData, ThrowOnError>) => {
     return (options.client ?? client).post<OauthTokenResponses, OauthTokenErrors, ThrowOnError>({
-        responseTransformer: oauthTokenResponseTransformer,
         url: '/oauth/token',
         ...options,
         headers: {
@@ -602,7 +596,6 @@ export const oauthToken = <ThrowOnError extends boolean = false>(options: Option
  */
 export const propertyFormatsList = <ThrowOnError extends boolean = false>(options?: Options<PropertyFormatsListData, ThrowOnError>) => {
     return (options?.client ?? client).get<PropertyFormatsListResponses, PropertyFormatsListErrors, ThrowOnError>({
-        responseTransformer: propertyFormatsListResponseTransformer,
         url: '/propertyformats',
         ...options
     });
@@ -615,7 +608,6 @@ export const propertyFormatsList = <ThrowOnError extends boolean = false>(option
  */
 export const propertyFormatsGet = <ThrowOnError extends boolean = false>(options: Options<PropertyFormatsGetData, ThrowOnError>) => {
     return (options.client ?? client).get<PropertyFormatsGetResponses, PropertyFormatsGetErrors, ThrowOnError>({
-        responseTransformer: propertyFormatsGetResponseTransformer,
         url: '/propertyformats/{key}',
         ...options
     });
@@ -628,7 +620,6 @@ export const propertyFormatsGet = <ThrowOnError extends boolean = false>(options
  */
 export const propertyGroupsList = <ThrowOnError extends boolean = false>(options?: Options<PropertyGroupsListData, ThrowOnError>) => {
     return (options?.client ?? client).get<PropertyGroupsListResponses, PropertyGroupsListErrors, ThrowOnError>({
-        responseTransformer: propertyGroupsListResponseTransformer,
         url: '/propertygroups',
         ...options
     });
@@ -641,7 +632,6 @@ export const propertyGroupsList = <ThrowOnError extends boolean = false>(options
  */
 export const propertyGroupsCreate = <ThrowOnError extends boolean = false>(options: Options<PropertyGroupsCreateData, ThrowOnError>) => {
     return (options.client ?? client).post<PropertyGroupsCreateResponses, PropertyGroupsCreateErrors, ThrowOnError>({
-        responseTransformer: propertyGroupsCreateResponseTransformer,
         url: '/propertygroups',
         ...options,
         headers: {
@@ -658,7 +648,6 @@ export const propertyGroupsCreate = <ThrowOnError extends boolean = false>(optio
  */
 export const propertyGroupsDelete = <ThrowOnError extends boolean = false>(options: Options<PropertyGroupsDeleteData, ThrowOnError>) => {
     return (options.client ?? client).delete<PropertyGroupsDeleteResponses, PropertyGroupsDeleteErrors, ThrowOnError>({
-        responseTransformer: propertyGroupsDeleteResponseTransformer,
         url: '/propertygroups/{key}',
         ...options
     });
@@ -671,7 +660,6 @@ export const propertyGroupsDelete = <ThrowOnError extends boolean = false>(optio
  */
 export const propertyGroupsGet = <ThrowOnError extends boolean = false>(options: Options<PropertyGroupsGetData, ThrowOnError>) => {
     return (options.client ?? client).get<PropertyGroupsGetResponses, PropertyGroupsGetErrors, ThrowOnError>({
-        responseTransformer: propertyGroupsGetResponseTransformer,
         url: '/propertygroups/{key}',
         ...options
     });
@@ -684,7 +672,6 @@ export const propertyGroupsGet = <ThrowOnError extends boolean = false>(options:
  */
 export const propertyGroupsPatch = <ThrowOnError extends boolean = false>(options: Options<PropertyGroupsPatchData, ThrowOnError>) => {
     return (options.client ?? client).patch<PropertyGroupsPatchResponses, PropertyGroupsPatchErrors, ThrowOnError>({
-        responseTransformer: propertyGroupsPatchResponseTransformer,
         url: '/propertygroups/{key}',
         ...options,
         headers: {
@@ -702,7 +689,6 @@ export const propertyGroupsPatch = <ThrowOnError extends boolean = false>(option
  */
 export const propertyGroupsPut = <ThrowOnError extends boolean = false>(options: Options<PropertyGroupsPutData, ThrowOnError>) => {
     return (options.client ?? client).put<PropertyGroupsPutResponses, PropertyGroupsPutErrors, ThrowOnError>({
-        responseTransformer: propertyGroupsPutResponseTransformer,
         url: '/propertygroups/{key}',
         ...options,
         headers: {

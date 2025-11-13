@@ -2,9 +2,7 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-export type PinnedCollectionPayload = {
-    title: string;
-    key: string;
-    isActive?: boolean;
+export type SearchParams = {
+    appKey?: string;
 };
 

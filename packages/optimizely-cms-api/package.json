@@ -2,7 +2,7 @@
   "name": "@remkoj/optimizely-cms-api",
   "displayName": "Optimizely CMS - Integration API Client",
   "description": "A Javascript client for the Integration API provided by the Optimizely CMS.",
-  "version": "6.0.0-pre13",
+  "version": "6.0.0-pre14",
   "type": "commonjs",
   "license": "Apache-2.0",
   "main": "./dist/index.js",
@@ -12,11 +12,11 @@
   ],
   "devDependencies": {
     "@hey-api/client-fetch": "^0.13.1",
-    "@hey-api/openapi-ts": "^0.86.8",
-    "rimraf": "^6.0.1"
+    "@hey-api/openapi-ts": "^0.87.4",
+    "rimraf": "^6.1.0"
   },
   "dependencies": {
-    "@types/node": "^22.18.13",
+    "@types/node": "^22.19.1",
     "dotenv": "^17.2.3",
     "dotenv-expand": "^12.0.3",
     "glob": "^11.0.3",
