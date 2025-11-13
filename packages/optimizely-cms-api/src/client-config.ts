@@ -17,7 +17,7 @@ export const createClientConfig: CreateConfig = (config, apiConfig) => {
     baseUrl.pathname = baseUrl.pathname + '/'
 
   if (envConfig.debug)
-    process.stdout.write(`⚪ [CMS API] Creating API-Client for ${baseUrl.href} as ${envConfig.actAs ?? envConfig.clientId}\n`)
+    console.log(`⚪ [CMS API] Creating API-Client for ${baseUrl.href} as ${envConfig.actAs ?? envConfig.clientId}\n`)
 
   const authBaseUrl = baseUrl.hostname === 'api.cms.optimizely.com' ?
     new URL("/", baseUrl) :

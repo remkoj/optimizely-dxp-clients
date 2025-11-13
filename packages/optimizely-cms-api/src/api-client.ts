@@ -125,10 +125,10 @@ class BaseApiClient {
     // Store instance variables
     this._config = config ?? readEnvConfig()
     this._client = createClient(createClientConfig(createConfig({
-      baseUrl: 'https://api.cms.optimizely.com/preview3'
+      baseUrl: 'https://api.cms.optimizely.com/preview3',
     }), this._config));
     this._instanceClient = createInstanceClient(createClientConfig(createInstanceConfig({
-      baseUrl: new URL('/_cms/preview2', this._config.base).href
+      baseUrl: new URL('/_cms/preview2', this._config.base).href,
     })));
 
     // Configure Client

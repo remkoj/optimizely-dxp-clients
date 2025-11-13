@@ -2,8 +2,8 @@
 
 import type { Client, Options as Options2, TDataShape } from './client';
 import { client } from './client.gen';
-import { contentTypesCreateResponseTransformer, contentTypesDeleteResponseTransformer, contentTypesGetResponseTransformer, contentTypesListResponseTransformer, contentTypesPatchResponseTransformer, displayTemplatesCreateResponseTransformer, displayTemplatesDeleteResponseTransformer, displayTemplatesGetResponseTransformer, displayTemplatesListResponseTransformer, displayTemplatesPatchResponseTransformer, propertyFormatsGetResponseTransformer, propertyFormatsListResponseTransformer, propertyGroupsCreateResponseTransformer, propertyGroupsDeleteResponseTransformer, propertyGroupsGetResponseTransformer, propertyGroupsListResponseTransformer, propertyGroupsPatchResponseTransformer } from './transformers.gen';
-import type { ContentTypesCreateData, ContentTypesCreateErrors, ContentTypesCreateResponses, ContentTypesDeleteData, ContentTypesDeleteErrors, ContentTypesDeleteResponses, ContentTypesGetData, ContentTypesGetErrors, ContentTypesGetResponses, ContentTypesListData, ContentTypesListErrors, ContentTypesListResponses, ContentTypesPatchData, ContentTypesPatchErrors, ContentTypesPatchResponses, DisplayTemplatesCreateData, DisplayTemplatesCreateErrors, DisplayTemplatesCreateResponses, DisplayTemplatesDeleteData, DisplayTemplatesDeleteErrors, DisplayTemplatesDeleteResponses, DisplayTemplatesGetData, DisplayTemplatesGetErrors, DisplayTemplatesGetResponses, DisplayTemplatesListData, DisplayTemplatesListErrors, DisplayTemplatesListResponses, DisplayTemplatesPatchData, DisplayTemplatesPatchErrors, DisplayTemplatesPatchResponses, PropertyFormatsGetData, PropertyFormatsGetErrors, PropertyFormatsGetResponses, PropertyFormatsListData, PropertyFormatsListErrors, PropertyFormatsListResponses, PropertyGroupsCreateData, PropertyGroupsCreateErrors, PropertyGroupsCreateResponses, PropertyGroupsDeleteData, PropertyGroupsDeleteErrors, PropertyGroupsDeleteResponses, PropertyGroupsGetData, PropertyGroupsGetErrors, PropertyGroupsGetResponses, PropertyGroupsListData, PropertyGroupsListErrors, PropertyGroupsListResponses, PropertyGroupsPatchData, PropertyGroupsPatchErrors, PropertyGroupsPatchResponses } from './types.gen';
+import { blueprintsCreateResponseTransformer, blueprintsDeleteResponseTransformer, blueprintsGetResponseTransformer, blueprintsListResponseTransformer, blueprintsPatchResponseTransformer, changesetsCreateItemResponseTransformer, changesetsCreateResponseTransformer, changesetsDeleteItemResponseTransformer, changesetsDeleteResponseTransformer, changesetsGetItemResponseTransformer, changesetsGetResponseTransformer, changesetsListItemsResponseTransformer, changesetsListResponseTransformer, changesetsPatchItemResponseTransformer, changesetsPatchResponseTransformer, contentCopyResponseTransformer, contentCreateResponseTransformer, contentCreateVersionResponseTransformer, contentDeleteLocaleResponseTransformer, contentDeleteResponseTransformer, contentDeleteVersionResponseTransformer, contentGetMetadataResponseTransformer, contentGetPathResponseTransformer, contentGetVersionResponseTransformer, contentListAllVersionsResponseTransformer, contentListAssetsResponseTransformer, contentListItemsResponseTransformer, contentListVersionsResponseTransformer, contentPatchMetadataResponseTransformer, contentPatchVersionResponseTransformer, contentTypesCreateResponseTransformer, contentTypesDeleteResponseTransformer, contentTypesGetResponseTransformer, contentTypesListResponseTransformer, contentTypesPatchResponseTransformer, contentUndeleteResponseTransformer, displayTemplatesCreateResponseTransformer, displayTemplatesDeleteResponseTransformer, displayTemplatesGetResponseTransformer, displayTemplatesListResponseTransformer, displayTemplatesPatchResponseTransformer, propertyFormatsGetResponseTransformer, propertyFormatsListResponseTransformer, propertyGroupsCreateResponseTransformer, propertyGroupsDeleteResponseTransformer, propertyGroupsGetResponseTransformer, propertyGroupsListResponseTransformer, propertyGroupsPatchResponseTransformer } from './transformers.gen';
+import type { BlueprintsCreateData, BlueprintsCreateErrors, BlueprintsCreateResponses, BlueprintsDeleteData, BlueprintsDeleteErrors, BlueprintsDeleteResponses, BlueprintsGetData, BlueprintsGetErrors, BlueprintsGetResponses, BlueprintsListData, BlueprintsListErrors, BlueprintsListResponses, BlueprintsPatchData, BlueprintsPatchErrors, BlueprintsPatchResponses, ChangesetsCreateData, ChangesetsCreateErrors, ChangesetsCreateItemData, ChangesetsCreateItemErrors, ChangesetsCreateItemResponses, ChangesetsCreateResponses, ChangesetsDeleteData, ChangesetsDeleteErrors, ChangesetsDeleteItemData, ChangesetsDeleteItemErrors, ChangesetsDeleteItemResponses, ChangesetsDeleteResponses, ChangesetsGetData, ChangesetsGetErrors, ChangesetsGetItemData, ChangesetsGetItemErrors, ChangesetsGetItemResponses, ChangesetsGetResponses, ChangesetsListData, ChangesetsListErrors, ChangesetsListItemsData, ChangesetsListItemsErrors, ChangesetsListItemsResponses, ChangesetsListResponses, ChangesetsPatchData, ChangesetsPatchErrors, ChangesetsPatchItemData, ChangesetsPatchItemErrors, ChangesetsPatchItemResponses, ChangesetsPatchResponses, ContentCopyData, ContentCopyErrors, ContentCopyResponses, ContentCreateData, ContentCreateErrors, ContentCreateResponses, ContentCreateVersionData, ContentCreateVersionErrors, ContentCreateVersionResponses, ContentDeleteData, ContentDeleteErrors, ContentDeleteLocaleData, ContentDeleteLocaleErrors, ContentDeleteLocaleResponses, ContentDeleteResponses, ContentDeleteVersionData, ContentDeleteVersionErrors, ContentDeleteVersionResponses, ContentGetMetadataData, ContentGetMetadataErrors, ContentGetMetadataResponses, ContentGetPathData, ContentGetPathErrors, ContentGetPathResponses, ContentGetVersionData, ContentGetVersionErrors, ContentGetVersionResponses, ContentListAllVersionsData, ContentListAllVersionsErrors, ContentListAllVersionsResponses, ContentListAssetsData, ContentListAssetsErrors, ContentListAssetsResponses, ContentListItemsData, ContentListItemsErrors, ContentListItemsResponses, ContentListVersionsData, ContentListVersionsErrors, ContentListVersionsResponses, ContentPatchMetadataData, ContentPatchMetadataErrors, ContentPatchMetadataResponses, ContentPatchVersionData, ContentPatchVersionErrors, ContentPatchVersionResponses, ContentTypesCreateData, ContentTypesCreateErrors, ContentTypesCreateResponses, ContentTypesDeleteData, ContentTypesDeleteErrors, ContentTypesDeleteResponses, ContentTypesGetData, ContentTypesGetErrors, ContentTypesGetResponses, ContentTypesListData, ContentTypesListErrors, ContentTypesListResponses, ContentTypesPatchData, ContentTypesPatchErrors, ContentTypesPatchResponses, ContentUndeleteData, ContentUndeleteErrors, ContentUndeleteResponses, DisplayTemplatesCreateData, DisplayTemplatesCreateErrors, DisplayTemplatesCreateResponses, DisplayTemplatesDeleteData, DisplayTemplatesDeleteErrors, DisplayTemplatesDeleteResponses, DisplayTemplatesGetData, DisplayTemplatesGetErrors, DisplayTemplatesGetResponses, DisplayTemplatesListData, DisplayTemplatesListErrors, DisplayTemplatesListResponses, DisplayTemplatesPatchData, DisplayTemplatesPatchErrors, DisplayTemplatesPatchResponses, PropertyFormatsGetData, PropertyFormatsGetErrors, PropertyFormatsGetResponses, PropertyFormatsListData, PropertyFormatsListErrors, PropertyFormatsListResponses, PropertyGroupsCreateData, PropertyGroupsCreateErrors, PropertyGroupsCreateResponses, PropertyGroupsDeleteData, PropertyGroupsDeleteErrors, PropertyGroupsDeleteResponses, PropertyGroupsGetData, PropertyGroupsGetErrors, PropertyGroupsGetResponses, PropertyGroupsListData, PropertyGroupsListErrors, PropertyGroupsListResponses, PropertyGroupsPatchData, PropertyGroupsPatchErrors, PropertyGroupsPatchResponses } from './types.gen';
 
 export type Options<TData extends TDataShape = TDataShape, ThrowOnError extends boolean = boolean> = Options2<TData, ThrowOnError> & {
     /**
@@ -17,6 +17,454 @@ export type Options<TData extends TDataShape = TDataShape, ThrowOnError extends 
      * used to access values that aren't defined as part of the SDK function.
      */
     meta?: Record<string, unknown>;
+};
+
+/**
+ * List blueprints
+ *
+ * List blueprints using the provided parameters. This API is experimental and may change in future releases.
+ */
+export const blueprintsList = <ThrowOnError extends boolean = false>(options?: Options<BlueprintsListData, ThrowOnError>) => {
+    return (options?.client ?? client).get<BlueprintsListResponses, BlueprintsListErrors, ThrowOnError>({
+        responseTransformer: blueprintsListResponseTransformer,
+        url: '/experimental/blueprints',
+        ...options
+    });
+};
+
+/**
+ * Create a blueprint
+ *
+ * Create a new blueprint. This API is experimental and may change in future releases.
+ */
+export const blueprintsCreate = <ThrowOnError extends boolean = false>(options: Options<BlueprintsCreateData, ThrowOnError>) => {
+    return (options.client ?? client).post<BlueprintsCreateResponses, BlueprintsCreateErrors, ThrowOnError>({
+        responseTransformer: blueprintsCreateResponseTransformer,
+        url: '/experimental/blueprints',
+        ...options,
+        headers: {
+            'Content-Type': 'application/json',
+            ...options.headers
+        }
+    });
+};
+
+/**
+ * Delete a blueprint
+ *
+ * Deletes the blueprint with the provided key. This API is experimental and may change in future releases.
+ */
+export const blueprintsDelete = <ThrowOnError extends boolean = false>(options: Options<BlueprintsDeleteData, ThrowOnError>) => {
+    return (options.client ?? client).delete<BlueprintsDeleteResponses, BlueprintsDeleteErrors, ThrowOnError>({
+        responseTransformer: blueprintsDeleteResponseTransformer,
+        url: '/experimental/blueprints/{key}',
+        ...options
+    });
+};
+
+/**
+ * Get a specific blueprint
+ *
+ * Get the blueprint with the provided key. This API is experimental and may change in future releases.
+ */
+export const blueprintsGet = <ThrowOnError extends boolean = false>(options: Options<BlueprintsGetData, ThrowOnError>) => {
+    return (options.client ?? client).get<BlueprintsGetResponses, BlueprintsGetErrors, ThrowOnError>({
+        responseTransformer: blueprintsGetResponseTransformer,
+        url: '/experimental/blueprints/{key}',
+        ...options
+    });
+};
+
+/**
+ * Patch blueprint
+ *
+ * Patch an existing blueprint. This API is experimental and may change in future releases.
+ */
+export const blueprintsPatch = <ThrowOnError extends boolean = false>(options: Options<BlueprintsPatchData, ThrowOnError>) => {
+    return (options.client ?? client).patch<BlueprintsPatchResponses, BlueprintsPatchErrors, ThrowOnError>({
+        responseTransformer: blueprintsPatchResponseTransformer,
+        url: '/experimental/blueprints/{key}',
+        ...options,
+        headers: {
+            'Content-Type': 'application/merge-patch+json',
+            ...options.headers
+        }
+    });
+};
+
+/**
+ * List changeset
+ *
+ * Lists all changeset using the provided options. This API is experimental and may change in future releases.
+ */
+export const changesetsList = <ThrowOnError extends boolean = false>(options?: Options<ChangesetsListData, ThrowOnError>) => {
+    return (options?.client ?? client).get<ChangesetsListResponses, ChangesetsListErrors, ThrowOnError>({
+        responseTransformer: changesetsListResponseTransformer,
+        url: '/experimental/changesets',
+        ...options
+    });
+};
+
+/**
+ * Create changeset
+ *
+ * Creates a new changeset. This API is experimental and may change in future releases.
+ */
+export const changesetsCreate = <ThrowOnError extends boolean = false>(options: Options<ChangesetsCreateData, ThrowOnError>) => {
+    return (options.client ?? client).post<ChangesetsCreateResponses, ChangesetsCreateErrors, ThrowOnError>({
+        responseTransformer: changesetsCreateResponseTransformer,
+        url: '/experimental/changesets',
+        ...options,
+        headers: {
+            'Content-Type': 'application/json',
+            ...options.headers
+        }
+    });
+};
+
+/**
+ * Delete changeset
+ *
+ * Deletes the changeset with the provided key. If a changeset with the provided key does not exist an error is returned. This API is experimental and may change in future releases.
+ */
+export const changesetsDelete = <ThrowOnError extends boolean = false>(options: Options<ChangesetsDeleteData, ThrowOnError>) => {
+    return (options.client ?? client).delete<ChangesetsDeleteResponses, ChangesetsDeleteErrors, ThrowOnError>({
+        responseTransformer: changesetsDeleteResponseTransformer,
+        url: '/experimental/changesets/{key}',
+        ...options
+    });
+};
+
+/**
+ * Get changeset
+ *
+ * Gets the changeset with the provided key. This API is experimental and may change in future releases.
+ */
+export const changesetsGet = <ThrowOnError extends boolean = false>(options: Options<ChangesetsGetData, ThrowOnError>) => {
+    return (options.client ?? client).get<ChangesetsGetResponses, ChangesetsGetErrors, ThrowOnError>({
+        responseTransformer: changesetsGetResponseTransformer,
+        url: '/experimental/changesets/{key}',
+        ...options
+    });
+};
+
+/**
+ * Patch changeset
+ *
+ * Patch an existing changeset. This API is experimental and may change in future releases.
+ */
+export const changesetsPatch = <ThrowOnError extends boolean = false>(options: Options<ChangesetsPatchData, ThrowOnError>) => {
+    return (options.client ?? client).patch<ChangesetsPatchResponses, ChangesetsPatchErrors, ThrowOnError>({
+        responseTransformer: changesetsPatchResponseTransformer,
+        url: '/experimental/changesets/{key}',
+        ...options,
+        headers: {
+            'Content-Type': 'application/merge-patch+json',
+            ...options.headers
+        }
+    });
+};
+
+/**
+ * Delete changeset item
+ *
+ * Deletes the specified changeset item from the changeset. This API is experimental and may change in future releases.
+ */
+export const changesetsDeleteItem = <ThrowOnError extends boolean = false>(options: Options<ChangesetsDeleteItemData, ThrowOnError>) => {
+    return (options.client ?? client).delete<ChangesetsDeleteItemResponses, ChangesetsDeleteItemErrors, ThrowOnError>({
+        responseTransformer: changesetsDeleteItemResponseTransformer,
+        url: '/experimental/changesets/{changeset}/items/{key}/versions/{version}',
+        ...options
+    });
+};
+
+/**
+ * Get changeset item
+ *
+ * Gets the changeset item for the specified content reference. This API is experimental and may change in future releases.
+ */
+export const changesetsGetItem = <ThrowOnError extends boolean = false>(options: Options<ChangesetsGetItemData, ThrowOnError>) => {
+    return (options.client ?? client).get<ChangesetsGetItemResponses, ChangesetsGetItemErrors, ThrowOnError>({
+        responseTransformer: changesetsGetItemResponseTransformer,
+        url: '/experimental/changesets/{changeset}/items/{key}/versions/{version}',
+        ...options
+    });
+};
+
+/**
+ * Patch changeset item
+ *
+ * Patch the given changeset item. This API is experimental and may change in future releases.
+ */
+export const changesetsPatchItem = <ThrowOnError extends boolean = false>(options: Options<ChangesetsPatchItemData, ThrowOnError>) => {
+    return (options.client ?? client).patch<ChangesetsPatchItemResponses, ChangesetsPatchItemErrors, ThrowOnError>({
+        responseTransformer: changesetsPatchItemResponseTransformer,
+        url: '/experimental/changesets/{changeset}/items/{key}/versions/{version}',
+        ...options,
+        headers: {
+            'Content-Type': 'application/merge-patch+json',
+            ...options.headers
+        }
+    });
+};
+
+/**
+ * List changeset items
+ *
+ * Lists the available changeset items for the specified changeset using
+ * the provided options. This API is experimental and may change in future releases.
+ */
+export const changesetsListItems = <ThrowOnError extends boolean = false>(options: Options<ChangesetsListItemsData, ThrowOnError>) => {
+    return (options.client ?? client).get<ChangesetsListItemsResponses, ChangesetsListItemsErrors, ThrowOnError>({
+        responseTransformer: changesetsListItemsResponseTransformer,
+        url: '/experimental/changesets/{changeset}/items',
+        ...options
+    });
+};
+
+/**
+ * Create changeset item
+ *
+ * Creates the given changeset item. This API is experimental and may change in future releases.
+ */
+export const changesetsCreateItem = <ThrowOnError extends boolean = false>(options: Options<ChangesetsCreateItemData, ThrowOnError>) => {
+    return (options.client ?? client).post<ChangesetsCreateItemResponses, ChangesetsCreateItemErrors, ThrowOnError>({
+        responseTransformer: changesetsCreateItemResponseTransformer,
+        url: '/experimental/changesets/{changeset}/items',
+        ...options,
+        headers: {
+            'Content-Type': 'application/json',
+            ...options.headers
+        }
+    });
+};
+
+/**
+ * Create content
+ *
+ * Create a new content item. This API is experimental and may change in future releases.
+ */
+export const contentCreate = <ThrowOnError extends boolean = false>(options: Options<ContentCreateData, ThrowOnError>) => {
+    return (options.client ?? client).post<ContentCreateResponses, ContentCreateErrors, ThrowOnError>({
+        responseTransformer: contentCreateResponseTransformer,
+        url: '/experimental/content',
+        ...options,
+        headers: {
+            'Content-Type': 'application/json',
+            ...options.headers
+        }
+    });
+};
+
+/**
+ * Delete content
+ *
+ * Deletes the content item with the provided key. If a content item with the provided key does not exist an error is returned. This API is experimental and may change in future releases.
+ */
+export const contentDelete = <ThrowOnError extends boolean = false>(options: Options<ContentDeleteData, ThrowOnError>) => {
+    return (options.client ?? client).delete<ContentDeleteResponses, ContentDeleteErrors, ThrowOnError>({
+        responseTransformer: contentDeleteResponseTransformer,
+        url: '/experimental/content/{key}',
+        ...options
+    });
+};
+
+/**
+ * Get content
+ *
+ * Get shared metadata about the content instance with the provided key. This API is experimental and may change in future releases.
+ */
+export const contentGetMetadata = <ThrowOnError extends boolean = false>(options: Options<ContentGetMetadataData, ThrowOnError>) => {
+    return (options.client ?? client).get<ContentGetMetadataResponses, ContentGetMetadataErrors, ThrowOnError>({
+        responseTransformer: contentGetMetadataResponseTransformer,
+        url: '/experimental/content/{key}',
+        ...options
+    });
+};
+
+/**
+ * Patch content
+ *
+ * Patch an existing content item. If a content item with the provided key does not exist an error is returned. This API is experimental and may change in future releases.
+ */
+export const contentPatchMetadata = <ThrowOnError extends boolean = false>(options: Options<ContentPatchMetadataData, ThrowOnError>) => {
+    return (options.client ?? client).patch<ContentPatchMetadataResponses, ContentPatchMetadataErrors, ThrowOnError>({
+        responseTransformer: contentPatchMetadataResponseTransformer,
+        url: '/experimental/content/{key}',
+        ...options,
+        headers: {
+            'Content-Type': 'application/merge-patch+json',
+            ...options.headers
+        }
+    });
+};
+
+/**
+ * Get content path
+ *
+ * Get the content path with the provided key. This API is experimental and may change in future releases.
+ */
+export const contentGetPath = <ThrowOnError extends boolean = false>(options: Options<ContentGetPathData, ThrowOnError>) => {
+    return (options.client ?? client).get<ContentGetPathResponses, ContentGetPathErrors, ThrowOnError>({
+        responseTransformer: contentGetPathResponseTransformer,
+        url: '/experimental/content/{key}/path',
+        ...options
+    });
+};
+
+/**
+ * List content in container
+ *
+ * List the content items located in a specific container. This API is experimental and may change in future releases.
+ */
+export const contentListItems = <ThrowOnError extends boolean = false>(options: Options<ContentListItemsData, ThrowOnError>) => {
+    return (options.client ?? client).get<ContentListItemsResponses, ContentListItemsErrors, ThrowOnError>({
+        responseTransformer: contentListItemsResponseTransformer,
+        url: '/experimental/content/{key}/items',
+        ...options
+    });
+};
+
+/**
+ * List assets
+ *
+ * List the assets that belongs to a content instance. This API is experimental and may change in future releases.
+ */
+export const contentListAssets = <ThrowOnError extends boolean = false>(options: Options<ContentListAssetsData, ThrowOnError>) => {
+    return (options.client ?? client).get<ContentListAssetsResponses, ContentListAssetsErrors, ThrowOnError>({
+        responseTransformer: contentListAssetsResponseTransformer,
+        url: '/experimental/content/{key}/assets',
+        ...options
+    });
+};
+
+/**
+ * Copy content
+ *
+ * Create a copy of the content item with the provided key. This API is experimental and may change in future releases.
+ */
+export const contentCopy = <ThrowOnError extends boolean = false>(options: Options<ContentCopyData, ThrowOnError>) => {
+    return (options.client ?? client).post<ContentCopyResponses, ContentCopyErrors, ThrowOnError>({
+        responseTransformer: contentCopyResponseTransformer,
+        url: '/experimental/content/{key}:copy',
+        ...options,
+        headers: {
+            'Content-Type': 'application/json',
+            ...options.headers
+        }
+    });
+};
+
+/**
+ * Restore content
+ *
+ * Restore the deleted content item with the provided key. If a content item with the provided key is not deleted an error is returned. This API is experimental and may change in future releases.
+ */
+export const contentUndelete = <ThrowOnError extends boolean = false>(options: Options<ContentUndeleteData, ThrowOnError>) => {
+    return (options.client ?? client).post<ContentUndeleteResponses, ContentUndeleteErrors, ThrowOnError>({
+        responseTransformer: contentUndeleteResponseTransformer,
+        url: '/experimental/content/{key}:undelete',
+        ...options
+    });
+};
+
+/**
+ * Query versions
+ *
+ * List content versions based on the provided query options. This API is experimental and may change in future releases.
+ */
+export const contentListAllVersions = <ThrowOnError extends boolean = false>(options?: Options<ContentListAllVersionsData, ThrowOnError>) => {
+    return (options?.client ?? client).get<ContentListAllVersionsResponses, ContentListAllVersionsErrors, ThrowOnError>({
+        responseTransformer: contentListAllVersionsResponseTransformer,
+        url: '/experimental/content/versions',
+        ...options
+    });
+};
+
+/**
+ * Delete locale
+ *
+ * Deletes the content item with the provided key. If a content item with the provided key does not exist an error is returned. This API is experimental and may change in future releases.
+ */
+export const contentDeleteLocale = <ThrowOnError extends boolean = false>(options: Options<ContentDeleteLocaleData, ThrowOnError>) => {
+    return (options.client ?? client).delete<ContentDeleteLocaleResponses, ContentDeleteLocaleErrors, ThrowOnError>({
+        responseTransformer: contentDeleteLocaleResponseTransformer,
+        url: '/experimental/content/{key}/versions',
+        ...options
+    });
+};
+
+/**
+ * List versions
+ *
+ * List versions of the content item with the provided key and the provided options. This API is experimental and may change in future releases.
+ */
+export const contentListVersions = <ThrowOnError extends boolean = false>(options: Options<ContentListVersionsData, ThrowOnError>) => {
+    return (options.client ?? client).get<ContentListVersionsResponses, ContentListVersionsErrors, ThrowOnError>({
+        responseTransformer: contentListVersionsResponseTransformer,
+        url: '/experimental/content/{key}/versions',
+        ...options
+    });
+};
+
+/**
+ * Create version
+ *
+ * Create a new version of a content item. This API is experimental and may change in future releases.
+ */
+export const contentCreateVersion = <ThrowOnError extends boolean = false>(options: Options<ContentCreateVersionData, ThrowOnError>) => {
+    return (options.client ?? client).post<ContentCreateVersionResponses, ContentCreateVersionErrors, ThrowOnError>({
+        responseTransformer: contentCreateVersionResponseTransformer,
+        url: '/experimental/content/{key}/versions',
+        ...options,
+        headers: {
+            'Content-Type': 'application/json',
+            ...options.headers
+        }
+    });
+};
+
+/**
+ * Delete version
+ *
+ * Deletes the content item with the provided key. If a content item with the provided key does not exist an error is returned. This API is experimental and may change in future releases.
+ */
+export const contentDeleteVersion = <ThrowOnError extends boolean = false>(options: Options<ContentDeleteVersionData, ThrowOnError>) => {
+    return (options.client ?? client).delete<ContentDeleteVersionResponses, ContentDeleteVersionErrors, ThrowOnError>({
+        responseTransformer: contentDeleteVersionResponseTransformer,
+        url: '/experimental/content/{key}/versions/{version}',
+        ...options
+    });
+};
+
+/**
+ * Get version
+ *
+ * Get the content item with the provided key and version. This API is experimental and may change in future releases.
+ */
+export const contentGetVersion = <ThrowOnError extends boolean = false>(options: Options<ContentGetVersionData, ThrowOnError>) => {
+    return (options.client ?? client).get<ContentGetVersionResponses, ContentGetVersionErrors, ThrowOnError>({
+        responseTransformer: contentGetVersionResponseTransformer,
+        url: '/experimental/content/{key}/versions/{version}',
+        ...options
+    });
+};
+
+/**
+ * Patch version
+ *
+ * Patch an existing content item. If a content item with the provided key does not exist an error is returned. This API is experimental and may change in future releases.
+ */
+export const contentPatchVersion = <ThrowOnError extends boolean = false>(options: Options<ContentPatchVersionData, ThrowOnError>) => {
+    return (options.client ?? client).patch<ContentPatchVersionResponses, ContentPatchVersionErrors, ThrowOnError>({
+        responseTransformer: contentPatchVersionResponseTransformer,
+        url: '/experimental/content/{key}/versions/{version}',
+        ...options,
+        headers: {
+            'Content-Type': 'application/merge-patch+json',
+            ...options.headers
+        }
+    });
 };
 
 /**

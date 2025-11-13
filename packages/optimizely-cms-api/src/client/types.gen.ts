@@ -55,6 +55,415 @@ export type ArrayItem = {
 };
 
 /**
+ * Represents a blueprint of a content item.
+ */
+export type Blueprint = {
+    /**
+     * The key that identifies this blueprint.
+     */
+    readonly key?: string;
+    /**
+     * The display name of this blueprint.
+     */
+    displayName: string;
+    /**
+     * The content type of this blueprint.
+     */
+    readonly contentType?: string;
+    lastModified?: Date;
+    /**
+     * The username of the user that made the latest modification to this blueprint.
+     */
+    readonly lastModifiedBy?: string;
+    content?: BlueprintData;
+};
+
+/**
+ * Represents the data part of a Blueprint.
+ */
+export type BlueprintData = {
+    /**
+     * Properties as they are defined by corresponding component or content type.
+     */
+    properties?: {
+        [key: string]: unknown;
+    };
+    composition?: CompositionNode;
+};
+
+export type BlueprintPage = {
+    /**
+     * The items in this paged collection.
+     */
+    readonly items?: Array<Blueprint>;
+    /**
+     * The zero-based index of the current page.
+     */
+    readonly pageIndex?: number;
+    /**
+     * The number of items in each page. Not necessarily the same as the number of items in this page.
+     */
+    readonly pageSize?: number;
+    /**
+     * The estimated total number of items in the collection. May be omitted if the total item count is unknown.
+     */
+    readonly totalItemCount?: number;
+};
+
+/**
+ * Changesets are used to group work on several content items together.
+ */
+export type Changeset = {
+    /**
+     * The unique key of this Changeset.
+     */
+    key?: string;
+    /**
+     * The source of this Changeset.
+     */
+    readonly source?: string;
+    /**
+     * The name of this Changeset.
+     */
+    displayName: string;
+    /**
+     * A timestamp indicating when this changeset was first created.
+     */
+    readonly created?: Date;
+    /**
+     * The username of the user that created this changeset.
+     */
+    readonly createdBy?: string;
+    lastModified?: Date;
+};
+
+/**
+ * Items in an changeset that contains a link to the specific content version.
+ */
+export type ChangesetItem = {
+    reference: ContentReference;
+    /**
+     * Gets/sets the changeset item category.
+     */
+    category?: string;
+};
+
+export type ChangesetItemPage = {
+    /**
+     * The items in this paged collection.
+     */
+    readonly items?: Array<ChangesetItem>;
+    /**
+     * The zero-based index of the current page.
+     */
+    readonly pageIndex?: number;
+    /**
+     * The number of items in each page. Not necessarily the same as the number of items in this page.
+     */
+    readonly pageSize?: number;
+    /**
+     * The estimated total number of items in the collection. May be omitted if the total item count is unknown.
+     */
+    readonly totalItemCount?: number;
+};
+
+export type ChangesetPage = {
+    /**
+     * The items in this paged collection.
+     */
+    readonly items?: Array<Changeset>;
+    /**
+     * The zero-based index of the current page.
+     */
+    readonly pageIndex?: number;
+    /**
+     * The number of items in each page. Not necessarily the same as the number of items in this page.
+     */
+    readonly pageSize?: number;
+    /**
+     * The estimated total number of items in the collection. May be omitted if the total item count is unknown.
+     */
+    readonly totalItemCount?: number;
+};
+
+/**
+ * Defines display settings for a CompositionNode."/>
+ */
+export type CompositionDisplaySettings = {
+    /**
+     * The key for the display template that these settings apply to.
+     */
+    readonly displayTemplate: string;
+    /**
+     * Gets/sets the display settings for this CompositionNode.
+     */
+    settings?: {
+        [key: string]: string;
+    } | null;
+};
+
+/**
+ * Specifies a node in a content composition.
+ */
+export type CompositionNode = {
+    /**
+     * Specifies the id of this CompositionNode.
+     */
+    id?: string | null;
+    /**
+     * The display name of this ContentType.
+     */
+    displayName?: string | null;
+    /**
+     * Gets the node type of this CompositionNode.
+     */
+    readonly nodeType?: string;
+    /**
+     * Gets the node layout type of this CompositionNode
+     */
+    readonly layoutType?: string | null;
+    displaySettings?: CompositionDisplaySettings;
+    /**
+     * Represents a content component.
+     */
+    component?: {
+        /**
+         * Dictionary with all custom properties as specified by associated ContentType
+         */
+        properties?: unknown;
+        reference?: string;
+        /**
+         * The key of the content type that this is an embedded instance of.
+         */
+        contentType?: string | null;
+    };
+    /**
+     * Gets the available child nodes for this CompositionNode.
+     */
+    nodes?: Array<CompositionNode> | null;
+};
+
+/**
+ * Represents a content component.
+ */
+export type ContentComponent = {
+    /**
+     * An optional display option for the content component.
+     */
+    displayOption?: string | null;
+    /**
+     * An optional group for the personalizable component.
+     */
+    segmentationGroup?: string | null;
+    /**
+     * Specifies the settings for the content component.
+     */
+    segments?: Array<string> | null;
+    /**
+     * The display name of the content component. If Reference is set, the name is automatically set to the name of the referenced content.
+     */
+    name?: string | null;
+    reference?: string;
+    /**
+     * The key of the content type that this is an embedded instance of.
+     */
+    contentType?: string | null;
+    /**
+     * Dictionary with all custom properties as specified by associated ContentType
+     */
+    content?: unknown;
+};
+
+/**
+ * Represents a version of a content item.
+ */
+export type ContentItem = {
+    /**
+     * Properties as they are defined by corresponding component or content type.
+     */
+    properties?: {
+        [key: string]: unknown;
+    };
+    /**
+     * The key that identifies this content item.
+     */
+    readonly key?: string;
+    /**
+     * The locale of this content instance.
+     */
+    readonly locale?: string;
+    /**
+     * The version identifier of this content instance.
+     */
+    readonly version?: string;
+    /**
+     * The variation of this content item, if any. Variations are used to represent different states or forms of the same content item.
+     * A variation has it's own publish lifecycle. A variation can though not be published before the default version of same local is published.
+     */
+    readonly variation?: string | null;
+    /**
+     * The content type of this content item.
+     */
+    readonly contentType?: string;
+    /**
+     * The display name of this content item.
+     */
+    displayName: string;
+    /**
+     * Indicates a time when this content was published or should be published.
+     */
+    published?: Date | null;
+    /**
+     * Indicates a time when this content expired or should expire.
+     */
+    expired?: Date | null;
+    /**
+     * The status of this version of the content item.
+     */
+    status?: 'draft' | 'ready' | 'published' | 'previous' | 'scheduled' | 'rejected' | 'inReview';
+    /**
+     * Indicates a time when this content version should transition to published status. Must only be assigned when Status is set to Scheduled.
+     */
+    delayPublishUntil?: Date | null;
+    /**
+     * The key that identifies the container content that this content item belongs to.
+     */
+    container?: string | null;
+    /**
+     * The key that identifies the owner of this content. Content that is own by another content is also known as an asset.
+     */
+    owner?: string | null;
+    /**
+     * A string that represents the segment that should be used when routing or generate routes to the current content instance.
+     */
+    routeSegment?: string | null;
+    lastModified?: Date;
+    /**
+     * The username of the user that made the latest modification to this content instance.
+     */
+    readonly lastModifiedBy?: string;
+    composition?: CompositionNode;
+};
+
+export type ContentItemPage = {
+    /**
+     * The items in this paged collection.
+     */
+    readonly items?: Array<ContentItem>;
+    /**
+     * The zero-based index of the current page.
+     */
+    readonly pageIndex?: number;
+    /**
+     * The number of items in each page. Not necessarily the same as the number of items in this page.
+     */
+    readonly pageSize?: number;
+    /**
+     * The estimated total number of items in the collection. May be omitted if the total item count is unknown.
+     */
+    readonly totalItemCount?: number;
+};
+
+/**
+ * Describes information about a locale instance of a content item.
+ */
+export type ContentLocaleInfo = {
+    /**
+     * The display name of the content.
+     */
+    readonly displayName?: string;
+    /**
+     * The date and time when the first locale version for the content was created.
+     */
+    readonly created?: Date;
+    /**
+     * The username of the user that created this locale version of content.
+     */
+    readonly createdBy?: string;
+    /**
+     * The status of the current locale.
+     */
+    status?: 'draft' | 'published';
+};
+
+/**
+ * Represents metadata about a content item.
+ */
+export type ContentMetadata = {
+    /**
+     * The key that identifies this content.
+     */
+    key?: string;
+    /**
+     * The content type of this content.
+     */
+    contentType?: string;
+    /**
+     * Set of locales that this content has been created for.
+     */
+    readonly locales?: {
+        [key: string]: ContentLocaleInfo;
+    };
+    /**
+     * The key that identifies the container content that this content belongs to.
+     */
+    container?: string | null;
+    /**
+     * Indicates if the content contains any content items.
+     */
+    readonly hasItems?: boolean;
+    /**
+     * The key that identifies the owner of this content. Content that is own by another content is also known as an asset.
+     */
+    owner?: string | null;
+    /**
+     * A timestamp, which if provided, indicates when this content was deleted.
+     */
+    readonly deleted?: Date | null;
+    /**
+     * The username of the user that deleted this content.
+     */
+    readonly deletedBy?: string | null;
+};
+
+export type ContentMetadataPage = {
+    /**
+     * The items in this paged collection.
+     */
+    readonly items?: Array<ContentMetadata>;
+    /**
+     * The zero-based index of the current page.
+     */
+    readonly pageIndex?: number;
+    /**
+     * The number of items in each page. Not necessarily the same as the number of items in this page.
+     */
+    readonly pageSize?: number;
+    /**
+     * The estimated total number of items in the collection. May be omitted if the total item count is unknown.
+     */
+    readonly totalItemCount?: number;
+};
+
+/**
+ * A reference to a specific content instance.
+ */
+export type ContentReference = {
+    /**
+     * The content key that identifies the content.
+     */
+    readonly key?: string;
+    /**
+     * The name of the content locale
+     */
+    readonly locale?: string;
+    /**
+     * The identifier of a specific version of the content.
+     */
+    readonly version?: string;
+};
+
+/**
  * A writable implementation of an ContentType.
  */
 export type ContentType = {
@@ -226,6 +635,28 @@ export type ContentTypeProperty = {
 };
 
 /**
+ * Options for copying content.
+ */
+export type CopyContentOptions = {
+    /**
+     * Indicates if deleted content could be used as source.
+     */
+    allowDeleted?: boolean;
+    /**
+     * Optional key of the container where the copied content should be placed.
+     */
+    container?: string | null;
+    /**
+     * Optional key of the owner where the copied content should be placed.
+     */
+    owner?: string | null;
+    /**
+     * Indicates if published versions of the content should keep their published status rather than being created as a draft version at the destination.
+     */
+    keepPublishedStatus?: boolean;
+};
+
+/**
  * Describes a setting for a display template.
  */
 export type DisplaySetting = {
@@ -364,6 +795,28 @@ export type ImageDescriptor = {
      * Indicates if the image should be pre-generated when a new image is uploaded rather than when first requested.
      */
     pregenerated?: boolean;
+};
+
+/**
+ * Represents a hyperlink.
+ */
+export type Link = {
+    /**
+     * Gets or sets the URL.
+     */
+    url?: string | null;
+    /**
+     * Gets or sets where to display the URL in a browsing context.
+     */
+    target?: string;
+    /**
+     * Gets or sets the title of the link.
+     */
+    title?: string;
+    /**
+     * Gets or sets the content inside a link.
+     */
+    text?: string;
 };
 
 export type ProblemDetails = {
@@ -532,6 +985,189 @@ export type PropertyGroupPage = {
 };
 
 /**
+ * Represents a blueprint of a content item.
+ */
+export type BlueprintWritable = {
+    /**
+     * The display name of this blueprint.
+     */
+    displayName: string;
+    lastModified?: Date;
+    content?: BlueprintDataWritable;
+};
+
+/**
+ * Represents the data part of a Blueprint.
+ */
+export type BlueprintDataWritable = {
+    /**
+     * Properties as they are defined by corresponding component or content type.
+     */
+    properties?: {
+        [key: string]: unknown;
+    };
+    composition?: CompositionNodeWritable;
+};
+
+export type BlueprintPageWritable = {
+    [key: string]: never;
+};
+
+/**
+ * Changesets are used to group work on several content items together.
+ */
+export type ChangesetWritable = {
+    /**
+     * The unique key of this Changeset.
+     */
+    key?: string;
+    /**
+     * The name of this Changeset.
+     */
+    displayName: string;
+    lastModified?: Date;
+};
+
+/**
+ * Items in an changeset that contains a link to the specific content version.
+ */
+export type ChangesetItemWritable = {
+    /**
+     * Gets/sets the changeset item category.
+     */
+    category?: string;
+};
+
+export type ChangesetItemPageWritable = {
+    [key: string]: never;
+};
+
+export type ChangesetPageWritable = {
+    [key: string]: never;
+};
+
+/**
+ * Defines display settings for a CompositionNode."/>
+ */
+export type CompositionDisplaySettingsWritable = {
+    /**
+     * Gets/sets the display settings for this CompositionNode.
+     */
+    settings?: {
+        [key: string]: string;
+    } | null;
+};
+
+/**
+ * Specifies a node in a content composition.
+ */
+export type CompositionNodeWritable = {
+    /**
+     * Specifies the id of this CompositionNode.
+     */
+    id?: string | null;
+    /**
+     * The display name of this ContentType.
+     */
+    displayName?: string | null;
+    displaySettings?: CompositionDisplaySettingsWritable;
+    /**
+     * Represents a content component.
+     */
+    component?: {
+        /**
+         * Dictionary with all custom properties as specified by associated ContentType
+         */
+        properties?: unknown;
+        reference?: string;
+        /**
+         * The key of the content type that this is an embedded instance of.
+         */
+        contentType?: string | null;
+    };
+    /**
+     * Gets the available child nodes for this CompositionNode.
+     */
+    nodes?: Array<CompositionNodeWritable> | null;
+};
+
+/**
+ * Represents a version of a content item.
+ */
+export type ContentItemWritable = {
+    /**
+     * Properties as they are defined by corresponding component or content type.
+     */
+    properties?: {
+        [key: string]: unknown;
+    };
+    /**
+     * The display name of this content item.
+     */
+    displayName: string;
+    /**
+     * Indicates a time when this content was published or should be published.
+     */
+    published?: Date | null;
+    /**
+     * Indicates a time when this content expired or should expire.
+     */
+    expired?: Date | null;
+    /**
+     * The status of this version of the content item.
+     */
+    status?: 'draft' | 'ready' | 'published' | 'previous' | 'scheduled' | 'rejected' | 'inReview';
+    /**
+     * Indicates a time when this content version should transition to published status. Must only be assigned when Status is set to Scheduled.
+     */
+    delayPublishUntil?: Date | null;
+    /**
+     * The key that identifies the container content that this content item belongs to.
+     */
+    container?: string | null;
+    /**
+     * The key that identifies the owner of this content. Content that is own by another content is also known as an asset.
+     */
+    owner?: string | null;
+    /**
+     * A string that represents the segment that should be used when routing or generate routes to the current content instance.
+     */
+    routeSegment?: string | null;
+    lastModified?: Date;
+    composition?: CompositionNodeWritable;
+};
+
+export type ContentItemPageWritable = {
+    [key: string]: never;
+};
+
+/**
+ * Represents metadata about a content item.
+ */
+export type ContentMetadataWritable = {
+    /**
+     * The key that identifies this content.
+     */
+    key?: string;
+    /**
+     * The content type of this content.
+     */
+    contentType?: string;
+    /**
+     * The key that identifies the container content that this content belongs to.
+     */
+    container?: string | null;
+    /**
+     * The key that identifies the owner of this content. Content that is own by another content is also known as an asset.
+     */
+    owner?: string | null;
+};
+
+export type ContentMetadataPageWritable = {
+    [key: string]: never;
+};
+
+/**
  * A writable implementation of an ContentType.
  */
 export type ContentTypeWritable = {
@@ -667,6 +1303,1280 @@ export type PropertyGroupWritable = {
 export type PropertyGroupPageWritable = {
     [key: string]: never;
 };
+
+export type BlueprintsListData = {
+    body?: never;
+    path?: never;
+    query?: {
+        pageIndex?: number;
+        pageSize?: number;
+    };
+    url: '/experimental/blueprints';
+};
+
+export type BlueprintsListErrors = {
+    /**
+     * Forbidden
+     */
+    403: ProblemDetails;
+};
+
+export type BlueprintsListError = BlueprintsListErrors[keyof BlueprintsListErrors];
+
+export type BlueprintsListResponses = {
+    /**
+     * OK
+     */
+    200: BlueprintPage;
+};
+
+export type BlueprintsListResponse = BlueprintsListResponses[keyof BlueprintsListResponses];
+
+export type BlueprintsCreateData = {
+    /**
+     * The blueprint that should be created.
+     */
+    body: BlueprintWritable;
+    path?: never;
+    query?: never;
+    url: '/experimental/blueprints';
+};
+
+export type BlueprintsCreateErrors = {
+    /**
+     * Bad Request
+     */
+    400: ProblemDetails;
+    /**
+     * Forbidden
+     */
+    403: ProblemDetails;
+};
+
+export type BlueprintsCreateError = BlueprintsCreateErrors[keyof BlueprintsCreateErrors];
+
+export type BlueprintsCreateResponses = {
+    /**
+     * Created
+     */
+    201: Blueprint;
+};
+
+export type BlueprintsCreateResponse = BlueprintsCreateResponses[keyof BlueprintsCreateResponses];
+
+export type BlueprintsDeleteData = {
+    body?: never;
+    headers?: {
+        /**
+         * If provided, the DELETE request will only be considered if the value matches the RFC7232 ETag of the current resource. Weak ETags will always be ignored.
+         */
+        ifMatch?: string;
+        /**
+         * If provided, the DELETE request will only be considered if the resource has not been modified since the provided date. This parameter will be ignored if an 'If-Match' parameter is also provided.
+         */
+        ifUnmodifiedSince?: string;
+    };
+    path: {
+        /**
+         * The key of the blueprint to delete.
+         */
+        key: string;
+    };
+    query?: never;
+    url: '/experimental/blueprints/{key}';
+};
+
+export type BlueprintsDeleteErrors = {
+    /**
+     * Bad Request
+     */
+    400: ProblemDetails;
+    /**
+     * Forbidden
+     */
+    403: ProblemDetails;
+    /**
+     * Not Found
+     */
+    404: ProblemDetails;
+    /**
+     * Precondition Failed
+     */
+    412: ProblemDetails;
+};
+
+export type BlueprintsDeleteError = BlueprintsDeleteErrors[keyof BlueprintsDeleteErrors];
+
+export type BlueprintsDeleteResponses = {
+    /**
+     * OK
+     */
+    200: Blueprint;
+};
+
+export type BlueprintsDeleteResponse = BlueprintsDeleteResponses[keyof BlueprintsDeleteResponses];
+
+export type BlueprintsGetData = {
+    body?: never;
+    headers?: {
+        /**
+         * If provided and the value matches the RFC7232 ETag of the current resource a 304 NotModified response will be returned. Weak ETags will always be ignored.
+         */
+        ifNoneMatch?: string;
+        /**
+         * If provided and the resource has not been modified since the date a 304 NotModified response will be returned. This parameter will be ignored if an 'If-None-Match' parameter is also provided.
+         */
+        ifModifiedSince?: string;
+    };
+    path: {
+        /**
+         * The key of the blueprint to retrieve.
+         */
+        key: string;
+    };
+    query?: never;
+    url: '/experimental/blueprints/{key}';
+};
+
+export type BlueprintsGetErrors = {
+    /**
+     * Forbidden
+     */
+    403: ProblemDetails;
+    /**
+     * Not Found
+     */
+    404: ProblemDetails;
+};
+
+export type BlueprintsGetError = BlueprintsGetErrors[keyof BlueprintsGetErrors];
+
+export type BlueprintsGetResponses = {
+    /**
+     * OK
+     */
+    200: Blueprint;
+};
+
+export type BlueprintsGetResponse = BlueprintsGetResponses[keyof BlueprintsGetResponses];
+
+export type BlueprintsPatchData = {
+    /**
+     * The values of the blueprint that should be patched formatted according to RFC7396.
+     */
+    body: BlueprintWritable;
+    headers?: {
+        /**
+         * If provided, the PATCH request will only be considered if the value matches the RFC7232 ETag of the current resource. Weak ETags will always be ignored.
+         */
+        ifMatch?: string;
+        /**
+         * If provided, the PATCH request will only be considered if the resource has not been modified since the provided date. This parameter will be ignored if an 'If-Match' parameter is also provided.
+         */
+        ifUnmodifiedSince?: string;
+    };
+    path: {
+        /**
+         * The key of the blueprint to patch.
+         */
+        key: string;
+    };
+    query?: never;
+    url: '/experimental/blueprints/{key}';
+};
+
+export type BlueprintsPatchErrors = {
+    /**
+     * Bad Request
+     */
+    400: ProblemDetails;
+    /**
+     * Forbidden
+     */
+    403: ProblemDetails;
+    /**
+     * Not Found
+     */
+    404: ProblemDetails;
+    /**
+     * Precondition Failed
+     */
+    412: ProblemDetails;
+};
+
+export type BlueprintsPatchError = BlueprintsPatchErrors[keyof BlueprintsPatchErrors];
+
+export type BlueprintsPatchResponses = {
+    /**
+     * OK
+     */
+    200: Blueprint;
+};
+
+export type BlueprintsPatchResponse = BlueprintsPatchResponses[keyof BlueprintsPatchResponses];
+
+export type ChangesetsListData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Indicates which sources should be included when listing changesets.
+         * Use Default to include changesets without a specific sources.
+         */
+        sources?: Array<string>;
+        pageIndex?: number;
+        pageSize?: number;
+    };
+    url: '/experimental/changesets';
+};
+
+export type ChangesetsListErrors = {
+    /**
+     * Forbidden
+     */
+    403: ProblemDetails;
+};
+
+export type ChangesetsListError = ChangesetsListErrors[keyof ChangesetsListErrors];
+
+export type ChangesetsListResponses = {
+    /**
+     * OK
+     */
+    200: ChangesetPage;
+};
+
+export type ChangesetsListResponse = ChangesetsListResponses[keyof ChangesetsListResponses];
+
+export type ChangesetsCreateData = {
+    /**
+     * The changeset that should be created.
+     */
+    body: ChangesetWritable;
+    path?: never;
+    query?: never;
+    url: '/experimental/changesets';
+};
+
+export type ChangesetsCreateErrors = {
+    /**
+     * Bad Request
+     */
+    400: ProblemDetails;
+    /**
+     * Forbidden
+     */
+    403: ProblemDetails;
+};
+
+export type ChangesetsCreateError = ChangesetsCreateErrors[keyof ChangesetsCreateErrors];
+
+export type ChangesetsCreateResponses = {
+    /**
+     * Created
+     */
+    201: Changeset;
+};
+
+export type ChangesetsCreateResponse = ChangesetsCreateResponses[keyof ChangesetsCreateResponses];
+
+export type ChangesetsDeleteData = {
+    body?: never;
+    path: {
+        /**
+         * The key of the changeset to delete.
+         */
+        key: string;
+    };
+    query?: never;
+    url: '/experimental/changesets/{key}';
+};
+
+export type ChangesetsDeleteErrors = {
+    /**
+     * Bad Request
+     */
+    400: ProblemDetails;
+    /**
+     * Forbidden
+     */
+    403: ProblemDetails;
+    /**
+     * Not Found
+     */
+    404: ProblemDetails;
+};
+
+export type ChangesetsDeleteError = ChangesetsDeleteErrors[keyof ChangesetsDeleteErrors];
+
+export type ChangesetsDeleteResponses = {
+    /**
+     * OK
+     */
+    200: Changeset;
+};
+
+export type ChangesetsDeleteResponse = ChangesetsDeleteResponses[keyof ChangesetsDeleteResponses];
+
+export type ChangesetsGetData = {
+    body?: never;
+    headers?: {
+        /**
+         * If provided and the value matches the RFC7232 ETag of the current resource a 304 NotModified response will be returned. Weak ETags will always be ignored.
+         */
+        ifNoneMatch?: string;
+        /**
+         * If provided and the resource has not been modified since the date a 304 NotModified response will be returned. This parameter will be ignored if an 'If-None-Match' parameter is also provided.
+         */
+        ifModifiedSince?: string;
+    };
+    path: {
+        /**
+         * The key of the changeset to retrieve.
+         */
+        key: string;
+    };
+    query?: never;
+    url: '/experimental/changesets/{key}';
+};
+
+export type ChangesetsGetErrors = {
+    /**
+     * Forbidden
+     */
+    403: ProblemDetails;
+    /**
+     * Not Found
+     */
+    404: ProblemDetails;
+};
+
+export type ChangesetsGetError = ChangesetsGetErrors[keyof ChangesetsGetErrors];
+
+export type ChangesetsGetResponses = {
+    /**
+     * OK
+     */
+    200: Changeset;
+};
+
+export type ChangesetsGetResponse = ChangesetsGetResponses[keyof ChangesetsGetResponses];
+
+export type ChangesetsPatchData = {
+    /**
+     * The values of the changeset that should be patched formatted according to RFC7396.
+     */
+    body: ChangesetWritable;
+    path: {
+        /**
+         * The key of the changeset to patch.
+         */
+        key: string;
+    };
+    query?: never;
+    url: '/experimental/changesets/{key}';
+};
+
+export type ChangesetsPatchErrors = {
+    /**
+     * Bad Request
+     */
+    400: ProblemDetails;
+    /**
+     * Forbidden
+     */
+    403: ProblemDetails;
+    /**
+     * Not Found
+     */
+    404: ProblemDetails;
+};
+
+export type ChangesetsPatchError = ChangesetsPatchErrors[keyof ChangesetsPatchErrors];
+
+export type ChangesetsPatchResponses = {
+    /**
+     * OK
+     */
+    200: Changeset;
+};
+
+export type ChangesetsPatchResponse = ChangesetsPatchResponses[keyof ChangesetsPatchResponses];
+
+export type ChangesetsDeleteItemData = {
+    body?: never;
+    path: {
+        /**
+         * The changeset key
+         */
+        changeset: string;
+        /**
+         * The content key
+         */
+        key: string;
+        /**
+         * The content version
+         */
+        version: string;
+    };
+    query?: never;
+    url: '/experimental/changesets/{changeset}/items/{key}/versions/{version}';
+};
+
+export type ChangesetsDeleteItemErrors = {
+    /**
+     * Bad Request
+     */
+    400: ProblemDetails;
+    /**
+     * Forbidden
+     */
+    403: ProblemDetails;
+    /**
+     * Not Found
+     */
+    404: ProblemDetails;
+};
+
+export type ChangesetsDeleteItemError = ChangesetsDeleteItemErrors[keyof ChangesetsDeleteItemErrors];
+
+export type ChangesetsDeleteItemResponses = {
+    /**
+     * OK
+     */
+    200: ChangesetItem;
+};
+
+export type ChangesetsDeleteItemResponse = ChangesetsDeleteItemResponses[keyof ChangesetsDeleteItemResponses];
+
+export type ChangesetsGetItemData = {
+    body?: never;
+    path: {
+        /**
+         * The changeset key
+         */
+        changeset: string;
+        /**
+         * The content key
+         */
+        key: string;
+        /**
+         * The content version
+         */
+        version: string;
+    };
+    query?: never;
+    url: '/experimental/changesets/{changeset}/items/{key}/versions/{version}';
+};
+
+export type ChangesetsGetItemErrors = {
+    /**
+     * Forbidden
+     */
+    403: ProblemDetails;
+    /**
+     * Not Found
+     */
+    404: ProblemDetails;
+};
+
+export type ChangesetsGetItemError = ChangesetsGetItemErrors[keyof ChangesetsGetItemErrors];
+
+export type ChangesetsGetItemResponses = {
+    /**
+     * OK
+     */
+    200: ChangesetItem;
+};
+
+export type ChangesetsGetItemResponse = ChangesetsGetItemResponses[keyof ChangesetsGetItemResponses];
+
+export type ChangesetsPatchItemData = {
+    /**
+     * The values of the changeset item that should be patched formatted according to RFC7396.
+     */
+    body: ChangesetItemWritable;
+    path: {
+        /**
+         * The changeset key
+         */
+        changeset: string;
+        /**
+         * The content key
+         */
+        key: string;
+        /**
+         * The content version
+         */
+        version: string;
+    };
+    query?: never;
+    url: '/experimental/changesets/{changeset}/items/{key}/versions/{version}';
+};
+
+export type ChangesetsPatchItemErrors = {
+    /**
+     * Bad Request
+     */
+    400: ProblemDetails;
+    /**
+     * Forbidden
+     */
+    403: ProblemDetails;
+    /**
+     * Not Found
+     */
+    404: ProblemDetails;
+};
+
+export type ChangesetsPatchItemError = ChangesetsPatchItemErrors[keyof ChangesetsPatchItemErrors];
+
+export type ChangesetsPatchItemResponses = {
+    /**
+     * OK
+     */
+    200: ChangesetItem;
+};
+
+export type ChangesetsPatchItemResponse = ChangesetsPatchItemResponses[keyof ChangesetsPatchItemResponses];
+
+export type ChangesetsListItemsData = {
+    body?: never;
+    path: {
+        /**
+         * The changeset key
+         */
+        changeset: string;
+    };
+    query?: {
+        pageIndex?: number;
+        pageSize?: number;
+    };
+    url: '/experimental/changesets/{changeset}/items';
+};
+
+export type ChangesetsListItemsErrors = {
+    /**
+     * Forbidden
+     */
+    403: ProblemDetails;
+    /**
+     * Not Found
+     */
+    404: ProblemDetails;
+};
+
+export type ChangesetsListItemsError = ChangesetsListItemsErrors[keyof ChangesetsListItemsErrors];
+
+export type ChangesetsListItemsResponses = {
+    /**
+     * OK
+     */
+    200: ChangesetItemPage;
+};
+
+export type ChangesetsListItemsResponse = ChangesetsListItemsResponses[keyof ChangesetsListItemsResponses];
+
+export type ChangesetsCreateItemData = {
+    /**
+     * The changeset item
+     */
+    body: ChangesetItemWritable;
+    path: {
+        /**
+         * The changeset key
+         */
+        changeset: string;
+    };
+    query?: never;
+    url: '/experimental/changesets/{changeset}/items';
+};
+
+export type ChangesetsCreateItemErrors = {
+    /**
+     * Bad Request
+     */
+    400: ProblemDetails;
+    /**
+     * Forbidden
+     */
+    403: ProblemDetails;
+    /**
+     * Not Found
+     */
+    404: ProblemDetails;
+};
+
+export type ChangesetsCreateItemError = ChangesetsCreateItemErrors[keyof ChangesetsCreateItemErrors];
+
+export type ChangesetsCreateItemResponses = {
+    /**
+     * Created
+     */
+    201: ChangesetItem;
+};
+
+export type ChangesetsCreateItemResponse = ChangesetsCreateItemResponses[keyof ChangesetsCreateItemResponses];
+
+export type ContentCreateData = {
+    /**
+     * The content item that should be created.
+     */
+    body: ContentItemWritable;
+    headers?: {
+        /**
+         * Indicates that the content validation should be ignored.
+         */
+        cmsSkipValidation?: boolean;
+    };
+    path?: never;
+    query?: never;
+    url: '/experimental/content';
+};
+
+export type ContentCreateErrors = {
+    /**
+     * Bad Request
+     */
+    400: ProblemDetails;
+    /**
+     * Forbidden
+     */
+    403: ProblemDetails;
+};
+
+export type ContentCreateError = ContentCreateErrors[keyof ContentCreateErrors];
+
+export type ContentCreateResponses = {
+    /**
+     * Created
+     */
+    201: ContentItem;
+};
+
+export type ContentCreateResponse = ContentCreateResponses[keyof ContentCreateResponses];
+
+export type ContentDeleteData = {
+    body?: never;
+    headers?: {
+        /**
+         * Indicates that the content item should be permanently deleted immediately or if it should be soft deleted first.
+         */
+        cmsPermanentDelete?: boolean;
+    };
+    path: {
+        /**
+         * The key of the content item to delete.
+         */
+        key: string;
+    };
+    query?: never;
+    url: '/experimental/content/{key}';
+};
+
+export type ContentDeleteErrors = {
+    /**
+     * Bad Request
+     */
+    400: ProblemDetails;
+    /**
+     * Forbidden
+     */
+    403: ProblemDetails;
+    /**
+     * Not Found
+     */
+    404: ProblemDetails;
+};
+
+export type ContentDeleteError = ContentDeleteErrors[keyof ContentDeleteErrors];
+
+export type ContentDeleteResponses = {
+    /**
+     * OK
+     */
+    200: ContentMetadata;
+};
+
+export type ContentDeleteResponse = ContentDeleteResponses[keyof ContentDeleteResponses];
+
+export type ContentGetMetadataData = {
+    body?: never;
+    path: {
+        /**
+         * The key of the content to retrieve metadata for.
+         */
+        key: string;
+    };
+    query?: {
+        /**
+         * Indicates that metadata for a deleted content may be returned.
+         */
+        allowDeleted?: boolean;
+    };
+    url: '/experimental/content/{key}';
+};
+
+export type ContentGetMetadataErrors = {
+    /**
+     * Forbidden
+     */
+    403: ProblemDetails;
+    /**
+     * Not Found
+     */
+    404: ProblemDetails;
+};
+
+export type ContentGetMetadataError = ContentGetMetadataErrors[keyof ContentGetMetadataErrors];
+
+export type ContentGetMetadataResponses = {
+    /**
+     * OK
+     */
+    200: ContentMetadata;
+};
+
+export type ContentGetMetadataResponse = ContentGetMetadataResponses[keyof ContentGetMetadataResponses];
+
+export type ContentPatchMetadataData = {
+    /**
+     * The values of the content item that should be patched.
+     */
+    body: ContentMetadataWritable;
+    path: {
+        /**
+         * The key of the content item to patch.
+         */
+        key: string;
+    };
+    query?: never;
+    url: '/experimental/content/{key}';
+};
+
+export type ContentPatchMetadataErrors = {
+    /**
+     * Bad Request
+     */
+    400: ProblemDetails;
+    /**
+     * Forbidden
+     */
+    403: ProblemDetails;
+    /**
+     * Not Found
+     */
+    404: ProblemDetails;
+};
+
+export type ContentPatchMetadataError = ContentPatchMetadataErrors[keyof ContentPatchMetadataErrors];
+
+export type ContentPatchMetadataResponses = {
+    /**
+     * OK
+     */
+    200: ContentMetadata;
+};
+
+export type ContentPatchMetadataResponse = ContentPatchMetadataResponses[keyof ContentPatchMetadataResponses];
+
+export type ContentGetPathData = {
+    body?: never;
+    path: {
+        /**
+         * The key of the content path to retrieve.
+         */
+        key: string;
+    };
+    query?: {
+        pageIndex?: number;
+        pageSize?: number;
+    };
+    url: '/experimental/content/{key}/path';
+};
+
+export type ContentGetPathErrors = {
+    /**
+     * Forbidden
+     */
+    403: ProblemDetails;
+    /**
+     * Not Found
+     */
+    404: ProblemDetails;
+};
+
+export type ContentGetPathError = ContentGetPathErrors[keyof ContentGetPathErrors];
+
+export type ContentGetPathResponses = {
+    /**
+     * OK
+     */
+    200: ContentMetadataPage;
+};
+
+export type ContentGetPathResponse = ContentGetPathResponses[keyof ContentGetPathResponses];
+
+export type ContentListItemsData = {
+    body?: never;
+    path: {
+        /**
+         * The key of the content to retrieve items for.
+         */
+        key: string;
+    };
+    query?: {
+        /**
+         * Indicates which content types or base types to include in the list.
+         */
+        contentTypes?: Array<string>;
+        pageIndex?: number;
+        pageSize?: number;
+    };
+    url: '/experimental/content/{key}/items';
+};
+
+export type ContentListItemsErrors = {
+    /**
+     * Forbidden
+     */
+    403: ProblemDetails;
+    /**
+     * Not Found
+     */
+    404: ProblemDetails;
+};
+
+export type ContentListItemsError = ContentListItemsErrors[keyof ContentListItemsErrors];
+
+export type ContentListItemsResponses = {
+    /**
+     * OK
+     */
+    200: ContentMetadataPage;
+};
+
+export type ContentListItemsResponse = ContentListItemsResponses[keyof ContentListItemsResponses];
+
+export type ContentListAssetsData = {
+    body?: never;
+    path: {
+        /**
+         * The key of the content to retrieve assets for.
+         */
+        key: string;
+    };
+    query?: {
+        /**
+         * Indicates which content types or base types to include in the list.
+         */
+        contentTypes?: Array<string>;
+        pageIndex?: number;
+        pageSize?: number;
+    };
+    url: '/experimental/content/{key}/assets';
+};
+
+export type ContentListAssetsErrors = {
+    /**
+     * Forbidden
+     */
+    403: ProblemDetails;
+    /**
+     * Not Found
+     */
+    404: ProblemDetails;
+};
+
+export type ContentListAssetsError = ContentListAssetsErrors[keyof ContentListAssetsErrors];
+
+export type ContentListAssetsResponses = {
+    /**
+     * OK
+     */
+    200: ContentMetadataPage;
+};
+
+export type ContentListAssetsResponse = ContentListAssetsResponses[keyof ContentListAssetsResponses];
+
+export type ContentCopyData = {
+    /**
+     * Optional instructions for how to copy content.
+     */
+    body?: CopyContentOptions;
+    path: {
+        /**
+         * The key of the content item to copy.
+         */
+        key: string;
+    };
+    query?: never;
+    url: '/experimental/content/{key}:copy';
+};
+
+export type ContentCopyErrors = {
+    /**
+     * Bad Request
+     */
+    400: ProblemDetails;
+    /**
+     * Forbidden
+     */
+    403: ProblemDetails;
+    /**
+     * Not Found
+     */
+    404: ProblemDetails;
+};
+
+export type ContentCopyError = ContentCopyErrors[keyof ContentCopyErrors];
+
+export type ContentCopyResponses = {
+    /**
+     * OK
+     */
+    200: ContentMetadata;
+};
+
+export type ContentCopyResponse = ContentCopyResponses[keyof ContentCopyResponses];
+
+export type ContentUndeleteData = {
+    body?: never;
+    path: {
+        /**
+         * The key of the content item to undelete.
+         */
+        key: string;
+    };
+    query?: never;
+    url: '/experimental/content/{key}:undelete';
+};
+
+export type ContentUndeleteErrors = {
+    /**
+     * Bad Request
+     */
+    400: ProblemDetails;
+    /**
+     * Forbidden
+     */
+    403: ProblemDetails;
+    /**
+     * Not Found
+     */
+    404: ProblemDetails;
+};
+
+export type ContentUndeleteError = ContentUndeleteErrors[keyof ContentUndeleteErrors];
+
+export type ContentUndeleteResponses = {
+    /**
+     * OK
+     */
+    200: ContentMetadata;
+};
+
+export type ContentUndeleteResponse = ContentUndeleteResponses[keyof ContentUndeleteResponses];
+
+export type ContentListAllVersionsData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Indicates which content locales that should be listed. Use 'NEUTRAL' to include locale-neutral content.
+         * Locale must be a valid IETF BCP-47 language tag.
+         */
+        locales?: Array<string>;
+        /**
+         * Indicates which status content versions must have to be listed.
+         */
+        statuses?: Array<'draft' | 'ready' | 'published' | 'previous' | 'scheduled' | 'rejected' | 'inReview'>;
+        pageIndex?: number;
+        pageSize?: number;
+    };
+    url: '/experimental/content/versions';
+};
+
+export type ContentListAllVersionsErrors = {
+    /**
+     * Forbidden
+     */
+    403: ProblemDetails;
+};
+
+export type ContentListAllVersionsError = ContentListAllVersionsErrors[keyof ContentListAllVersionsErrors];
+
+export type ContentListAllVersionsResponses = {
+    /**
+     * OK
+     */
+    200: ContentItemPage;
+};
+
+export type ContentListAllVersionsResponse = ContentListAllVersionsResponses[keyof ContentListAllVersionsResponses];
+
+export type ContentDeleteLocaleData = {
+    body?: never;
+    path: {
+        key: string;
+    };
+    query?: {
+        locale?: string;
+    };
+    url: '/experimental/content/{key}/versions';
+};
+
+export type ContentDeleteLocaleErrors = {
+    /**
+     * Bad Request
+     */
+    400: ProblemDetails;
+    /**
+     * Forbidden
+     */
+    403: ProblemDetails;
+    /**
+     * Not Found
+     */
+    404: ProblemDetails;
+};
+
+export type ContentDeleteLocaleError = ContentDeleteLocaleErrors[keyof ContentDeleteLocaleErrors];
+
+export type ContentDeleteLocaleResponses = {
+    /**
+     * OK
+     */
+    200: ContentItem;
+};
+
+export type ContentDeleteLocaleResponse = ContentDeleteLocaleResponses[keyof ContentDeleteLocaleResponses];
+
+export type ContentListVersionsData = {
+    body?: never;
+    path: {
+        key: string;
+    };
+    query?: {
+        /**
+         * Indicates which content locales that should be listed. Use 'NEUTRAL' to include locale-neutral content.
+         * Locale must be a valid IETF BCP-47 language tag.
+         */
+        locales?: Array<string>;
+        /**
+         * Indicates which status content versions must have to be listed.
+         */
+        statuses?: Array<'draft' | 'ready' | 'published' | 'previous' | 'scheduled' | 'rejected' | 'inReview'>;
+        pageIndex?: number;
+        pageSize?: number;
+    };
+    url: '/experimental/content/{key}/versions';
+};
+
+export type ContentListVersionsErrors = {
+    /**
+     * Forbidden
+     */
+    403: ProblemDetails;
+    /**
+     * Not Found
+     */
+    404: ProblemDetails;
+};
+
+export type ContentListVersionsError = ContentListVersionsErrors[keyof ContentListVersionsErrors];
+
+export type ContentListVersionsResponses = {
+    /**
+     * OK
+     */
+    200: ContentItemPage;
+};
+
+export type ContentListVersionsResponse = ContentListVersionsResponses[keyof ContentListVersionsResponses];
+
+export type ContentCreateVersionData = {
+    /**
+     * The content version that should be created.
+     */
+    body: ContentItemWritable;
+    headers?: {
+        /**
+         * Indicates that the content validation should be ignored.
+         */
+        cmsSkipValidation?: boolean;
+    };
+    path: {
+        /**
+         * The key of the content item for which a new content version should be created.
+         */
+        key: string;
+    };
+    query?: never;
+    url: '/experimental/content/{key}/versions';
+};
+
+export type ContentCreateVersionErrors = {
+    /**
+     * Bad Request
+     */
+    400: ProblemDetails;
+    /**
+     * Forbidden
+     */
+    403: ProblemDetails;
+    /**
+     * Not Found
+     */
+    404: ProblemDetails;
+};
+
+export type ContentCreateVersionError = ContentCreateVersionErrors[keyof ContentCreateVersionErrors];
+
+export type ContentCreateVersionResponses = {
+    /**
+     * Created
+     */
+    201: ContentItem;
+};
+
+export type ContentCreateVersionResponse = ContentCreateVersionResponses[keyof ContentCreateVersionResponses];
+
+export type ContentDeleteVersionData = {
+    body?: never;
+    path: {
+        key: string;
+        version: string;
+    };
+    query?: never;
+    url: '/experimental/content/{key}/versions/{version}';
+};
+
+export type ContentDeleteVersionErrors = {
+    /**
+     * Bad Request
+     */
+    400: ProblemDetails;
+    /**
+     * Forbidden
+     */
+    403: ProblemDetails;
+    /**
+     * Not Found
+     */
+    404: ProblemDetails;
+};
+
+export type ContentDeleteVersionError = ContentDeleteVersionErrors[keyof ContentDeleteVersionErrors];
+
+export type ContentDeleteVersionResponses = {
+    /**
+     * OK
+     */
+    200: ContentItem;
+};
+
+export type ContentDeleteVersionResponse = ContentDeleteVersionResponses[keyof ContentDeleteVersionResponses];
+
+export type ContentGetVersionData = {
+    body?: never;
+    headers?: {
+        /**
+         * If provided and the value matches the RFC7232 ETag of the current resource a 304 NotModified response will be returned. Weak ETags will always be ignored.
+         */
+        ifNoneMatch?: string;
+        /**
+         * If provided and the resource has not been modified since the date a 304 NotModified response will be returned. This parameter will be ignored if an 'If-None-Match' parameter is also provided.
+         */
+        ifModifiedSince?: string;
+    };
+    path: {
+        key: string;
+        version: string;
+    };
+    query?: {
+        locale?: string;
+    };
+    url: '/experimental/content/{key}/versions/{version}';
+};
+
+export type ContentGetVersionErrors = {
+    /**
+     * Forbidden
+     */
+    403: ProblemDetails;
+    /**
+     * Not Found
+     */
+    404: ProblemDetails;
+};
+
+export type ContentGetVersionError = ContentGetVersionErrors[keyof ContentGetVersionErrors];
+
+export type ContentGetVersionResponses = {
+    /**
+     * OK
+     */
+    200: ContentItem;
+};
+
+export type ContentGetVersionResponse = ContentGetVersionResponses[keyof ContentGetVersionResponses];
+
+export type ContentPatchVersionData = {
+    /**
+     * The content information that should be patched.
+     */
+    body: ContentItemWritable;
+    headers?: {
+        /**
+         * Indicates that the content validation should be ignored.
+         */
+        cmsSkipValidation?: boolean;
+    };
+    path: {
+        /**
+         * The key of the content item that should be patched.
+         */
+        key: string;
+        /**
+         * The version of the content that should be patched.
+         */
+        version: string;
+    };
+    query?: {
+        /**
+         * The locale of the content that should be patched.
+         */
+        locale?: string;
+    };
+    url: '/experimental/content/{key}/versions/{version}';
+};
+
+export type ContentPatchVersionErrors = {
+    /**
+     * Bad Request
+     */
+    400: ProblemDetails;
+    /**
+     * Forbidden
+     */
+    403: ProblemDetails;
+    /**
+     * Not Found
+     */
+    404: ProblemDetails;
+};
+
+export type ContentPatchVersionError = ContentPatchVersionErrors[keyof ContentPatchVersionErrors];
+
+export type ContentPatchVersionResponses = {
+    /**
+     * OK
+     */
+    200: ContentItem;
+};
+
+export type ContentPatchVersionResponse = ContentPatchVersionResponses[keyof ContentPatchVersionResponses];
 
 export type ContentTypesListData = {
     body?: never;

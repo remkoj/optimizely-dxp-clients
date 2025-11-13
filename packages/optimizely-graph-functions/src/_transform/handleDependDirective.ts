@@ -6,17 +6,12 @@ import {
   type FragmentDefinitionNode,
   type ASTNode,
   type DocumentNode,
-  type SelectionNode,
-  type SelectionSetNode,
-  type FragmentSpreadNode,
   type OperationDefinitionNode,
   type ArgumentNode,
   type Location,
-  OperationTypeNode,
+  FieldNode,
 } from 'graphql'
-import * as QueryGen from '../contenttype-loader'
-import type { PresetOptions, Injection, TransformOptions } from '../types'
-import { defaultOptions, pickTransformOptions } from './options'
+import type { PresetOptions } from '../types'
 
 /**
  * Remove the "item" field in queries and fragments from the "ContentReference" type if it's not in the schema
@@ -47,7 +42,6 @@ export async function handleDependDirective(
           // Check if the field has the `depend` directive
           const dependDirective = node.directives?.find(x => x.name.value === 'depend')
           if (dependDirective) {
-
             // If so read the arguments and validate if the required "on" argument is there
             const args = parseArgs(dependDirective.arguments)
             const dependency = args.get('on')
@@ -60,10 +54,16 @@ export async function handleDependDirective(
               throw new Error(`The "on" parameter of the "@depend" directive must have the form "typeName.fieldName" ${ buildLocString(dependDirective)}`)
 
             // Retrieve the type fields
-            const fields = getObjectFieldNames(options.schema, typeName)
+            const fields = getObjectFieldNames(options.schema, typeName);
+            isModified = true;
             if (!(fields?.includes(fieldName) ?? false)) {
-              isModified = true;
               return null // Remove the item
+            } else {
+              const newNode : FieldNode = {
+                ...node,
+                directives: node.directives?.filter(x => x.name.value !== 'depend')
+              }
+              return newNode;
             }
           }
         }
