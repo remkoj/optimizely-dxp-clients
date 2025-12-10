@@ -1,0 +1,45 @@
+{
+	"folders": [
+    {
+      "name": "Package: CMS API",
+      "path": "./packages/optimizely-cms-api"
+    },
+    {
+      "name": "Package: CMS CLI",
+      "path": "./packages/optimizely-cms-cli"
+    },
+    {
+      "name": "Package: CMS React",
+      "path": "./packages/optimizely-cms-react"
+    },
+    {
+      "name": "Package: CMS Next.js",
+      "path": "./packages/optimizely-cms-nextjs"
+    },
+    {
+      "name": "Package: Graph CLI",
+      "path": "./packages/optimizely-graph-cli"
+    },
+    {
+      "name": "Package: Graph Client",
+      "path": "./packages/optimizely-graph-client"
+    },
+    {
+      "name": "Package: GraphQL Codegen Preset",
+      "path": "./packages/optimizely-graph-functions"
+    },
+    {
+      "name": "Sample Project",
+      "path": "./samples/basic-project",
+    },
+		{
+      "name": "Repository",
+			"path": "."
+		}
+	],
+	"settings": {
+		"postman.settings.dotenv-detection-notification-visibility": false,
+    "typescript.tsdk": "Repository/.yarn/sdks/typescript/lib",
+    "typescript.enablePromptUseWorkspaceTsdk": true
+	}
+}

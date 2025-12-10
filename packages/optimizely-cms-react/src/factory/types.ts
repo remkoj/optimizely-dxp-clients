@@ -39,6 +39,16 @@ export type ComponentTypeDictionaryEntry = {
  */
 export interface ComponentFactory {
   /**
+   * A list of interfaces to ignore when resolving components. Adjust this
+   * list if you're experiencing issues with resolving components due to 
+   * contracts. Values **must be** provided lowercase and without leading 
+   * underscore. For example `_Item` must be provided as `item`.
+   * 
+   * The default value includes the common ones for SaaS CMS.
+   */
+  ignoredContracts: string[];
+  
+  /**
    * Check if the component type has been registered within the factory
    * 
    * @param       type            The component type to check for
