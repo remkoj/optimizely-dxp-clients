@@ -118,7 +118,8 @@ export class DefaultComponentFactory implements ComponentFactory {
     if (Array.isArray(handleToProcess) && handleToProcess.every((s) => typeof s === 'string'))
       return handleToProcess
         .map((s) => s === '' ? EmptyComponentHandle : (s.startsWith('_') ? s.substring(1) : s)) // Remove all leading underscores
-        .filter((s) => !this.ignoredContracts.includes(s.toLocaleLowerCase()))
+        .filter((s) => !this.ignoredContracts.includes(s.toLocaleLowerCase())) // Remove from ignored contracts
+        .filter((s, i, a) => i === 0 || a[i-1] !== s ) // Remove duplicates (i.e. Component/Component/...)
         .join(MERGE_SYMBOL)
     throw new Error(`Invalid component type handle: ${typeof handle}`)
   }
