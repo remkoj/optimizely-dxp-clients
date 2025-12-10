@@ -1,4 +1,5 @@
 import type { Metadata } from 'next'
+import { CmsContent } from '@remkoj/optimizely-cms-react/rsc'
 
 import './globals.css'
 
@@ -14,7 +15,12 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body>{children}</body>
+      <body>
+        <header style={{ borderBottom: "2px solid #000" }}>
+          <CmsContent contentLink={{key: "7e9d73a0f7bd416aab12ef33d1d239c6"}} variant='header' />
+        </header>
+        <main>{children}</main>
+      </body>
     </html>
   )
 }
