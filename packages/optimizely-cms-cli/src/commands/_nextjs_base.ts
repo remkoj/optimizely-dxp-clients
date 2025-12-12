@@ -1,9 +1,8 @@
 import type { CliModule } from '../types.js'
-import { createClient, type ApiClient as CmsApiClient, type IntegrationApi } from '@remkoj/optimizely-cms-api'
-import { parseArgs } from '../tools/parseArgs.js'
+import { type IntegrationApi } from '@remkoj/optimizely-cms-api'
 import chalk from 'chalk'
 import figures from 'figures'
-import { type ContentTypesArgs, type getContentTypes, contentTypesBuilder } from '../tools/contentTypes.js'
+import { type ContentTypesArgs, contentTypesBuilder } from '../tools/contentTypes.js'
 import fs from 'node:fs'
 import path from 'node:path'
 
@@ -34,7 +33,7 @@ export function createTypeFolders(contentTypes: Array<IntegrationApi.ContentType
         const baseType = contentType.baseType ?? 'default'
 
         // Create the type folder
-        const typePath = path.join(basePath, baseType, contentType.key)
+        const typePath = path.join(basePath, baseType, contentType.key.split(':').pop())
         if (!fs.existsSync(typePath)) {
             fs.mkdirSync(typePath, { recursive: true })
             if (debug)

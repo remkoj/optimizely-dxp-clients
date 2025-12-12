@@ -1,5 +1,6 @@
 // Leverage Next.JS configuration loading
 import { loadEnvConfig } from '@next/env'
+
 const loadEnvResult = loadEnvConfig(__dirname, undefined, console)
 console.log(`Optimizely CMS Configuration`)
 console.log(`  - Environments: ${loadEnvResult.loadedEnvFiles.map(x => x.path).join(', ')}`)
@@ -9,6 +10,11 @@ import type { CodegenConfig } from '@graphql-codegen/cli'
 import getSchemaInfo from '@remkoj/optimizely-graph-client/codegen'
 import OptimizelyGraphPreset, { type PresetOptions as OptimizelyGraphPresetOptions } from '@remkoj/optimizely-graph-functions/preset'
 
+if (__dirname !== process.cwd()) {
+  process.stderr.write('Code generation isn\'t executed in the project root, this will cause undesired side-effects\n')
+  process.exit(1)
+}
+
 // Create the configuration itself
 const config: CodegenConfig = {
   schema: getSchemaInfo(),
@@ -17,7 +23,7 @@ const config: CodegenConfig = {
     'src/**/*.graphql',
   ],
   generates: {
-    './src/gql/': {
+    'src/gql/': {
       //documents: ['opti-cms:/queries/13', 'opti-cms:/fragments/13'],
       preset: OptimizelyGraphPreset,
       presetConfig: {

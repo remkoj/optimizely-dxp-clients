@@ -48,7 +48,8 @@ export const NextJsFragmentsCommand: NextJsModule<{ loadedContentTypes: GetConte
 export function createGraphFragments(contentType: IntegrationApi.ContentType, typePath: string, basePath: string, force: boolean, debug: boolean, contentTypes: IntegrationApi.ContentType[], forCms12: boolean = false): Array<string> | undefined {
   const returnValue: Array<string> = []
   const baseType = contentType.baseType ?? 'default'
-  const baseQueryFile = path.join(typePath, `${contentType.key}.${baseType}.graphql`)
+  const baseQueryFile = path.join(typePath, `${contentType.key.split(':').pop()}.${baseType}.graphql`)
+  //console.log('Mapping', contentType.key, baseQueryFile);
   if (fs.existsSync(baseQueryFile)) {
     if (force) {
       if (debug)
@@ -76,7 +77,7 @@ export function createGraphFragments(contentType: IntegrationApi.ContentType, ty
         return
       }
       const fullTypeName = forCms12 ? contentType.key + propContentType.key : propContentType.key
-      const propertyFragmentFile = path.join(basePath, propContentType.baseType, propContentType.key, `${fullTypeName}.property.graphql`)
+      const propertyFragmentFile = path.join(basePath, propContentType.baseType, propContentType.key.split(':').pop(), `${fullTypeName.split(':').pop()}.property.graphql`)
       const propertyFragmentDir = path.dirname(propertyFragmentFile)
 
       if (!fs.existsSync(propertyFragmentDir))
@@ -99,7 +100,9 @@ export function createGraphFragments(contentType: IntegrationApi.ContentType, ty
 
 export function createInitialFragment(contentType: IntegrationApi.ContentType, forProperty: boolean = false, forBaseType?: IntegrationApi.ContentType, forCms12: boolean = false): { fragment: string, propertyTypes: ([string, boolean][] | null) } {
   const { fragmentFields, propertyTypes } = renderProperties(contentType, forCms12);
-  const fragmentTarget = forProperty ? (forCms12 ? (forBaseType?.key ?? '') + contentType.key : contentType.key + 'Property') : contentType.key
+  const contentTypeKey = contentType.key.split(':').pop();
+  const fragmentTarget = forProperty ? (forCms12 ? (forBaseType?.key ?? '') + contentTypeKey : contentTypeKey + 'Property') : contentTypeKey
+
   const tpl = `fragment ${fragmentTarget}Data on ${fragmentTarget} {
   ${fragmentFields.join("\n  ")}
 }`
@@ -148,7 +151,7 @@ export function renderProperties(contentType: IntegrationApi.ContentType, forCms
                 fragmentFields.push(`${propName} { ...IContentListItem }`)
               break;
             case IntegrationApi.PropertyDataType.COMPONENT:
-              const componentType = (typeData.items as IntegrationApi.ComponentListItem).contentType
+              const componentType = (typeData.items as IntegrationApi.ComponentListItem).contentType.split(':').pop()
               switch (componentType) {
                 case 'link':
                   fragmentFields.push(`${propName} { ...LinkItemData }`)
@@ -196,7 +199,7 @@ export function renderProperties(contentType: IntegrationApi.ContentType, forCms
         fragmentFields.push(`${propName} { ...ReferenceData }`)
         break;
       case IntegrationApi.PropertyDataType.COMPONENT: {
-        const componentType = (typeProps[propKey] as IntegrationApi.ComponentProperty).contentType
+        const componentType = (typeProps[propKey] as IntegrationApi.ComponentProperty).contentType.split(':').pop()
         if (forCms12 && componentType == "link") {
           fragmentFields.push(`${propName} { ...LinkItemData }`)
         } else {

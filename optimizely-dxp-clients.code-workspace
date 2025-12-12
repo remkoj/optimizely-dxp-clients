@@ -29,6 +29,10 @@
       "path": "./packages/optimizely-graph-functions"
     },
     {
+      "name": "Package: Optimizely One",
+      "path": "./packages/optimizely-one-nextjs"
+    },
+    {
       "name": "Sample Project",
       "path": "./samples/basic-project",
     },

@@ -152,8 +152,8 @@ export async function createTemplateMetadata(client: ApiClientInstance, displayT
       break;
     case 'content':
       const contentType = await client.contentTypes.contentTypesGet(displayTemplate.contentType ?? '-')
-      itemPath = path.join(basePath, contentType.baseType, contentType.key)
-      typesPath = path.join(basePath, contentType.baseType, contentType.key)
+      itemPath = path.join(basePath, contentType.baseType, contentType.key.split(':').pop())
+      typesPath = path.join(basePath, contentType.baseType, contentType.key.split(':').pop())
       targetType = targetPrefix + '/' + displayTemplate.contentType
       break;
     default:

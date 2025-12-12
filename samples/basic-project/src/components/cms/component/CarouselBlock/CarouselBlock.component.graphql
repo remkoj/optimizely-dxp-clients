@@ -1,3 +1,0 @@
-fragment CarouselBlockData on CarouselBlock {
-  CarouselItemsContentArea { ...IContentListItem }
-}
