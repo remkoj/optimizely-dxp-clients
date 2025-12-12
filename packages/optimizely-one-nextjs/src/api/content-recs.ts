@@ -12,9 +12,8 @@ export const ContentRecsApiService: ApiService<any> = {
     if (!optiOneConfig.ContentRecsHost)
       return Responses.NotFound
 
-    const crId = ContentRecs.Tools.getVisitorID(await cookies)
     // Identify visitor
-    const crId = ContentRecs.Tools.getVisitorID(cookies)
+    const crId = ContentRecs.Tools.getVisitorID(await cookies)
     if (!crId)
       return [{ total_hits: 0, content: [] }, 200]
 

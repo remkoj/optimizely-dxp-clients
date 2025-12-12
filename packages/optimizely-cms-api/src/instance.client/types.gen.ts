@@ -975,15 +975,15 @@ export type OauthToken = {
     /**
      * Gets or sets the access token.
      */
-    accessToken?: string | null;
+    access_token?: string | null;
     /**
      * Gets or sets the expiry time in seconds.
      */
-    expiresIn?: number;
+    expires_in?: number;
     /**
      * Gets or sets the token type.
      */
-    tokenType?: string;
+    token_type?: string;
 };
 
 /**
@@ -997,7 +997,7 @@ export type OauthTokenError = {
     /**
      * Gets or sets the error description.
      */
-    errorDescription?: string | null;
+    error_description?: string | null;
 };
 
 /**
@@ -1007,19 +1007,19 @@ export type OauthTokenRequest = {
     /**
      * Gets or sets the grant type.
      */
-    grantType?: string | null;
+    grant_type?: string | null;
     /**
      * Gets or sets the client id.
      */
-    clientId?: string | null;
+    client_id?: string | null;
     /**
      * Gets or sets the client secret.
      */
-    clientSecret?: string | null;
+    client_secret?: string | null;
     /**
      * Get or sets the subject to act as.
      */
-    actAs?: string | null;
+    act_as?: string | null;
 };
 
 export type ProblemDetails = {

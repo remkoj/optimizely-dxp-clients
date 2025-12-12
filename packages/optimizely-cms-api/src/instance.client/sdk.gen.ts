@@ -24,56 +24,48 @@ export type Options<TData extends TDataShape = TDataShape, ThrowOnError extends 
  *
  * Lists all changeset using the provided options.
  */
-export const changesetsList = <ThrowOnError extends boolean = false>(options?: Options<ChangesetsListData, ThrowOnError>) => {
-    return (options?.client ?? client).get<ChangesetsListResponses, ChangesetsListErrors, ThrowOnError>({
-        responseTransformer: changesetsListResponseTransformer,
-        url: '/changesets',
-        ...options
-    });
-};
+export const changesetsList = <ThrowOnError extends boolean = false>(options?: Options<ChangesetsListData, ThrowOnError>) => (options?.client ?? client).get<ChangesetsListResponses, ChangesetsListErrors, ThrowOnError>({
+    responseTransformer: changesetsListResponseTransformer,
+    url: '/changesets',
+    ...options
+});
 
 /**
  * Create changeset
  *
  * Creates a new changeset.
  */
-export const changesetsCreate = <ThrowOnError extends boolean = false>(options: Options<ChangesetsCreateData, ThrowOnError>) => {
-    return (options.client ?? client).post<ChangesetsCreateResponses, ChangesetsCreateErrors, ThrowOnError>({
-        responseTransformer: changesetsCreateResponseTransformer,
-        url: '/changesets',
-        ...options,
-        headers: {
-            'Content-Type': 'application/json',
-            ...options.headers
-        }
-    });
-};
+export const changesetsCreate = <ThrowOnError extends boolean = false>(options: Options<ChangesetsCreateData, ThrowOnError>) => (options.client ?? client).post<ChangesetsCreateResponses, ChangesetsCreateErrors, ThrowOnError>({
+    responseTransformer: changesetsCreateResponseTransformer,
+    url: '/changesets',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
 
 /**
  * Delete changeset
  *
  * Deletes the changeset with the provided key. If a changeset with the provided key does not exist an error is returned.
  */
-export const changesetsDelete = <ThrowOnError extends boolean = false>(options: Options<ChangesetsDeleteData, ThrowOnError>) => {
-    return (options.client ?? client).delete<ChangesetsDeleteResponses, ChangesetsDeleteErrors, ThrowOnError>({
-        responseTransformer: changesetsDeleteResponseTransformer,
-        url: '/changesets/{key}',
-        ...options
-    });
-};
+export const changesetsDelete = <ThrowOnError extends boolean = false>(options: Options<ChangesetsDeleteData, ThrowOnError>) => (options.client ?? client).delete<ChangesetsDeleteResponses, ChangesetsDeleteErrors, ThrowOnError>({
+    responseTransformer: changesetsDeleteResponseTransformer,
+    url: '/changesets/{key}',
+    ...options
+});
 
 /**
  * Get changeset
  *
  * Gets the changeset with the provided key.
  */
-export const changesetsGet = <ThrowOnError extends boolean = false>(options: Options<ChangesetsGetData, ThrowOnError>) => {
-    return (options.client ?? client).get<ChangesetsGetResponses, ChangesetsGetErrors, ThrowOnError>({
-        responseTransformer: changesetsGetResponseTransformer,
-        url: '/changesets/{key}',
-        ...options
-    });
-};
+export const changesetsGet = <ThrowOnError extends boolean = false>(options: Options<ChangesetsGetData, ThrowOnError>) => (options.client ?? client).get<ChangesetsGetResponses, ChangesetsGetErrors, ThrowOnError>({
+    responseTransformer: changesetsGetResponseTransformer,
+    url: '/changesets/{key}',
+    ...options
+});
 
 /**
  * Create or replace changeset
@@ -81,41 +73,29 @@ export const changesetsGet = <ThrowOnError extends boolean = false>(options: Opt
  * Creates or replaces a changeset. If a changeset with the provided key exist it is replaced.
  * Otherwise a new changeset is created.
  */
-export const changesetsPut = <ThrowOnError extends boolean = false>(options: Options<ChangesetsPutData, ThrowOnError>) => {
-    return (options.client ?? client).put<ChangesetsPutResponses, ChangesetsPutErrors, ThrowOnError>({
-        responseTransformer: changesetsPutResponseTransformer,
-        url: '/changesets/{key}',
-        ...options,
-        headers: {
-            'Content-Type': 'application/json',
-            ...options.headers
-        }
-    });
-};
+export const changesetsPut = <ThrowOnError extends boolean = false>(options: Options<ChangesetsPutData, ThrowOnError>) => (options.client ?? client).put<ChangesetsPutResponses, ChangesetsPutErrors, ThrowOnError>({
+    responseTransformer: changesetsPutResponseTransformer,
+    url: '/changesets/{key}',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
 
 /**
  * Delete changeset item
  *
  * Deletes the specified changeset item from the changeset.
  */
-export const changesetsDeleteItem = <ThrowOnError extends boolean = false>(options: Options<ChangesetsDeleteItemData, ThrowOnError>) => {
-    return (options.client ?? client).delete<ChangesetsDeleteItemResponses, ChangesetsDeleteItemErrors, ThrowOnError>({
-        url: '/changesets/{changeset}/items/{key}/versions/{version}',
-        ...options
-    });
-};
+export const changesetsDeleteItem = <ThrowOnError extends boolean = false>(options: Options<ChangesetsDeleteItemData, ThrowOnError>) => (options.client ?? client).delete<ChangesetsDeleteItemResponses, ChangesetsDeleteItemErrors, ThrowOnError>({ url: '/changesets/{changeset}/items/{key}/versions/{version}', ...options });
 
 /**
  * Get changeset item
  *
  * Gets the changeset item for the specified content reference.
  */
-export const changesetsGetItem = <ThrowOnError extends boolean = false>(options: Options<ChangesetsGetItemData, ThrowOnError>) => {
-    return (options.client ?? client).get<ChangesetsGetItemResponses, ChangesetsGetItemErrors, ThrowOnError>({
-        url: '/changesets/{changeset}/items/{key}/versions/{version}',
-        ...options
-    });
-};
+export const changesetsGetItem = <ThrowOnError extends boolean = false>(options: Options<ChangesetsGetItemData, ThrowOnError>) => (options.client ?? client).get<ChangesetsGetItemResponses, ChangesetsGetItemErrors, ThrowOnError>({ url: '/changesets/{changeset}/items/{key}/versions/{version}', ...options });
 
 /**
  * List changeset items
@@ -123,345 +103,294 @@ export const changesetsGetItem = <ThrowOnError extends boolean = false>(options:
  * Lists the available changeset items for the specified changeset using
  * the provided options.
  */
-export const changesetsListItems = <ThrowOnError extends boolean = false>(options: Options<ChangesetsListItemsData, ThrowOnError>) => {
-    return (options.client ?? client).get<ChangesetsListItemsResponses, ChangesetsListItemsErrors, ThrowOnError>({
-        url: '/changesets/{changeset}/items',
-        ...options
-    });
-};
+export const changesetsListItems = <ThrowOnError extends boolean = false>(options: Options<ChangesetsListItemsData, ThrowOnError>) => (options.client ?? client).get<ChangesetsListItemsResponses, ChangesetsListItemsErrors, ThrowOnError>({ url: '/changesets/{changeset}/items', ...options });
 
 /**
  * Create changeset item
  *
  * Creates the given changeset item.
  */
-export const changesetsCreateItem = <ThrowOnError extends boolean = false>(options: Options<ChangesetsCreateItemData, ThrowOnError>) => {
-    return (options.client ?? client).post<ChangesetsCreateItemResponses, ChangesetsCreateItemErrors, ThrowOnError>({
-        url: '/changesets/{changeset}/items',
-        ...options,
-        headers: {
-            'Content-Type': 'application/json',
-            ...options.headers
-        }
-    });
-};
+export const changesetsCreateItem = <ThrowOnError extends boolean = false>(options: Options<ChangesetsCreateItemData, ThrowOnError>) => (options.client ?? client).post<ChangesetsCreateItemResponses, ChangesetsCreateItemErrors, ThrowOnError>({
+    url: '/changesets/{changeset}/items',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
 
 /**
  * Update changeset item
  *
  * Updates the given changeset item.
  */
-export const changesetsUpdateItem = <ThrowOnError extends boolean = false>(options: Options<ChangesetsUpdateItemData, ThrowOnError>) => {
-    return (options.client ?? client).put<ChangesetsUpdateItemResponses, ChangesetsUpdateItemErrors, ThrowOnError>({
-        url: '/changesets/{changeset}/items/{contentKey}/versions/{contentVersion}',
-        ...options,
-        headers: {
-            'Content-Type': 'application/json',
-            ...options.headers
-        }
-    });
-};
+export const changesetsUpdateItem = <ThrowOnError extends boolean = false>(options: Options<ChangesetsUpdateItemData, ThrowOnError>) => (options.client ?? client).put<ChangesetsUpdateItemResponses, ChangesetsUpdateItemErrors, ThrowOnError>({
+    url: '/changesets/{changeset}/items/{contentKey}/versions/{contentVersion}',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
 
 /**
  * Create content
  *
  * Create a new content item.
  */
-export const contentCreate = <ThrowOnError extends boolean = false>(options: Options<ContentCreateData, ThrowOnError>) => {
-    return (options.client ?? client).post<ContentCreateResponses, ContentCreateErrors, ThrowOnError>({
-        responseTransformer: contentCreateResponseTransformer,
-        url: '/content',
-        ...options,
-        headers: {
-            'Content-Type': 'application/json',
-            ...options.headers
-        }
-    });
-};
+export const contentCreate = <ThrowOnError extends boolean = false>(options: Options<ContentCreateData, ThrowOnError>) => (options.client ?? client).post<ContentCreateResponses, ContentCreateErrors, ThrowOnError>({
+    responseTransformer: contentCreateResponseTransformer,
+    url: '/content',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
 
 /**
  * Delete content
  *
  * Deletes the content item with the provided key. If a content item with the provided key does not exist an error is returned.
  */
-export const contentDelete = <ThrowOnError extends boolean = false>(options: Options<ContentDeleteData, ThrowOnError>) => {
-    return (options.client ?? client).delete<ContentDeleteResponses, ContentDeleteErrors, ThrowOnError>({
-        responseTransformer: contentDeleteResponseTransformer,
-        url: '/content/{key}',
-        ...options
-    });
-};
+export const contentDelete = <ThrowOnError extends boolean = false>(options: Options<ContentDeleteData, ThrowOnError>) => (options.client ?? client).delete<ContentDeleteResponses, ContentDeleteErrors, ThrowOnError>({
+    responseTransformer: contentDeleteResponseTransformer,
+    url: '/content/{key}',
+    ...options
+});
 
 /**
  * Get content
  *
  * Get shared metadata about the content instance with the provided key.
  */
-export const contentGetMetadata = <ThrowOnError extends boolean = false>(options: Options<ContentGetMetadataData, ThrowOnError>) => {
-    return (options.client ?? client).get<ContentGetMetadataResponses, ContentGetMetadataErrors, ThrowOnError>({
-        responseTransformer: contentGetMetadataResponseTransformer,
-        url: '/content/{key}',
-        ...options
-    });
-};
+export const contentGetMetadata = <ThrowOnError extends boolean = false>(options: Options<ContentGetMetadataData, ThrowOnError>) => (options.client ?? client).get<ContentGetMetadataResponses, ContentGetMetadataErrors, ThrowOnError>({
+    responseTransformer: contentGetMetadataResponseTransformer,
+    url: '/content/{key}',
+    ...options
+});
 
 /**
  * Update content
  *
  * Update an existing content item. If a content item with the provided key does not exist an error is returned.
  */
-export const contentPatchMetadata = <ThrowOnError extends boolean = false>(options: Options<ContentPatchMetadataData, ThrowOnError>) => {
-    return (options.client ?? client).patch<ContentPatchMetadataResponses, ContentPatchMetadataErrors, ThrowOnError>({
-        responseTransformer: contentPatchMetadataResponseTransformer,
-        url: '/content/{key}',
-        ...options,
-        headers: {
-            'Content-Type': 'application/merge-patch+json',
-            ...options.headers
-        }
-    });
-};
+export const contentPatchMetadata = <ThrowOnError extends boolean = false>(options: Options<ContentPatchMetadataData, ThrowOnError>) => (options.client ?? client).patch<ContentPatchMetadataResponses, ContentPatchMetadataErrors, ThrowOnError>({
+    responseTransformer: contentPatchMetadataResponseTransformer,
+    url: '/content/{key}',
+    ...options,
+    headers: {
+        'Content-Type': 'application/merge-patch+json',
+        ...options.headers
+    }
+});
 
 /**
  * Get content path
  *
  * Get the content path with the provided key.
  */
-export const contentGetPath = <ThrowOnError extends boolean = false>(options: Options<ContentGetPathData, ThrowOnError>) => {
-    return (options.client ?? client).get<ContentGetPathResponses, ContentGetPathErrors, ThrowOnError>({
-        responseTransformer: contentGetPathResponseTransformer,
-        url: '/content/{key}/path',
-        ...options
-    });
-};
+export const contentGetPath = <ThrowOnError extends boolean = false>(options: Options<ContentGetPathData, ThrowOnError>) => (options.client ?? client).get<ContentGetPathResponses, ContentGetPathErrors, ThrowOnError>({
+    responseTransformer: contentGetPathResponseTransformer,
+    url: '/content/{key}/path',
+    ...options
+});
 
 /**
  * List content in container
  *
  * List the content items located in a specific container.
  */
-export const contentListItems = <ThrowOnError extends boolean = false>(options: Options<ContentListItemsData, ThrowOnError>) => {
-    return (options.client ?? client).get<ContentListItemsResponses, ContentListItemsErrors, ThrowOnError>({
-        responseTransformer: contentListItemsResponseTransformer,
-        url: '/content/{key}/items',
-        ...options
-    });
-};
+export const contentListItems = <ThrowOnError extends boolean = false>(options: Options<ContentListItemsData, ThrowOnError>) => (options.client ?? client).get<ContentListItemsResponses, ContentListItemsErrors, ThrowOnError>({
+    responseTransformer: contentListItemsResponseTransformer,
+    url: '/content/{key}/items',
+    ...options
+});
 
 /**
  * List assets
  *
  * List the assets that belongs to a content instance.
  */
-export const contentListAssets = <ThrowOnError extends boolean = false>(options: Options<ContentListAssetsData, ThrowOnError>) => {
-    return (options.client ?? client).get<ContentListAssetsResponses, ContentListAssetsErrors, ThrowOnError>({
-        responseTransformer: contentListAssetsResponseTransformer,
-        url: '/content/{key}/assets',
-        ...options
-    });
-};
+export const contentListAssets = <ThrowOnError extends boolean = false>(options: Options<ContentListAssetsData, ThrowOnError>) => (options.client ?? client).get<ContentListAssetsResponses, ContentListAssetsErrors, ThrowOnError>({
+    responseTransformer: contentListAssetsResponseTransformer,
+    url: '/content/{key}/assets',
+    ...options
+});
 
 /**
  * Copy content
  *
  * Create a copy of the content item with the provided key.
  */
-export const contentCopy = <ThrowOnError extends boolean = false>(options: Options<ContentCopyData, ThrowOnError>) => {
-    return (options.client ?? client).post<ContentCopyResponses, ContentCopyErrors, ThrowOnError>({
-        responseTransformer: contentCopyResponseTransformer,
-        url: '/content/{key}:copy',
-        ...options,
-        headers: {
-            'Content-Type': 'application/json',
-            ...options.headers
-        }
-    });
-};
+export const contentCopy = <ThrowOnError extends boolean = false>(options: Options<ContentCopyData, ThrowOnError>) => (options.client ?? client).post<ContentCopyResponses, ContentCopyErrors, ThrowOnError>({
+    responseTransformer: contentCopyResponseTransformer,
+    url: '/content/{key}:copy',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
 
 /**
  * Restore content
  *
  * Restore the deleted content item with the provided key. If a content item with the provided key is not deleted an error is returned.
  */
-export const contentUndelete = <ThrowOnError extends boolean = false>(options: Options<ContentUndeleteData, ThrowOnError>) => {
-    return (options.client ?? client).post<ContentUndeleteResponses, ContentUndeleteErrors, ThrowOnError>({
-        responseTransformer: contentUndeleteResponseTransformer,
-        url: '/content/{key}:undelete',
-        ...options
-    });
-};
+export const contentUndelete = <ThrowOnError extends boolean = false>(options: Options<ContentUndeleteData, ThrowOnError>) => (options.client ?? client).post<ContentUndeleteResponses, ContentUndeleteErrors, ThrowOnError>({
+    responseTransformer: contentUndeleteResponseTransformer,
+    url: '/content/{key}:undelete',
+    ...options
+});
 
 /**
  * Query versions
  *
  * List content versions based on the provided query options.
  */
-export const contentListAllVersions = <ThrowOnError extends boolean = false>(options?: Options<ContentListAllVersionsData, ThrowOnError>) => {
-    return (options?.client ?? client).get<ContentListAllVersionsResponses, ContentListAllVersionsErrors, ThrowOnError>({
-        responseTransformer: contentListAllVersionsResponseTransformer,
-        url: '/content/versions',
-        ...options
-    });
-};
+export const contentListAllVersions = <ThrowOnError extends boolean = false>(options?: Options<ContentListAllVersionsData, ThrowOnError>) => (options?.client ?? client).get<ContentListAllVersionsResponses, ContentListAllVersionsErrors, ThrowOnError>({
+    responseTransformer: contentListAllVersionsResponseTransformer,
+    url: '/content/versions',
+    ...options
+});
 
 /**
  * Delete locale
  *
  * Deletes the content item with the provided key. If a content item with the provided key does not exist an error is returned.
  */
-export const contentDeleteLocale = <ThrowOnError extends boolean = false>(options: Options<ContentDeleteLocaleData, ThrowOnError>) => {
-    return (options.client ?? client).delete<ContentDeleteLocaleResponses, ContentDeleteLocaleErrors, ThrowOnError>({
-        responseTransformer: contentDeleteLocaleResponseTransformer,
-        url: '/content/{key}/versions',
-        ...options
-    });
-};
+export const contentDeleteLocale = <ThrowOnError extends boolean = false>(options: Options<ContentDeleteLocaleData, ThrowOnError>) => (options.client ?? client).delete<ContentDeleteLocaleResponses, ContentDeleteLocaleErrors, ThrowOnError>({
+    responseTransformer: contentDeleteLocaleResponseTransformer,
+    url: '/content/{key}/versions',
+    ...options
+});
 
 /**
  * List versions
  *
  * List versions of the content item with the provided key and the provided options.
  */
-export const contentListVersions = <ThrowOnError extends boolean = false>(options: Options<ContentListVersionsData, ThrowOnError>) => {
-    return (options.client ?? client).get<ContentListVersionsResponses, ContentListVersionsErrors, ThrowOnError>({
-        responseTransformer: contentListVersionsResponseTransformer,
-        url: '/content/{key}/versions',
-        ...options
-    });
-};
+export const contentListVersions = <ThrowOnError extends boolean = false>(options: Options<ContentListVersionsData, ThrowOnError>) => (options.client ?? client).get<ContentListVersionsResponses, ContentListVersionsErrors, ThrowOnError>({
+    responseTransformer: contentListVersionsResponseTransformer,
+    url: '/content/{key}/versions',
+    ...options
+});
 
 /**
  * Create version
  *
  * Create a new version of a content item.
  */
-export const contentCreateVersion = <ThrowOnError extends boolean = false>(options: Options<ContentCreateVersionData, ThrowOnError>) => {
-    return (options.client ?? client).post<ContentCreateVersionResponses, ContentCreateVersionErrors, ThrowOnError>({
-        responseTransformer: contentCreateVersionResponseTransformer,
-        url: '/content/{key}/versions',
-        ...options,
-        headers: {
-            'Content-Type': 'application/json',
-            ...options.headers
-        }
-    });
-};
+export const contentCreateVersion = <ThrowOnError extends boolean = false>(options: Options<ContentCreateVersionData, ThrowOnError>) => (options.client ?? client).post<ContentCreateVersionResponses, ContentCreateVersionErrors, ThrowOnError>({
+    responseTransformer: contentCreateVersionResponseTransformer,
+    url: '/content/{key}/versions',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
 
 /**
  * Delete version
  *
  * Deletes the content item with the provided key. If a content item with the provided key does not exist an error is returned.
  */
-export const contentDeleteVersion = <ThrowOnError extends boolean = false>(options: Options<ContentDeleteVersionData, ThrowOnError>) => {
-    return (options.client ?? client).delete<ContentDeleteVersionResponses, ContentDeleteVersionErrors, ThrowOnError>({
-        responseTransformer: contentDeleteVersionResponseTransformer,
-        url: '/content/{key}/versions/{version}',
-        ...options
-    });
-};
+export const contentDeleteVersion = <ThrowOnError extends boolean = false>(options: Options<ContentDeleteVersionData, ThrowOnError>) => (options.client ?? client).delete<ContentDeleteVersionResponses, ContentDeleteVersionErrors, ThrowOnError>({
+    responseTransformer: contentDeleteVersionResponseTransformer,
+    url: '/content/{key}/versions/{version}',
+    ...options
+});
 
 /**
  * Get version
  *
  * Get the content item with the provided key and version.
  */
-export const contentGetVersion = <ThrowOnError extends boolean = false>(options: Options<ContentGetVersionData, ThrowOnError>) => {
-    return (options.client ?? client).get<ContentGetVersionResponses, ContentGetVersionErrors, ThrowOnError>({
-        responseTransformer: contentGetVersionResponseTransformer,
-        url: '/content/{key}/versions/{version}',
-        ...options
-    });
-};
+export const contentGetVersion = <ThrowOnError extends boolean = false>(options: Options<ContentGetVersionData, ThrowOnError>) => (options.client ?? client).get<ContentGetVersionResponses, ContentGetVersionErrors, ThrowOnError>({
+    responseTransformer: contentGetVersionResponseTransformer,
+    url: '/content/{key}/versions/{version}',
+    ...options
+});
 
 /**
  * Update version
  *
  * Update an existing content item. If a content item with the provided key does not exist an error is returned.
  */
-export const contentPatchVersion = <ThrowOnError extends boolean = false>(options: Options<ContentPatchVersionData, ThrowOnError>) => {
-    return (options.client ?? client).patch<ContentPatchVersionResponses, ContentPatchVersionErrors, ThrowOnError>({
-        responseTransformer: contentPatchVersionResponseTransformer,
-        url: '/content/{key}/versions/{version}',
-        ...options,
-        headers: {
-            'Content-Type': 'application/merge-patch+json',
-            ...options.headers
-        }
-    });
-};
+export const contentPatchVersion = <ThrowOnError extends boolean = false>(options: Options<ContentPatchVersionData, ThrowOnError>) => (options.client ?? client).patch<ContentPatchVersionResponses, ContentPatchVersionErrors, ThrowOnError>({
+    responseTransformer: contentPatchVersionResponseTransformer,
+    url: '/content/{key}/versions/{version}',
+    ...options,
+    headers: {
+        'Content-Type': 'application/merge-patch+json',
+        ...options.headers
+    }
+});
 
 /**
  * List content types
  *
  * List content types using the provided options.
  */
-export const contentTypesList = <ThrowOnError extends boolean = false>(options?: Options<ContentTypesListData, ThrowOnError>) => {
-    return (options?.client ?? client).get<ContentTypesListResponses, ContentTypesListErrors, ThrowOnError>({
-        responseTransformer: contentTypesListResponseTransformer,
-        url: '/contenttypes',
-        ...options
-    });
-};
+export const contentTypesList = <ThrowOnError extends boolean = false>(options?: Options<ContentTypesListData, ThrowOnError>) => (options?.client ?? client).get<ContentTypesListResponses, ContentTypesListErrors, ThrowOnError>({
+    responseTransformer: contentTypesListResponseTransformer,
+    url: '/contenttypes',
+    ...options
+});
 
 /**
  * Create content type
  *
  * Create a new content type.
  */
-export const contentTypesCreate = <ThrowOnError extends boolean = false>(options: Options<ContentTypesCreateData, ThrowOnError>) => {
-    return (options.client ?? client).post<ContentTypesCreateResponses, ContentTypesCreateErrors, ThrowOnError>({
-        responseTransformer: contentTypesCreateResponseTransformer,
-        url: '/contenttypes',
-        ...options,
-        headers: {
-            'Content-Type': 'application/json',
-            ...options.headers
-        }
-    });
-};
+export const contentTypesCreate = <ThrowOnError extends boolean = false>(options: Options<ContentTypesCreateData, ThrowOnError>) => (options.client ?? client).post<ContentTypesCreateResponses, ContentTypesCreateErrors, ThrowOnError>({
+    responseTransformer: contentTypesCreateResponseTransformer,
+    url: '/contenttypes',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
 
 /**
  * Delete content type
  *
  * Deletes the content type with the provided key. If a content type with the provided key does not exist an error is returned.
  */
-export const contentTypesDelete = <ThrowOnError extends boolean = false>(options: Options<ContentTypesDeleteData, ThrowOnError>) => {
-    return (options.client ?? client).delete<ContentTypesDeleteResponses, ContentTypesDeleteErrors, ThrowOnError>({
-        responseTransformer: contentTypesDeleteResponseTransformer,
-        url: '/contenttypes/{key}',
-        ...options
-    });
-};
+export const contentTypesDelete = <ThrowOnError extends boolean = false>(options: Options<ContentTypesDeleteData, ThrowOnError>) => (options.client ?? client).delete<ContentTypesDeleteResponses, ContentTypesDeleteErrors, ThrowOnError>({
+    responseTransformer: contentTypesDeleteResponseTransformer,
+    url: '/contenttypes/{key}',
+    ...options
+});
 
 /**
  * Get content type
  *
  * Get the content type with the provided key.
  */
-export const contentTypesGet = <ThrowOnError extends boolean = false>(options: Options<ContentTypesGetData, ThrowOnError>) => {
-    return (options.client ?? client).get<ContentTypesGetResponses, ContentTypesGetErrors, ThrowOnError>({
-        responseTransformer: contentTypesGetResponseTransformer,
-        url: '/contenttypes/{key}',
-        ...options
-    });
-};
+export const contentTypesGet = <ThrowOnError extends boolean = false>(options: Options<ContentTypesGetData, ThrowOnError>) => (options.client ?? client).get<ContentTypesGetResponses, ContentTypesGetErrors, ThrowOnError>({
+    responseTransformer: contentTypesGetResponseTransformer,
+    url: '/contenttypes/{key}',
+    ...options
+});
 
 /**
  * Update content type
  *
  * Update an existing content type. If a content type with the provided key does not exist an error is returned.
  */
-export const contentTypesPatch = <ThrowOnError extends boolean = false>(options: Options<ContentTypesPatchData, ThrowOnError>) => {
-    return (options.client ?? client).patch<ContentTypesPatchResponses, ContentTypesPatchErrors, ThrowOnError>({
-        responseTransformer: contentTypesPatchResponseTransformer,
-        url: '/contenttypes/{key}',
-        ...options,
-        headers: {
-            'Content-Type': 'application/merge-patch+json',
-            ...options.headers
-        }
-    });
-};
+export const contentTypesPatch = <ThrowOnError extends boolean = false>(options: Options<ContentTypesPatchData, ThrowOnError>) => (options.client ?? client).patch<ContentTypesPatchResponses, ContentTypesPatchErrors, ThrowOnError>({
+    responseTransformer: contentTypesPatchResponseTransformer,
+    url: '/contenttypes/{key}',
+    ...options,
+    headers: {
+        'Content-Type': 'application/merge-patch+json',
+        ...options.headers
+    }
+});
 
 /**
  * Create or replace content type
@@ -469,90 +398,78 @@ export const contentTypesPatch = <ThrowOnError extends boolean = false>(options:
  * Create or replace a content type. If a content type with the provided key exist it is replaced.
  * Otherwise a new content type is created.
  */
-export const contentTypesPut = <ThrowOnError extends boolean = false>(options: Options<ContentTypesPutData, ThrowOnError>) => {
-    return (options.client ?? client).put<ContentTypesPutResponses, ContentTypesPutErrors, ThrowOnError>({
-        responseTransformer: contentTypesPutResponseTransformer,
-        url: '/contenttypes/{key}',
-        ...options,
-        headers: {
-            'Content-Type': 'application/json',
-            ...options.headers
-        }
-    });
-};
+export const contentTypesPut = <ThrowOnError extends boolean = false>(options: Options<ContentTypesPutData, ThrowOnError>) => (options.client ?? client).put<ContentTypesPutResponses, ContentTypesPutErrors, ThrowOnError>({
+    responseTransformer: contentTypesPutResponseTransformer,
+    url: '/contenttypes/{key}',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
 
 /**
  * List display templates
  *
  * List display templates using the provided options.
  */
-export const displayTemplatesList = <ThrowOnError extends boolean = false>(options?: Options<DisplayTemplatesListData, ThrowOnError>) => {
-    return (options?.client ?? client).get<DisplayTemplatesListResponses, DisplayTemplatesListErrors, ThrowOnError>({
-        responseTransformer: displayTemplatesListResponseTransformer,
-        url: '/displaytemplates',
-        ...options
-    });
-};
+export const displayTemplatesList = <ThrowOnError extends boolean = false>(options?: Options<DisplayTemplatesListData, ThrowOnError>) => (options?.client ?? client).get<DisplayTemplatesListResponses, DisplayTemplatesListErrors, ThrowOnError>({
+    responseTransformer: displayTemplatesListResponseTransformer,
+    url: '/displaytemplates',
+    ...options
+});
 
 /**
  * Create display template
  *
  * Create a new display template.
  */
-export const displayTemplatesCreate = <ThrowOnError extends boolean = false>(options: Options<DisplayTemplatesCreateData, ThrowOnError>) => {
-    return (options.client ?? client).post<DisplayTemplatesCreateResponses, DisplayTemplatesCreateErrors, ThrowOnError>({
-        responseTransformer: displayTemplatesCreateResponseTransformer,
-        url: '/displaytemplates',
-        ...options,
-        headers: {
-            'Content-Type': 'application/json',
-            ...options.headers
-        }
-    });
-};
+export const displayTemplatesCreate = <ThrowOnError extends boolean = false>(options: Options<DisplayTemplatesCreateData, ThrowOnError>) => (options.client ?? client).post<DisplayTemplatesCreateResponses, DisplayTemplatesCreateErrors, ThrowOnError>({
+    responseTransformer: displayTemplatesCreateResponseTransformer,
+    url: '/displaytemplates',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
 
 /**
  * Delete display template
  *
  * Deletes the display template with the provided key.
  */
-export const displayTemplatesDelete = <ThrowOnError extends boolean = false>(options: Options<DisplayTemplatesDeleteData, ThrowOnError>) => {
-    return (options.client ?? client).delete<DisplayTemplatesDeleteResponses, DisplayTemplatesDeleteErrors, ThrowOnError>({
-        responseTransformer: displayTemplatesDeleteResponseTransformer,
-        url: '/displaytemplates/{key}',
-        ...options
-    });
-};
+export const displayTemplatesDelete = <ThrowOnError extends boolean = false>(options: Options<DisplayTemplatesDeleteData, ThrowOnError>) => (options.client ?? client).delete<DisplayTemplatesDeleteResponses, DisplayTemplatesDeleteErrors, ThrowOnError>({
+    responseTransformer: displayTemplatesDeleteResponseTransformer,
+    url: '/displaytemplates/{key}',
+    ...options
+});
 
 /**
  * Get display template
  *
  * Get the display template with the provided key.
  */
-export const displayTemplatesGet = <ThrowOnError extends boolean = false>(options: Options<DisplayTemplatesGetData, ThrowOnError>) => {
-    return (options.client ?? client).get<DisplayTemplatesGetResponses, DisplayTemplatesGetErrors, ThrowOnError>({
-        responseTransformer: displayTemplatesGetResponseTransformer,
-        url: '/displaytemplates/{key}',
-        ...options
-    });
-};
+export const displayTemplatesGet = <ThrowOnError extends boolean = false>(options: Options<DisplayTemplatesGetData, ThrowOnError>) => (options.client ?? client).get<DisplayTemplatesGetResponses, DisplayTemplatesGetErrors, ThrowOnError>({
+    responseTransformer: displayTemplatesGetResponseTransformer,
+    url: '/displaytemplates/{key}',
+    ...options
+});
 
 /**
  * Update display template
  *
  * Update an existing display template.
  */
-export const displayTemplatesPatch = <ThrowOnError extends boolean = false>(options: Options<DisplayTemplatesPatchData, ThrowOnError>) => {
-    return (options.client ?? client).patch<DisplayTemplatesPatchResponses, DisplayTemplatesPatchErrors, ThrowOnError>({
-        responseTransformer: displayTemplatesPatchResponseTransformer,
-        url: '/displaytemplates/{key}',
-        ...options,
-        headers: {
-            'Content-Type': 'application/merge-patch+json',
-            ...options.headers
-        }
-    });
-};
+export const displayTemplatesPatch = <ThrowOnError extends boolean = false>(options: Options<DisplayTemplatesPatchData, ThrowOnError>) => (options.client ?? client).patch<DisplayTemplatesPatchResponses, DisplayTemplatesPatchErrors, ThrowOnError>({
+    responseTransformer: displayTemplatesPatchResponseTransformer,
+    url: '/displaytemplates/{key}',
+    ...options,
+    headers: {
+        'Content-Type': 'application/merge-patch+json',
+        ...options.headers
+    }
+});
 
 /**
  * Create or replace a display template
@@ -560,17 +477,15 @@ export const displayTemplatesPatch = <ThrowOnError extends boolean = false>(opti
  * Create or replace a display template. If a display template with the provided key exist it is replaced.
  * Otherwise a new display template is created.
  */
-export const displayTemplatesPut = <ThrowOnError extends boolean = false>(options: Options<DisplayTemplatesPutData, ThrowOnError>) => {
-    return (options.client ?? client).put<DisplayTemplatesPutResponses, DisplayTemplatesPutErrors, ThrowOnError>({
-        responseTransformer: displayTemplatesPutResponseTransformer,
-        url: '/displaytemplates/{key}',
-        ...options,
-        headers: {
-            'Content-Type': 'application/json',
-            ...options.headers
-        }
-    });
-};
+export const displayTemplatesPut = <ThrowOnError extends boolean = false>(options: Options<DisplayTemplatesPutData, ThrowOnError>) => (options.client ?? client).put<DisplayTemplatesPutResponses, DisplayTemplatesPutErrors, ThrowOnError>({
+    responseTransformer: displayTemplatesPutResponseTransformer,
+    url: '/displaytemplates/{key}',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
 
 /**
  * Request access token
@@ -578,108 +493,77 @@ export const displayTemplatesPut = <ThrowOnError extends boolean = false>(option
  * Request an access token. This endpoint only supports the 'client_credentials' grant type
  * and will only issue short-lived tokens.
  */
-export const oauthToken = <ThrowOnError extends boolean = false>(options: Options<OauthTokenData, ThrowOnError>) => {
-    return (options.client ?? client).post<OauthTokenResponses, OauthTokenErrors, ThrowOnError>({
-        url: '/oauth/token',
-        ...options,
-        headers: {
-            'Content-Type': 'application/json',
-            ...options.headers
-        }
-    });
-};
+export const oauthToken = <ThrowOnError extends boolean = false>(options: Options<OauthTokenData, ThrowOnError>) => (options.client ?? client).post<OauthTokenResponses, OauthTokenErrors, ThrowOnError>({
+    url: '/oauth/token',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
 
 /**
  * List property formats
  *
  * List all property formats using the provided options.
  */
-export const propertyFormatsList = <ThrowOnError extends boolean = false>(options?: Options<PropertyFormatsListData, ThrowOnError>) => {
-    return (options?.client ?? client).get<PropertyFormatsListResponses, PropertyFormatsListErrors, ThrowOnError>({
-        url: '/propertyformats',
-        ...options
-    });
-};
+export const propertyFormatsList = <ThrowOnError extends boolean = false>(options?: Options<PropertyFormatsListData, ThrowOnError>) => (options?.client ?? client).get<PropertyFormatsListResponses, PropertyFormatsListErrors, ThrowOnError>({ url: '/propertyformats', ...options });
 
 /**
  * Get property format
  *
  * Get the property format with the provided key.
  */
-export const propertyFormatsGet = <ThrowOnError extends boolean = false>(options: Options<PropertyFormatsGetData, ThrowOnError>) => {
-    return (options.client ?? client).get<PropertyFormatsGetResponses, PropertyFormatsGetErrors, ThrowOnError>({
-        url: '/propertyformats/{key}',
-        ...options
-    });
-};
+export const propertyFormatsGet = <ThrowOnError extends boolean = false>(options: Options<PropertyFormatsGetData, ThrowOnError>) => (options.client ?? client).get<PropertyFormatsGetResponses, PropertyFormatsGetErrors, ThrowOnError>({ url: '/propertyformats/{key}', ...options });
 
 /**
  * List property groups
  *
  * List property groups using the provided options.
  */
-export const propertyGroupsList = <ThrowOnError extends boolean = false>(options?: Options<PropertyGroupsListData, ThrowOnError>) => {
-    return (options?.client ?? client).get<PropertyGroupsListResponses, PropertyGroupsListErrors, ThrowOnError>({
-        url: '/propertygroups',
-        ...options
-    });
-};
+export const propertyGroupsList = <ThrowOnError extends boolean = false>(options?: Options<PropertyGroupsListData, ThrowOnError>) => (options?.client ?? client).get<PropertyGroupsListResponses, PropertyGroupsListErrors, ThrowOnError>({ url: '/propertygroups', ...options });
 
 /**
  * Create property group
  *
  * Create a new property group.
  */
-export const propertyGroupsCreate = <ThrowOnError extends boolean = false>(options: Options<PropertyGroupsCreateData, ThrowOnError>) => {
-    return (options.client ?? client).post<PropertyGroupsCreateResponses, PropertyGroupsCreateErrors, ThrowOnError>({
-        url: '/propertygroups',
-        ...options,
-        headers: {
-            'Content-Type': 'application/json',
-            ...options.headers
-        }
-    });
-};
+export const propertyGroupsCreate = <ThrowOnError extends boolean = false>(options: Options<PropertyGroupsCreateData, ThrowOnError>) => (options.client ?? client).post<PropertyGroupsCreateResponses, PropertyGroupsCreateErrors, ThrowOnError>({
+    url: '/propertygroups',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
 
 /**
  * Delete property group
  *
  * Deletes the property group with the provided key.
  */
-export const propertyGroupsDelete = <ThrowOnError extends boolean = false>(options: Options<PropertyGroupsDeleteData, ThrowOnError>) => {
-    return (options.client ?? client).delete<PropertyGroupsDeleteResponses, PropertyGroupsDeleteErrors, ThrowOnError>({
-        url: '/propertygroups/{key}',
-        ...options
-    });
-};
+export const propertyGroupsDelete = <ThrowOnError extends boolean = false>(options: Options<PropertyGroupsDeleteData, ThrowOnError>) => (options.client ?? client).delete<PropertyGroupsDeleteResponses, PropertyGroupsDeleteErrors, ThrowOnError>({ url: '/propertygroups/{key}', ...options });
 
 /**
  * Get property group
  *
  * Get the property group with the provided key.
  */
-export const propertyGroupsGet = <ThrowOnError extends boolean = false>(options: Options<PropertyGroupsGetData, ThrowOnError>) => {
-    return (options.client ?? client).get<PropertyGroupsGetResponses, PropertyGroupsGetErrors, ThrowOnError>({
-        url: '/propertygroups/{key}',
-        ...options
-    });
-};
+export const propertyGroupsGet = <ThrowOnError extends boolean = false>(options: Options<PropertyGroupsGetData, ThrowOnError>) => (options.client ?? client).get<PropertyGroupsGetResponses, PropertyGroupsGetErrors, ThrowOnError>({ url: '/propertygroups/{key}', ...options });
 
 /**
  * Update property group
  *
  * Update an existing property group.
  */
-export const propertyGroupsPatch = <ThrowOnError extends boolean = false>(options: Options<PropertyGroupsPatchData, ThrowOnError>) => {
-    return (options.client ?? client).patch<PropertyGroupsPatchResponses, PropertyGroupsPatchErrors, ThrowOnError>({
-        url: '/propertygroups/{key}',
-        ...options,
-        headers: {
-            'Content-Type': 'application/merge-patch+json',
-            ...options.headers
-        }
-    });
-};
+export const propertyGroupsPatch = <ThrowOnError extends boolean = false>(options: Options<PropertyGroupsPatchData, ThrowOnError>) => (options.client ?? client).patch<PropertyGroupsPatchResponses, PropertyGroupsPatchErrors, ThrowOnError>({
+    url: '/propertygroups/{key}',
+    ...options,
+    headers: {
+        'Content-Type': 'application/merge-patch+json',
+        ...options.headers
+    }
+});
 
 /**
  * Create or replace property group
@@ -687,13 +571,11 @@ export const propertyGroupsPatch = <ThrowOnError extends boolean = false>(option
  * Create or replace a property group. If a property group with the provided key exist it is replaced.
  * Otherwise a new property group is created.
  */
-export const propertyGroupsPut = <ThrowOnError extends boolean = false>(options: Options<PropertyGroupsPutData, ThrowOnError>) => {
-    return (options.client ?? client).put<PropertyGroupsPutResponses, PropertyGroupsPutErrors, ThrowOnError>({
-        url: '/propertygroups/{key}',
-        ...options,
-        headers: {
-            'Content-Type': 'application/json',
-            ...options.headers
-        }
-    });
-};
+export const propertyGroupsPut = <ThrowOnError extends boolean = false>(options: Options<PropertyGroupsPutData, ThrowOnError>) => (options.client ?? client).put<PropertyGroupsPutResponses, PropertyGroupsPutErrors, ThrowOnError>({
+    url: '/propertygroups/{key}',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});

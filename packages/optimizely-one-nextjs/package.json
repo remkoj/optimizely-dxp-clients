@@ -40,20 +40,20 @@
   },
   "devDependencies": {
     "@remkoj/optimizely-graph-client": "workspace:6.0.0-pre14",
-    "@tailwindcss/cli": "^4.1.17",
-    "@types/node": "^22.19.1",
-    "@types/react": "^19.2.4",
+    "@tailwindcss/cli": "^4.1.18",
+    "@types/node": "^22.19.2",
+    "@types/react": "^19.2.7",
     "@types/react-dom": "19.2.3",
     "@types/uuid": "^11.0.0",
-    "browserslist": "^4.28.0",
-    "next": "^16.0.2",
+    "browserslist": "^4.28.1",
+    "next": "^16.0.10",
     "prop-types": "^15.8.1",
-    "react": "^19.2.0",
-    "react-dom": "^19.2.0",
+    "react": "^19.2.3",
+    "react-dom": "^19.2.3",
     "scheduler": "^0.27.0",
-    "tailwindcss": "^4.1.17",
+    "tailwindcss": "^4.1.18",
     "typescript": "^5.9.3",
-    "update-browserslist-db": "^1.1.4"
+    "update-browserslist-db": "^1.2.2"
   },
   "peerDependencies": {
     "next": "^15 || ^16",
@@ -65,7 +65,7 @@
     "@headlessui/react": "^2.2.9",
     "@heroicons/react": "^2.2.0",
     "@remkoj/optimizely-graph-client": "6.0.0-pre14",
-    "swr": "^2.3.6",
+    "swr": "^2.3.7",
     "uuid": "^13.0.0"
   },
   "scripts": {

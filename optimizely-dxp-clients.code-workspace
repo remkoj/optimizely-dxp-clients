@@ -29,6 +29,10 @@
       "path": "./packages/optimizely-graph-functions"
     },
     {
+      "name": "Package: Optimizely One",
+      "path": "./packages/optimizely-one-nextjs"
+    },
+    {
       "name": "Sample Project",
       "path": "./samples/basic-project",
     },
@@ -39,7 +43,7 @@
 	],
 	"settings": {
 		"postman.settings.dotenv-detection-notification-visibility": false,
-    "typescript.tsdk": "Repository/.yarn/sdks/typescript/lib",
+    "typescript.tsdk": "Repository/node_modules/typescript/lib",
     "typescript.enablePromptUseWorkspaceTsdk": true
 	}
 }

@@ -1370,11 +1370,11 @@ export type BlueprintsDeleteData = {
         /**
          * If provided, the DELETE request will only be considered if the value matches the RFC7232 ETag of the current resource. Weak ETags will always be ignored.
          */
-        ifMatch?: string;
+        'If-Match'?: string;
         /**
          * If provided, the DELETE request will only be considered if the resource has not been modified since the provided date. This parameter will be ignored if an 'If-Match' parameter is also provided.
          */
-        ifUnmodifiedSince?: string;
+        'If-Unmodified-Since'?: string;
     };
     path: {
         /**
@@ -1422,11 +1422,11 @@ export type BlueprintsGetData = {
         /**
          * If provided and the value matches the RFC7232 ETag of the current resource a 304 NotModified response will be returned. Weak ETags will always be ignored.
          */
-        ifNoneMatch?: string;
+        'If-None-Match'?: string;
         /**
          * If provided and the resource has not been modified since the date a 304 NotModified response will be returned. This parameter will be ignored if an 'If-None-Match' parameter is also provided.
          */
-        ifModifiedSince?: string;
+        'If-Modified-Since'?: string;
     };
     path: {
         /**
@@ -1469,11 +1469,11 @@ export type BlueprintsPatchData = {
         /**
          * If provided, the PATCH request will only be considered if the value matches the RFC7232 ETag of the current resource. Weak ETags will always be ignored.
          */
-        ifMatch?: string;
+        'If-Match'?: string;
         /**
          * If provided, the PATCH request will only be considered if the resource has not been modified since the provided date. This parameter will be ignored if an 'If-Match' parameter is also provided.
          */
-        ifUnmodifiedSince?: string;
+        'If-Unmodified-Since'?: string;
     };
     path: {
         /**
@@ -1624,11 +1624,11 @@ export type ChangesetsGetData = {
         /**
          * If provided and the value matches the RFC7232 ETag of the current resource a 304 NotModified response will be returned. Weak ETags will always be ignored.
          */
-        ifNoneMatch?: string;
+        'If-None-Match'?: string;
         /**
          * If provided and the resource has not been modified since the date a 304 NotModified response will be returned. This parameter will be ignored if an 'If-None-Match' parameter is also provided.
          */
-        ifModifiedSince?: string;
+        'If-Modified-Since'?: string;
     };
     path: {
         /**
@@ -1927,7 +1927,7 @@ export type ContentCreateData = {
         /**
          * Indicates that the content validation should be ignored.
          */
-        cmsSkipValidation?: boolean;
+        'cms-skip-validation'?: boolean;
     };
     path?: never;
     query?: never;
@@ -1962,7 +1962,7 @@ export type ContentDeleteData = {
         /**
          * Indicates that the content item should be permanently deleted immediately or if it should be soft deleted first.
          */
-        cmsPermanentDelete?: boolean;
+        'cms-permanent-delete'?: boolean;
     };
     path: {
         /**
@@ -2404,7 +2404,7 @@ export type ContentCreateVersionData = {
         /**
          * Indicates that the content validation should be ignored.
          */
-        cmsSkipValidation?: boolean;
+        'cms-skip-validation'?: boolean;
     };
     path: {
         /**
@@ -2484,11 +2484,11 @@ export type ContentGetVersionData = {
         /**
          * If provided and the value matches the RFC7232 ETag of the current resource a 304 NotModified response will be returned. Weak ETags will always be ignored.
          */
-        ifNoneMatch?: string;
+        'If-None-Match'?: string;
         /**
          * If provided and the resource has not been modified since the date a 304 NotModified response will be returned. This parameter will be ignored if an 'If-None-Match' parameter is also provided.
          */
-        ifModifiedSince?: string;
+        'If-Modified-Since'?: string;
     };
     path: {
         key: string;
@@ -2531,7 +2531,7 @@ export type ContentPatchVersionData = {
         /**
          * Indicates that the content validation should be ignored.
          */
-        cmsSkipValidation?: boolean;
+        'cms-skip-validation'?: boolean;
     };
     path: {
         /**
@@ -2653,11 +2653,11 @@ export type ContentTypesDeleteData = {
         /**
          * If provided, the DELETE request will only be considered if the value matches the RFC7232 ETag of the current resource. Weak ETags will always be ignored.
          */
-        ifMatch?: string;
+        'If-Match'?: string;
         /**
          * If provided, the DELETE request will only be considered if the resource has not been modified since the provided date. This parameter will be ignored if an 'If-Match' parameter is also provided.
          */
-        ifUnmodifiedSince?: string;
+        'If-Unmodified-Since'?: string;
     };
     path: {
         /**
@@ -2705,11 +2705,11 @@ export type ContentTypesGetData = {
         /**
          * If provided and the value matches the RFC7232 ETag of the current resource a 304 NotModified response will be returned. Weak ETags will always be ignored.
          */
-        ifNoneMatch?: string;
+        'If-None-Match'?: string;
         /**
          * If provided and the resource has not been modified since the date a 304 NotModified response will be returned. This parameter will be ignored if an 'If-None-Match' parameter is also provided.
          */
-        ifModifiedSince?: string;
+        'If-Modified-Since'?: string;
     };
     path: {
         /**
@@ -2752,15 +2752,15 @@ export type ContentTypesPatchData = {
         /**
          * Patch the content type even though the changes might result in data loss.
          */
-        cmsIgnoreDataLossWarnings?: boolean;
+        'cms-ignore-data-loss-warnings'?: boolean;
         /**
          * If provided, the PATCH request will only be considered if the value matches the RFC7232 ETag of the current resource. Weak ETags will always be ignored.
          */
-        ifMatch?: string;
+        'If-Match'?: string;
         /**
          * If provided, the PATCH request will only be considered if the resource has not been modified since the provided date. This parameter will be ignored if an 'If-Match' parameter is also provided.
          */
-        ifUnmodifiedSince?: string;
+        'If-Unmodified-Since'?: string;
     };
     path: {
         /**
@@ -2868,11 +2868,11 @@ export type DisplayTemplatesDeleteData = {
         /**
          * If provided, the DELETE request will only be considered if the value matches the RFC7232 ETag of the current resource. Weak ETags will always be ignored.
          */
-        ifMatch?: string;
+        'If-Match'?: string;
         /**
          * If provided, the DELETE request will only be considered if the resource has not been modified since the provided date. This parameter will be ignored if an 'If-Match' parameter is also provided.
          */
-        ifUnmodifiedSince?: string;
+        'If-Unmodified-Since'?: string;
     };
     path: {
         /**
@@ -2920,11 +2920,11 @@ export type DisplayTemplatesGetData = {
         /**
          * If provided and the value matches the RFC7232 ETag of the current resource a 304 NotModified response will be returned. Weak ETags will always be ignored.
          */
-        ifNoneMatch?: string;
+        'If-None-Match'?: string;
         /**
          * If provided and the resource has not been modified since the date a 304 NotModified response will be returned. This parameter will be ignored if an 'If-None-Match' parameter is also provided.
          */
-        ifModifiedSince?: string;
+        'If-Modified-Since'?: string;
     };
     path: {
         /**
@@ -2967,11 +2967,11 @@ export type DisplayTemplatesPatchData = {
         /**
          * If provided, the PATCH request will only be considered if the value matches the RFC7232 ETag of the current resource. Weak ETags will always be ignored.
          */
-        ifMatch?: string;
+        'If-Match'?: string;
         /**
          * If provided, the PATCH request will only be considered if the resource has not been modified since the provided date. This parameter will be ignored if an 'If-Match' parameter is also provided.
          */
-        ifUnmodifiedSince?: string;
+        'If-Unmodified-Since'?: string;
     };
     path: {
         /**
@@ -3047,11 +3047,11 @@ export type PropertyFormatsGetData = {
         /**
          * If provided and the value matches the RFC7232 ETag of the current resource a 304 NotModified response will be returned. Weak ETags will always be ignored.
          */
-        ifNoneMatch?: string;
+        'If-None-Match'?: string;
         /**
          * If provided and the resource has not been modified since the date a 304 NotModified response will be returned. This parameter will be ignored if an 'If-None-Match' parameter is also provided.
          */
-        ifModifiedSince?: string;
+        'If-Modified-Since'?: string;
     };
     path: {
         /**
@@ -3159,11 +3159,11 @@ export type PropertyGroupsDeleteData = {
         /**
          * If provided, the DELETE request will only be considered if the value matches the RFC7232 ETag of the current resource. Weak ETags will always be ignored.
          */
-        ifMatch?: string;
+        'If-Match'?: string;
         /**
          * If provided, the DELETE request will only be considered if the resource has not been modified since the provided date. This parameter will be ignored if an 'If-Match' parameter is also provided.
          */
-        ifUnmodifiedSince?: string;
+        'If-Unmodified-Since'?: string;
     };
     path: {
         /**
@@ -3211,11 +3211,11 @@ export type PropertyGroupsGetData = {
         /**
          * If provided and the value matches the RFC7232 ETag of the current resource a 304 NotModified response will be returned. Weak ETags will always be ignored.
          */
-        ifNoneMatch?: string;
+        'If-None-Match'?: string;
         /**
          * If provided and the resource has not been modified since the date a 304 NotModified response will be returned. This parameter will be ignored if an 'If-None-Match' parameter is also provided.
          */
-        ifModifiedSince?: string;
+        'If-Modified-Since'?: string;
     };
     path: {
         /**
@@ -3258,11 +3258,11 @@ export type PropertyGroupsPatchData = {
         /**
          * If provided, the PATCH request will only be considered if the value matches the RFC7232 ETag of the current resource. Weak ETags will always be ignored.
          */
-        ifMatch?: string;
+        'If-Match'?: string;
         /**
          * If provided, the PATCH request will only be considered if the resource has not been modified since the provided date. This parameter will be ignored if an 'If-Match' parameter is also provided.
          */
-        ifUnmodifiedSince?: string;
+        'If-Unmodified-Since'?: string;
     };
     path: {
         /**

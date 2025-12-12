@@ -2,21 +2,19 @@
 
 import type { ChangesetsCreateResponse, ChangesetsDeleteResponse, ChangesetsGetResponse, ChangesetsListResponse, ChangesetsPutResponse, ContentCopyResponse, ContentCreateResponse, ContentCreateVersionResponse, ContentDeleteLocaleResponse, ContentDeleteResponse, ContentDeleteVersionResponse, ContentGetMetadataResponse, ContentGetPathResponse, ContentGetVersionResponse, ContentListAllVersionsResponse, ContentListAssetsResponse, ContentListItemsResponse, ContentListVersionsResponse, ContentPatchMetadataResponse, ContentPatchVersionResponse, ContentTypesCreateResponse, ContentTypesDeleteResponse, ContentTypesGetResponse, ContentTypesListResponse, ContentTypesPatchResponse, ContentTypesPutResponse, ContentUndeleteResponse, DisplayTemplatesCreateResponse, DisplayTemplatesDeleteResponse, DisplayTemplatesGetResponse, DisplayTemplatesListResponse, DisplayTemplatesPatchResponse, DisplayTemplatesPutResponse } from './types.gen';
 
-const changesetPageSchemaResponseTransformer = (data: any) => {
-    if (data.items) {
-        data.items = data.items.map((item: any) => {
-            return changesetSchemaResponseTransformer(item);
-        });
-    }
-    return data;
-};
-
 const changesetSchemaResponseTransformer = (data: any) => {
     if (data.created) {
         data.created = new Date(data.created);
     }
     if (data.lastModified) {
         data.lastModified = new Date(data.lastModified);
+    }
+    return data;
+};
+
+const changesetPageSchemaResponseTransformer = (data: any) => {
+    if (data.items) {
+        data.items = data.items.map((item: any) => changesetSchemaResponseTransformer(item));
     }
     return data;
 };
@@ -46,18 +44,6 @@ export const changesetsPutResponseTransformer = async (data: any): Promise<Chang
     return data;
 };
 
-const contentItemWithContentTypesSchemaResponseTransformer = (data: any) => {
-    if (data.contentTypes) {
-        data.contentTypes = data.contentTypes.map((item: any) => {
-            return contentTypeSchemaResponseTransformer(item);
-        });
-    }
-    if (data.item) {
-        data.item = contentItemSchemaResponseTransformer(data.item);
-    }
-    return data;
-};
-
 const contentTypeSchemaResponseTransformer = (data: any) => {
     if (data.created) {
         data.created = new Date(data.created);
@@ -80,6 +66,16 @@ const contentItemSchemaResponseTransformer = (data: any) => {
     }
     if (data.lastModified) {
         data.lastModified = new Date(data.lastModified);
+    }
+    return data;
+};
+
+const contentItemWithContentTypesSchemaResponseTransformer = (data: any) => {
+    if (data.contentTypes) {
+        data.contentTypes = data.contentTypes.map((item: any) => contentTypeSchemaResponseTransformer(item));
+    }
+    if (data.item) {
+        data.item = contentItemSchemaResponseTransformer(data.item);
     }
     return data;
 };
@@ -113,9 +109,7 @@ export const contentPatchMetadataResponseTransformer = async (data: any): Promis
 
 const contentMetadataPageSchemaResponseTransformer = (data: any) => {
     if (data.items) {
-        data.items = data.items.map((item: any) => {
-            return contentMetadataSchemaResponseTransformer(item);
-        });
+        data.items = data.items.map((item: any) => contentMetadataSchemaResponseTransformer(item));
     }
     return data;
 };
@@ -147,14 +141,10 @@ export const contentUndeleteResponseTransformer = async (data: any): Promise<Con
 
 const contentItemListWithContentTypesSchemaResponseTransformer = (data: any) => {
     if (data.contentTypes) {
-        data.contentTypes = data.contentTypes.map((item: any) => {
-            return contentTypeSchemaResponseTransformer(item);
-        });
+        data.contentTypes = data.contentTypes.map((item: any) => contentTypeSchemaResponseTransformer(item));
     }
     if (data.items) {
-        data.items = data.items.map((item: any) => {
-            return contentItemSchemaResponseTransformer(item);
-        });
+        data.items = data.items.map((item: any) => contentItemSchemaResponseTransformer(item));
     }
     return data;
 };
@@ -196,9 +186,7 @@ export const contentPatchVersionResponseTransformer = async (data: any): Promise
 
 const contentTypePageSchemaResponseTransformer = (data: any) => {
     if (data.items) {
-        data.items = data.items.map((item: any) => {
-            return contentTypeSchemaResponseTransformer(item);
-        });
+        data.items = data.items.map((item: any) => contentTypeSchemaResponseTransformer(item));
     }
     return data;
 };
@@ -233,21 +221,19 @@ export const contentTypesPutResponseTransformer = async (data: any): Promise<Con
     return data;
 };
 
-const displayTemplatePageSchemaResponseTransformer = (data: any) => {
-    if (data.items) {
-        data.items = data.items.map((item: any) => {
-            return displayTemplateSchemaResponseTransformer(item);
-        });
-    }
-    return data;
-};
-
 const displayTemplateSchemaResponseTransformer = (data: any) => {
     if (data.created) {
         data.created = new Date(data.created);
     }
     if (data.lastModified) {
         data.lastModified = new Date(data.lastModified);
+    }
+    return data;
+};
+
+const displayTemplatePageSchemaResponseTransformer = (data: any) => {
+    if (data.items) {
+        data.items = data.items.map((item: any) => displayTemplateSchemaResponseTransformer(item));
     }
     return data;
 };

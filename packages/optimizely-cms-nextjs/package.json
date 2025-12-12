@@ -47,13 +47,13 @@
     "@remkoj/optimizely-cms-react": "workspace:6.0.0-pre14",
     "@remkoj/optimizely-graph-client": "workspace:6.0.0-pre14",
     "@types/negotiator": "^0.6.4",
-    "@types/node": "^22.19.1",
-    "@types/react": "^19.2.4",
+    "@types/node": "^22.19.2",
+    "@types/react": "^19.2.7",
     "@types/react-dom": "19.2.3",
-    "next": "^16.0.2",
+    "next": "^16.0.10",
     "prop-types": "^15.8.1",
-    "react": "^19.2.0",
-    "react-dom": "^19.2.0",
+    "react": "^19.2.3",
+    "react-dom": "^19.2.3",
     "scheduler": "^0.27.0",
     "typescript": "^5.9.3"
   },
@@ -64,7 +64,7 @@
     "deepmerge": "^4.3.1",
     "entities": "^7.0.0",
     "graphql": "^16.12.0",
-    "graphql-request": "^7.3.3",
+    "graphql-request": "^7.3.5",
     "negotiator": "^1.0.0"
   },
   "peerDependencies": {
