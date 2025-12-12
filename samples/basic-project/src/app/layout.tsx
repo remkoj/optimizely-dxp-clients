@@ -1,5 +1,7 @@
 import type { Metadata } from 'next'
-import { CmsContent } from '@remkoj/optimizely-cms-react/rsc'
+import { CmsContent, ServerContext } from '@remkoj/optimizely-cms-react/rsc'
+import { client } from '@/api'
+import { factory } from '@/components/factory'
 
 import './globals.css'
 
@@ -13,11 +15,16 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode
 }>) {
+  const ctx: ServerContext = new ServerContext({
+    factory,
+    client,
+    mode: 'public'
+  });
   return (
     <html lang="en">
       <body>
-        <header style={{ borderBottom: "2px solid #000" }}>
-          <CmsContent contentLink={{key: "7e9d73a0f7bd416aab12ef33d1d239c6"}} variant='header' />
+        <header style={{ borderBottom: "2px solid #000", minHeight: "25px", marginBottom: '5px' }}>
+          {/*<CmsContent contentLink={{key: "7e9d73a0f7bd416aab12ef33d1d239c6"}} variant='header' ctx={ctx} />*/}
         </header>
         <main>{children}</main>
       </body>
