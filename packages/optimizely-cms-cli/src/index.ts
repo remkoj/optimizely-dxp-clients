@@ -1,11 +1,12 @@
-import { prepare } from './env.js'
+import { prepare, getProjectDir } from './env.js'
 import createOptiCmsApp from './app.js'
 import { commands } from './commands/index.js'
 import APP from './version.json' with { type: "json" }
 
 async function main() {
     const envFiles = prepare()
-    const app = createOptiCmsApp(APP.name, APP.version, undefined, envFiles)
+    const projectDir = getProjectDir()
+    const app = createOptiCmsApp(APP.name, APP.version, undefined, envFiles, projectDir)
     app.command(commands)
     try {
         await app.parse(process.argv.slice(2))

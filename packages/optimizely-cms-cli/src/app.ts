@@ -3,10 +3,11 @@ import yargs from 'yargs'
 import { type OptiCmsApp } from './types.js'
 import chalk from 'chalk';
 
-export function createOptiCmsApp(scriptName: string, version?: string, epilogue?: string, envFiles?: Array<string>) : OptiCmsApp
+export function createOptiCmsApp(scriptName: string, version?: string, epilogue?: string, envFiles?: Array<string>, projectDir?: string) : OptiCmsApp
 {
     let configError = ""
     let config : CmsIntegrationApiOptions;
+    const defaultPath = projectDir ?? process.cwd();
     try {
         config = getCmsIntegrationApiConfigFromEnvironment()
     } catch (e) {
@@ -19,7 +20,7 @@ export function createOptiCmsApp(scriptName: string, version?: string, epilogue?
         .scriptName(scriptName)
         .version(version ?? "development")
         .usage('$0 <cmd> [args]')
-        .option("path", { alias: "p", description: "Application root folder", string: true, type: "string", demandOption: false, default: process.cwd() })
+        .option("path", { alias: "p", description: "Application root folder", string: true, type: "string", demandOption: false, default: defaultPath })
         .option("components", { alias: "c", description: "Path to components folder", string: true, type: "string", demandOption: false, default: "./src/components/cms" })
         .option("cms_url", { alias: "cu", description: "Optimizely CMS URL", string: true, type: "string", demandOption: isDemanded(config.base), default: config.base, coerce: (val) => new URL(val)})
         .option("client_id", { alias: "ci", description: "API Client ID", string: true, type: "string", demandOption: isDemanded(config.clientId), default: config.clientId })

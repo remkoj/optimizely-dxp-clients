@@ -34,7 +34,7 @@ export function createTypeFolders(contentTypes: Array<IntegrationApi.ContentType
         const baseType = contentType.baseType ?? 'default'
 
         // Create the type folder
-        const typePath = path.join(basePath, baseType, contentType.key)
+        const typePath = path.join(basePath, baseType, contentType.key.replaceAll(':','_'))
         if (!fs.existsSync(typePath)) {
             fs.mkdirSync(typePath, { recursive: true })
             if (debug)

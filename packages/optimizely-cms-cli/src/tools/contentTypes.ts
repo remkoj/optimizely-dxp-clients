@@ -63,6 +63,8 @@ export async function getContentTypes(client: CmsApiClient, args: ArgumentsCamel
   }
 
   const validBaseTypes = getEnumOptions(IntegrationApi.ContentBaseType).map(x => x.toLowerCase())
+  if (cfg.debug)
+    process.stdout.write(`Allowing base types: ${ validBaseTypes.join(', ')}\n`);
   const allContentTypes = all ?
     // If we're returning all content types, including non-supported base types, make sure the base type is always set
     results.map(contentType => {
@@ -71,15 +73,21 @@ export async function getContentTypes(client: CmsApiClient, args: ArgumentsCamel
         baseType: contentType.baseType ?? 'default'
       } as IntegrationApi.ContentType
     }) :
-    // Otherwise filter out any non supported content base type
+    // Otherwise filter out any non supported content base type and types that include a ':'
     results.filter(contentType => {
       const baseType = (contentType.baseType ?? 'default').toLowerCase()
-      const isValid = validBaseTypes.includes(baseType)
+      const isValid = validBaseTypes.includes(baseType) && !contentType.key.includes(':')
       if (!isValid && cfg.debug)
         process.stdout.write(chalk.gray(`${figures.arrowRight} Removing ${contentType.key} as it has an unsupported base type: ${baseType}\n`))
       return isValid
     })
   const contentTypes = allContentTypes.filter(data => {
+    // Remove all intermediary/supporting types
+    if (!all && data.key.includes(':')) {
+      if (cfg.debug)
+        process.stdout.write(chalk.gray(`${figures.arrowRight} Skipping Content-Type ${data.key} due to it containing a ':'\n`))
+      return false;
+    }
 
     // Remove items based upon filters
     const keepType = (!excludeBaseTypes.includes(data.baseType)) &&

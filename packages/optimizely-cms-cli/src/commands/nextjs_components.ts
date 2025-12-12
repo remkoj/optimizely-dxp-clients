@@ -56,7 +56,7 @@ function createComponent(contentType: IntegrationApi.ContentType, typePath: stri
   // Get type information & short-hands
   const displayTemplate = getDisplayTemplateInfo(contentType, typePath)
   const baseDisplayTemplate = getBaseTypeTemplateInfo(contentType, typePath)
-  const varName = `${contentType.key}${ucFirst(contentType.baseType ?? 'part')}`
+  const varName = `${contentType.key.replaceAll(':','_')}${ucFirst(contentType.baseType ?? 'part')}`
   const tplFn = Templates[contentType.baseType] ?? Templates['default']
 
   if (!tplFn) {
@@ -111,13 +111,14 @@ import { ${baseDisplayTemplate} } from "../styles/displayTemplates";` : ''}
  * ${contentType.displayName}
  * ${contentType.description}
  */
-export const ${varName} : CmsComponent<${contentType.key}DataFragment${(displayTemplate || baseDisplayTemplate) ? ', ' + [displayTemplate, baseDisplayTemplate].filter(x => x).join(" | ") : ''}> = ({ data${(displayTemplate || baseDisplayTemplate) ? ', layoutProps' : ''}, editProps }) => {
+export const ${varName} : CmsComponent<${contentType.key}DataFragment${(displayTemplate || baseDisplayTemplate) ? ', ' + [displayTemplate, baseDisplayTemplate].filter(x => x).join(" | ") : ''}> = ({ data${(displayTemplate || baseDisplayTemplate) ? ', layoutProps' : ''}, editProps${ contentType.baseType == 'section' ? ', children': ''} }) => {
     const componentName = '${contentType.displayName}'
     const componentInfo = '${contentType.description?.replaceAll("'", "\\'") ?? ''}'
     return <CmsEditable className="w-full border-y border-y-solid border-y-slate-900 py-2 mb-4" {...editProps}>
         <div className="font-bold italic">{ componentName }</div>
         <div>{ componentInfo }</div>
-        { Object.getOwnPropertyNames(data).length > 0 && <pre className="w-full overflow-x-hidden font-mono text-sm bg-slate-200 p-2 rounded-sm border border-solid border-slate-900 text-slate-900">{ JSON.stringify(data, undefined, 4) }</pre> }
+        { Object.getOwnPropertyNames(data).length > 0 && <pre className="w-full overflow-x-hidden font-mono text-sm bg-slate-200 p-2 rounded-sm border border-solid border-slate-900 text-slate-900">{ JSON.stringify(data, undefined, 4) }</pre> }${ contentType.baseType == 'section' ? `
+        { children }` : '' }
     </CmsEditable>
 }
 ${varName}.displayName = "${contentType.displayName} (${ucFirst(contentType.baseType)}/${contentType.key})"
@@ -157,7 +158,7 @@ export default ${varName}`,
   // Template for all experience component types
   experience: (contentType, varName, displayTemplate) => `import { type OptimizelyNextPage as CmsComponent } from "@remkoj/optimizely-cms-nextjs";
 import { getFragmentData } from "@/gql/fragment-masking";
-import { ExperienceDataFragmentDoc, CompositionDataFragmentDoc, ${contentType.key}DataFragmentDoc, type ${contentType.key}DataFragment } from "@/gql/graphql";
+import { ExperienceDataFragmentDoc, ${contentType.key}DataFragmentDoc, type ${contentType.key}DataFragment } from "@/gql/graphql";
 import { OptimizelyComposition, isNode, CmsEditable } from "@remkoj/optimizely-cms-react/rsc";${displayTemplate ? `
 import { ${displayTemplate} } from "./displayTemplates";` : ''}
 import { getSdk } from "@/gql"
@@ -167,9 +168,9 @@ import { getSdk } from "@/gql"
  * ${contentType.description}
  */
 export const ${varName} : CmsComponent<${contentType.key}DataFragment${displayTemplate ? ', ' + displayTemplate : ''}> = ({ data${displayTemplate ? ', layoutProps' : ''}, ctx }) => {
-    const composition = getFragmentData(CompositionDataFragmentDoc, getFragmentData(ExperienceDataFragmentDoc, data)?.composition)
+    const composition = getFragmentData(ExperienceDataFragmentDoc, data)?.composition
     return <CmsEditable as="div" className="mx-auto px-2 container" cmsFieldName="unstructuredData" ctx={ctx}>
-        { composition && isNode(composition) && <OptimizelyComposition node={composition} /> }
+        { composition && isNode(composition) && <OptimizelyComposition node={composition} ctx={ctx} /> }
     </CmsEditable>
 }
 ${varName}.displayName = "${contentType.displayName} (${ucFirst(contentType.baseType)}/${contentType.key})"
