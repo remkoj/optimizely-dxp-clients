@@ -26,8 +26,8 @@ export const TypesPullCommand : TypesPullModule = {
         const { contentTypes } = await getContentTypes(client, args)
 
         const updatedTypes : Array<string> = contentTypes.map(contentType => {
-            const typePath = path.join(basePath, contentType.baseType, contentType.key.replaceAll(':','_'))
-            const typeFile = path.join(typePath, `${ contentType.key.replaceAll(':','_') }.opti-type.json`)
+            const typePath = path.join(basePath, contentType.baseType, contentType.key.split(':').pop())
+            const typeFile = path.join(typePath, `${ contentType.key.split(':').pop() }.opti-type.json`)
 
             if (!fs.existsSync(typePath))
                 fs.mkdirSync(typePath, { recursive: true })

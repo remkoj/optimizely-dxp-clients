@@ -56,7 +56,7 @@ function createComponent(contentType: IntegrationApi.ContentType, typePath: stri
   // Get type information & short-hands
   const displayTemplate = getDisplayTemplateInfo(contentType, typePath)
   const baseDisplayTemplate = getBaseTypeTemplateInfo(contentType, typePath)
-  const varName = `${contentType.key.replaceAll(':','_')}${ucFirst(contentType.baseType ?? 'part')}`
+  const varName = `${contentType.key.split(':').pop()}${ucFirst(contentType.baseType ?? 'part')}`
   const tplFn = Templates[contentType.baseType] ?? Templates['default']
 
   if (!tplFn) {
@@ -103,7 +103,7 @@ const Templates: Record<'default', TemplateFn> & Partial<Record<IntegrationApi.C
 {
   // Default Template for all components without specifics
   default: (contentType, varName, displayTemplate, baseDisplayTemplate) => `import { CmsEditable, type CmsComponent } from "@remkoj/optimizely-cms-react/rsc";
-import { ${contentType.key}DataFragmentDoc, type ${contentType.key}DataFragment } from "@/gql/graphql";${displayTemplate ? `
+import { ${contentType.key.split(':').pop()}DataFragmentDoc, type ${contentType.key.split(':').pop()}DataFragment } from "@/gql/graphql";${displayTemplate ? `
 import { ${displayTemplate} } from "./displayTemplates";` : ''}${baseDisplayTemplate ? `
 import { ${baseDisplayTemplate} } from "../styles/displayTemplates";` : ''}
 
@@ -111,7 +111,7 @@ import { ${baseDisplayTemplate} } from "../styles/displayTemplates";` : ''}
  * ${contentType.displayName}
  * ${contentType.description}
  */
-export const ${varName} : CmsComponent<${contentType.key}DataFragment${(displayTemplate || baseDisplayTemplate) ? ', ' + [displayTemplate, baseDisplayTemplate].filter(x => x).join(" | ") : ''}> = ({ data${(displayTemplate || baseDisplayTemplate) ? ', layoutProps' : ''}, editProps${ contentType.baseType == 'section' ? ', children': ''} }) => {
+export const ${varName} : CmsComponent<${contentType.key.split(':').pop()}DataFragment${(displayTemplate || baseDisplayTemplate) ? ', ' + [displayTemplate, baseDisplayTemplate].filter(x => x).join(" | ") : ''}> = ({ data${(displayTemplate || baseDisplayTemplate) ? ', layoutProps' : ''}, editProps${ contentType.baseType == 'section' ? ', children': ''} }) => {
     const componentName = '${contentType.displayName}'
     const componentInfo = '${contentType.description?.replaceAll("'", "\\'") ?? ''}'
     return <CmsEditable className="w-full border-y border-y-solid border-y-slate-900 py-2 mb-4" {...editProps}>
@@ -122,13 +122,13 @@ export const ${varName} : CmsComponent<${contentType.key}DataFragment${(displayT
     </CmsEditable>
 }
 ${varName}.displayName = "${contentType.displayName} (${ucFirst(contentType.baseType)}/${contentType.key})"
-${varName}.getDataFragment = () => ['${contentType.key}Data', ${contentType.key}DataFragmentDoc]
+${varName}.getDataFragment = () => ['${contentType.key.split(':').pop()}Data', ${contentType.key.split(':').pop()}DataFragmentDoc]
 
 export default ${varName}`,
 
   // Template for all page component types
   page: (contentType, varName, displayTemplate) => `import { type OptimizelyNextPage as CmsComponent } from "@remkoj/optimizely-cms-nextjs";
-import { ${contentType.key}DataFragmentDoc, type ${contentType.key}DataFragment } from "@/gql/graphql";${displayTemplate ? `
+import { ${contentType.key.split(':').pop()}DataFragmentDoc, type ${contentType.key.split(':').pop()}DataFragment } from "@/gql/graphql";${displayTemplate ? `
 import { ${displayTemplate} } from "./displayTemplates";` : ''}
 import { getSdk } from "@/gql"
 
@@ -136,7 +136,7 @@ import { getSdk } from "@/gql"
  * ${contentType.displayName}
  * ${contentType.description}
  */
-export const ${varName} : CmsComponent<${contentType.key}DataFragment${displayTemplate ? ', ' + displayTemplate : ''}> = ({ data${displayTemplate ? ', layoutProps' : ''} }) => {
+export const ${varName} : CmsComponent<${contentType.key.split(':').pop()}DataFragment${displayTemplate ? ', ' + displayTemplate : ''}> = ({ data${displayTemplate ? ', layoutProps' : ''} }) => {
     const componentName = '${contentType.displayName}'
     const componentInfo = '${contentType.description?.replaceAll("'", "\\'") ?? ''}'
     return <div className="mx-auto px-2 container">
@@ -146,7 +146,7 @@ export const ${varName} : CmsComponent<${contentType.key}DataFragment${displayTe
     </div>
 }
 ${varName}.displayName = "${contentType.displayName} (${ucFirst(contentType.baseType)}/${contentType.key})"
-${varName}.getDataFragment = () => ['${contentType.key}Data', ${contentType.key}DataFragmentDoc]
+${varName}.getDataFragment = () => ['${contentType.key.split(':').pop()}Data', ${contentType.key.split(':').pop()}DataFragmentDoc]
 ${varName}.getMetaData = async (contentLink, locale, client) => {
     const sdk = getSdk(client);
     // Add your metadata logic here
@@ -158,7 +158,7 @@ export default ${varName}`,
   // Template for all experience component types
   experience: (contentType, varName, displayTemplate) => `import { type OptimizelyNextPage as CmsComponent } from "@remkoj/optimizely-cms-nextjs";
 import { getFragmentData } from "@/gql/fragment-masking";
-import { ExperienceDataFragmentDoc, ${contentType.key}DataFragmentDoc, type ${contentType.key}DataFragment } from "@/gql/graphql";
+import { ExperienceDataFragmentDoc, ${contentType.key.split(':').pop()}DataFragmentDoc, type ${contentType.key.split(':').pop()}DataFragment } from "@/gql/graphql";
 import { OptimizelyComposition, isNode, CmsEditable } from "@remkoj/optimizely-cms-react/rsc";${displayTemplate ? `
 import { ${displayTemplate} } from "./displayTemplates";` : ''}
 import { getSdk } from "@/gql"
@@ -167,14 +167,14 @@ import { getSdk } from "@/gql"
  * ${contentType.displayName}
  * ${contentType.description}
  */
-export const ${varName} : CmsComponent<${contentType.key}DataFragment${displayTemplate ? ', ' + displayTemplate : ''}> = ({ data${displayTemplate ? ', layoutProps' : ''}, ctx }) => {
+export const ${varName} : CmsComponent<${contentType.key.split(':').pop()}DataFragment${displayTemplate ? ', ' + displayTemplate : ''}> = ({ data${displayTemplate ? ', layoutProps' : ''}, ctx }) => {
     const composition = getFragmentData(ExperienceDataFragmentDoc, data)?.composition
     return <CmsEditable as="div" className="mx-auto px-2 container" cmsFieldName="unstructuredData" ctx={ctx}>
         { composition && isNode(composition) && <OptimizelyComposition node={composition} ctx={ctx} /> }
     </CmsEditable>
 }
 ${varName}.displayName = "${contentType.displayName} (${ucFirst(contentType.baseType)}/${contentType.key})"
-${varName}.getDataFragment = () => ['${contentType.key}Data', ${contentType.key}DataFragmentDoc]
+${varName}.getDataFragment = () => ['${contentType.key.split(':').pop()}Data', ${contentType.key}DataFragmentDoc]
 ${varName}.getMetaData = async (contentLink, locale, client) => {
     const sdk = getSdk(client);
     // Add your metadata logic here
