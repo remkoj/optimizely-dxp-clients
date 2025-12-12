@@ -1,7 +1,6 @@
 import type { Metadata } from 'next'
-import { CmsContent, ServerContext } from '@remkoj/optimizely-cms-react/rsc'
-import { client } from '@/api'
-import { factory } from '@/components/factory'
+/*import { CmsContent } from '@remkoj/optimizely-cms-react/rsc'
+import { publishedContext as ctx } from '@/api'*/
 
 import './globals.css'
 
@@ -15,11 +14,6 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode
 }>) {
-  const ctx: ServerContext = new ServerContext({
-    factory,
-    client,
-    mode: 'public'
-  });
   return (
     <html lang="en">
       <body>
