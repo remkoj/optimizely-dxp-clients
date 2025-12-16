@@ -41,7 +41,7 @@
   "devDependencies": {
     "@remkoj/optimizely-graph-client": "workspace:6.0.0-pre14",
     "@tailwindcss/cli": "^4.1.18",
-    "@types/node": "^22.19.2",
+    "@types/node": "^22.19.3",
     "@types/react": "^19.2.7",
     "@types/react-dom": "19.2.3",
     "@types/uuid": "^11.0.0",
@@ -65,7 +65,7 @@
     "@headlessui/react": "^2.2.9",
     "@heroicons/react": "^2.2.0",
     "@remkoj/optimizely-graph-client": "6.0.0-pre14",
-    "swr": "^2.3.7",
+    "swr": "^2.3.8",
     "uuid": "^13.0.0"
   },
   "scripts": {

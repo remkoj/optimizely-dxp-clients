@@ -1,7 +1,5 @@
 import typescript from '@rollup/plugin-typescript';
 import json from '@rollup/plugin-json';
-import tsConfig from './tsconfig.json' with { type: "json" };
-import typescriptSdk from "typescript"
 import packageInfo from './package.json' with { type: "json"};
 
 function getExternals() {
@@ -21,11 +19,8 @@ export default {
   treeshake: "smallest",
   plugins: [
     typescript({
-      include: "{,**/}*.(cts|mts|ts|tsx|js|jsx)",
-      exclude: "src/**/*.json",
-      outputToFilesystem: true,
-      compilerOptions: tsConfig.compilerOptions,
-      typescript: typescriptSdk
+      filterRoot: import.meta.dirname,
+      outputToFilesystem: true
     }), 
     json({ 
       include: "src/**/*.json" 

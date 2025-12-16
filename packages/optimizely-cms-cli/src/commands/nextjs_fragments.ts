@@ -1,5 +1,4 @@
-import { IntegrationApi, OptiCmsVersion } from '@remkoj/optimizely-cms-api'
-import path from 'node:path'
+import { IntegrationApi } from '@remkoj/optimizely-cms-api'
 import fs from 'node:fs'
 import chalk from 'chalk'
 import figures from 'figures'
@@ -25,7 +24,7 @@ export const NextJsFragmentsCommand: NextJsModule<{ loadedContentTypes: GetConte
     // Start process
     process.stdout.write(chalk.yellowBright(`${figures.arrowRight} Generating GraphQL fragments\n`))
     const typeFolders = createdTypeFolders ?? createTypeFolders(contentTypes, basePath, debug)
-    const tracker: GraphQLGen.PropertyCollisionTracker = new Map()
+    const tracker = new Map<string,string>()
     const dependencies: string[] = []
     const updatedTypes = contentTypes.map(contentType => {
       const { written, propertyTypes } = createComponentFragments(contentType, getTypeFolder(typeFolders, contentType.key), force, debug, tracker)
@@ -67,7 +66,7 @@ export function createComponentFragments(
   typePath: TypeFolderList[number],
   force: boolean,
   debug: boolean,
-  propertyTracker: GraphQLGen.PropertyCollisionTracker = new Map()
+  propertyTracker: Map<string,string> = new Map<string,string>()
 ): {
   written: boolean
   propertyTypes: string[]

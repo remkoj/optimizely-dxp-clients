@@ -4,6 +4,76 @@ import * as QueryGen from '../contenttype-loader'
 import * as OptiCMS from '../cms'
 import type { PresetOptions } from '../types'
 import { getAllFragments, getAllTypeNames } from "./tools"
+import { isNotNullOrUndefined } from '../utils'
+
+export async function getComponentDocuments(loader: string = '@remkoj/optimizely-graph-functions/contenttype-loader')
+{
+  const componentTypes = OptiCMS.getAllContentTypes(undefined, 100, (ct) => {
+    return ct.key && ct.source !== 'graph' ? true : false
+  });
+
+  const documents: Types.CustomDocumentLoader[] = [];
+  for await (const componentType of componentTypes) {
+    const vLoc = QueryGen.buildVirtualLocation(componentType, { type: 'fragment', forProperty: false })
+    if (vLoc) {
+      // Inject virtual location
+      const def: Types.CustomDocumentLoader = {}
+      def[vLoc] = { loader };
+      documents.push(def);
+
+      // Get properties
+      const propertyComponentTypeNames = QueryGen.getReferencedPropertyComponents(componentType);
+      const propertyComponentTypes = (await Promise.all(propertyComponentTypeNames.map(componentTypeName => OptiCMS.getContentType(componentTypeName)))).filter(isNotNullOrUndefined)
+      for (const propertyComponentType of propertyComponentTypes) {
+        const propVLoc = QueryGen.buildVirtualLocation(propertyComponentType, { type: 'fragment', forProperty: true })
+        if (propVLoc && !documents.some(x => typeof x === 'object' && x[propVLoc])) {
+          // Inject virtual location
+          const def: Types.CustomDocumentLoader = {}
+          def[propVLoc] = { loader };
+          documents.push(def);
+        }
+      }
+    }
+  }
+  return documents;
+}
+
+export async function getInjectionTargetDocuments(loader: string = '@remkoj/optimizely-graph-functions/contenttype-loader')
+{
+  const documents: Types.CustomDocumentLoader[] = [];
+  for (const injectionTarget of QueryGen.getInjectionTargets()) {
+    const vLoc = QueryGen.buildVirtualLocation(injectionTarget)
+    const def: Types.CustomDocumentLoader = {}
+    def[vLoc] = { loader };
+    documents.push(def);
+  }
+  return documents
+}
+
+export async function injectInjectionTargets(files: Types.DocumentFile[], options: Types.PresetFnArgs<PresetOptions>): Promise<Types.DocumentFile[]> {
+  const allFragments = getAllFragments(files)
+  const addedFiles: Types.DocumentFile[] = []
+
+  if (options.presetConfig.verbose)
+    console.log(`✨ [Optimizely] Generating injection target fragments`)
+
+  for (const injectionTarget of QueryGen.getInjectionTargets()) {
+    if (!allFragments.some(x => x.fragmentName === injectionTarget)) {
+      const vLoc = `opti-cms:/injectiontarget/${injectionTarget}`
+      const rawSDL = `fragment ${injectionTarget} on _IContent { ...IContentData }`
+      if (options.presetConfig.verbose)
+        console.log(`    - Generated fragment ${injectionTarget} at ${vLoc}`)
+      addedFiles.push({
+        rawSDL,
+        document: parse(rawSDL),
+        location: vLoc,
+        hash: vLoc
+      })
+    }
+  }
+
+  return [...files, ...addedFiles]
+}
 
 /**
  * Check all fragments within the project and ensure that there's at least a fragment for every
@@ -20,31 +90,13 @@ export async function injectComponentDocuments(files: Types.DocumentFile[], opti
   const addedFiles: Types.DocumentFile[] = []
 
   if (options.presetConfig.verbose)
-    console.log(`✨ [Optimizely] Generating injection target fragments that have not been defined by the implementation`)
-
-  for (const injectionTarget of Object.getOwnPropertyNames(QueryGen.ContentTypeTarget)) {
-    if (!allFragments.some(x => x.fragmentName === injectionTarget)) {
-      const vLoc = `opti-cms:/injectiontarget/${injectionTarget}`
-      const rawSDL = `fragment ${injectionTarget} on _IContent { ...IContentData }`
-      if (options.presetConfig.verbose)
-        console.log(`    - Generated fragment ${injectionTarget} at ${vLoc}`)
-      addedFiles.push({
-        rawSDL,
-        document: parse(rawSDL),
-        location: vLoc,
-        hash: vLoc
-      })
-    }
-  }
-
-  if (options.presetConfig.verbose)
     console.log(`✨ [Optimizely] Generating component fragments that have not been defined by the implementation`)
 
   const allContentTypes = OptiCMS.getAllContentTypes(options.presetConfig.cmsClient, 100, (ct) => {
     return ct.key && ct.source !== 'graph' ? true : false
   });
 
-  const propTracker: QueryGen.PropertyCollisionTracker = new Map()
+  const propTracker: Map<string,string> = new Map()
 
   for await (const contentType of allContentTypes) {
     // Skip over content types without a key

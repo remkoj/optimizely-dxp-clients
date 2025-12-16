@@ -5,6 +5,26 @@ import * as OptiCMS from '../cms'
 import type { PresetOptions } from '../types'
 import { getAllQueries, getAllTypeNames } from './tools'
 
+export async function getSectionDocuments(loader: string = '@remkoj/optimizely-graph-functions/contenttype-loader')
+{
+  const sectionTypes = OptiCMS.getAllContentTypes(undefined, 100, (ct) => {
+    if (ct.source == "graph")
+      return false;
+    return ["_section"].includes((ct.baseType || "").toLowerCase());
+  });
+
+  const documents: Types.CustomDocumentLoader[] = [];
+  for await (const sectionType of sectionTypes) {
+    const vLoc = QueryGen.buildVirtualLocation(sectionType, { type: 'query' })
+    if (vLoc) {
+      const def: Types.CustomDocumentLoader = {}
+      def[vLoc] = { loader }
+      documents.push(def);
+    }
+  }
+  return documents;
+}
+
 export async function injectSectionQueries(files: Types.DocumentFile[], options: Types.PresetFnArgs<PresetOptions>): Promise<Types.DocumentFile[]> {
   if (options.presetConfig.verbose)
     console.log(`✨ [Optimizely] Generating page queries that have not been defined by the implementation`)

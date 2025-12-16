@@ -12,13 +12,15 @@ import {
   cleanFragments,
   normalizeFragmentNames,
   normalizeQueryNames,
-  injectComponentDocuments,
-  injectSectionQueries,
-  injectPageQueries,
+  getComponentDocuments,
+  getSectionDocuments,
+  getPageDocuments,
+  getInjectionTargetDocuments,
   performInjections,
   cleanFragmentSpreads,
   handleDependDirective,
 } from './transform'
+
 import type { PresetOptions } from './types'
 
 export type { PresetOptions } from './types'
@@ -61,8 +63,40 @@ export const preset: Types.OutputPreset<PresetOptions> = {
       return loader
     })
 
+    // Get page documents
+    const [
+      pageDocuments,
+      sectionDocuments,
+      componentDocuments,
+      injectionTargets
+    ] = await Promise.all([
+      getPageDocuments(),
+      getSectionDocuments(),
+      getComponentDocuments(),
+      getInjectionTargetDocuments()
+    ]);
+
     // Create a new, extended, array
-    return [...documents, ...CmsDocLoaders]
+    const allDocuments = [
+      ...CmsDocLoaders, 
+      ...pageDocuments,
+      ...sectionDocuments,
+      ...componentDocuments,
+      ...injectionTargets
+    ]
+
+    function compareOperationDocuments( a: Types.OperationDocument, b: Types.OperationDocument ) {
+      const aPath = typeof(a) === 'string' ? a : Object.getOwnPropertyNames(a).join(';');
+      const bPath = typeof(b) === 'string' ? b : Object.getOwnPropertyNames(b).join(';');
+      if ( aPath < bPath ) return -1;
+      if ( aPath > bPath ) return 1;
+      return 0;
+    }
+
+    allDocuments.sort(compareOperationDocuments)
+
+    //console.log(allDocuments);
+    return [...documents, ...allDocuments]
   },
 
   buildGeneratesSection: async (options) => {
@@ -94,54 +128,15 @@ export const preset: Types.OutputPreset<PresetOptions> = {
       }
     }
 
-    function injectOptimizelyTransforms(
-      currentTransforms?: Types.ConfiguredDocumentTransform<object>[]
-    ): Types.ConfiguredDocumentTransform<object>[] {
-      const dt = currentTransforms ?? []
-      dt.unshift({
-        name: 'Optimizely.CMS',
-        transformObject: {
-          transform: (tOpts) =>
-            executeDocumentTransforms(
-              tOpts.documents,
-              [
-                cleanFragments, // Remove fragments that target non-existing types
-                normalizeFragmentNames, // Allow overriding of built-in fragments
-                normalizeQueryNames, // Allow overriding of built-in queries
-                injectComponentDocuments, // Inject fragments to fetch component data
-                injectPageQueries, // Inject queries to fetch page/experience data
-                injectSectionQueries, // Inject queries to fetch section data
-                performInjections, // Run injections of component fragments adjacent to placeholder fragments
-                cleanFragmentSpreads, // Remove all fragment spreads that target a fragment that does not exist in the documents
-                handleDependDirective, // Remove the "item" field in queries and fragments from the "ContentReference" type if it's not in the schema
-              ],
-              options
-            ),
-        },
-      })
-      return dt
-    }
-    function hasOptimizelyTransform(currentTransforms?: Types.ConfiguredDocumentTransform<object>[])
-    {
-      if (!Array.isArray(currentTransforms)) return false
-      return currentTransforms.some(x => x.name === 'Optimizely.CMS')
-    }
-
     // Apply all changes to the document set, prior to validating it. They're executed in the order of the array
-    options.documentTransforms = injectOptimizelyTransforms(
-      options.documentTransforms
-    )
-
+    options.documentTransforms = injectOptimizelyTransforms(options.documentTransforms, options)
     options.documents = await executeDocumentTransforms(options.documents, [
-      cleanFragments,           // Remove fragments that target non-existing types
-      normalizeFragmentNames,   // Allow overriding of built-in fragments
-      normalizeQueryNames,      // Allow overriding of built-in queries
-      injectComponentDocuments, // Inject fragments to fetch component data
-      injectPageQueries,        // Inject queries to fetch page/experience data
-      injectSectionQueries,     // Inject queries to fetch section data
-      performInjections,        // Run injections of component fragments adjacent to placeholder fragments
-      cleanFragmentSpreads,     // Remove all fragment spreads that target a fragment that does not exist in the documents
-      handleDependDirective     // Remove the "item" field in queries and fragments from the "ContentReference" type if it's not in the schema
+      cleanFragments,         // Remove fragments that target non-existing types
+      normalizeFragmentNames, // Allow overriding of built-in fragments
+      normalizeQueryNames,    // Allow overriding of built-in queries
+      performInjections,      // Run injections of component fragments adjacent to placeholder fragments
+      cleanFragmentSpreads,   // Remove all fragment spreads that target a fragment that does not exist in the documents
+      handleDependDirective,  // Remove the "item" field in queries and fragments from the "ContentReference" type if it's not in the schema
     ], options);
 
     // Build the preset files
@@ -225,8 +220,8 @@ export const preset: Types.OutputPreset<PresetOptions> = {
         })
       }
 
-      if (!hasOptimizelyTransform(fileConfig.documentTransforms))
-        fileConfig.documentTransforms = injectOptimizelyTransforms(fileConfig.documentTransforms)
+      //if (!hasOptimizelyTransform(fileConfig.documentTransforms))
+      //  fileConfig.documentTransforms = injectOptimizelyTransforms(fileConfig.documentTransforms)
 
       // Optimizely Graph supports recursive queries to allow fetching
       // data as created in the CMS. This can cause issues when using
@@ -249,6 +244,40 @@ export const preset: Types.OutputPreset<PresetOptions> = {
 
     return section
   },
+}
+
+
+function injectOptimizelyTransforms(
+  currentTransforms: Types.ConfiguredDocumentTransform<object>[] | undefined,
+  options: Types.PresetFnArgs<PresetOptions, {
+    [key: string]: any;
+  }>
+): Types.ConfiguredDocumentTransform<object>[] {
+  const dt = currentTransforms ?? []
+  dt.unshift({
+    name: 'Optimizely.CMS',
+    transformObject: {
+      transform: (tOpts) =>
+        executeDocumentTransforms(
+          tOpts.documents,
+          [
+            cleanFragments,         // Remove fragments that target non-existing types
+            normalizeFragmentNames, // Allow overriding of built-in fragments
+            normalizeQueryNames,    // Allow overriding of built-in queries
+            performInjections,      // Run injections of component fragments adjacent to placeholder fragments
+            cleanFragmentSpreads,   // Remove all fragment spreads that target a fragment that does not exist in the documents
+            handleDependDirective,  // Remove the "item" field in queries and fragments from the "ContentReference" type if it's not in the schema
+          ],
+          options
+        ),
+    },
+  })
+  return dt
+}
+function hasOptimizelyTransform(currentTransforms?: Types.ConfiguredDocumentTransform<object>[])
+{
+  if (!Array.isArray(currentTransforms)) return false
+  return currentTransforms.some(x => x.name === 'Optimizely.CMS')
 }
 
 export default preset

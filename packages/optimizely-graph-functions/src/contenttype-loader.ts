@@ -3,10 +3,19 @@ import { parse } from 'graphql'
 import * as OptiCMS from './cms'
 import type { IntegrationApi } from '@remkoj/optimizely-cms-api'
 import { ucFirst, isNonEmptyString } from './tools'
+import { parseVirtualLocation } from './virtual-location'
+import path from 'node:path'
+import fs from 'node:fs'
+
+/**
+ * Export the virtual location builder and injection targets
+ */
+export { parseVirtualLocation, buildVirtualLocation, ContentTypeTarget as InjectionTargets, getInjectionTargets } from './virtual-location'
 
 export * as Tools from './tools'
 
 type LoaderConfig = {
+  cwd: string,
   pluginContext?: {
     [key: string]: any;
   }
@@ -14,23 +23,146 @@ type LoaderConfig = {
 
 type LoaderFunction = (documentUri: string, config: LoaderConfig) => Promise<Types.DocumentFile | undefined | void>
 
+
+
+/**
+ * Tracker for all properties, indexed by property name, then type
+ * for a list of all ContentTypes. This uses a lock file to remember
+ * any collision resolutions done by the code generation.
+ */
+export class PropertyCollisionTracker extends Map<string,string> {
+  private _cwd: string | undefined;
+  private _ready: boolean = false;
+
+  public set cwd(newValue: string | undefined)
+  {
+    if (newValue !== this._cwd) {
+      this._cwd = newValue
+      super.clear();
+      if (newValue === undefined) {
+        this._ready = false;
+        return
+      }
+      
+      this.readLock();
+      this._ready = true;
+    }
+  }
+
+  public get cwd(): string | undefined {
+    return this._cwd
+  }
+
+  public constructor(cwd?: string)
+  {
+    super()
+    this.cwd = cwd
+  }
+
+  private ensureReady()
+  {
+    if (!this._ready)
+      throw new Error("NOT READY")
+  }
+
+  private updateLock()
+  {
+    if (!this._cwd)
+      throw new Error("Working directory unknown");
+    const file = path.join(this._cwd, 'opti-props.lock')
+    const data: {propertyName: string, propertyType: string}[] = [];
+    for ( const [entryKey,entryValue] of super.entries())
+      data.push({ propertyName: entryKey, propertyType: entryValue })
+    const raw = JSON.stringify(data, undefined, '  ')
+    fs.writeFileSync(file, raw, { encoding: 'utf-8' })
+  }
+
+  private readLock()
+  {
+    try {
+      if (!this._cwd)
+        throw new Error("Working directory unknown");
+      const file = path.join(this._cwd, 'opti-props.lock')
+      const raw = fs.readFileSync(file, { encoding: 'utf-8'})
+      const data = raw.length > 0 ? JSON.parse(raw) : []
+      if (!Array.isArray(data))
+        throw new Error(`Invalid lock file at ${ file }`)
+      for (const itm of data.filter(this.isMapData))
+        super.set(itm.propertyName, itm.propertyType)
+    } catch (e: any) {
+      if (e.code === 'ENOENT')
+        return []
+      throw e
+    }
+  }
+
+  private isMapData(v: any): v is {propertyName: string, propertyType: string}
+  {
+    if (typeof(v)!=='object' || v === null)
+      return false;
+    return typeof(v.propertyName) === 'string' && typeof(v.propertyType) ==='string'
+  }
+
+  has(key: string): boolean {
+    this.ensureReady()
+    return super.has(key)
+  }
+
+  set(key: string, value: string): this {
+    this.ensureReady()
+    const cv = super.get(key)
+    if (cv !== value) {
+      super.set(key,value)
+      this.updateLock()
+    }
+    return this
+  }
+
+  get(key: string): string | undefined {
+    this.ensureReady()
+    return super.get(key)
+  }
+
+  delete(key: string): boolean {
+    this.ensureReady()
+    const res = super.delete(key)
+    this.updateLock()
+    return res
+  }
+
+  clear(): void {
+    this.ensureReady()
+    super.clear()
+    this.updateLock()
+  }
+}
+
+const collisionTracker: PropertyCollisionTracker = new PropertyCollisionTracker()
+
 const ContentTypeLoader: LoaderFunction = async (documentUri, config) => {
+  collisionTracker.cwd = config.cwd;
+
   const parsedData = parseVirtualLocation(documentUri)
   if (!parsedData)
     return undefined
 
   const { type: loaderType, contentTypeBase: baseType, contentTypeKey, forProperty: isForProperty } = parsedData
 
-  const contentType = await OptiCMS.getContentType(contentTypeKey)
-  if (!contentType)
-    throw new Error(`ContentType with key ${baseType} cannot be loaded`)
+  let rawSDL: string|undefined;
+  if (loaderType === "target") {
+    rawSDL = buildInjectionTarget(`_${ contentTypeKey }`)
+  } else {
+    const contentType = await OptiCMS.getContentType(contentTypeKey)
+    if (!contentType)
+      throw new Error(`ContentType with key ${baseType} cannot be loaded`)
 
-  if (contentType.baseType !== baseType)
-    throw new Error(`ContentType base types don't match, expected ${baseType} but received ${contentType.baseType}`)
+    if (contentType.baseType !== baseType)
+      throw new Error(`ContentType base types don't match, expected ${baseType} but received ${contentType.baseType}`)
 
-  const rawSDL = loaderType === 'fragment' ?
-    buildFragment(contentType, (name) => '_' + name, isForProperty) :
-    buildGetQuery(contentType)
+    rawSDL = loaderType === 'fragment' ?
+      buildFragment(contentType, (name) => '_' + name, isForProperty, collisionTracker) :
+      buildGetQuery(contentType, (name) => '_' + name, collisionTracker)
+  }
 
   return rawSDL ? {
     document: parse(rawSDL),
@@ -38,40 +170,6 @@ const ContentTypeLoader: LoaderFunction = async (documentUri, config) => {
     hash: documentUri,
     rawSDL
   } : undefined
-}
-
-export type VirtualLocationOptions = { forProperty: boolean, type: 'fragment' | 'query' }
-export type VirtualLocationData = { contentTypeBase: string, contentTypeKey: string, injectionTargets: Array<string> } & VirtualLocationOptions
-const DefaultVirtualLocationOptions: VirtualLocationOptions = { forProperty: false, type: 'fragment' }
-
-export function parseVirtualLocation(virtualPath: string): VirtualLocationData | undefined {
-  if (!virtualPath.startsWith('opti-cms:/'))
-    return undefined
-  const virtualURL = new URL(virtualPath)
-  const [basePath, baseType, ctKey, ...targets] = virtualURL.pathname.split('/').filter(isNonEmptyString);
-
-  // Validate the basepath
-  if (!['contenttypes', 'contentquery'].includes(basePath))
-    return undefined
-
-  const type = basePath == "contenttypes" ? 'fragment' : 'query';
-  const forProperty = baseType.endsWith('.property')
-  const contentTypeBase = parseBaseType(forProperty ? baseType.substring(0, baseType.length - 9) : baseType);
-  const contentTypeKey = ctKey;
-  const injectionTargets = targets
-  return { type, contentTypeBase, contentTypeKey, injectionTargets, forProperty }
-}
-
-export function buildVirtualLocation(contentType: IntegrationApi.ContentType, options?: Partial<VirtualLocationOptions>) {
-  const { forProperty, type } = { ...DefaultVirtualLocationOptions, ...options };
-  const basePath = type == 'fragment' ? 'contenttypes' : 'contentquery'
-  const ctKey = contentType.key
-  if (!ctKey || contentType.source === 'graph' || contentType.source === '_system')
-    return undefined
-  const baseType = extractBaseType(contentType)
-  return forProperty ?
-    `opti-cms:/${basePath}/${baseType}.property/${ctKey}` :
-    `opti-cms:/${basePath}/${baseType}/${ctKey}/${getContentTypeTargets(contentType).join('/')}`
 }
 
 /**
@@ -86,75 +184,11 @@ export function getGraphPropertyType(contentType: IntegrationApi.ContentType): s
   return (contentType.key ? contentType.key : "_IContent") + "Property"
 }
 
-export function parseBaseType(storedBaseType: string) {
-  switch (storedBaseType.toLowerCase()) {
-    case 'section':
-    case 'media':
-    case 'component':
-    case 'experience':
-    case 'page':
-      return '_' + storedBaseType;
-    default:
-      return storedBaseType;
-  }
+export function buildInjectionTarget(injectionTarget: string) {
+  return `fragment ${injectionTarget} on _IContent { ...IContentData }`
 }
 
-export function extractBaseType(contentType: IntegrationApi.ContentType, fallback: string = 'cms'): string {
-  return (contentType.baseType ?? fallback).replace(/^_+/, '')
-}
-
-export enum ContentTypeTarget {
-  'SectionData' = 'SectionData',
-  'PageData' = 'PageData',
-  'MediaData' = 'MediaData',
-  'ComponentData' = 'ComponentData',
-  'ElementData' = 'ElementData',
-  'SectionElementData' = 'SectionElementData',
-  'FormElementData' = 'FormElementData',
-  'BlockData' = 'BlockData',
-}
-
-export function getContentTypeTargets(contentType: IntegrationApi.ContentType): ContentTypeTarget[] {
-  if (!contentType.key || contentType.key.startsWith('graph:'))
-    return [];
-
-  const injections: ContentTypeTarget[] = [];
-  const baseType = extractBaseType(contentType)
-  switch (baseType) {
-    case 'section':
-      injections.push(ContentTypeTarget.SectionData)
-      break;
-    case 'page':
-    case 'experience':
-      injections.push(ContentTypeTarget.PageData)
-      break;
-    case 'media':
-    case 'video':
-    case 'image':
-      injections.push(ContentTypeTarget.MediaData)
-      break;
-    case 'component': {
-      const usage = contentType.compositionBehaviors ?? []
-      const source = contentType.source
-
-      if (!(source === '_server' && usage.length === 1 && usage[0] === 'formsElementEnabled'))
-        injections.push(ContentTypeTarget.ComponentData)
-
-      if (usage.includes('elementEnabled')) injections.push(ContentTypeTarget.ElementData)
-      if (usage.includes('sectionEnabled')) injections.push(ContentTypeTarget.SectionElementData)
-      if (usage.includes('formsElementEnabled')) injections.push(ContentTypeTarget.FormElementData)
-
-      break;
-    }
-    default:
-      injections.push(ContentTypeTarget.BlockData)
-      break;
-  }
-
-  return injections
-}
-
-export function buildGetQuery(contentType: IntegrationApi.ContentType, queryName?: string | ((defaultName: string) => string), propertyTracker: PropertyCollisionTracker = new Map()) {
+export function buildGetQuery(contentType: IntegrationApi.ContentType, queryName?: string | ((defaultName: string) => string), propertyTracker: Map<string,string> = new Map()) {
   // Prepare
   if (!contentType.key || contentType.source === 'graph')
     return ''
@@ -225,13 +259,7 @@ export function getSlugFromKey(key: string) {
   return newKey
 }
 
-/**
- * Tracker for all properties, indexed by property name, then type
- * for a list of all ContentTypes.
- */
-export type PropertyCollisionTracker = Map<string, string>
-
-export function buildFragment(contentType: IntegrationApi.ContentType, fragmentName?: string | ((defaultName: string) => string), forProperty: boolean = false, propertyTracker: PropertyCollisionTracker = new Map()) {
+export function buildFragment(contentType: IntegrationApi.ContentType, fragmentName?: string | ((defaultName: string) => string), forProperty: boolean = false, propertyTracker: Map<string,string> = new Map()) {
   if (!contentType.key)
     return ''
   const graphType = forProperty ? getGraphPropertyType(contentType) : getGraphType(contentType)
@@ -257,7 +285,7 @@ export function buildFragment(contentType: IntegrationApi.ContentType, fragmentN
 }`
 }
 
-export function buildProperty(propertyName: string, propertyConfig?: IntegrationApi.ContentTypeProperty, propertyTracker: PropertyCollisionTracker = new Map()): string | null {
+export function buildProperty(propertyName: string, propertyConfig?: IntegrationApi.ContentTypeProperty, propertyTracker: Map<string,string> = new Map()): string | null {
   const propertyItemConfig = propertyConfig?.type === 'array' ? propertyConfig?.items ?? propertyConfig : propertyConfig
   const propertyType = propertyItemConfig?.type ?? 'any'
 
@@ -266,6 +294,7 @@ export function buildProperty(propertyName: string, propertyConfig?: Integration
   if (propertyTracker.has(propertyName)) {
     if (propertyTracker.get(propertyName) != propertyType) {
       outputPropertyName = `${propertyName}${ucFirst(propertyType)}: ${propertyName}`
+      propertyTracker.set(`${propertyName}${ucFirst(propertyType)}`, propertyType)
     }
   } else {
     propertyTracker.set(propertyName, propertyType)

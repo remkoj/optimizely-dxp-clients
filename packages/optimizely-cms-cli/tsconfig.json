@@ -8,7 +8,7 @@
 
         "sourceMap": true,
         "sourceRoot": "./src",
-        "outDir": "./dist",
+        "outDir": "./dist/raw",
         "rootDir": "./src",
         "incremental": true,
         "composite": false,

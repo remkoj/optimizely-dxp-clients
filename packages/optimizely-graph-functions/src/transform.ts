@@ -4,12 +4,12 @@ import type { FragmentDefinitionNode, SelectionNode, SelectionSetNode, ASTNode, 
 import { Kind, visit } from 'graphql'
 
 export { cleanFragments } from "./_transform/cleanFragments"
-export { injectComponentDocuments } from "./_transform/injectComponentDocuments"
+export { injectComponentDocuments, getComponentDocuments, injectInjectionTargets, getInjectionTargetDocuments } from "./_transform/injectComponentDocuments"
 export { normalizeFragmentNames } from "./_transform/normalizeFragmentNames"
 export { normalizeQueryNames } from "./_transform/normalizeQueryNames"
 export { pickTransformOptions } from "./_transform/options"
-export { injectPageQueries } from "./_transform/injectPageQueries"
-export { injectSectionQueries } from "./_transform/injectSectionQueries"
+export { injectPageQueries, getPageDocuments } from "./_transform/injectPageQueries"
+export { injectSectionQueries, getSectionDocuments } from "./_transform/injectSectionQueries"
 export { performInjections } from "./_transform/performInjections"
 export { cleanFragmentSpreads } from "./_transform/cleanSpreads"
 export { handleDependDirective } from "./_transform/handleDependDirective"
