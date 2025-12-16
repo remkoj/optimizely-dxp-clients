@@ -84,13 +84,13 @@ export function normalizeAndPrefixContentType(contentType: Array<string | null> 
  */
 export function resolveComponentType(factory: ComponentFactory, type: ComponentTypeHandle, variants: Array<string> = []) : ReturnType<ComponentFactory['resolve']>
 {
+    const newType = Array.isArray(type) ? [...type].pop() ?? type : type
     for (const variant of variants) {
-        const variantType = Array.isArray(type) ? [ ...type, variant ] : type + TYPE_MERGE_SYMBOL + variant
-        const variantComponent = factory.resolve(variantType)
+        const variantComponent = factory.resolve(newType, variant)
         if (variantComponent)
             return variantComponent
     }
-    return factory.resolve(type)
+    return factory.resolve(newType)
 }
 
 export function isCmsComponentWithDataQuery<T = DocumentNode>(toTest?: BaseCmsComponent<T>) : toTest is CmsComponentWithQuery<T>

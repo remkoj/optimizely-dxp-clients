@@ -215,7 +215,7 @@ function processName(input: string) : string {
 
 function generateFactory(factoryInfo: ComponentFactoryDefintion, factoryKey: string) : string
 {
-    const needsPrefixFunction = factoryInfo.subfactories.length > 0
+    const needsPrefixFunction = false; //factoryInfo.subfactories.length > 0
     const factoryName = factoryKey.split(path.sep).map(processName).join("") + "Factory"
     const components = factoryInfo.entries
     const subFactories = factoryInfo.subfactories
@@ -234,7 +234,7 @@ ${ needsPrefixFunction ? `// Prefix entries - if needed
 ${ subFactories.map(subFactory => Array.isArray(subFactory.prefix) ?
     subFactory.prefix.map(z => `prefixDictionaryEntries(${ subFactory.variable }, "${ z }");`).join("\n") :
     `prefixDictionaryEntries(${ subFactory.variable }, "${ subFactory.prefix }");`
-).join("\n")}
+).join("\n") }
 
 ` : ''}// Build dictionary
 export const ${factoryName} : ComponentTypeDictionary = [

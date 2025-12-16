@@ -51,31 +51,28 @@ export class DefaultComponentFactory implements ComponentFactory {
     type: ComponentTypeHandle,
     component: ComponentType,
     useSuspense: boolean = false,
-    loader?: ComponentType
+    loader?: ComponentType,
+    variant: string = 'default'
   ): void {
-    const registryKey = this.processComponentTypeHandle(type)
+    const registryKey = this.processComponentTypeHandle(type, variant)
     if (this.dbg)
       console.log(`➕ [DefaultComponentFactory] Registering ${registryKey}`)
-    this.registry.set(registryKey, { type, component, useSuspense, loader })
+    this.registry.set(registryKey, { type: registryKey, component, useSuspense, loader, variant })
   }
 
   public registerAll(components: ComponentTypeDictionary): void {
-    components.forEach((c) => {
-      const registryKey = this.processComponentTypeHandle(c.type)
-      if (this.dbg)
-        console.log(`➕ [DefaultComponentFactory] Registering ${registryKey}`)
-      this.registry.set(registryKey, c)
-    })
+    components.forEach(c => this.register(c.type, c.component, c.useSuspense, c.loader, c.variant))
   }
 
-  public has(type: ComponentTypeHandle): boolean {
-    const registryKey = this.processComponentTypeHandle(type)
-    //if (this.dbg) console.log(`🔎 [DefaultComponentFactory] Checking for ${ registryKey }`)
+  public has(type: ComponentTypeHandle, variant: string = 'default'): boolean {
+    const registryKey = this.processComponentTypeHandle(type, variant)
+    if (this.dbg) 
+      console.log(`🔎 [DefaultComponentFactory] Checking for ${ registryKey } - ${ this.registry.has(registryKey) ? 'YES' : 'NO'}`)
     return this.registry.has(registryKey)
   }
 
-  public resolve(type: ComponentTypeHandle): undefined | ComponentType {
-    const registryKey = this.processComponentTypeHandle(type)
+  public resolve(type: ComponentTypeHandle, variant: string = 'default'): undefined | ComponentType {
+    const registryKey = this.processComponentTypeHandle(type, variant)
 
     const entry = this.registry.get(registryKey)
     if (!entry) {
@@ -113,14 +110,29 @@ export class DefaultComponentFactory implements ComponentFactory {
     return this.registry.delete(registryKey)
   }
 
-  private processComponentTypeHandle(handle: ComponentTypeHandle): string {
-    let handleToProcess = typeof handle === 'string' ? handle.split(MERGE_SYMBOL) : handle;
-    if (Array.isArray(handleToProcess) && handleToProcess.every((s) => typeof s === 'string'))
-      return handleToProcess
-        .map((s) => s === '' ? EmptyComponentHandle : (s.startsWith('_') ? s.substring(1) : s)) // Remove all leading underscores
-        .filter((s) => !this.ignoredContracts.includes(s.toLocaleLowerCase())) // Remove from ignored contracts
-        .filter((s, i, a) => i === 0 || a[i-1] !== s ) // Remove duplicates (i.e. Component/Component/...)
-        .join(MERGE_SYMBOL)
+  /**
+   * Process the component variant handle into 
+   * 
+   * @param handle 
+   * @param variant 
+   * @returns 
+   */
+  private processComponentTypeHandle(handle: ComponentTypeHandle, variant?: string): string {
+    let handleToProcess = typeof handle === 'string' ? handle.split(MERGE_SYMBOL) : [...handle];
+    if (Array.isArray(handleToProcess) && handleToProcess.every((s) => typeof s === 'string')) {
+      
+      const offset = (
+        ['component','page','experience'].includes(handleToProcess.at(handleToProcess.length - 3)?.toLowerCase()??'') && 
+        !['row','column','section','experience','media'].includes(handleToProcess.at(handleToProcess.length - 2)?.toLowerCase()??'')
+      ) ? 1 : 0
+
+      const typeName = handleToProcess.at(handleToProcess.length - (1+offset))
+      const prefix = handleToProcess.at(handleToProcess.length - (2+offset)) === 'RichText' ? 'RichText/' : '' 
+      const actualVariant = offset > 0 ? handleToProcess.at(handleToProcess.length - 1) ?? variant ?? 'default' : variant ?? 'default'
+      const newHandle = prefix + typeName + '/' + actualVariant
+
+      return newHandle
+    }
     throw new Error(`Invalid component type handle: ${typeof handle}`)
   }
 }
