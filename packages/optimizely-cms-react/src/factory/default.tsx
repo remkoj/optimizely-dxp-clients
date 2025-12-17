@@ -76,9 +76,10 @@ export class DefaultComponentFactory implements ComponentFactory {
 
     const entry = this.registry.get(registryKey)
     if (!entry) {
-      console.warn(
-        `❌ [DefaultComponentFactory] Unable to resolve ${registryKey}, this will prevent the item from rendering`
-      )
+      if (this.dbg)
+        console.warn(
+          `❌ [DefaultComponentFactory] Unable to resolve ${registryKey}, this will prevent the item from rendering`
+        )
       return undefined // The key is not registered in the factory
     }
     if (entry.useSuspense != true) return entry.component // There's no suspense, so we're using the component directly

@@ -12,8 +12,8 @@
   "scripts": {
     "update-cfg": "node ./script/update-cfg.js",
     "prepare": "node ./script/update-cfg.js && rollup -c",
-    "watch": "node ./script/update-cfg.js rollup -c ./rollup.config.js -w",
-    "compile": "node ./script/update-cfg.js rollup -c ./rollup.config.js",
+    "watch": "node ./script/update-cfg.js && rollup -c ./rollup.config.js -w",
+    "compile": "node ./script/update-cfg.js && rollup -c ./rollup.config.js",
     "opti-cms": "node ./dist/index.js"
   },
   "devDependencies": {

@@ -82,15 +82,21 @@ export function normalizeAndPrefixContentType(contentType: Array<string | null> 
  * @param       variants    The variants to test
  * @returns     The resolved Component or undefined if not found
  */
-export function resolveComponentType(factory: ComponentFactory, type: ComponentTypeHandle, variants: Array<string> = []) : ReturnType<ComponentFactory['resolve']>
+export function resolveComponentType(factory: ComponentFactory, type: ContentType, variants: Array<string> = []) : ReturnType<ComponentFactory['resolve']>
 {
-    const newType = Array.isArray(type) ? [...type].pop() ?? type : type
+  const contentTypeKey = type.at(0);
+  if (contentTypeKey) {
     for (const variant of variants) {
-        const variantComponent = factory.resolve(newType, variant)
-        if (variantComponent)
-            return variantComponent
+      const variantComponent = factory.resolve(contentTypeKey, variant)
+      if (variantComponent)
+        return variantComponent
     }
-    return factory.resolve(newType)
+    const mainComponent = factory.resolve(contentTypeKey)
+    if (mainComponent) 
+      return mainComponent;
+  }
+  console.warn(`❌ [Component Resolution] Unable to resolve ${ contentTypeKey } in any of the requested variants: ${ [...variants, 'default'].join(', ') }`)
+  return undefined
 }
 
 export function isCmsComponentWithDataQuery<T = DocumentNode>(toTest?: BaseCmsComponent<T>) : toTest is CmsComponentWithQuery<T>
