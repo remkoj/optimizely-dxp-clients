@@ -131,6 +131,7 @@ export const NextJsFactoryCommand : NextJsModule = {
                   import: './'+childFactoryKey,
                   variable: processName(childFactoryKey) + 'Factory'
                 })
+                componentFactoryDefintions.set(parentFactoryKey, parentFactory)
               }
             })
         })

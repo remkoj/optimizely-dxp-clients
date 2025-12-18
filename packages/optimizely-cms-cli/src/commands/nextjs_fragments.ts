@@ -136,9 +136,10 @@ export function renderProperties(contentType: IntegrationApi.ContentType, forCms
           const typeData = typeProps[propKey] as IntegrationApi.ListProperty
           switch (typeData.items.type) {
             case IntegrationApi.PropertyDataType.INTEGER:
-              if (typeData.format == 'categorization')
-                fragmentFields.push(`${propName} { Id, Name, Description }`)
-              else
+              if (typeData.format == 'categorization') {
+                //fragmentFields.push(`${propName} { Id, Name, Description }`)
+                console.warn(chalk.redBright(`❗ Property ${ propName } is a 'categorization', this is not supported. If you need to use this property, add it manually into the generated files`));
+              } else
                 fragmentFields.push(propName)
               break
             case IntegrationApi.PropertyDataType.STRING:
@@ -200,7 +201,7 @@ export function renderProperties(contentType: IntegrationApi.ContentType, forCms
         break;
       case IntegrationApi.PropertyDataType.COMPONENT: {
         const componentType = (typeProps[propKey] as IntegrationApi.ComponentProperty).contentType.split(':').pop()
-        if (forCms12 && componentType == "link") {
+        if (componentType == "link") {
           fragmentFields.push(`${propName} { ...LinkItemData }`)
         } else {
           const componentFragmentName = forCms12 ? contentType.key + componentType : componentType + 'Property'
@@ -210,7 +211,10 @@ export function renderProperties(contentType: IntegrationApi.ContentType, forCms
         break;
       }
       case IntegrationApi.PropertyDataType.BINARY:
-        fragmentFields.push(`${propName} { ...BinaryData }`)
+        fragmentFields.push(propName)
+        break;
+      case IntegrationApi.PropertyDataType.CONTENT:
+        fragmentFields.push(`${propName} { ...${forCms12 ? 'PageIContentListItem' : 'BlockData'} }`)
         break;
       default:
         fragmentFields.push(propName)

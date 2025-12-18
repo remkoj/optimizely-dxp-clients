@@ -738,12 +738,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@formatjs/intl-localematcher@npm:^0.6.2":
-  version: 0.6.2
-  resolution: "@formatjs/intl-localematcher@npm:0.6.2"
+"@formatjs/intl-localematcher@npm:^0.7.2":
+  version: 0.7.2
+  resolution: "@formatjs/intl-localematcher@npm:0.7.2"
   dependencies:
     tslib: "npm:^2.8.0"
-  checksum: 10c0/22a17a4c67160b6c9f52667914acfb7b79cd6d80630d4ac6d4599ce447cb89d2a64f7d58fa35c3145ddb37fef893f0a45b9a55e663a4eb1f2ae8b10a89fac235
+  checksum: 10c0/1f1573e70958378b538368c05ca97479e820ac18e7f87a54a10f7fb2393c49577d6ee68ff7b0e5b95c6151528af2e241c3c62f0f8037d6b7c08db32e09b18f9c
   languageName: node
   linkType: hard
 
@@ -1654,7 +1654,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@remkoj/optimizely-cms-nextjs@workspace:packages/optimizely-cms-nextjs"
   dependencies:
-    "@formatjs/intl-localematcher": "npm:^0.6.2"
+    "@formatjs/intl-localematcher": "npm:^0.7.2"
     "@remkoj/optimizely-cms-react": "workspace:5.2.0"
     "@remkoj/optimizely-graph-client": "workspace:5.2.0"
     "@types/negotiator": "npm:^0.6.4"
@@ -1669,7 +1669,7 @@ __metadata:
     prop-types: "npm:^15.8.1"
     react: "npm:^18.3.1"
     react-dom: "npm:^18.3.1"
-    scheduler: "npm:^0.26.0"
+    scheduler: "npm:^0.27.0"
     typescript: "npm:^5.9.3"
   peerDependencies:
     "@remkoj/optimizely-cms-react": ^5.2.0
@@ -1698,7 +1698,7 @@ __metadata:
     prop-types: "npm:^15.8.1"
     react: "npm:^18.3.1"
     react-dom: "npm:^18.3.1"
-    scheduler: "npm:^0.26.0"
+    scheduler: "npm:^0.27.0"
     typescript: "npm:^5.9.3"
   peerDependencies:
     "@remkoj/optimizely-graph-client": ^5
@@ -1753,7 +1753,7 @@ __metadata:
     graphql-request: "npm:^6.1.0"
     openapi-typescript-codegen: "npm:^0.29.0"
     prop-types: "npm:^15.8.1"
-    scheduler: "npm:^0.26.0"
+    scheduler: "npm:^0.27.0"
     typescript: "npm:^5.9.3"
     uuid: "npm:^11.1.0"
   peerDependencies:
@@ -1806,7 +1806,7 @@ __metadata:
     prop-types: "npm:^15.8.1"
     react: "npm:^18.3.1"
     react-dom: "npm:^18.3.1"
-    scheduler: "npm:^0.26.0"
+    scheduler: "npm:^0.27.0"
     swr: "npm:^2.3.8"
     tailwindcss: "npm:^3.4.19"
     typescript: "npm:^5.9.3"
@@ -5147,10 +5147,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"scheduler@npm:^0.26.0":
-  version: 0.26.0
-  resolution: "scheduler@npm:0.26.0"
-  checksum: 10c0/5b8d5bfddaae3513410eda54f2268e98a376a429931921a81b5c3a2873aab7ca4d775a8caac5498f8cbc7d0daeab947cf923dbd8e215d61671f9f4e392d34356
+"scheduler@npm:^0.27.0":
+  version: 0.27.0
+  resolution: "scheduler@npm:0.27.0"
+  checksum: 10c0/4f03048cb05a3c8fddc45813052251eca00688f413a3cee236d984a161da28db28ba71bd11e7a3dd02f7af84ab28d39fb311431d3b3772fed557945beb00c452
   languageName: node
   linkType: hard
 
