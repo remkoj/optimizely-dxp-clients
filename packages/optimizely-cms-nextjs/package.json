@@ -58,7 +58,7 @@
     "typescript": "^5.9.3"
   },
   "dependencies": {
-    "@formatjs/intl-localematcher": "^0.7.1",
+    "@formatjs/intl-localematcher": "^0.7.2",
     "@remkoj/optimizely-cms-react": "6.0.0-pre14",
     "@remkoj/optimizely-graph-client": "6.0.0-pre14",
     "deepmerge": "^4.3.1",
