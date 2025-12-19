@@ -4,8 +4,8 @@ import { commands } from './commands/index.js'
 import APP from './version.json' with { type: "json" }
 
 async function main() {
-    const envFiles = prepare()
     const projectDir = getProjectDir()
+    const envFiles = prepare(projectDir)
     const app = createOptiCmsApp(APP.name, APP.version, undefined, envFiles, projectDir)
     app.command(commands)
     try {
