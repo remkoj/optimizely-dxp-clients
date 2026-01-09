@@ -9,7 +9,7 @@ export function getProjectDir() : string
   let testPath = process.cwd();
   let hasPackageJson = false;
   do {
-    hasPackageJson = fs.statSync('/'+path.join(testPath, 'package.json'), {throwIfNoEntry: false})?.isFile() ?? false;
+    hasPackageJson = fs.statSync(path.join(testPath, 'package.json'), {throwIfNoEntry: false})?.isFile() ?? false;
     if (!hasPackageJson)
       testPath = path.normalize(path.join(testPath,'..'));
   } while (!hasPackageJson && testPath.length > 2);

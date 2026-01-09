@@ -57,12 +57,12 @@ export function OptimizelyComposition({
   const [contentLink, contentTypes, nodeId, fragmentData, layoutProps] =
     nodePropsFactory(node)
   const firstExistingType = contentTypes
-    .map((ct) => factory.has([...ct].reverse()))
+    .map((ct) => factory.has(Array.isArray(ct) ? [...ct].reverse() : ct))
     .indexOf(true)
   const contentType = contentTypes[firstExistingType]
   if (!contentType)
     throw new Error(
-      `🟡 [VisualBuilder] [OptimizelyComposition] The factory must have a definition for one of these types: ${contentTypes.map((x) => x.join('/')).join(', ')}`
+      `🟡 [VisualBuilder] [OptimizelyComposition] The factory must have a definition for one of these types: ${contentTypes.map((x) => Array.isArray(x) ? x.join('/') : x).join(', ')}`
     )
 
   return (

@@ -1,7 +1,7 @@
 {
   "name": "@remkoj/optimizely-graph-client",
   "license": "Apache-2.0",
-  "version": "5.1.7",
+  "version": "5.2.0",
   "repository": "https://github.com/remkoj/optimizely-dxp-clients.git",
   "author": "Remko Jantzen <693172+remkoj@users.noreply.github.com>",
   "homepage": "https://github.com/remkoj/optimizely-dxp-clients",
@@ -51,13 +51,13 @@
   },
   "devDependencies": {
     "@types/crypto-js": "^4.2.2",
-    "@types/node": "^22.16.5",
-    "graphql": "^16.11.0",
+    "@types/node": "^22.19.3",
+    "graphql": "^16.12.0",
     "graphql-request": "^6.1.0",
     "openapi-typescript-codegen": "^0.29.0",
     "prop-types": "^15.8.1",
-    "scheduler": "^0.26.0",
-    "typescript": "^5.8.3"
+    "scheduler": "^0.27.0",
+    "typescript": "^5.9.3"
   },
   "dependencies": {
     "crypto-js": "^4.2.0",
@@ -67,11 +67,12 @@
     "graphql-request": "^6"
   },
   "scripts": {
+    "update-cfg": "node ./scripts/update-cfg.js",
     "clean": "tsc --build --clean",
-    "compile-ts": "tsc --build",
-    "prepare": "tsc --build",
-    "watch": "yarn tsc --watch",
-    "recompile": "tsc --build --clean && tsc --build --force",
+    "compile-ts": "node ./scripts/update-cfg.js && tsc --build",
+    "prepare": "node ./scripts/update-cfg.js && tsc --build",
+    "watch": "node ./scripts/update-cfg.js && yarn tsc --watch",
+    "recompile": "node ./scripts/update-cfg.js && tsc --build --clean && tsc --build --force",
     "generate": "openapi --input https://cg.optimizely.com/app/swagger/swagger.json --output ./src/admin-api/client --name OptimizelyGraphAdminApi && node ./scripts/update-imports.cjs"
   }
 }

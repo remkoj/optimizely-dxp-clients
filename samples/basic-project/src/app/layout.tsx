@@ -1,6 +1,6 @@
 import type { Metadata } from 'next'
-/*import { CmsContent } from '@remkoj/optimizely-cms-react/rsc'
-import { publishedContext as ctx } from '@/api'*/
+import { CmsContent } from '@remkoj/optimizely-cms-react/rsc'
+import { publishedContext as ctx } from '@/api'
 
 import './globals.css'
 
@@ -18,7 +18,7 @@ export default function RootLayout({
     <html lang="en">
       <body>
         <header style={{ borderBottom: "2px solid #000", minHeight: "25px", marginBottom: '5px' }}>
-          {/*<CmsContent contentLink={{key: "7e9d73a0f7bd416aab12ef33d1d239c6"}} variant='header' ctx={ctx} />*/}
+          <CmsContent contentLink={{key: "7950541bb6a84d049784cb6f46262c12"}} variant='header' ctx={ctx} />
         </header>
         <main>{children}</main>
       </body>

@@ -32,6 +32,11 @@ export type ComponentTypeDictionaryEntry = {
      * The component to use as "loading" state by the <Suspense />
      */
     loader?: ComponentType
+
+    /**
+     * Used for the loading of a specific variant of the component (for example 'header', 'footer', 'menu')
+     */
+    variant?: string
 }
 
 /**
@@ -54,7 +59,7 @@ export interface ComponentFactory {
      * @param       type            The component type to check for
      * @returns     Whether or not the type exists within the factory
      */
-    has(type: ComponentTypeHandle) : boolean
+    has(type: ComponentTypeHandle, variant?: string) : boolean
 
     /**
      * Register an individual component. When the component type has already
@@ -64,8 +69,9 @@ export interface ComponentFactory {
      * @param       component       The component to bind to the type
      * @param       useSuspense     If set to 'true' the registered component will be wrapped in <Suspense />
      * @param       loader          The component to use as "loading" state by the <Suspense />
+     * @param       variant         The specific variant of the component (for example 'header', 'footer', 'menu')
      */
-    register(type: ComponentTypeHandle, component: ComponentType, useSuspense?: boolean, loader?: ComponentType) : void
+    register(type: ComponentTypeHandle, component: ComponentType, useSuspense?: boolean, loader?: ComponentType, variant?: string) : void
 
     /**
      * Register all components provided through the dictionary. When the 
@@ -80,10 +86,11 @@ export interface ComponentFactory {
      * the implemenation supports it.
      * 
      * @param       type            The component type to remove
+     * @param       variant         The variant of the component type, will remove all if not specified
      * @returns     `true` If the component was not found or removed, `false`
      *              otherwise
      */
-    remove?: (type: ComponentTypeHandle) => boolean
+    remove?: (type: ComponentTypeHandle, variant?: string) => boolean
 
     /**
      * Resolve a component type
@@ -91,7 +98,7 @@ export interface ComponentFactory {
      * @param       type    The type to search the component for
      * @returns     The component that was resolved for the provided type
      */
-    resolve(type: ComponentTypeHandle) : ComponentType | undefined
+    resolve(type: ComponentTypeHandle, variant?: string) : ComponentType | undefined
 
     /**
      * Retrieve the registered components as a dictionary that can be used to
