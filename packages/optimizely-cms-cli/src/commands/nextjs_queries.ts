@@ -7,13 +7,8 @@ import figures from 'figures'
 import { parseArgs } from '../tools/parseArgs.js'
 import { createCmsClient } from '../tools/cmsClient.js'
 import { getContentTypes, contentTypesBuilder, ContentTypesArgsDefaults, type GetContentTypesResult } from '../tools/contentTypes.js'
-import { type NextJsModule, createTypeFolders, getTypeFolder, type TypeFolderList } from './_nextjs_base.js'
+import { type NextJsModule, createTypeFolders, getTypeFolder, getGeneratedProps, writeGeneratedProps, type GeneratedPropsArray, type TypeFolderList } from './_nextjs_base.js'
 import { renderProperties, createInitialFragment } from './nextjs_fragments.js'
-
-/**
- * Keep track of all generated properties
- */
-let generatedProps: Array<{ propType: string, propName: string }> = []
 
 export const NextJsQueriesCommand: NextJsModule<{ loadedContentTypes: GetContentTypesResult, createdTypeFolders: TypeFolderList }> = {
   command: "nextjs:queries",
@@ -24,19 +19,19 @@ export const NextJsQueriesCommand: NextJsModule<{ loadedContentTypes: GetContent
     return updatedArgs
   },
   handler: async (args, opts) => {
-    generatedProps = []
     // Prepare
     const { loadedContentTypes, createdTypeFolders } = opts || {}
-    const { components: basePath, _config: { debug }, force } = parseArgs(args)
+    const { components: basePath, _config: { debug }, force, path: appPath } = parseArgs(args)
     const client = createCmsClient(args)
     const { contentTypes, all: allContentTypes } = loadedContentTypes ?? await getContentTypes(client, args)
+    const generatedProps = getGeneratedProps(appPath);
 
     // Start process
     process.stdout.write(chalk.yellowBright(`${figures.arrowRight} Generating GraphQL fragments for ${contentTypes.map(x => x.key).join(', ')}\n`))
     const typeFolders = createdTypeFolders ?? createTypeFolders(contentTypes, basePath, debug)
     const updatedTypes = contentTypes.map(contentType => {
       const typePath = getTypeFolder(typeFolders, contentType.key)
-      return createGraphQueries(contentType, typePath, basePath, force, debug, allContentTypes, client.runtimeCmsVersion == OptiCmsVersion.CMS12)
+      return createGraphQueries(contentType, typePath, basePath, force, debug, allContentTypes, generatedProps, client.runtimeCmsVersion == OptiCmsVersion.CMS12)
     }).filter(x => x).flat()
 
     // Report outcome
@@ -46,13 +41,13 @@ export const NextJsQueriesCommand: NextJsModule<{ loadedContentTypes: GetContent
       process.stdout.write(chalk.yellowBright(`${figures.arrowRight} No GraphQL fragments created/updated\n`))
     if (!opts) process.stdout.write(chalk.green(chalk.bold(figures.tick + " Done")) + "\n")
 
-    generatedProps = []
+    writeGeneratedProps(appPath, generatedProps)
   }
 }
 
 export default NextJsQueriesCommand
 
-export function createGraphQueries(contentType: IntegrationApi.ContentType, typePath: string, basePath: string, force: boolean, debug: boolean, contentTypes: IntegrationApi.ContentType[], forCms12: boolean = false): Array<string> | undefined {
+export function createGraphQueries(contentType: IntegrationApi.ContentType, typePath: string, basePath: string, force: boolean, debug: boolean, contentTypes: IntegrationApi.ContentType[], generatedProps: GeneratedPropsArray = [], forCms12: boolean = false): Array<string> | undefined {
   const returnValue: Array<string> = []
   const baseQueryFile = path.join(typePath, `${contentType.key}.query.graphql`)
   if (fs.existsSync(baseQueryFile)) {
@@ -68,7 +63,7 @@ export function createGraphQueries(contentType: IntegrationApi.ContentType, type
     process.stdout.write(chalk.gray(`${figures.arrowRight} Creating ${contentType.displayName} (${contentType.key}) base fragment\n`))
   }
 
-  const { fragment, propertyTypes } = createInitialQuery(contentType, false, undefined, forCms12)
+  const { fragment, propertyTypes } = createInitialQuery(contentType, false, undefined, generatedProps, forCms12)
   fs.writeFileSync(baseQueryFile, fragment)
   returnValue.push(contentType.key)
 
@@ -91,7 +86,7 @@ export function createGraphQueries(contentType: IntegrationApi.ContentType, type
       if (!fs.existsSync(propertyFragmentFile) || force) {
         if (debug)
           process.stdout.write(chalk.gray(`${figures.arrowRight} Writing ${propContentType.displayName} (${propContentType.key}) property fragment\n`))
-        const propContentTypeInfo = createInitialFragment(propContentType, true, contentType, forCms12)
+        const propContentTypeInfo = createInitialFragment(propContentType, true, contentType, generatedProps, forCms12)
         fs.writeFileSync(propertyFragmentFile, propContentTypeInfo.fragment)
         returnValue.push(propContentType.key)
         if (Array.isArray(propContentTypeInfo.propertyTypes))
@@ -103,8 +98,8 @@ export function createGraphQueries(contentType: IntegrationApi.ContentType, type
   return returnValue.length > 0 ? returnValue : undefined
 }
 
-function createInitialQuery(contentType: IntegrationApi.ContentType, forProperty: boolean = false, forBaseType?: IntegrationApi.ContentType, forCms12: boolean = false): { fragment: string, propertyTypes: ([string, boolean][] | null) } {
-  const { fragmentFields, propertyTypes } = renderProperties(contentType, forCms12);
+function createInitialQuery(contentType: IntegrationApi.ContentType, forProperty: boolean = false, forBaseType?: IntegrationApi.ContentType, generatedProps: GeneratedPropsArray = [], forCms12: boolean = false): { fragment: string, propertyTypes: ([string, boolean][] | null) } {
+  const { fragmentFields, propertyTypes } = renderProperties(contentType, generatedProps, forCms12);
   const fragmentTarget = forProperty ? (forCms12 ? (forBaseType?.key ?? '') + contentType.key : contentType.key + 'Property') : contentType.key
   const tpl = `query get${fragmentTarget}Data($key: String!, $locale: [Locales], $version: String, $changeset: String, $variation: String) {
   data: ${fragmentTarget} (

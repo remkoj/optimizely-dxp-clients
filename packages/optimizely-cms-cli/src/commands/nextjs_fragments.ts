@@ -7,23 +7,22 @@ import figures from 'figures'
 import { parseArgs } from '../tools/parseArgs.js'
 import { createCmsClient } from '../tools/cmsClient.js'
 import { getContentTypes, type GetContentTypesResult } from '../tools/contentTypes.js'
-import { type NextJsModule, builder, createTypeFolders, getTypeFolder, type TypeFolderList } from './_nextjs_base.js'
-
-/**
- * Keep track of all generated properties
- */
-let generatedProps: Array<{ propType: string, propName: string }> = []
+import { type NextJsModule, builder, createTypeFolders, getTypeFolder, getGeneratedProps, writeGeneratedProps, type TypeFolderList, type GeneratedPropsArray } from './_nextjs_base.js'
 
 export const NextJsFragmentsCommand: NextJsModule<{ loadedContentTypes: GetContentTypesResult, createdTypeFolders: TypeFolderList }> = {
   command: "nextjs:fragments",
   describe: "Create the GrapQL Fragments for a Next.JS / Optimizely Graph structure",
   builder,
   handler: async (args, opts) => {
-    generatedProps = []
     // Prepare
     const { loadedContentTypes, createdTypeFolders } = opts || {}
-    const { components: basePath, _config: { debug }, force } = parseArgs(args)
+    const { components: basePath, _config: { debug }, force, path: appPath } = parseArgs(args)
     const client = createCmsClient(args)
+
+    // Get locked property names
+    const generatedProps = getGeneratedProps(appPath);
+
+    // Get content types
     const { contentTypes, all: allContentTypes } = loadedContentTypes ?? await getContentTypes(client, args)
 
     // Start process
@@ -31,7 +30,7 @@ export const NextJsFragmentsCommand: NextJsModule<{ loadedContentTypes: GetConte
     const typeFolders = createdTypeFolders ?? createTypeFolders(contentTypes, basePath, debug)
     const updatedTypes = contentTypes.map(contentType => {
       const typePath = getTypeFolder(typeFolders, contentType.key)
-      return createGraphFragments(contentType, typePath, basePath, force, debug, allContentTypes, client.runtimeCmsVersion == OptiCmsVersion.CMS12)
+      return createGraphFragments(contentType, typePath, basePath, force, debug, allContentTypes, generatedProps, client.runtimeCmsVersion == OptiCmsVersion.CMS12)
     }).filter(x => x).flat()
 
     // Report outcome
@@ -39,13 +38,15 @@ export const NextJsFragmentsCommand: NextJsModule<{ loadedContentTypes: GetConte
       process.stdout.write(chalk.yellowBright(`${figures.arrowRight} Created/updated GraphQL fragments for ${updatedTypes.join(', ')}\n`))
     else
       process.stdout.write(chalk.yellowBright(`${figures.arrowRight} No GraphQL fragments created/updated\n`))
-    if (!opts) process.stdout.write(chalk.green(chalk.bold(figures.tick + " Done")) + "\n")
+    
+    // Write updated lock
+    writeGeneratedProps(appPath, generatedProps);
 
-    generatedProps = []
+    if (!opts) process.stdout.write(chalk.green(chalk.bold(figures.tick + " Done")) + "\n")
   }
 }
 
-export function createGraphFragments(contentType: IntegrationApi.ContentType, typePath: string, basePath: string, force: boolean, debug: boolean, contentTypes: IntegrationApi.ContentType[], forCms12: boolean = false): Array<string> | undefined {
+export function createGraphFragments(contentType: IntegrationApi.ContentType, typePath: string, basePath: string, force: boolean, debug: boolean, contentTypes: IntegrationApi.ContentType[], generatedProps: GeneratedPropsArray = [], forCms12: boolean = false): Array<string> | undefined {
   const returnValue: Array<string> = []
   const baseType = contentType.baseType ?? 'default'
   const baseQueryFile = path.join(typePath, `${contentType.key.split(':').pop()}.${baseType}.graphql`)
@@ -63,7 +64,7 @@ export function createGraphFragments(contentType: IntegrationApi.ContentType, ty
     process.stdout.write(chalk.gray(`${figures.arrowRight} Creating ${contentType.displayName} (${contentType.key}) base fragment\n`))
   }
 
-  const { fragment, propertyTypes } = createInitialFragment(contentType, false, undefined, forCms12)
+  const { fragment, propertyTypes } = createInitialFragment(contentType, false, undefined, generatedProps, forCms12)
   fs.writeFileSync(baseQueryFile, fragment)
   returnValue.push(contentType.key)
 
@@ -86,7 +87,7 @@ export function createGraphFragments(contentType: IntegrationApi.ContentType, ty
       if (!fs.existsSync(propertyFragmentFile) || force) {
         if (debug)
           process.stdout.write(chalk.gray(`${figures.arrowRight} Writing ${propContentType.displayName} (${propContentType.key}) property fragment\n`))
-        const propContentTypeInfo = createInitialFragment(propContentType, true, contentType, forCms12)
+        const propContentTypeInfo = createInitialFragment(propContentType, true, contentType, generatedProps, forCms12)
         fs.writeFileSync(propertyFragmentFile, propContentTypeInfo.fragment)
         returnValue.push(propContentType.key)
         if (Array.isArray(propContentTypeInfo.propertyTypes))
@@ -98,8 +99,8 @@ export function createGraphFragments(contentType: IntegrationApi.ContentType, ty
   return returnValue.length > 0 ? returnValue : undefined
 }
 
-export function createInitialFragment(contentType: IntegrationApi.ContentType, forProperty: boolean = false, forBaseType?: IntegrationApi.ContentType, forCms12: boolean = false): { fragment: string, propertyTypes: ([string, boolean][] | null) } {
-  const { fragmentFields, propertyTypes } = renderProperties(contentType, forCms12);
+export function createInitialFragment(contentType: IntegrationApi.ContentType, forProperty: boolean = false, forBaseType?: IntegrationApi.ContentType, generatedProps: GeneratedPropsArray = [], forCms12: boolean = false): { fragment: string, propertyTypes: ([string, boolean][] | null) } {
+  const { fragmentFields, propertyTypes } = renderProperties(contentType, generatedProps, forCms12);
   const contentTypeKey = contentType.key.split(':').pop();
   const fragmentTarget = forProperty ? (forCms12 ? (forBaseType?.key ?? '') + contentTypeKey : contentTypeKey + 'Property') : contentTypeKey
 
@@ -112,7 +113,7 @@ export function createInitialFragment(contentType: IntegrationApi.ContentType, f
   }
 }
 
-export function renderProperties(contentType: IntegrationApi.ContentType, forCms12: boolean = false) {
+export function renderProperties(contentType: IntegrationApi.ContentType, generatedProps: GeneratedPropsArray = [], forCms12: boolean = false) {
   const propertyTypes: [string, boolean][] = []
   const fragmentFields: string[] = []
   const typeProps = contentType.properties ?? {}
@@ -126,7 +127,8 @@ export function renderProperties(contentType: IntegrationApi.ContentType, forCms
       return
 
     const propType = (typeProps[propKey] as IntegrationApi.ContentTypeProperty).type
-    const isConflict = generatedProps.some(x => x.propName == propKey && x.propType != propType)
+    const propDataType = getPropDataType(typeProps[propKey] as IntegrationApi.ContentTypeProperty)
+    const isConflict = generatedProps.some(x => x.propName == propKey && x.propType != propDataType)
     const propName = isConflict ? `${contentType.key}${propKey}: ${propKey}` : propKey
 
     // Write the property
@@ -221,10 +223,11 @@ export function renderProperties(contentType: IntegrationApi.ContentType, forCms
         break;
     }
 
-    generatedProps.push({
-      propType: (typeProps[propKey] as IntegrationApi.ContentTypeProperty).type,
-      propName: propKey
-    })
+    if (propName === propKey && !generatedProps.some(x => x.propName === propKey))
+      generatedProps.push({
+        propType: propDataType,
+        propName: propKey
+      })
   })
 
   if ((contentType.baseType as string) == "experience")
@@ -247,3 +250,17 @@ function ucFirst(value: string | null | undefined) {
 }
 
 export default NextJsFragmentsCommand
+
+function getPropDataType(baseInfo: IntegrationApi.ContentTypeProperty)
+{
+  const baseType = baseInfo.type;
+  if (!baseType)
+    throw new Error("Invalid property type definition");
+  const propInfo: { type: IntegrationApi.PropertyDataType, format?: string } = baseInfo.type === "array" ? (baseInfo as IntegrationApi.ListProperty).items : baseInfo
+  switch (propInfo.type) {
+    case "string":
+      return propInfo.format === 'html' ? 'richtext' : propInfo.type;
+    default:
+      return propInfo.type;
+  }
+}

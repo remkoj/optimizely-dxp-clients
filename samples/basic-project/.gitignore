@@ -40,5 +40,9 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
-# Artefacts
+# Testing artefacts
+/src/components/cms/
+/src/components/cms/index.ts
 /src/gql
+.opti-props.lock
+yarn.lock
