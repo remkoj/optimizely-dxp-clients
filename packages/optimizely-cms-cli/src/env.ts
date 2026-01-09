@@ -1,6 +1,25 @@
 import { globSync as glob } from 'glob'
 import { config } from 'dotenv'
 import { expand } from 'dotenv-expand'
+import path from 'node:path'
+import fs from 'node:fs'
+
+export function getProjectDir() : string
+{
+  let testPath = process.cwd();
+  let hasPackageJson = false;
+  do {
+    hasPackageJson = fs.statSync(path.join(testPath, 'package.json'), {throwIfNoEntry: false})?.isFile() ?? false;
+    if (!hasPackageJson)
+      testPath = path.normalize(path.join(testPath,'..'));
+  } while (!hasPackageJson && testPath.length > 2);
+
+  if (!hasPackageJson) {
+    throw new Error('No package.json found!')
+  }
+
+  return testPath
+}
 
 /**
  * Prepare the application context, by parsing the .env files in the main

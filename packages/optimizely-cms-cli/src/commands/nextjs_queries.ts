@@ -21,9 +21,10 @@ export const NextJsQueriesCommand: NextJsModule<{ loadedContentTypes: GetContent
   handler: async (args, opts) => {
     // Prepare
     const { loadedContentTypes, createdTypeFolders } = opts || {}
-    const { components: basePath, _config: { debug }, force } = parseArgs(args)
+    const { components: basePath, _config: { debug }, force, path: appPath } = parseArgs(args)
     const client = createCmsClient(args)
     const { contentTypes, all: allContentTypes } = loadedContentTypes ?? await getContentTypes(client, args)
+    const generatedProps = getGeneratedProps(appPath);
 
     // Start process
     process.stdout.write(chalk.yellowBright(`${figures.arrowRight} Generating GraphQL queries\n`))

@@ -2,10 +2,9 @@ import type { ComponentType } from 'react';
 import type { DocumentNode } from 'graphql';
 import type { ContentLinkWithLocale, ContentLink, VariationInput, IOptiGraphClient, InlineContentLink } from '@remkoj/optimizely-graph-client';
 import type { ContentType, BaseCmsComponent, CmsComponentWithQuery, CmsComponentWithFragment, WithGqlFragment, ContentQueryProps, CmsComponentProps } from './types.js';
-import type { ComponentFactory, ComponentTypeHandle } from './factory/types.js';
+import type { ComponentFactory } from './factory/types.js';
 
 import { OptiCmsSchema } from '@remkoj/optimizely-graph-client';
-import { TYPE_MERGE_SYMBOL } from './factory/index.js';
 import { localeToGraphLocale } from '@remkoj/optimizely-graph-client/utils';
 
 //Export the Rich-Text utilities
@@ -108,14 +107,21 @@ export function normalizeAndPrefixContentType(contentType: Array<string | null> 
  * @param       variants    The variants to test
  * @returns     The resolved Component or undefined if not found
  */
-export function resolveComponentType(factory: ComponentFactory, type: ComponentTypeHandle, variants: Array<string> = []): ReturnType<ComponentFactory['resolve']> {
-  for (const variant of variants) {
-    const variantType = Array.isArray(type) ? [...type, variant] : type + TYPE_MERGE_SYMBOL + variant
-    const variantComponent = factory.resolve(variantType)
-    if (variantComponent)
-      return variantComponent
+export function resolveComponentType(factory: ComponentFactory, type: ContentType, variants: Array<string> = []) : ReturnType<ComponentFactory['resolve']>
+{
+  const contentTypeKey = type.at(0);
+  if (contentTypeKey) {
+    for (const variant of variants) {
+      const variantComponent = factory.resolve(contentTypeKey, variant)
+      if (variantComponent)
+        return variantComponent
+    }
+    const mainComponent = factory.resolve(contentTypeKey)
+    if (mainComponent) 
+      return mainComponent;
   }
-  return factory.resolve(type)
+  console.warn(`❌ [Component Resolution] Unable to resolve ${ contentTypeKey } in any of the requested variants: ${ [...variants, 'default'].join(', ') }`)
+  return undefined
 }
 
 export function isCmsComponentWithDataQuery<T = DocumentNode>(toTest?: BaseCmsComponent<T>): toTest is CmsComponentWithQuery<T> {

@@ -3,6 +3,7 @@ import { GraphQLClient, type RequestMiddleware, type Variables } from "graphql-r
 import { AuthMode, type RequestMethod, type IOptiGraphClient, type OptiGraphSiteInfo, type IOptiGraphClientFlags, type OptiCmsSchema, type FrontendUser, SchemaVersion } from "./types.js"
 import createHmacFetch, { type FetchAPI } from "../hmac-fetch.js"
 import { base64encode, isError, validateToken, getAuthMode, isValidFrontendUser } from "./utils.js"
+import versionInfo from '../version.js'
 
 type RequestExtendedInit<V extends Variables = Variables> = Parameters<RequestMiddleware<V>>[0] & {
   next?: {
@@ -299,7 +300,8 @@ export class ContentGraphClient extends GraphQLClient implements IOptiGraphClien
   protected buildDefaultHeaders(): Record<string, string> {
     // Default headers
     const headers: Record<string, string> = {
-      "X-Client": "@RemkoJ/OptimizelyGraphClient"
+      "X-Client": "@RemkoJ/OptimizelyGraphClient",
+      "X-Client-Version": versionInfo.version
     }
 
     // Add feature flag based headers

@@ -41,16 +41,8 @@ export function resolveComponent(
     throw new Error('Empty factory on the context')
   }
 
-  // Optimizely Graph stores the type in Most Significant first order, we need least significant first, also we're stripping out the common "Content" item from it
-  const myContentType = prefix
-    ? Utils.normalizeAndPrefixContentType(
-        Array.isArray(contentType) ? [...contentType].reverse() : contentType,
-        prefix
-      )
-    : Utils.normalizeContentType(
-        Array.isArray(contentType) ? [...contentType].reverse() : contentType,
-        true
-      )
+  // Make sure that we normalize the input from graph into a string array
+  const myContentType = Utils.normalizeContentType(contentType, false);
 
   // Validate that we have a value to ask the factory a component for
   if (!myContentType || myContentType.length == 0) {
@@ -72,7 +64,7 @@ export function resolveComponent(
   const Component = Utils.resolveComponentType(
     factory,
     myContentType,
-    variant ? [variant] : []
+    [variant, prefix].filter(Utils.isNotNullOrUndefined)
   ) as EnhancedCmsComponent | undefined
 
   // Handle component not found in factory

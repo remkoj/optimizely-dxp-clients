@@ -1,4 +1,4 @@
-import { isContentType } from '../../utilities.js'
+import { isContentType, isNotNullOrUndefined } from '../../utilities.js'
 import { isContentLink, ContentLinkWithLocale, isInlineContentLink } from '@remkoj/optimizely-graph-client'
 import type { CompositionNode, LeafPropsFactory, CompositionComponentNode, NodePropsFactory, CompositionStructureNode } from './types.js'
 
@@ -76,22 +76,13 @@ export const defaultPropsFactory: LeafPropsFactory = <ET extends Record<string, 
 }
 
 export const defaultNodePropsFactory: NodePropsFactory = <ET extends Record<string, any>, LT = string>(node: CompositionStructureNode) => {
+  const componentMainName = node.type ? ( node.layoutType === 'experience' ? node.type+"Node" : node.type) : undefined
   const componentTypes = [
-    // New style logic
-    node.template && [node.template, ucFirst(node.type), ucFirst(node.layoutType), "Content"].filter(x => x) as string[],
-    [ucFirst(node.type), ucFirst(node.layoutType), "Content"].filter(x => x) as string[],
-    node.template && [node.template, ucFirst(node.layoutType), "Content"].filter(x => x) as string[],
-    node.template && [node.template, "Styles", ucFirst(node.layoutType), "Content"].filter(x => x) as string[],
-    node.template && [node.template, ucFirst(node.layoutType), "Nodes", "Content"].filter(x => x) as string[],
-
-    // Old style logic
-    [node.template, ucFirst(node.type), ucFirst(node.layoutType), "Component", "Content"].filter(x => x) as string[],
-    (node.template && node.type) ? [node.type ? ucFirst(node.type) : null, ucFirst(node.layoutType), "Component", "Content"].filter(x => x) as string[] : null,
-
-    // Fallback
-    ["Node", "Content"],
-    ["Node", "Component", "Content"]
-  ].filter(x => x) as Array<Array<string>>
+    componentMainName ? [componentMainName] : undefined,
+    node.template ? [ node.template ] : undefined,
+    [ucFirst(node.layoutType)+'Node'],
+    ['Node']
+  ].filter(isNotNullOrUndefined);
   const contentLink: ContentLinkWithLocale<LT> = { key: node.key ?? '', isInline: true }
   const componentData: ET = { __name: node.name, ...node.component } as unknown as ET
   const layoutData = {

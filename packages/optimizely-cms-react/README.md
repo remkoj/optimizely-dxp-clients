@@ -1,8 +1,7 @@
 # Optimizely SaaS CMS React Components
+
 > [!WARNING]
-> This documentation is for V3 and up. This version introduced a number of breaking changes - most notably it significantly simplified the exports.
->
-> For some of the commonly used old exports it still contains placeholders, however those are deprecated and will be removed in a future version
+> There'll be an update of Optimizely SaaS CMS that is incompatible with all SDK versions prior to 5.1.6. If you don't upgrade, you will see empty pages (main website) and "Component not found" messages (preview).
 
 This package provides two main entry points, depending on your build environment:
 - `@remkoj/optimizely-cms-react` This export contains the library, whith React components that use a client side context

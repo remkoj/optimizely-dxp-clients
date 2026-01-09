@@ -1,4 +1,8 @@
 # Optimizely GraphQL Codegen Plugin  <!-- omit in toc -->
+
+> [!WARNING]
+> There'll be an update of Optimizely SaaS CMS that is incompatible with all SDK versions prior to 5.1.6. If you don't upgrade, you will see empty pages (main website) and "Component not found" messages (preview).
+
 GraphQL Codegen plugin and preset which generate both the GraphQL type definitions and a few convenienece methods for useage with [Optimizely Graph Client](../optimizely-graph-client/README.md).
 
 [Release notes](https://github.com/remkoj/optimizely-dxp-clients/releases)

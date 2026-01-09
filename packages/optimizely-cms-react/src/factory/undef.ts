@@ -7,16 +7,16 @@ export class UndefinedComponentFactory implements ComponentFactory {
   set ignoredContracts(newList: string[]) {
     throw new Error("Factory not specified, please specify a factory.");
   }
-  has(type: ComponentTypeHandle): boolean {
+  has(): boolean {
     throw new Error("Factory not specified, please specify a factory.");
   }
-  register(type: ComponentTypeHandle, componentType: ComponentType): void {
+  register(): void {
     throw new Error("Factory not specified, please specify a factory.");
   }
-  registerAll(components: ComponentTypeDictionary): void {
+  registerAll(): void {
     throw new Error("Factory not specified, please specify a factory.");
   }
-  resolve(type: ComponentTypeHandle): ComponentType | undefined {
+  resolve(): ComponentType | undefined {
     throw new Error("Factory not specified, please specify a factory.");
   }
   extract(): ComponentTypeDictionary {

@@ -17,8 +17,13 @@ export const NextJsFragmentsCommand: NextJsModule<{ loadedContentTypes: GetConte
 
     // Prepare
     const { loadedContentTypes, createdTypeFolders } = opts || {}
-    const { components: basePath, _config: { debug }, force } = parseArgs(args)
+    const { components: basePath, _config: { debug }, force, path: appPath } = parseArgs(args)
     const client = createCmsClient(args)
+
+    // Get locked property names
+    const generatedProps = getGeneratedProps(appPath);
+
+    // Get content types
     const { contentTypes, all: allContentTypes } = loadedContentTypes ?? await getContentTypes(client, args)
 
     // Start process
@@ -152,3 +157,17 @@ export function createPropertyFragments(
 }
 
 export default NextJsFragmentsCommand
+
+function getPropDataType(baseInfo: IntegrationApi.ContentTypeProperty)
+{
+  const baseType = baseInfo.type;
+  if (!baseType)
+    throw new Error("Invalid property type definition");
+  const propInfo: { type: IntegrationApi.PropertyDataType, format?: string } = baseInfo.type === "array" ? (baseInfo as IntegrationApi.ListProperty).items : baseInfo
+  switch (propInfo.type) {
+    case "string":
+      return propInfo.format === 'html' ? 'richtext' : propInfo.type;
+    default:
+      return propInfo.type;
+  }
+}
