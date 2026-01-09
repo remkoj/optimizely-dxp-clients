@@ -60,7 +60,7 @@
     "typescript": "^5.9.3"
   },
   "dependencies": {
-    "@formatjs/intl-localematcher": "^0.7.2",
+    "@formatjs/intl-localematcher": "^0.7.5",
     "deepmerge": "^4.3.1",
     "negotiator": "^1.0.0"
   },
