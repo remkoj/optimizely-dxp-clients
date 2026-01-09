@@ -82,6 +82,14 @@ export interface ComponentFactory {
   register(type: ComponentTypeHandle, component: ComponentType, useSuspense?: boolean, loader?: ComponentType, variant?: string) : void
 
   /**
+   * Perform a batch registration of a collection of components. Each item will be extracted and registered
+   * through the register function.
+   * 
+   * @param     components      The components to register
+   */
+  registerAll(components: ComponentTypeDictionary): void
+
+  /**
    * Allows removing of a component type from the factory, but only when
    * the implemenation supports it.
    * 

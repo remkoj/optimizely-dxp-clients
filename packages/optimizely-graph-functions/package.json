@@ -57,7 +57,7 @@
     "@graphql-codegen/client-preset": "^5.2.2",
     "@graphql-codegen/plugin-helpers": "^6.1.0",
     "@graphql-codegen/typescript": "^5.0.7",
-    "@graphql-codegen/typescript-graphql-request": "^6.3.0",
+    "@graphql-codegen/typescript-graphql-request": "^6.4.0",
     "@graphql-codegen/typescript-operations": "^5.0.7",
     "@remkoj/optimizely-cms-api": "6.0.0-pre14",
     "@remkoj/optimizely-graph-client": "6.0.0-pre14",

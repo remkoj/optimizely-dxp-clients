@@ -3,7 +3,7 @@ import yargs from 'yargs'
 import { type OptiCmsApp } from './types.js'
 import chalk from 'chalk';
 
-export function createOptiCmsApp(scriptName: string, version?: string, epilogue?: string, envFiles?: Array<string>): OptiCmsApp {
+export function createOptiCmsApp(scriptName: string, version?: string, epilogue?: string, envFiles?: Array<string>, projectDir?: string): OptiCmsApp {
   if (envFiles) {
     process.stdout.write(chalk.bold(`✅ Loaded environment files:`) + "\n")
     envFiles.forEach(envFile => {
@@ -18,11 +18,12 @@ export function createOptiCmsApp(scriptName: string, version?: string, epilogue?
     console.error(chalk.redBright(`${chalk.bold("[ERROR]:")} Error processing environment variables: ${e.message}`))
     process.exit(1)
   }
+  const defaultPath = projectDir ?? process.cwd();
   return yargs(process.argv)
     .scriptName(scriptName)
     .version(version ?? "development")
     .usage('$0 <cmd> [args]')
-    .option("path", { alias: "p", description: "Application root folder", string: true, type: "string", demandOption: false, default: process.cwd() })
+    .option("path", { alias: "p", description: "Application root folder", string: true, type: "string", demandOption: false, default: defaultPath })
     .option("components", { alias: "c", description: "Path to components folder", string: true, type: "string", demandOption: false, default: "./src/components/cms" })
     .option("cms_url", { alias: "cu", description: "Optimizely CMS URL", string: true, type: "string", demandOption: isDemanded(config.base), default: config.base, coerce: (val) => val ? new URL(val) : undefined })
     .option("client_id", { alias: "ci", description: "API Client ID", string: true, type: "string", demandOption: isDemanded(config.clientId), default: config.clientId })

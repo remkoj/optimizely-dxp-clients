@@ -24,7 +24,7 @@ export const NextJsQueriesCommand: NextJsModule<{ loadedContentTypes: GetContent
     const { components: basePath, _config: { debug }, force, path: appPath } = parseArgs(args)
     const client = createCmsClient(args)
     const { contentTypes, all: allContentTypes } = loadedContentTypes ?? await getContentTypes(client, args)
-    const generatedProps = getGeneratedProps(appPath);
+    const propertyTracker = new GraphQLGen.PropertyCollisionTracker(appPath);
 
     // Start process
     process.stdout.write(chalk.yellowBright(`${figures.arrowRight} Generating GraphQL queries\n`))
@@ -32,7 +32,7 @@ export const NextJsQueriesCommand: NextJsModule<{ loadedContentTypes: GetContent
     const typeFolders = createdTypeFolders ?? createTypeFolders(contentTypes, basePath, debug)
     const updatedTypes = contentTypes.map(contentType => {
       const typePath = getTypeFolder(typeFolders, contentType.key)
-      const { written, propertyTypes } = createGraphQueries(contentType, typePath, force, debug)
+      const { written, propertyTypes } = createGraphQueries(contentType, typePath, force, debug, propertyTracker)
       dependencies.push(...propertyTypes)
       return written ? contentType.key : undefined
     }).filter(x => x).flat()
@@ -52,7 +52,7 @@ export const NextJsQueriesCommand: NextJsModule<{ loadedContentTypes: GetContent
         typeFolders.push(tf)
       }
       return tf
-    }, force, debug)
+    }, force, debug, propertyTracker)
 
     // Report outcome
     if (generatedProps.length > 0)
@@ -71,6 +71,7 @@ export function createGraphQueries(
   typePath: TypeFolderList[number],
   force: boolean,
   debug: boolean,
+  tracker: Map<string,string>
 ): { written: boolean, propertyTypes: string[] } {
   const baseQueryFile = typePath.queryFile
 
@@ -89,7 +90,7 @@ export function createGraphQueries(
   }
 
   if (mustWrite) {
-    const fragment = GraphQLGen.buildGetQuery(contentType, undefined, new Map())
+    const fragment = GraphQLGen.buildGetQuery(contentType, undefined, tracker)
     fs.writeFileSync(baseQueryFile, fragment)
   }
 

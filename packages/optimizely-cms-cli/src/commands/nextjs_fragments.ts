@@ -20,16 +20,13 @@ export const NextJsFragmentsCommand: NextJsModule<{ loadedContentTypes: GetConte
     const { components: basePath, _config: { debug }, force, path: appPath } = parseArgs(args)
     const client = createCmsClient(args)
 
-    // Get locked property names
-    const generatedProps = getGeneratedProps(appPath);
-
     // Get content types
     const { contentTypes, all: allContentTypes } = loadedContentTypes ?? await getContentTypes(client, args)
 
     // Start process
     process.stdout.write(chalk.yellowBright(`${figures.arrowRight} Generating GraphQL fragments\n`))
     const typeFolders = createdTypeFolders ?? createTypeFolders(contentTypes, basePath, debug)
-    const tracker = new Map<string,string>()
+    const tracker = new GraphQLGen.PropertyCollisionTracker(appPath);
     const dependencies: string[] = []
     const updatedTypes = contentTypes.map(contentType => {
       const { written, propertyTypes } = createComponentFragments(contentType, getTypeFolder(typeFolders, contentType.key), force, debug, tracker)
@@ -54,7 +51,7 @@ export const NextJsFragmentsCommand: NextJsModule<{ loadedContentTypes: GetConte
         typeFolders.push(tf)
       }
       return tf
-    }, force, debug)
+    }, force, debug, tracker)
 
     // Report outcome
     if (generatedProps.length > 0)
@@ -106,7 +103,8 @@ export function createPropertyFragments(
   allContentTypes: IntegrationApi.ContentType[],
   selectTypeFolder: (ctKey: IntegrationApi.ContentType) => TypeFolderList[number] | undefined,
   force: boolean = false,
-  debug: boolean = false
+  debug: boolean = false,
+  propertyTracker: Map<string,string> = new Map<string,string>()
 ) {
   const returnValue: string[] = []
   for (const propertyContentTypeKey of propertyTypesList.filter((v, i, a) => a.indexOf(v, i + 1) <= i)) {
@@ -139,7 +137,7 @@ export function createPropertyFragments(
       process.stdout.write(chalk.gray(`${figures.arrowRight} Creating ${contentType.displayName} (${contentType.key}) property fragment\n`))
     }
     if (mustWrite) {
-      const fragment = GraphQLGen.buildFragment(contentType, undefined, true)
+      const fragment = GraphQLGen.buildFragment(contentType, undefined, true, propertyTracker)
       fs.writeFileSync(propertyFragmentFile, fragment)
       returnValue.push(contentType.key)
     }
@@ -149,7 +147,7 @@ export function createPropertyFragments(
     if (referencedPropertyTypes.length > 0) {
       if (debug)
         process.stdout.write(chalk.gray(`${figures.arrowRight} Component property ${propertyContentTypeKey} uses components a property, recursing down\n`))
-      const additionalProperties = createPropertyFragments(referencedPropertyTypes, allContentTypes, selectTypeFolder, force, debug)
+      const additionalProperties = createPropertyFragments(referencedPropertyTypes, allContentTypes, selectTypeFolder, force, debug, propertyTracker)
       returnValue.push(...additionalProperties)
     }
   }
@@ -157,17 +155,3 @@ export function createPropertyFragments(
 }
 
 export default NextJsFragmentsCommand
-
-function getPropDataType(baseInfo: IntegrationApi.ContentTypeProperty)
-{
-  const baseType = baseInfo.type;
-  if (!baseType)
-    throw new Error("Invalid property type definition");
-  const propInfo: { type: IntegrationApi.PropertyDataType, format?: string } = baseInfo.type === "array" ? (baseInfo as IntegrationApi.ListProperty).items : baseInfo
-  switch (propInfo.type) {
-    case "string":
-      return propInfo.format === 'html' ? 'richtext' : propInfo.type;
-    default:
-      return propInfo.type;
-  }
-}

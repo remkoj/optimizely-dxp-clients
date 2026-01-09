@@ -7,18 +7,17 @@ export type ClientOptions = {
 /**
  * Describes a property that can contain a reference to binary data.
  */
-export type BinaryProperty = ContentTypeProperty & {
-    type: 'BinaryProperty';
-} & {
+export type BinaryProperty = Omit<ContentTypeProperty, 'type'> & {
     imageDescriptor?: ImageDescriptor;
+    type: 'BinaryProperty';
 };
 
 /**
  * Describes a property that can contain a boolean value.
  */
-export type BooleanProperty = ContentTypeProperty & {
+export type BooleanProperty = Omit<ContentTypeProperty, 'type'> & {
     type: 'BooleanProperty';
-} & {};
+};
 
 /**
  * Changesets are used to group work on several content items together.
@@ -99,25 +98,23 @@ export type ChangesetPage = {
 /**
  * Describes a property list item that can contain a component instance of a specific type.
  */
-export type ComponentListItem = ListPropertyItem & {
-    type: 'ComponentListItem';
-} & {
+export type ComponentListItem = Omit<ListPropertyItem, 'type'> & {
     /**
      * The key of the ContentType that this ComponentListItem can contain.
      */
     contentType: string;
+    type: 'ComponentListItem';
 };
 
 /**
  * Describes a property that can contain a component instance of a specific type.
  */
-export type ComponentProperty = ContentTypeProperty & {
-    type: 'ComponentProperty';
-} & {
+export type ComponentProperty = Omit<ContentTypeProperty, 'type'> & {
     /**
      * The key of the ContentType that this ComponentProperty can contain.
      */
     contentType: string;
+    type: 'ComponentProperty';
 };
 
 /**
@@ -282,9 +279,7 @@ export type ContentItemWithContentTypes = {
 /**
  * Describes a property list item that can hold a content item.
  */
-export type ContentListItem = ListPropertyItem & {
-    type: 'ContentListItem';
-} & {
+export type ContentListItem = Omit<ListPropertyItem, 'type'> & {
     /**
      * Specifies which content types and base types these property items are allowed to contain.
      */
@@ -293,6 +288,7 @@ export type ContentListItem = ListPropertyItem & {
      * Specifies which content types and base types these property items cannot contain.
      */
     restrictedTypes?: Array<string>;
+    type: 'ContentListItem';
 };
 
 /**
@@ -376,9 +372,7 @@ export type ContentMetadataPage = {
 /**
  * Describes a property that can contain a content item.
  */
-export type ContentProperty = ContentTypeProperty & {
-    type: 'ContentProperty';
-} & {
+export type ContentProperty = Omit<ContentTypeProperty, 'type'> & {
     /**
      * Specifies which content types and base types this property is allowed to contain.
      */
@@ -387,6 +381,7 @@ export type ContentProperty = ContentTypeProperty & {
      * Specifies which content types and base types this property cannot contain.
      */
     restrictedTypes?: Array<string>;
+    type: 'ContentProperty';
 };
 
 /**
@@ -410,9 +405,7 @@ export type ContentReference = {
 /**
  * Describes a property list item that can hold a reference to a content item.
  */
-export type ContentReferenceListItem = ListPropertyItem & {
-    type: 'ContentReferenceListItem';
-} & {
+export type ContentReferenceListItem = Omit<ListPropertyItem, 'type'> & {
     /**
      * Specifies which content types and base types these list items are allowed to reference.
      */
@@ -421,14 +414,13 @@ export type ContentReferenceListItem = ListPropertyItem & {
      * Specifies which content types and base types these list items cannot contain.
      */
     restrictedTypes?: Array<string>;
+    type: 'ContentReferenceListItem';
 };
 
 /**
  * Describes a property that can contain a reference to a content item.
  */
-export type ContentReferenceProperty = ContentTypeProperty & {
-    type: 'ContentReferenceProperty';
-} & {
+export type ContentReferenceProperty = Omit<ContentTypeProperty, 'type'> & {
     /**
      * Specifies which content types and base types this property is allowed to reference.
      */
@@ -437,6 +429,7 @@ export type ContentReferenceProperty = ContentTypeProperty & {
      * Specifies which content types and base types this property is restricted from referencing.
      */
     restrictedTypes?: Array<string>;
+    type: 'ContentReferenceProperty';
 };
 
 /**
@@ -633,9 +626,7 @@ export type CopyContentOptions = {
 /**
  * Describes a property list item that can contain a timestamp.
  */
-export type DateTimeListItem = ListPropertyItem & {
-    type: 'DateTimeListItem';
-} & {
+export type DateTimeListItem = Omit<ListPropertyItem, 'type'> & {
     /**
      * The earliest timestamp that list items of this type should be able to contain.
      */
@@ -644,14 +635,13 @@ export type DateTimeListItem = ListPropertyItem & {
      * The latest timestamp that list items of this type should be able to contain.
      */
     maximum?: Date | null;
+    type: 'DateTimeListItem';
 };
 
 /**
  * Describes a property that can contain a timestamp.
  */
-export type DateTimeProperty = ContentTypeProperty & {
-    type: 'DateTimeProperty';
-} & {
+export type DateTimeProperty = Omit<ContentTypeProperty, 'type'> & {
     /**
      * The earliest timestamp that properties of this type should be able to contain.
      */
@@ -660,6 +650,7 @@ export type DateTimeProperty = ContentTypeProperty & {
      * The latest timestamp that properties of this type should be able to contain.
      */
     maximum?: Date | null;
+    type: 'DateTimeProperty';
 };
 
 /**
@@ -796,9 +787,7 @@ export type DoubleEnumerationValue = {
 /**
  * Describes a property list item that can contain a float number.
  */
-export type FloatListItem = ListPropertyItem & {
-    type: 'FloatListItem';
-} & {
+export type FloatListItem = Omit<ListPropertyItem, 'type'> & {
     /**
      * The minimum value that list items of this type should be able to contain.
      */
@@ -808,14 +797,13 @@ export type FloatListItem = ListPropertyItem & {
      */
     maximum?: number | null;
     enum?: DoubleEnumerationSettings;
+    type: 'FloatListItem';
 };
 
 /**
  * Describes a property that can contain a float number.
  */
-export type FloatProperty = ContentTypeProperty & {
-    type: 'FloatProperty';
-} & {
+export type FloatProperty = Omit<ContentTypeProperty, 'type'> & {
     /**
      * The minimum value that properties of this type should be able to contain.
      */
@@ -825,6 +813,7 @@ export type FloatProperty = ContentTypeProperty & {
      */
     maximum?: number | null;
     enum?: DoubleEnumerationSettings;
+    type: 'FloatProperty';
 };
 
 /**
@@ -877,9 +866,7 @@ export type Int32EnumerationValue = {
 /**
  * Describes a property list item that can contain integers.
  */
-export type IntegerListItem = ListPropertyItem & {
-    type: 'IntegerListItem';
-} & {
+export type IntegerListItem = Omit<ListPropertyItem, 'type'> & {
     /**
      * The minimum value that list items of this type should be able to contain.
      */
@@ -889,14 +876,13 @@ export type IntegerListItem = ListPropertyItem & {
      */
     maximum?: number | null;
     enum?: Int32EnumerationSettings;
+    type: 'IntegerListItem';
 };
 
 /**
  * Describes a property that can contain an integer.
  */
-export type IntegerProperty = ContentTypeProperty & {
-    type: 'IntegerProperty';
-} & {
+export type IntegerProperty = Omit<ContentTypeProperty, 'type'> & {
     /**
      * The minimum value that properties of this type should be able to contain.
      */
@@ -906,21 +892,20 @@ export type IntegerProperty = ContentTypeProperty & {
      */
     maximum?: number | null;
     enum?: Int32EnumerationSettings;
+    type: 'IntegerProperty';
 };
 
 /**
  * Describes a property that can contain a JSON value in the form of a string.
  */
-export type JsonStringProperty = ContentTypeProperty & {
+export type JsonStringProperty = Omit<ContentTypeProperty, 'type'> & {
     type: 'JsonStringProperty';
-} & {};
+};
 
 /**
  * A property in the CMS that may hold a list of items.
  */
-export type ListProperty = ContentTypeProperty & {
-    type: 'ListProperty';
-} & {
+export type ListProperty = Omit<ContentTypeProperty, 'type'> & {
     /**
      * Specifies the minimum number of items in this array property.
      */
@@ -949,6 +934,7 @@ export type ListProperty = ContentTypeProperty & {
     } & StringListItem) | ({
         type: 'UrlListItem';
     } & UrlListItem);
+    type: 'ListProperty';
 };
 
 /**
@@ -1171,9 +1157,7 @@ export type StringEnumerationValue = {
 /**
  * Describes a property list item that can contain a string.
  */
-export type StringListItem = ListPropertyItem & {
-    type: 'StringListItem';
-} & {
+export type StringListItem = Omit<ListPropertyItem, 'type'> & {
     /**
      * The minimum string length that list items of this type should be able to contain.
      */
@@ -1187,14 +1171,13 @@ export type StringListItem = ListPropertyItem & {
      */
     pattern?: string | null;
     enum?: StringEnumerationSettings;
+    type: 'StringListItem';
 };
 
 /**
  * Describes a property that can contain strings.
  */
-export type StringProperty = ContentTypeProperty & {
-    type: 'StringProperty';
-} & {
+export type StringProperty = Omit<ContentTypeProperty, 'type'> & {
     /**
      * The minimum string length that properties of this type should be able to contain.
      */
@@ -1208,21 +1191,22 @@ export type StringProperty = ContentTypeProperty & {
      */
     pattern?: string | null;
     enum?: StringEnumerationSettings;
+    type: 'StringProperty';
 };
 
 /**
  * Describes a property list item that can contain a URL.
  */
-export type UrlListItem = ListPropertyItem & {
+export type UrlListItem = Omit<ListPropertyItem, 'type'> & {
     type: 'UrlListItem';
-} & {};
+};
 
 /**
  * Describes a property that can contain URLs.
  */
-export type UrlProperty = ContentTypeProperty & {
+export type UrlProperty = Omit<ContentTypeProperty, 'type'> & {
     type: 'UrlProperty';
-} & {};
+};
 
 /**
  * Represent the different status values of a content version.

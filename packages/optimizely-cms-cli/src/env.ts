@@ -27,9 +27,11 @@ export function getProjectDir() : string
  * 
  * @returns     A string array with the files processed
  */
-export function prepare(): string[] {
-  const globResult = glob(".env*");
-  const envFiles = globResult.sort((a, b) => b.length - a.length).filter(n => n == ".env" || n == ".env.local" || (process.env.NODE_ENV && n == `.env.${process.env.NODE_ENV}.local`));
+export function prepare(pDir?: string): string[] {
+  const projectDir = pDir ?? getProjectDir();
+  const envFiles = glob(".env*", { cwd: projectDir })
+                    .sort((a, b) => b.length - a.length)
+                    .filter(n => n == ".env" || n == ".env.local" || (process.env.NODE_ENV && n == `.env.${process.env.NODE_ENV}.local`));
   expand(config({ path: envFiles, debug: false, quiet: true }));
   return envFiles;
 }

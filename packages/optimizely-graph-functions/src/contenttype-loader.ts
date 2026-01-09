@@ -69,7 +69,7 @@ export class PropertyCollisionTracker extends Map<string,string> {
   {
     if (!this._cwd)
       throw new Error("Working directory unknown");
-    const file = path.join(this._cwd, 'opti-props.lock')
+    const file = path.join(this._cwd, '.opti-props.lock')
     const data: {propertyName: string, propertyType: string}[] = [];
     for ( const [entryKey,entryValue] of super.entries())
       data.push({ propertyName: entryKey, propertyType: entryValue })
@@ -82,7 +82,7 @@ export class PropertyCollisionTracker extends Map<string,string> {
     try {
       if (!this._cwd)
         throw new Error("Working directory unknown");
-      const file = path.join(this._cwd, 'opti-props.lock')
+      const file = path.join(this._cwd, '.opti-props.lock')
       const raw = fs.readFileSync(file, { encoding: 'utf-8'})
       const data = raw.length > 0 ? JSON.parse(raw) : []
       if (!Array.isArray(data))

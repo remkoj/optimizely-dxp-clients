@@ -10,7 +10,6 @@ export { CancelablePromise, CancelError } from './core/CancelablePromise.js';
 export { OpenAPI } from './core/OpenAPI.js';
 export type { OpenAPIConfig } from './core/OpenAPI.js';
 
-export type { APIRequestPayload } from './models/APIRequestPayload.js';
 export type { BestBetCollectionPayload } from './models/BestBetCollectionPayload.js';
 export type { BestBetCollectionResult } from './models/BestBetCollectionResult.js';
 export type { CacheInvalidationConfig } from './models/CacheInvalidationConfig.js';
@@ -48,7 +47,6 @@ export type { Record_string_string_ } from './models/Record_string_string_.js';
 export type { Request } from './models/Request.js';
 export type { RequestLog } from './models/RequestLog.js';
 export type { Response } from './models/Response.js';
-export type { SearchParams } from './models/SearchParams.js';
 export { Slot } from './models/Slot.js';
 export type { SourceInfo } from './models/SourceInfo.js';
 export type { SourceInfoMap } from './models/SourceInfoMap.js';
@@ -60,6 +58,7 @@ export type { Webhook } from './models/Webhook.js';
 export type { WebhookPayload } from './models/WebhookPayload.js';
 
 export { BestBetsService } from './services/BestBetsService.js';
+export { DefaultService } from './services/DefaultService.js';
 export { DefinitionV2Service } from './services/DefinitionV2Service.js';
 export { DefinitionV3Service } from './services/DefinitionV3Service.js';
 export { LogsService } from './services/LogsService.js';

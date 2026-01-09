@@ -6,6 +6,7 @@ import type { BaseHttpRequest } from './core/BaseHttpRequest.js';
 import type { OpenAPIConfig } from './core/OpenAPI.js';
 import { FetchHttpRequest } from './core/FetchHttpRequest.js';
 import { BestBetsService } from './services/BestBetsService.js';
+import { DefaultService } from './services/DefaultService.js';
 import { DefinitionV2Service } from './services/DefinitionV2Service.js';
 import { DefinitionV3Service } from './services/DefinitionV3Service.js';
 import { LogsService } from './services/LogsService.js';
@@ -17,6 +18,7 @@ import { WebhooksService } from './services/WebhooksService.js';
 type HttpRequestConstructor = new (config: OpenAPIConfig) => BaseHttpRequest;
 export class OptimizelyGraphAdminApi {
     public readonly bestBets: BestBetsService;
+    public readonly default: DefaultService;
     public readonly definitionV2: DefinitionV2Service;
     public readonly definitionV3: DefinitionV3Service;
     public readonly logs: LogsService;
@@ -28,8 +30,8 @@ export class OptimizelyGraphAdminApi {
     public readonly request: BaseHttpRequest;
     constructor(config?: Partial<OpenAPIConfig>, HttpRequest: HttpRequestConstructor = FetchHttpRequest) {
         this.request = new HttpRequest({
-            BASE: config?.BASE ?? 'https://admin-prod.cg.optimizely.com',
-            VERSION: config?.VERSION ?? '0.0.1',
+            BASE: config?.BASE ?? 'https://prod.cg.optimizely.com',
+            VERSION: config?.VERSION ?? '3.23.2',
             WITH_CREDENTIALS: config?.WITH_CREDENTIALS ?? false,
             CREDENTIALS: config?.CREDENTIALS ?? 'include',
             TOKEN: config?.TOKEN,
@@ -39,6 +41,7 @@ export class OptimizelyGraphAdminApi {
             ENCODE_PATH: config?.ENCODE_PATH,
         });
         this.bestBets = new BestBetsService(this.request);
+        this.default = new DefaultService(this.request);
         this.definitionV2 = new DefinitionV2Service(this.request);
         this.definitionV3 = new DefinitionV3Service(this.request);
         this.logs = new LogsService(this.request);

@@ -1,4 +1,4 @@
-import { prepare } from './env.js'
+import { prepare, getProjectDir } from './env.js'
 import createOptiCmsApp from './app.js'
 import { commands } from './commands/index.js'
 import APP from './version.json' with { type: "json" }
