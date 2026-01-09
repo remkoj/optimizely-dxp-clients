@@ -1,7 +1,11 @@
+# Optimizely CMS - Integration API Client <!-- omit in toc -->
+
+> [!WARNING]
+> There'll be an update of Optimizely SaaS CMS that is incompatible with all SDK versions prior to 5.1.6. If you don't upgrade, you will see empty pages (main website) and "Component not found" messages (preview).
+
 [![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](./LICENSE)
 ![Static Badge](https://img.shields.io/badge/Optimizely-Content_Management_System-blue?cacheSeconds=7200)
 
-# Optimizely CMS - Integration API Client <!-- omit in toc -->
 A Javascript client for the Integration API provided by the Optimizely CMS. It wraps the [Optimizely CMS SaaS Core REST API](https://docs.developers.optimizely.com/content-management-system/v1.0.0-SaaS-Core/reference/introduction-to-the-cms-content-api).
 
 ## Installation

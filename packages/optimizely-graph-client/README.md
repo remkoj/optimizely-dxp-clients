@@ -1,4 +1,8 @@
 # Optimizely Graph Client <!-- omit in toc -->
+
+> [!WARNING]
+> There'll be an update of Optimizely SaaS CMS that is incompatible with all SDK versions prior to 5.1.6. If you don't upgrade, you will see empty pages (main website) and "Component not found" messages (preview).
+
 An extension of the [graphql-request](https://www.npmjs.com/package/graphql-request) package, providing the configuration and additional logic needed to connect with Optimizely Graph.
 
 ## Within this document <!-- omit in toc -->

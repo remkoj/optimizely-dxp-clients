@@ -1,4 +1,8 @@
 # Optimizely Content Graph CLI
+
+> [!WARNING]
+> There'll be an update of Optimizely SaaS CMS that is incompatible with all SDK versions prior to 5.1.6. If you don't upgrade, you will see empty pages (main website) and "Component not found" messages (preview).
+
 Command line utitilities to work with Optimizely Content Graph.
 
 [Release notes](https://github.com/remkoj/optimizely-dxp-clients/releases)

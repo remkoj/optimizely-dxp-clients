@@ -1,4 +1,8 @@
 # Next.JS Optimizely One toolkit <!-- omit in toc -->
+
+> [!WARNING]
+> There'll be an update of Optimizely SaaS CMS that is incompatible with all SDK versions prior to 5.1.6. If you don't upgrade, you will see empty pages (main website) and "Component not found" messages (preview).
+
 React components (both client & server) to integrate the browser-side products from Optimizely (Web Experimentation, Data Platform & Content Analytics / Recommendations)
 
 ## Table of Contents <!-- omit in toc -->
