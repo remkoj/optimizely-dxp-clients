@@ -1,7 +1,7 @@
 {
   "name": "@remkoj/optimizely-one-nextjs",
   "license": "Apache-2.0",
-  "version": "6.0.0-pre14",
+  "version": "6.0.0-pre15",
   "repository": "https://github.com/remkoj/optimizely-dxp-clients.git",
   "author": "Remko Jantzen <693172+remkoj@users.noreply.github.com>",
   "homepage": "https://github.com/remkoj/optimizely-dxp-clients",
@@ -39,7 +39,7 @@
     }
   },
   "devDependencies": {
-    "@remkoj/optimizely-graph-client": "workspace:6.0.0-pre14",
+    "@remkoj/optimizely-graph-client": "workspace:6.0.0-pre15",
     "@tailwindcss/cli": "^4.1.18",
     "@types/node": "^22.19.6",
     "@types/react": "^19.2.8",
@@ -56,7 +56,7 @@
     "update-browserslist-db": "^1.2.3"
   },
   "peerDependencies": {
-    "next": "^15 || ^16",
+    "next": "^16",
     "react": "^19",
     "react-dom": "^19"
   },
@@ -64,7 +64,7 @@
     "@fastify/deepmerge": "^3.1.0",
     "@headlessui/react": "^2.2.9",
     "@heroicons/react": "^2.2.0",
-    "@remkoj/optimizely-graph-client": "6.0.0-pre14",
+    "@remkoj/optimizely-graph-client": "6.0.0-pre15",
     "swr": "^2.3.8",
     "uuid": "^13.0.0"
   },
