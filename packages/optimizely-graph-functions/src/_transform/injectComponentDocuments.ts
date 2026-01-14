@@ -1,6 +1,6 @@
 import type { Types } from '@graphql-codegen/plugin-helpers'
 import { parse } from 'graphql'
-import * as QueryGen from '../contenttype-loader'
+import { DocumentGenerator, VirtualLocation } from '../generator'
 import * as OptiCMS from '../cms'
 import type { PresetOptions } from '../types'
 import { getAllFragments, getAllTypeNames } from "./tools"
@@ -8,13 +8,13 @@ import { isNotNullOrUndefined } from '../utils'
 
 export async function getComponentDocuments(loader: string = '@remkoj/optimizely-graph-functions/contenttype-loader')
 {
-  const componentTypes = OptiCMS.getAllContentTypes(undefined, 100, (ct) => {
+  const componentTypes = await OptiCMS.getContentTypesList(undefined, (ct) => {
     return ct.key && ct.source !== 'graph' ? true : false
   });
 
   const documents: Types.CustomDocumentLoader[] = [];
-  for await (const componentType of componentTypes) {
-    const vLoc = QueryGen.buildVirtualLocation(componentType, { type: 'fragment', forProperty: false })
+  for (const componentType of componentTypes) {
+    const vLoc = VirtualLocation.build(componentType, { type: 'fragment', forProperty: false })
     if (vLoc) {
       // Inject virtual location
       const def: Types.CustomDocumentLoader = {}
@@ -22,10 +22,10 @@ export async function getComponentDocuments(loader: string = '@remkoj/optimizely
       documents.push(def);
 
       // Get properties
-      const propertyComponentTypeNames = QueryGen.getReferencedPropertyComponents(componentType);
+      const propertyComponentTypeNames = DocumentGenerator.getReferencedPropertyComponents(componentType);
       const propertyComponentTypes = (await Promise.all(propertyComponentTypeNames.map(componentTypeName => OptiCMS.getContentType(componentTypeName)))).filter(isNotNullOrUndefined)
       for (const propertyComponentType of propertyComponentTypes) {
-        const propVLoc = QueryGen.buildVirtualLocation(propertyComponentType, { type: 'fragment', forProperty: true })
+        const propVLoc = VirtualLocation.build(propertyComponentType, { type: 'fragment', forProperty: true })
         if (propVLoc && !documents.some(x => typeof x === 'object' && x[propVLoc])) {
           // Inject virtual location
           const def: Types.CustomDocumentLoader = {}
@@ -41,8 +41,8 @@ export async function getComponentDocuments(loader: string = '@remkoj/optimizely
 export async function getInjectionTargetDocuments(loader: string = '@remkoj/optimizely-graph-functions/contenttype-loader')
 {
   const documents: Types.CustomDocumentLoader[] = [];
-  for (const injectionTarget of QueryGen.getInjectionTargets()) {
-    const vLoc = QueryGen.buildVirtualLocation(injectionTarget)
+  for (const injectionTarget of VirtualLocation.getInjectionTargets()) {
+    const vLoc = VirtualLocation.build(injectionTarget)
     const def: Types.CustomDocumentLoader = {}
     def[vLoc] = { loader };
     documents.push(def);
@@ -57,7 +57,7 @@ export async function injectInjectionTargets(files: Types.DocumentFile[], option
   if (options.presetConfig.verbose)
     console.log(`✨ [Optimizely] Generating injection target fragments`)
 
-  for (const injectionTarget of QueryGen.getInjectionTargets()) {
+  for (const injectionTarget of VirtualLocation.getInjectionTargets()) {
     if (!allFragments.some(x => x.fragmentName === injectionTarget)) {
       const vLoc = `opti-cms:/injectiontarget/${injectionTarget}`
       const rawSDL = `fragment ${injectionTarget} on _IContent { ...IContentData }`
@@ -92,22 +92,23 @@ export async function injectComponentDocuments(files: Types.DocumentFile[], opti
   if (options.presetConfig.verbose)
     console.log(`✨ [Optimizely] Generating component fragments that have not been defined by the implementation`)
 
-  const allContentTypes = OptiCMS.getAllContentTypes(options.presetConfig.cmsClient, 100, (ct) => {
+  const allContentTypes = await OptiCMS.getContentTypes(options.presetConfig.cmsClient, (ct) => {
     return ct.key && ct.source !== 'graph' ? true : false
   });
+  const queryGen = new DocumentGenerator(allContentTypes);
 
   const propTracker: Map<string,string> = new Map()
 
-  for await (const contentType of allContentTypes) {
+  for (const [_, contentType] of allContentTypes) {
     // Skip over content types without a key
     if (!contentType.key)
       continue
 
     // Construct the type names expected to be in Graph
-    const graphType = QueryGen.getGraphType(contentType)
-    const graphPropertyType = QueryGen.getGraphPropertyType(contentType)
-    const fragmentName = QueryGen.Tools.ucFirst(graphType) + "Data"
-    const propertyFragmentName = QueryGen.Tools.ucFirst(graphPropertyType) + "Data"
+    const graphType = queryGen.getGraphType(contentType)
+    const graphPropertyType = queryGen.getGraphPropertyType(contentType)
+    const fragmentName = queryGen.getDefaultFragmentName(contentType);
+    const propertyFragmentName = queryGen.getDefaultPropertyFragmentName(contentType);
 
     // Check if the types exist
     const graphTypeExists = allGraphTypes.includes(graphType)
@@ -115,8 +116,8 @@ export async function injectComponentDocuments(files: Types.DocumentFile[], opti
 
     // Add Component Data Fragment
     if (graphTypeExists && !allFragments.has(fragmentName)) {
-      const rawSDL = QueryGen.buildFragment(contentType, fragmentName, false, propTracker)
-      const vLoc = QueryGen.buildVirtualLocation(contentType)
+      const rawSDL = queryGen.buildFragment(contentType, fragmentName, false, propTracker)
+      const vLoc = VirtualLocation.build(contentType)
       if (rawSDL) {
         if (options.presetConfig.verbose)
           console.log(`    - Generated fragment ${fragmentName} for ${contentType.key} at ${vLoc}`)
@@ -131,8 +132,8 @@ export async function injectComponentDocuments(files: Types.DocumentFile[], opti
 
     // Add Component Property Data Fragment
     if (graphPropertyTypeExists && contentType.baseType === '_component' && !allFragments.has(propertyFragmentName)) {
-      const rawSDL = QueryGen.buildFragment(contentType, propertyFragmentName, true, propTracker)
-      const vLoc = QueryGen.buildVirtualLocation(contentType, { forProperty: true })
+      const rawSDL = queryGen.buildFragment(contentType, propertyFragmentName, true, propTracker)
+      const vLoc = VirtualLocation.build(contentType, { forProperty: true })
       if (rawSDL) {
         if (options.presetConfig.verbose)
           console.log(`    - Generated property fragment ${propertyFragmentName} for ${contentType.key} at ${vLoc}`)

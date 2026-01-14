@@ -49,7 +49,8 @@ export const plugin: PluginFunction<PluginOptions> = async (schema, documents, c
   // Read the functions to fully build & extend
   const functions = config.functions || []
   if (functions.length == 0)
-    return "// NO FUNCTIONS TO BE EXPORTED"
+    return `// NO FUNCTIONS TO BE EXPORTED
+export const EXPORTED_FUNCTIONS = 0;`
 
   // Output the functions
   const docs = concatAST(documents.map(x => x.document).filter(isNotNullOrUndefined))
@@ -87,6 +88,8 @@ export const plugin: PluginFunction<PluginOptions> = async (schema, documents, c
   prepend.push(`import type * as Types from './graphql'`)
   prepend.push("\n")
 
+  append.push("\n")
+  append.push(`export const EXPORTED_FUNCTIONS = ${ functions.length };`)
   append.push("\n")
 
   return { prepend, content: output.join("\n"), append }

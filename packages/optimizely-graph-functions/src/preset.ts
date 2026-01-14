@@ -2,6 +2,7 @@ import { type Types } from '@graphql-codegen/plugin-helpers'
 
 // Import base preset
 import { preset as clientPreset } from '@graphql-codegen/client-preset'
+import { DocumentMode } from '@graphql-codegen/visitor-plugin-common'
 import * as GraphQLRequestPlugin from '@graphql-codegen/typescript-graphql-request'
 import * as AddPlugin from '@graphql-codegen/add'
 
@@ -55,7 +56,7 @@ export const preset: Types.OutputPreset<PresetOptions> = {
     // Transform / inject the Opti-CMS documents
     const CmsDocLoaders: Array<Types.CustomDocumentLoader> = (
       optiDocs.length == 0
-        ? ['opti-cms:/fragments/13', 'opti-cms:/queries/13']
+        ? ['opti-cms:/fragments/13',/*'opti-cms:/queries/13'*/]
         : optiDocs
     ).map((optiDoc) => {
       const loader: Types.CustomDocumentLoader = {}
@@ -153,14 +154,20 @@ export const preset: Types.OutputPreset<PresetOptions> = {
       plugins: [
         {
           add: {
-            content: ['import type * as Schema from "./graphql";'],
+            content: [
+              'import type * as Schema from "./graphql";',
+            ],
           },
         },
         {
           'typescript-graphql-request': {
-            ...options.config,
+            //rawRequest: true,
             useTypeImports: true,
             importOperationTypesFrom: 'Schema',
+            //documentMode: DocumentMode.string,
+            //experimentalAddDocumentNodeType: false,
+            //rawString: true,
+            ...options.config,
           },
         },
       ],

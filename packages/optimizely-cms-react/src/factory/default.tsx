@@ -55,6 +55,8 @@ export class DefaultComponentFactory implements ComponentFactory {
     variant: string = 'default'
   ): void {
     const registryKey = this.processComponentTypeHandle(type, variant)
+    if (this.dbg)
+      console.log(`➕ [DefaultComponentFactory] Registering ${registryKey}`)
     this.registry.set(registryKey, { type: registryKey, component, useSuspense, loader, variant })
   }
 

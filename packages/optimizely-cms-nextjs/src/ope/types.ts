@@ -69,7 +69,7 @@ export type EditViewOptions<LocaleType = string> = {
    * which actually loads the data of content to be shown to the 
    * editor.
    */
-  loader: GetContentByIdMethod<LocaleType>
+  loader?: GetContentByIdMethod<LocaleType>
 
   /**
    * The third step of the handling of a Preview/On-Page-Edit view,

@@ -16,7 +16,7 @@ export type ComponentTypeDictionaryEntry = {
   /**
    * The component type to register
    */
-  type: ComponentTypeHandle,
+  type: ComponentTypeHandle, 
 
   /**
    * The component to bind to the type
@@ -52,14 +52,6 @@ export interface ComponentFactory {
    * The default value includes the common ones for SaaS CMS.
    */
   ignoredContracts: string[];
-  
-  /**
-   * Check if the component type has been registered within the factory
-   * 
-   * @param       type            The component type to check for
-   * @returns     Whether or not the type exists within the factory
-   */
-  has(type: ComponentTypeHandle): boolean
 
   /**
    * Check if the component type has been registered within the factory
@@ -82,12 +74,12 @@ export interface ComponentFactory {
   register(type: ComponentTypeHandle, component: ComponentType, useSuspense?: boolean, loader?: ComponentType, variant?: string) : void
 
   /**
-   * Perform a batch registration of a collection of components. Each item will be extracted and registered
-   * through the register function.
+   * Register all components provided through the dictionary. When the 
+   * component type has already been registered it will be updated.
    * 
-   * @param     components      The components to register
+   * @param       components  The components to register
    */
-  registerAll(components: ComponentTypeDictionary): void
+  registerAll(components: ComponentTypeDictionary) : void
 
   /**
    * Allows removing of a component type from the factory, but only when

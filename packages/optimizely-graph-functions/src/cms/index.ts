@@ -1,26 +1,7 @@
-import type { IntegrationApi, CmsIntegrationApiClient, CmsIntegrationApiOptions } from "@remkoj/optimizely-cms-api";
+import { IntegrationApi, CmsIntegrationApiClient, CmsIntegrationApiOptions } from "@remkoj/optimizely-cms-api";
 import { createClient, isClientInstance } from "@remkoj/optimizely-cms-api";
 import { hasher as createHasher } from 'node-object-hash';
 import { lcFirst, trimStart, ucFirst } from '../tools'
-
-var hasher = createHasher({ sort: true, coerce: true });
-const clientByHash = new Map<string, Promise<CmsIntegrationApiClient>>();
-function getClient(config?: CmsIntegrationApiOptions): Promise<CmsIntegrationApiClient> {
-  const configHash = hasher.hash(config ?? {})
-  let client = clientByHash.get(configHash);
-  if (!client) {
-    client = new Promise((resolve, reject) => {
-      const cms_client = createClient(config);
-      cms_client.getInstanceInfo().then(() => {
-        resolve(cms_client)
-      }).catch(e => {
-        reject(e)
-      })
-    })
-    clientByHash.set(configHash, client)
-  }
-  return client
-}
 
 export function contentTypeToFragmentName(contentType: IntegrationApi.ContentType, forProperty: boolean = false): string | undefined {
   const contentTypeKey = contentType.key
@@ -44,11 +25,14 @@ export function fragmentNameToContentType(fragmentName: string): { contentType: 
   }
 }
 
-export async function getContentType(contentTypeKey: string, clientOrConfig?: CmsIntegrationApiClient | CmsIntegrationApiOptions): Promise<IntegrationApi.ContentType | undefined> {
+/*export async function getContentType(contentTypeKey: string, clientOrConfig?: CmsIntegrationApiClient | CmsIntegrationApiOptions): Promise<IntegrationApi.ContentType | undefined> {
   const client = isClientInstance(clientOrConfig) ? clientOrConfig : await getClient(clientOrConfig)
-  const contentType = await client.contentTypesGet({ path: { key: contentTypeKey } }).catch(() => undefined)
+  const contentType = await client.contentTypesGet({ path: { key: contentTypeKey } }).catch((e) => {
+    console.warn(e)
+    return undefined
+  })
   return contentType
-}
+}*/
 
 export type ContentTypeFilter = (contentType: IntegrationApi.ContentType) => Promise<boolean> | boolean
 const DefaultContentTypeFilter: ContentTypeFilter = () => true
@@ -60,7 +44,7 @@ const DefaultContentTypeFilter: ContentTypeFilter = () => true
  * @param pageSize 
  * @param filter
  */
-export async function* getAllContentTypes(clientOrConfig?: CmsIntegrationApiClient | CmsIntegrationApiOptions, pageSize: number = 25, filter: ContentTypeFilter = DefaultContentTypeFilter): AsyncGenerator<IntegrationApi.ContentType> {
+async function* getAllContentTypes(clientOrConfig?: CmsIntegrationApiClient | CmsIntegrationApiOptions, pageSize: number = 25, filter: ContentTypeFilter = DefaultContentTypeFilter): AsyncGenerator<IntegrationApi.ContentType> {
   const client = isClientInstance(clientOrConfig) ? clientOrConfig : await getClient(clientOrConfig)
   let requestPageSize = pageSize;
   let requestPageIndex = 0
@@ -91,3 +75,64 @@ export async function* getAllContentTypes(clientOrConfig?: CmsIntegrationApiClie
   } while (requestPageIndex < totalPages)
 }
 
+async function getAllContentTypesMap(clientOrConfig?: CmsIntegrationApiClient | CmsIntegrationApiOptions, pageSize: number = 25, filter: ContentTypeFilter = DefaultContentTypeFilter): Promise<Map<string, IntegrationApi.ContentType>>
+{
+  const contentTypeMap : Map<string, IntegrationApi.ContentType> = new Map();
+  const allContentTypes = getAllContentTypes(clientOrConfig, pageSize, filter);
+  for await (const ct of allContentTypes) {
+    if (ct.key) contentTypeMap.set(ct.key, ct)
+  }
+  return contentTypeMap
+}
+
+var hasher = createHasher({ sort: true, coerce: true });
+const clientByHash = new Map<string, Promise<CmsIntegrationApiClient>>();
+const contentTypeList = new Map<string, Promise<Map<string, IntegrationApi.ContentType>>>();
+
+export function getContentTypes(configOrClient?: CmsIntegrationApiOptions | CmsIntegrationApiClient, filter?: ContentTypeFilter): Promise<Map<string, IntegrationApi.ContentType>>
+{
+  const config = (isClientInstance(configOrClient) ? (configOrClient as CmsIntegrationApiClient & {_config: CmsIntegrationApiOptions})._config : configOrClient);
+  const hash = hasher.hash(config ?? {});
+  let list = contentTypeList.get(hash);
+  if (!list) {
+    list = getAllContentTypesMap(configOrClient, 100);
+    contentTypeList.set(hash, list);
+  }
+  if (filter)
+    return list.then(contentTypeMap => {
+      const filteredMap = new Map<string, IntegrationApi.ContentType>();
+      contentTypeMap.forEach((contentType, contentTypeKey ) => {
+        if (filter(contentType)) filteredMap.set(contentTypeKey, contentType);
+      });
+      return filteredMap
+    })
+  return list
+}
+
+export async function getContentTypesList(configOrClient?: CmsIntegrationApiOptions | CmsIntegrationApiClient, filter?: ContentTypeFilter): Promise<Array<IntegrationApi.ContentType>>
+{
+  const types = await getContentTypes(configOrClient, filter);
+  return Array.from(types.values());
+}
+
+export async function getContentType(contentTypeKey: string, clientOrConfig?: CmsIntegrationApiClient | CmsIntegrationApiOptions): Promise<IntegrationApi.ContentType | undefined> {
+  const types = await getContentTypes(clientOrConfig);
+  return types.get(contentTypeKey);
+}
+
+function getClient(config?: CmsIntegrationApiOptions): Promise<CmsIntegrationApiClient> {
+  const configHash = hasher.hash(config ?? {})
+  let client = clientByHash.get(configHash);
+  if (!client) {
+    client = new Promise((resolve, reject) => {
+      const cms_client = createClient(config);
+      cms_client.getInstanceInfo().then(() => {
+        resolve(cms_client)
+      }).catch(e => {
+        reject(e)
+      })
+    })
+    clientByHash.set(configHash, client)
+  }
+  return client
+}

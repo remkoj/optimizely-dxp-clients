@@ -11,8 +11,20 @@
     "sectionEnabled"
   ],
   "contracts": [],
-  "lastModifiedBy": "",
   "properties": {
+    "FieldMapping": {
+      "type": "array",
+      "displayName": "Field mappings",
+      "description": "",
+      "localized": false,
+      "required": false,
+      "group": "data",
+      "sortOrder": 0,
+      "items": {
+        "type": "component",
+        "contentType": "KeyValuePair"
+      }
+    },
     "Title": {
       "type": "string",
       "displayName": "Title",

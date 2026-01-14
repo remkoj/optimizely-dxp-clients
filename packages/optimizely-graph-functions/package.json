@@ -21,7 +21,8 @@
     "./transform": "./dist/transform.js",
     "./documents": "./dist/documents/index.js",
     "./loader": "./dist/embedded-loader.js",
-    "./contenttype-loader": "./dist/contenttype-loader.js"
+    "./contenttype-loader": "./dist/contenttype-loader.js",
+    "./generate": "./dist/generator/index.js"
   },
   "typesVersions": {
     "*": {
@@ -41,7 +42,10 @@
         "./dist/embedded-loader.d.ts"
       ],
       "contenttype-loader": [
-        "./dist/contenttype-loader.js"
+        "./dist/contenttype-loader.d.ts"
+      ],
+      "generate": [
+        "./dist/generator/index.d.ts"
       ]
     }
   },
@@ -49,7 +53,7 @@
     "@graphql-typed-document-node/core": "^3.2.0",
     "@remkoj/optimizely-cms-api": "workspace:6.0.0-pre14",
     "@remkoj/optimizely-graph-client": "workspace:6.0.0-pre14",
-    "@types/node": "^22.19.3",
+    "@types/node": "^22.19.6",
     "typescript": "^5.9.3"
   },
   "dependencies": {
@@ -75,5 +79,5 @@
     "watch": "yarn tsc --watch",
     "opti-patch": "yarn node dist/patch.js"
   },
-  "stableVersion": "5.1.0"
+  "stableVersion": "5.2.0"
 }

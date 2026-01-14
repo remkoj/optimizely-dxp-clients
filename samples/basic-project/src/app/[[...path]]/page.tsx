@@ -13,6 +13,14 @@ const {
   generateStaticParams,
   CmsPage: Page,
 } = createPage(factory, {
+
+  /**
+   * Filter all pages by those that have this exact value for
+   * _metadata.url.base. Which allows the most basic form of 
+   * multisite filtering.
+   */
+  //channel: "http://localhost:3000",
+
   /**
    * The factory to use to create the GraphQL Client to fetch data from Optimizely
    * CMS.
@@ -27,7 +35,7 @@ const {
     const client = createClient(undefined, token, {
       nextJsFetchDirectives: true,
     })
-    console.log(`⚪ [Sample Site] Debug has been ${ client.debug ? 'enabled' : 'disabled' }`)
+    //console.log(`⚪ [Sample Site] Debug has been ${ client.debug ? 'enabled' : 'disabled' }`)
     if (client.debug)
       console.log('⚪ [Sample Site] Created new Optimizely Graph client')
 

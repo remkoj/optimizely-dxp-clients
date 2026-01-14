@@ -7,7 +7,7 @@ import { parseArgs } from '../tools/parseArgs.js'
 import { createCmsClient } from '../tools/cmsClient.js'
 import { getContentTypes, type GetContentTypesResult } from '../tools/contentTypes.js'
 import { type NextJsModule, builder, createTypeFolders, getContentTypePaths, getTypeFolder, type TypeFolderList } from './_nextjs_base.js'
-import GraphQLGen from "@remkoj/optimizely-graph-functions/contenttype-loader"
+import { PropertyCollisionTracker, DocumentGenerator } from "@remkoj/optimizely-graph-functions/generate"
 
 export const NextJsFragmentsCommand: NextJsModule<{ loadedContentTypes: GetContentTypesResult, createdTypeFolders: TypeFolderList }> = {
   command: "nextjs:fragments",
@@ -22,14 +22,19 @@ export const NextJsFragmentsCommand: NextJsModule<{ loadedContentTypes: GetConte
 
     // Get content types
     const { contentTypes, all: allContentTypes } = loadedContentTypes ?? await getContentTypes(client, args)
+    const allContentTypesMap = new Map<string, IntegrationApi.ContentType>();
+    allContentTypes.forEach(x => {
+      if (x.key) allContentTypesMap.set(x.key, x)
+    });
+    const generator = new DocumentGenerator(allContentTypesMap);
 
     // Start process
     process.stdout.write(chalk.yellowBright(`${figures.arrowRight} Generating GraphQL fragments\n`))
     const typeFolders = createdTypeFolders ?? createTypeFolders(contentTypes, basePath, debug)
-    const tracker = new GraphQLGen.PropertyCollisionTracker(appPath);
+    const tracker = new PropertyCollisionTracker(appPath);
     const dependencies: string[] = []
     const updatedTypes = contentTypes.map(contentType => {
-      const { written, propertyTypes } = createComponentFragments(contentType, getTypeFolder(typeFolders, contentType.key), force, debug, tracker)
+      const { written, propertyTypes } = createComponentFragments(contentType, getTypeFolder(typeFolders, contentType.key), force, debug, tracker, generator)
       dependencies.push(...propertyTypes)
       return written ? contentType.key : undefined
     }).filter(x => x)
@@ -51,7 +56,7 @@ export const NextJsFragmentsCommand: NextJsModule<{ loadedContentTypes: GetConte
         typeFolders.push(tf)
       }
       return tf
-    }, force, debug, tracker)
+    }, force, debug, tracker, generator)
 
     // Report outcome
     if (generatedProps.length > 0)
@@ -68,12 +73,14 @@ export function createComponentFragments(
   typePath: TypeFolderList[number],
   force: boolean,
   debug: boolean,
-  propertyTracker: Map<string,string> = new Map<string,string>()
+  propertyTracker: Map<string,string> = new Map(),
+  generator: DocumentGenerator
 ): {
   written: boolean
   propertyTypes: string[]
 } {
   const baseQueryFile = typePath.fragmentFile
+
 
   let writeFragment: boolean = true;
   if (fs.existsSync(baseQueryFile)) {
@@ -91,11 +98,11 @@ export function createComponentFragments(
 
   let written: boolean = false
   if (writeFragment) {
-    const fragment = GraphQLGen.buildFragment(contentType, undefined, false, propertyTracker)
+    const fragment = generator.buildFragment(contentType, undefined, false, propertyTracker)
     fs.writeFileSync(baseQueryFile, fragment)
     written = true
   }
-  return { written, propertyTypes: GraphQLGen.getReferencedPropertyComponents(contentType) }
+  return { written, propertyTypes: DocumentGenerator.getReferencedPropertyComponents(contentType) }
 }
 
 export function createPropertyFragments(
@@ -104,7 +111,8 @@ export function createPropertyFragments(
   selectTypeFolder: (ctKey: IntegrationApi.ContentType) => TypeFolderList[number] | undefined,
   force: boolean = false,
   debug: boolean = false,
-  propertyTracker: Map<string,string> = new Map<string,string>()
+  propertyTracker: Map<string,string> = new Map<string,string>(),
+  generator: DocumentGenerator
 ) {
   const returnValue: string[] = []
   for (const propertyContentTypeKey of propertyTypesList.filter((v, i, a) => a.indexOf(v, i + 1) <= i)) {
@@ -137,17 +145,17 @@ export function createPropertyFragments(
       process.stdout.write(chalk.gray(`${figures.arrowRight} Creating ${contentType.displayName} (${contentType.key}) property fragment\n`))
     }
     if (mustWrite) {
-      const fragment = GraphQLGen.buildFragment(contentType, undefined, true, propertyTracker)
+      const fragment = generator.buildFragment(contentType, undefined, true, propertyTracker)
       fs.writeFileSync(propertyFragmentFile, fragment)
       returnValue.push(contentType.key)
     }
 
     // Recurse down for properties that we're not yet rendering
-    const referencedPropertyTypes = GraphQLGen.getReferencedPropertyComponents(contentType).filter(x => !propertyTypesList.includes(x))
+    const referencedPropertyTypes = DocumentGenerator.getReferencedPropertyComponents(contentType).filter(x => !propertyTypesList.includes(x))
     if (referencedPropertyTypes.length > 0) {
       if (debug)
         process.stdout.write(chalk.gray(`${figures.arrowRight} Component property ${propertyContentTypeKey} uses components a property, recursing down\n`))
-      const additionalProperties = createPropertyFragments(referencedPropertyTypes, allContentTypes, selectTypeFolder, force, debug, propertyTracker)
+      const additionalProperties = createPropertyFragments(referencedPropertyTypes, allContentTypes, selectTypeFolder, force, debug, propertyTracker, generator)
       returnValue.push(...additionalProperties)
     }
   }

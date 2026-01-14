@@ -1,6 +1,6 @@
 import type { Types } from '@graphql-codegen/plugin-helpers'
 import { visit, Kind, type FragmentDefinitionNode, type ASTNode, type SelectionNode, type SelectionSetNode, type FragmentSpreadNode, type OperationDefinitionNode } from 'graphql'
-import * as QueryGen from '../contenttype-loader'
+import { VirtualLocation } from '../generator'
 import type { PresetOptions, Injection, TransformOptions } from '../types'
 import { defaultOptions, pickTransformOptions } from "./options"
 
@@ -149,7 +149,7 @@ export async function getComponentFragments(files: Types.DocumentFile[], { injec
       return componentFragments; /// Stop if we don't have a document
 
     // Check if this an internally generated fragment
-    const vLocInfo = file.location ? QueryGen.parseVirtualLocation(file.location) : undefined
+    const vLocInfo = file.location ? VirtualLocation.parse(file.location) : undefined
     if (vLocInfo) {
       // Only process the Virtual Location if it's for a non-property fragment with at least one injection target
       if (vLocInfo.type !== 'fragment' || vLocInfo.forProperty || vLocInfo.injectionTargets.length == 0)

@@ -24,13 +24,12 @@ import OnPageEdit from '../components/on-page-edit.js'
 import { createAuthorizedClient } from '../client.js'
 import React, { type JSX } from 'react'
 import Script from 'next/script.js'
-import { getContentById } from './data.js'
 import { getContentRequest, isValidRequest } from './tools.js'
+import loadContent from './load-content.js'
 
 const defaultOptions: EditViewOptions<string> = {
   refreshNotice: () => <></>,
   layout: (props) => <>{props.children}</>,
-  loader: getContentById,
   clientFactory: (token?: string) => createAuthorizedClient(token),
   communicationInjectorPath: '/util/javascript/communicationinjector.js',
   contentResolver: getContentRequest,
@@ -107,75 +106,20 @@ export function createEditPageComponent<LocaleType = string>(
     }
 
     try {
-      const contentInfo = await getContentById(client, {
-        ...contentRequest,
-        locale:
-          contentRequest.locale && contentRequest.locale.length > 0
-            ? localeToGraphLocale(
-                Array.isArray(contentRequest.locale)
-                  ? contentRequest.locale.at(0)
-                  : contentRequest.locale
-              )
-            : undefined,
-        changeset: client.getChangeset(),
-      })
-      if ((contentInfo?.content?.total ?? 0) > 1) {
-        console.warn(
-          '🟠 [OnPageEdit] Content request ' +
-            JSON.stringify(contentRequest) +
-            ' yielded more then one item, picking first matching'
-        )
-      }
-      const contentItem =
-        (Array.isArray(contentInfo?.content?.items)
-          ? contentInfo?.content?.items[0]
-          : contentInfo?.content?.items) ?? undefined
-      const contentType = Utils.normalizeContentType(
-        contentItem?._metadata.types
-      )
 
-      // Return a 404 if the content item or type could not be resolved
-      if (!contentItem) {
-        console.warn(
-          `🟠 [OnPageEdit] The content item for ${JSON.stringify(contentRequest)} could not be loaded from Optimizely Graph`
-        )
-        return notFound()
-      }
-      if (!contentType) {
-        console.warn(
-          `🟠 [OnPageEdit] The content item for ${JSON.stringify(contentRequest)} did not contain content type information`
-        )
-        return notFound()
-      }
-
-      const contentLink: ContentLinkWithLocale = {
-        key: contentItem._metadata.key,
-        locale: contentItem._metadata.locale,
-        version: contentItem._metadata.version,
-      }
-
-      if (context.isDebug) {
-        console.log(
-          '⚪ [OnPageEdit] Resolved content:',
-          JSON.stringify({
-            ...contentLink,
-            type: (contentItem.contentType ?? []).join('/'),
-          })
-        )
-      }
-
+      const { contentLink, contentItem, contentType } = await loadContent(contentRequest, client, getContentById)
 
       // Store the editable content so it can be tested
       context.setEditableContentId(contentLink)
       if (contentLink.locale) context.setLocale(contentLink.locale)
 
       // Determine rendering flow controls
-      const isPage =
-        contentType.some((x) => x?.toLowerCase() == 'page') ?? false
-      const isSection = contentType.some(x => x?.toLowerCase() == 'section') ?? false
-      const sectionData = isSection && contentItem['composition'] && isNode(contentItem['composition']) ? contentItem['composition'] as CompositionNode : undefined
+      const isPage = contentType ? contentType.some((x) => x?.toLowerCase() === 'page') ?? false : false;
+      const isSection = contentType?.some(x => x?.toLowerCase() == 'section') ?? false
+      const sectionData = isSection && isNode(contentItem?.composition) ? contentItem.composition as CompositionNode : undefined
       if (sectionData) {
-        delete contentItem['composition']
+        if (contentItem?.composition)
+          delete contentItem.composition
         sectionData.component = contentItem
         context.setEditableContentIsExperience(true)
       }
@@ -189,7 +133,7 @@ export function createEditPageComponent<LocaleType = string>(
         <>
           {/* @ts-expect-error */}
           <Script src={ injectorUrl } strategy="afterInteractive"/>
-          <Layout locale={contentItem.locale?.name ?? ''}>
+          <Layout locale={contentItem?.locale?.name ?? ''}>
             <OnPageEdit refreshTimeout={refreshTimeout}>
               <RefreshNotice />
             </OnPageEdit>

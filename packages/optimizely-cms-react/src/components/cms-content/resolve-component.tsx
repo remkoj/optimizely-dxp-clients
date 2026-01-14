@@ -55,11 +55,6 @@ export function resolveComponent(
     )
   }
 
-  /*if (isDebug)
-    console.log(
-      `⚪ [CmsContent][resolveComponent] Normalized content type ${JSON.stringify(contentType)} to ${myContentType}`
-    )*/
-
   // Resolve component
   const Component = Utils.resolveComponentType(
     factory,

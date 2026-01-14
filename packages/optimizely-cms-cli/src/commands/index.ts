@@ -46,6 +46,7 @@ export const commands: CliModuleList = [
   StylesListCommand,
   StylesPullCommand,
   StylesPushCommand,
+  StylesDeleteCommand,
   TypesPullCommand,
   TypesPushCommand
 ]

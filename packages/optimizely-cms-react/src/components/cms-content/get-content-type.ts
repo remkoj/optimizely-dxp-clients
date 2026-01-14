@@ -42,7 +42,7 @@ export async function getContentType(link: ContentLink | InlineContentLink, gqlC
     return undefined
   }
 
-  const contentType = normalizeContentType(gqlResponse.Content?.item?._metadata?.types)
+  const contentType = normalizeContentType(gqlResponse.Content?.item?.metadata?.types)
   if (!contentType) {
     console.error(`🔴 [CmsContent][getContentType] The item did not contain type information! (${contentLinkToString(link)})`)
     throw new Error("The item did not contain type information")
@@ -56,7 +56,7 @@ export default getContentType
 type GetContentTypeResponse = {
   Content: {
     item: Partial<{
-      _metadata: Partial<{
+      metadata: Partial<{
         types: string[]
       }>
     }>

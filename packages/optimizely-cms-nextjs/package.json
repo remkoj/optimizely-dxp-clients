@@ -47,8 +47,8 @@
     "@remkoj/optimizely-cms-react": "workspace:6.0.0-pre14",
     "@remkoj/optimizely-graph-client": "workspace:6.0.0-pre14",
     "@types/negotiator": "^0.6.4",
-    "@types/node": "^22.19.3",
-    "@types/react": "^19.2.7",
+    "@types/node": "^22.19.6",
+    "@types/react": "^19.2.8",
     "@types/react-dom": "19.2.3",
     "next": "^16.1.1",
     "prop-types": "^15.8.1",
@@ -78,5 +78,5 @@
     "watch": "yarn tsc --watch",
     "recompile": "yarn tsc --build --clean && yarn tsc --build --force"
   },
-  "stableVersion": "5.1.0"
+  "stableVersion": "5.2.0"
 }

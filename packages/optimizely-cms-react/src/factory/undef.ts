@@ -1,4 +1,4 @@
-import { ComponentType, ComponentTypeDictionary, ComponentTypeHandle, type ComponentFactory } from "./types.js";
+import { ComponentType, ComponentTypeDictionary, type ComponentFactory } from "./types.js";
 
 export class UndefinedComponentFactory implements ComponentFactory {
   get ignoredContracts() : string[] {

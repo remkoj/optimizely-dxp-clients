@@ -8,7 +8,7 @@ import { createCmsClient } from '../tools/cmsClient.js'
 import { getContentTypes, contentTypesBuilder, ContentTypesArgsDefaults, type GetContentTypesResult } from '../tools/contentTypes.js'
 import { type NextJsModule, createTypeFolders, getTypeFolder, type TypeFolderList, getContentTypePaths } from './_nextjs_base.js'
 import { createPropertyFragments } from './nextjs_fragments.js'
-import GraphQLGen from "@remkoj/optimizely-graph-functions/contenttype-loader"
+import { PropertyCollisionTracker, DocumentGenerator } from "@remkoj/optimizely-graph-functions/generate"
 
 export const NextJsQueriesCommand: NextJsModule<{ loadedContentTypes: GetContentTypesResult, createdTypeFolders: TypeFolderList }> = {
   command: "nextjs:queries",
@@ -23,8 +23,13 @@ export const NextJsQueriesCommand: NextJsModule<{ loadedContentTypes: GetContent
     const { loadedContentTypes, createdTypeFolders } = opts || {}
     const { components: basePath, _config: { debug }, force, path: appPath } = parseArgs(args)
     const client = createCmsClient(args)
-    const { contentTypes, all: allContentTypes } = loadedContentTypes ?? await getContentTypes(client, args)
-    const propertyTracker = new GraphQLGen.PropertyCollisionTracker(appPath);
+    const { contentTypes, all: allContentTypes } = loadedContentTypes ?? await getContentTypes(client, args);
+    const allContentTypesMap = new Map<string, IntegrationApi.ContentType>();
+    allContentTypes.forEach(x => {
+      if (x.key) allContentTypesMap.set(x.key, x)
+    });
+    const generator = new DocumentGenerator(allContentTypesMap);
+    const propertyTracker = new PropertyCollisionTracker(appPath);
 
     // Start process
     process.stdout.write(chalk.yellowBright(`${figures.arrowRight} Generating GraphQL queries\n`))
@@ -32,7 +37,7 @@ export const NextJsQueriesCommand: NextJsModule<{ loadedContentTypes: GetContent
     const typeFolders = createdTypeFolders ?? createTypeFolders(contentTypes, basePath, debug)
     const updatedTypes = contentTypes.map(contentType => {
       const typePath = getTypeFolder(typeFolders, contentType.key)
-      const { written, propertyTypes } = createGraphQueries(contentType, typePath, force, debug, propertyTracker)
+      const { written, propertyTypes } = createGraphQueries(contentType, typePath, force, debug, propertyTracker, generator)
       dependencies.push(...propertyTypes)
       return written ? contentType.key : undefined
     }).filter(x => x).flat()
@@ -52,7 +57,7 @@ export const NextJsQueriesCommand: NextJsModule<{ loadedContentTypes: GetContent
         typeFolders.push(tf)
       }
       return tf
-    }, force, debug, propertyTracker)
+    }, force, debug, propertyTracker, generator)
 
     // Report outcome
     if (generatedProps.length > 0)
@@ -71,7 +76,8 @@ export function createGraphQueries(
   typePath: TypeFolderList[number],
   force: boolean,
   debug: boolean,
-  tracker: Map<string,string>
+  tracker: Map<string,string>,
+  generator: DocumentGenerator
 ): { written: boolean, propertyTypes: string[] } {
   const baseQueryFile = typePath.queryFile
 
@@ -90,12 +96,12 @@ export function createGraphQueries(
   }
 
   if (mustWrite) {
-    const fragment = GraphQLGen.buildGetQuery(contentType, undefined, tracker)
+    const fragment = generator.buildGetQuery(contentType, undefined, tracker)
     fs.writeFileSync(baseQueryFile, fragment)
   }
 
   return {
     written: mustWrite,
-    propertyTypes: GraphQLGen.getReferencedPropertyComponents(contentType)
+    propertyTypes: DocumentGenerator.getReferencedPropertyComponents(contentType)
   }
 }

@@ -41,8 +41,8 @@
   "devDependencies": {
     "@remkoj/optimizely-graph-client": "workspace:6.0.0-pre14",
     "@tailwindcss/cli": "^4.1.18",
-    "@types/node": "^22.19.3",
-    "@types/react": "^19.2.7",
+    "@types/node": "^22.19.6",
+    "@types/react": "^19.2.8",
     "@types/react-dom": "19.2.3",
     "@types/uuid": "^11.0.0",
     "browserslist": "^4.28.1",
@@ -76,5 +76,5 @@
     "tailwind": "tailwindcss -i ./src/styles.css -o ./dist/styles.css --minify",
     "recompile": "tsc --build --clean && tsc --build --force"
   },
-  "stableVersion": "5.1.0"
+  "stableVersion": "5.2.0"
 }

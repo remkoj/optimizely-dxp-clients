@@ -1,5 +1,5 @@
 import type { IntegrationApi } from "@remkoj/optimizely-cms-api"
-import { isNonEmptyString } from "./tools"
+import { isNonEmptyString } from "../tools"
 
 export type VirtualLocationOptions = { forProperty: boolean, type: 'fragment' | 'query' | 'target' }
 export type VirtualLocationData = { contentTypeBase: string, contentTypeKey: string, injectionTargets: Array<string> } & VirtualLocationOptions
@@ -37,7 +37,7 @@ export function getInjectionTargets() {
  * @param     virtualPath   The virtual path
  * @returns   The fragment/query configuration
  */
-export function parseVirtualLocation(virtualPath: string): VirtualLocationData | undefined {
+export function parse(virtualPath: string): VirtualLocationData | undefined {
   if (!virtualPath.startsWith('opti-cms:/'))
     return undefined
   const virtualURL = new URL(virtualPath)
@@ -65,9 +65,9 @@ export function parseVirtualLocation(virtualPath: string): VirtualLocationData |
   return { type, contentTypeBase, contentTypeKey, injectionTargets, forProperty }
 }
 
-export function buildVirtualLocation(injectionFragment: string): string
-export function buildVirtualLocation(contentType: IntegrationApi.ContentType, options?: Partial<VirtualLocationOptions>): string | undefined
-export function buildVirtualLocation(contentType: IntegrationApi.ContentType|string, options?: Partial<VirtualLocationOptions>) : string | undefined {
+export function build(injectionFragment: string): string
+export function build(contentType: IntegrationApi.ContentType, options?: Partial<VirtualLocationOptions>): string | undefined
+export function build(contentType: IntegrationApi.ContentType|string, options?: Partial<VirtualLocationOptions>) : string | undefined {
   if (typeof(contentType) === 'string') 
     return `opti-cms:/injectiontarget/${contentType}`
   

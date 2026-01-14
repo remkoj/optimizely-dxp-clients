@@ -12,11 +12,11 @@
   ],
   "devDependencies": {
     "@hey-api/client-fetch": "^0.13.1",
-    "@hey-api/openapi-ts": "^0.90.2",
+    "@hey-api/openapi-ts": "^0.90.3",
     "rimraf": "^6.1.2"
   },
   "dependencies": {
-    "@types/node": "^22.19.3",
+    "@types/node": "^22.19.6",
     "dotenv": "^17.2.3",
     "dotenv-expand": "^12.0.3",
     "glob": "^13.0.0",
@@ -31,5 +31,5 @@
     "rebuild": "yarn clean && yarn generate && tsc --build --force",
     "generate": "yarn node scripts/create-client.mjs"
   },
-  "stableVersion": "5.1.0"
+  "stableVersion": "5.2.0"
 }

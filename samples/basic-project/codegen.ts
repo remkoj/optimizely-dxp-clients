@@ -24,10 +24,10 @@ const config: CodegenConfig = {
   ],
   generates: {
     'src/gql/': {
-      //documents: ['opti-cms:/queries/13', 'opti-cms:/fragments/13'],
+      //documents: ['opti-cms:/queries/13'],
       preset: OptimizelyGraphPreset,
       presetConfig: {
-        functions: ['getContentType', 'getContentByPath', 'getContentById', 'getBlankExperienceData'],
+        // functions: ['getContentType', 'getContentByPath', 'getContentById', 'getBlankExperienceData'],
         // By default the preset will generate recursive queries
         // untill multiple recursions are supported, this needs to
         // be disabled when there's more then one component that

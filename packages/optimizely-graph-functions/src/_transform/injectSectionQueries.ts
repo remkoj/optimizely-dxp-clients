@@ -1,21 +1,22 @@
 import type { Types } from '@graphql-codegen/plugin-helpers'
 import { parse } from 'graphql'
-import * as QueryGen from '../contenttype-loader'
+
 import * as OptiCMS from '../cms'
 import type { PresetOptions } from '../types'
 import { getAllQueries, getAllTypeNames } from './tools'
+import { VirtualLocation, DocumentGenerator } from '../generator'
 
 export async function getSectionDocuments(loader: string = '@remkoj/optimizely-graph-functions/contenttype-loader')
 {
-  const sectionTypes = OptiCMS.getAllContentTypes(undefined, 100, (ct) => {
+  const sectionTypes = OptiCMS.getContentTypesList(undefined, (ct) => {
     if (ct.source == "graph")
       return false;
     return ["_section"].includes((ct.baseType || "").toLowerCase());
   });
 
   const documents: Types.CustomDocumentLoader[] = [];
-  for await (const sectionType of sectionTypes) {
-    const vLoc = QueryGen.buildVirtualLocation(sectionType, { type: 'query' })
+  for (const sectionType of await sectionTypes) {
+    const vLoc = VirtualLocation.build(sectionType, { type: 'query' })
     if (vLoc) {
       const def: Types.CustomDocumentLoader = {}
       def[vLoc] = { loader }
@@ -32,16 +33,18 @@ export async function injectSectionQueries(files: Types.DocumentFile[], options:
   const existingQueries = getAllQueries(files)
   const existingTypes = getAllTypeNames(options.schema)
 
-  const sectionTypes = OptiCMS.getAllContentTypes(undefined, 100, (ct) => {
+  const allTypes = OptiCMS.getContentTypes(undefined)
+  const sectionTypes = OptiCMS.getContentTypesList(undefined, (ct) => {
     if (ct.source == "graph")
       return false;
     return ["_section"].includes((ct.baseType || "").toLowerCase());
   });
 
   const newFiles: Types.DocumentFile[] = []
-  for await (const sectionContentType of sectionTypes) {
-    const graphDataType = QueryGen.getGraphType(sectionContentType)
-    const queryName = `get${QueryGen.Tools.ucFirst(graphDataType)}Data`
+  const queryGen = new DocumentGenerator(await allTypes)
+  for (const sectionContentType of await sectionTypes) {
+    const graphDataType = queryGen.getGraphType(sectionContentType)
+    const queryName = queryGen.getDefaultQueryName(sectionContentType);
 
     // Check if the type exists in the Schema, if not skip it
     if (!existingTypes.includes(graphDataType)) {
@@ -57,8 +60,8 @@ export async function injectSectionQueries(files: Types.DocumentFile[], options:
       continue
     }
 
-    const rawSDL = QueryGen.buildGetQuery(sectionContentType, queryName)
-    const vLoc = QueryGen.buildVirtualLocation(sectionContentType, { type: 'query' })
+    const rawSDL = queryGen.buildGetQuery(sectionContentType, queryName)
+    const vLoc = VirtualLocation.build(sectionContentType, { type: 'query' })
     if (options.presetConfig.verbose)
       console.log(`    - Generated query for ${sectionContentType.key} at ${vLoc}`)
 
