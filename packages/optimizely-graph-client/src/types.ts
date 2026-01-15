@@ -65,6 +65,16 @@ export type OptimizelyGraphConfigInternal = {
 export type OptimizelyGraphConfig = Partial<Omit<OptimizelyGraphConfigInternal, 'single_key'>> & Pick<OptimizelyGraphConfigInternal, 'single_key'>
 
 /**
+ * See [Vercel docs](https://vercel.com/docs/environment-variables/system-environment-variables) for details
+ */
+export type VercelEnvironmentVariables = {
+    automation_bypass_secret?: string
+    target_env?: string
+    project_production_url?: string
+    branch_url?: string
+}
+
+/**
  * @deprecated Reference OptimizelyGraphConfig
  */
 export type ContentGraphConfig = OptimizelyGraphConfig

@@ -42,6 +42,17 @@ export function readEnvironmentVariables(): Types.OptimizelyGraphConfig {
   return config
 }
 
+export function readVercelEnvironmentVariables(): Types.VercelEnvironmentVariables {
+  const config: Types.VercelEnvironmentVariables = {
+    automation_bypass_secret: getOptional('VERCEL_AUTOMATION_BYPASS_SECRET'),
+    target_env: getOptional('VERCEL_TARGET_ENV'),
+    project_production_url: getOptional('VERCEL_PROJECT_PRODUCTION_URL'),
+    branch_url: getOptional('VERCEL_BRANCH_URL')
+  }
+  
+  return config
+}  
+
 export function applyConfigDefaults(configuredValues: Types.OptimizelyGraphConfig): Types.OptimizelyGraphConfigInternal {
   const defaults: Types.OptimizelyGraphConfigInternal = {
     single_key: "",
@@ -75,9 +86,9 @@ function resolveDeploymentDomain(): string | undefined {
     return opti_variables
 
   // Then try to resolve based upon Vercel environment variables
-  const vercelEnv = getOptional('VERCEL_TARGET_ENV')
+  const vercelEnv = readVercelEnvironmentVariables().target_env
   if (vercelEnv && vercelEnv != 'development') {
-    const vercelDomain = vercelEnv == 'production' ? getOptional('VERCEL_PROJECT_PRODUCTION_URL') : getOptional('VERCEL_BRANCH_URL');
+    const vercelDomain = vercelEnv == 'production' ? readVercelEnvironmentVariables().project_production_url : readVercelEnvironmentVariables().branch_url;
     if (vercelDomain && vercelDomain != "")
       return vercelDomain
   }
