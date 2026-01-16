@@ -1,11 +1,14 @@
 import { getArgsConfig, getFrontendURL } from "../config.js";
 import type { CliModule } from '../types.js';
 import createAdminApi, { isApiError } from '@remkoj/optimizely-graph-client/admin'
-import { readEnvironmentVariables as getEnvConfig } from "@remkoj/optimizely-graph-client/config"
+import {
+  readEnvironmentVariables as getEnvConfig,
+  readVercelEnvironmentVariables as getVercelEnvConfig
+} from "@remkoj/optimizely-graph-client/config"
 import chalk from 'chalk'
 import figures from 'figures'
 
-type PublishToVercelProps = { path: string, verb: string, publish_token: string }
+type PublishToVercelProps = { path: string, verb: string, publish_token: string, vercel_automation_bypass: string }
 
 /**
  * An Yargs Command module
@@ -26,9 +29,12 @@ export const publishToVercelModule: CliModule<PublishToVercelProps> = {
     const hookPath = args.path ?? '/'
     const verb = args.verb ?? 'POST'
     const token = args.publish_token
+    const vercelAutomationBypass = args.vercel_automation_bypass
     const webhookTarget = new URL(hookPath, frontendUrl)
     if (token)
       webhookTarget.searchParams.set('token', token)
+    if (vercelAutomationBypass)
+      webhookTarget.searchParams.set('x-vercel-protection-bypass', vercelAutomationBypass)
     process.stdout.write(`${chalk.yellow(chalk.bold(figures.arrowRight))} Registering webhook target: ${chalk.yellow(webhookTarget.href)}\n`)
     if (webhookTarget.hostname == 'localhost') {
       process.stderr.write(chalk.redBright(chalk.bold(figures.cross) + " Cannot register a localhost Site URL with Content Graph") + "\n")
@@ -97,11 +103,13 @@ export const publishToVercelModule: CliModule<PublishToVercelProps> = {
   describe: "Adds a webhook to Optimizely Graph that invokes /api/content/publish on every publish in Optimizely Graph",
   builder: (args) => {
     const defaultToken = getEnvConfig().publish
+    const defaultVercelAutomationBypass = getVercelEnvConfig().automation_bypass_secret;
     const hasDefaultToken = typeof (defaultToken) == 'string' && defaultToken.length > 0
 
     args.positional('path', { type: "string", describe: "The frontend route to invoke to publish", default: "/api/content/publish", demandOption: false })
     args.positional('verb', { type: "string", describe: "The HTTP verb to be used when sending the webhook", default: "POST", demandOption: false })
     args.option("publish_token", { alias: "pt", description: "Publishing token", string: true, type: "string", demandOption: !hasDefaultToken, default: defaultToken })
+    args.option("vercel_automation_bypass", { type: "string", description: "Token used for automation to bypass vercel password protection", demandOption: false, default: defaultVercelAutomationBypass });
     return args
   }
 }

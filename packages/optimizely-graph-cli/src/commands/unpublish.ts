@@ -2,7 +2,7 @@ import { getArgsConfig, getFrontendURL } from "../config.js";
 import type { CliModule } from '../types.js';
 import createAdminApi, { isApiError } from '@remkoj/optimizely-graph-client/admin'
 
-type PublishToVercelProps = { path: string, token_id: string, publish_token: string }
+type PublishToVercelProps = { path: string, token_id: string, publish_token: string, vercel_automation_bypass: string }
 
 /**
  * An Yargs Command module
@@ -22,6 +22,7 @@ export const publishToVercelModule: CliModule<PublishToVercelProps> = {
     const hookPath = args.path ?? '/'
     const token = args.publish_token
     const token_id = args.token_id
+    const vercelAutomationBypass = args.vercel_automation_bypass
 
     // Create secure client
     if (!cgConfig.app_key || !cgConfig.secret)
@@ -53,6 +54,8 @@ export const publishToVercelModule: CliModule<PublishToVercelProps> = {
     const webhookTarget = new URL(hookPath, frontendUrl)
     if (token)
       webhookTarget.searchParams.set('token', token)
+    if (vercelAutomationBypass)
+      webhookTarget.searchParams.set('x-vercel-protection-bypass', vercelAutomationBypass)
     process.stdout.write(`Removing webhook target: ${webhookTarget.href}\n`)
     if (webhookTarget.hostname == 'localhost') {
       process.stderr.write("!! Cannot register a localhost Site URL with Content Graph\n")
@@ -104,6 +107,7 @@ export const publishToVercelModule: CliModule<PublishToVercelProps> = {
     args.positional('path', { type: "string", describe: "The frontend route to invoke to publish", default: "/api/content/publish", demandOption: false })
     args.option("publish_token", { alias: "pt", description: "Publishing token", string: true, type: "string", demandOption: !hasDefaultToken, default: defaultToken })
     args.option("token_id", { alias: "ti", description: "If set, removes this webhook only", string: true, type: "string", demandOption: false, default: undefined })
+    args.option("vercel_automation_bypass", { type: "string", description: "Token used for automation to bypass vercel password protection", demandOption: false, default: undefined });
     return args
   }
 }
