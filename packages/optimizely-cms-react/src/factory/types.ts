@@ -37,6 +37,12 @@ export type ComponentTypeDictionaryEntry = {
    * Used for the loading of a specific variant of the component (for example 'header', 'footer', 'menu')
    */
   variant?: string
+
+  /**
+   * Optional marker to indicate that the component is a Client Side component, which
+   * may add attribute filtering in the future.
+   */
+  isClient?: boolean
 }
 
 /**

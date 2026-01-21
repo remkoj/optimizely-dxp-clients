@@ -27,10 +27,10 @@
     "@rollup/plugin-typescript": "^12.3.0",
     "@rollup/pluginutils": "^5.3.0",
     "@types/crypto-js": "^4.2.2",
-    "@types/node": "^22.19.6",
+    "@types/node": "^22.19.7",
     "@types/source-map-support": "^0.5.10",
     "@types/yargs": "^17.0.35",
-    "rollup": "^4.55.1",
+    "rollup": "^4.55.3",
     "source-map-support": "^0.5.21",
     "tslib": "^2.8.1",
     "typescript": "^5.9.3"

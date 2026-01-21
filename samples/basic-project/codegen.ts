@@ -40,6 +40,8 @@ const config: CodegenConfig = {
         // The GQL tag to be used to identify inline GraphQL queries
         gqlTagName: 'gql',
 
+        prettyPrintQuery: false,
+
         // Configure the fragments that will be spread into the utility
         // partial fragments. You can use any fragment here, however the
         // system is designed for the following receiving fragments:

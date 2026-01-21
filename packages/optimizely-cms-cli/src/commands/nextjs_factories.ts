@@ -19,6 +19,7 @@ type ComponetFactoryEntry = {
   suspenseImport?: string
   suspenseVariable?: string
   variant?: string
+  isClient?: boolean
 }
 type ComponentFactoryDefintion = {
   file: string
@@ -39,6 +40,7 @@ export const NextJsFactoryCommand : NextJsModule = {
             process.stdout.write(chalk.gray(`${ figures.arrowRight } Start generating component factories\n`))
 
         // Get & filter all component files
+        const clientComponents: string[] = []
         const components = globSync(["./**/*.jsx","./**/*.tsx"], {
             cwd: basePath
         }).map(p => p.split(path.sep)).filter(p => {
@@ -61,6 +63,8 @@ export const NextJsFactoryCommand : NextJsModule = {
             // Check if the file has a default export
             const fileBuffer = fs.readFileSync(path.join(basePath, p.join(path.sep)))
             const hasDefaultExport = fileBuffer.includes('export default')
+            if (fileBuffer.includes('use client'))
+                clientComponents.push(p.join(path.sep))
             if (!hasDefaultExport) {
                 process.stdout.write(chalk.redBright(`${ figures.warning } No default export in ${ p.join(path.sep ) } - ignoring file\n`))
                 return false
@@ -75,11 +79,12 @@ export const NextJsFactoryCommand : NextJsModule = {
         // Build factory / component structure
         const componentFactoryDefintions = new Map<string, ComponentFactoryDefintion>()
         components.forEach(component => {
+            const componentDir = path.dirname(path.join(...component));
+
             // Determine component target
             const componentKey = processName(component.length == 1 ? ucFirst(path.basename(component[0], path.extname(component[0]))) : component.at(component.length - 2));
             let componentVariant = (component.length > 1 ? component.at(component.length - 1) ?? 'default' : 'default').replace('index','default');
             componentVariant = path.basename(componentVariant, path.extname(componentVariant));
-            const componentDir = path.dirname(path.join(...component));
 
             // Get factory information
             const factorySegments = component.length > 2 ? component.slice(0, -2) : [ROOT_FACTORY_KEY];
@@ -87,6 +92,7 @@ export const NextJsFactoryCommand : NextJsModule = {
             const factoryFile = path.join(factoryKey, FACTORY_FILE_NAME);
 
             // Check dynamic & suspense
+            const isClientComponent = clientComponents.includes(component.join(path.sep));
             const useDynamic = [
               path.join(basePath, componentDir , 'loading.tsx'),
               path.join(basePath, componentDir , 'loading.jsx')
@@ -115,7 +121,8 @@ export const NextJsFactoryCommand : NextJsModule = {
               loaderImport,
               loaderVariable: useDynamic ? componentVariablesBase + 'Loader' : undefined,
               suspenseImport,
-              suspenseVariable: useSuspense ? componentVariablesBase + 'Placeholder' : undefined
+              suspenseVariable: useSuspense ? componentVariablesBase + 'Placeholder' : undefined,
+              isClient: isClientComponent
             });
             componentFactoryDefintions.set(factoryKey, factory);
 
@@ -209,12 +216,13 @@ function generateFactory(factoryInfo: ComponentFactoryDefintion, factoryKey: str
   const subFactories = [...factoryInfo.subfactories].sort((a,b) => { return a.key < b.key ? -1 : a.key > b.key ? 1 : 0 })
 
   // Check if there's at least one component that uses next/dynamic
-  const hasDynamic = factoryInfo.entries.some(x => x.loaderImport)
+  const hasDynamic = factoryInfo.entries.some(x => x.loaderImport);
+  const hasClientComponents = factoryInfo.entries.some(x => x.isClient);
 
   // The intro for the factory
   const factoryIntro = `// Auto generated dictionary
 // @not-modified => When this line is removed, the "force" parameter of the CLI tool is required to overwrite this file
-import { type ComponentTypeDictionary } from '@remkoj/optimizely-cms-react';${ hasDynamic ? `
+import { type ComponentTypeDictionary } from '@remkoj/optimizely-cms-react';${ hasDynamic || hasClientComponents ? `
 import dynamic from 'next/dynamic';` : ''}`
 
   // The outry for the factory
@@ -223,13 +231,15 @@ export default ${factoryName};`
 
   // The imports of the factory
   const factoryImports = [...components, ...subFactories].map(x => {
-    let imports = [x.loaderImport ? 
-      `import ${ x.loaderVariable } from '${ x.loaderImport }';` :
-      `import ${ x.variable } from '${ x.import }';`];
+    const imports = [];
+    if (x.loaderImport)
+      imports.push(`import ${ x.loaderVariable } from '${ x.loaderImport }';`)
+    else if (!x.isClient)
+      imports.push(`import ${ x.variable } from '${ x.import }';`)
     if (x.suspenseImport)
       imports.push(`import ${ x.suspenseVariable } from '${ x.suspenseImport }';`)
-    return imports.join('\n');
-  }).join('\n');
+    return imports.length > 0 ? imports.join('\n') : undefined;
+  }).filter(x=>x).join('\n');
 
   // The dynamic imports of the factory
   const dynamicImports = hasDynamic ? `// Lazy load components that have a loading file, this only affects client components
@@ -242,6 +252,12 @@ export default ${factoryName};`
 });`
   }).join('\n') : undefined;
 
+  // The client imports of the factory
+  const clientComponents = hasClientComponents ? `// Lazy load client components even without loader specified
+`+components.filter(x=>x.isClient && !x.loaderImport).map(x=>{
+    return `const ${ x.variable } = dynamic(() => import('${ x.import }'), { ssr: true });`
+  }).join('\n') : undefined
+
   // The actual entries for the factory
   const factoryEntries = [...components.map(x => {
     return `  {
@@ -249,7 +265,8 @@ export default ${factoryName};`
     variant: '${ x.variant }',`: ''}
     component: ${ x.variable }${ x.suspenseVariable ? `,
     useSuspense: true,
-    loader: ${ x.suspenseVariable }` : '' }
+    loader: ${ x.suspenseVariable }` : '' }${ x.isClient ? `,
+    isClient: true` : ''}
   }`
   }), ...subFactories.map(x => `  ...${ x.variable }`)];
 
@@ -258,5 +275,5 @@ export default ${factoryName};`
 export const ${factoryName} : ComponentTypeDictionary = [${ factoryEntries.length > 0 ? '\n' + factoryEntries.join(',\n')+'\n' : '' }];`
 
   // Combine everything into one string
-  return [ factoryIntro, factoryImports, dynamicImports, factoryBody, factoryOutro ].filter(x => (x?.length || 0) > 0).join('\n\n')+'\n';
+  return [ factoryIntro, factoryImports, dynamicImports, clientComponents, factoryBody, factoryOutro ].filter(x => (x?.length || 0) > 0).join('\n\n')+'\n';
 }

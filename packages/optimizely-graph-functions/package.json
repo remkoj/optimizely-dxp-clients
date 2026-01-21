@@ -53,7 +53,7 @@
     "@graphql-typed-document-node/core": "^3.2.0",
     "@remkoj/optimizely-cms-api": "workspace:6.0.0-pre15",
     "@remkoj/optimizely-graph-client": "workspace:6.0.0-pre15",
-    "@types/node": "^22.19.6",
+    "@types/node": "^22.19.7",
     "typescript": "^5.9.3"
   },
   "dependencies": {

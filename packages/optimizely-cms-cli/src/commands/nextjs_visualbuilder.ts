@@ -8,6 +8,7 @@ import { createCmsClient } from '../tools/cmsClient.js'
 import { getStyles } from '../tools/styles.js'
 import { type NextJsModule, builder } from './_nextjs_base.js'
 import createStyles from './styles_pull.js'
+import { keyToSlug } from '../tools/project.js'
 
 export const NextJsVisualBuilderCommand: NextJsModule = {
   command: "nextjs:visualbuilder",
@@ -26,14 +27,14 @@ export const NextJsVisualBuilderCommand: NextJsModule = {
 
     // Process node styles
     styles.filter(x => typeof (x.nodeType) == 'string' && x.nodeType.length > 0).map(styleDefintion => {
-      const templatePath = path.join(basePath, 'nodes', styleDefintion.nodeType, styleDefintion.key)
+      const templatePath = path.join(basePath, 'nodes', keyToSlug(styleDefintion.nodeType), keyToSlug(styleDefintion.key))
       createSpecificNode(styleDefintion, templatePath, force, debug)
     })
 
     // Process base styles
     styles.filter(x => typeof (x.baseType) == 'string' && x.baseType.length > 0).map(styleDefinition => {
       const baseType = (styleDefinition.baseType ?? '').startsWith('_') ? (styleDefinition.baseType ?? '').substring(1) : styleDefinition.baseType
-      const templatePath = path.join(basePath, baseType, 'styles', styleDefinition.key)
+      const templatePath = path.join(basePath, baseType, 'styles', keyToSlug(styleDefinition.key))
       createSpecificNode(styleDefinition, templatePath, force, debug)
     })
 

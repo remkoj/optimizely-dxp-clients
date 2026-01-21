@@ -4,7 +4,7 @@ import { IntegrationApi, type CmsIntegrationApiClient as CmsApiClient } from '@r
 import { parseArgs } from '../tools/parseArgs.js'
 import chalk from 'chalk'
 import figures from 'figures'
-import { typeToSlug } from './project.js'
+import { shouldInclude, isContract, isGraphType, isFolder, isSystemType } from './filters.js'
 
 export type ContentTypesArgs = {
   excludeBaseTypes: string[]
@@ -46,10 +46,25 @@ export async function getContentTypes(
   const filteredContentTypes: Array<IntegrationApi.ContentType> = []
 
   for await (const contentType of getAllContentTypes(client, cfg.debug, pageSize)) {
-    // Skip content types mapped against Graph data, these should be used with their source type in Graph, not the reference in CMS
-    if (!all && contentType.key.toLowerCase().startsWith('graph:')) {
+    // Skip contracts by default as they're abstract classes and cannot be used to directly store data.
+    if (!all && isContract(contentType)) {
       if (cfg.debug)
-        process.stdout.write(chalk.gray(`${figures.arrowRight} Skipping ${contentType.key} as it is a reference to external data in Optimizely Graph\n`))
+        process.stdout.write(chalk.gray(`${figures.arrowRight} Skipping ${contentType.key || contentType.displayName || "unnamed type"} as it is a contract and cannot be instantiated directly, use --all to include\n`))
+      continue
+    }
+
+    // Skip content types mapped against Graph data, these should be used with their source type in Graph, 
+    // not the reference in CMS
+    if (!all && isGraphType(contentType)) {
+      if (cfg.debug)
+        process.stdout.write(chalk.gray(`${figures.arrowRight} Skipping ${contentType.key} as it is a reference to external data in Optimizely Graph, use --all to include\n`))
+      continue
+    }
+
+    // Skip folder types as these are non-data carrying types in the instance.
+    if (!all && isFolder(contentType)) {
+      if (cfg.debug)
+        process.stdout.write(chalk.gray(`${figures.arrowRight} Skipping ${contentType.key} as it is a folder, use --all to include\n`))
       continue
     }
 
@@ -57,21 +72,21 @@ export async function getContentTypes(
     allContentTypes.push(contentType)
 
     // Skip based upon base type filters
-    if (!shouldInclude(typeToSlug(contentType.baseType), baseTypes.map(x => typeToSlug(x)), excludeBaseTypes.map(x => typeToSlug(x)))) {
+    if (!shouldInclude(contentType.baseType, baseTypes, excludeBaseTypes, true)) {
       if (cfg.debug)
         process.stdout.write(chalk.gray(`${figures.arrowRight} Skipping ${contentType.key} as it has a restricted base type: ${contentType.baseType}\n`))
       continue
     }
 
     // Skip based upon type filters
-    if (!shouldInclude(contentType.key, types, excludeTypes)) {
+    if (!shouldInclude(contentType.key, types, excludeTypes, true)) {
       if (cfg.debug)
         process.stdout.write(chalk.gray(`${figures.arrowRight} Skipping ${contentType.key} as it has a restricted type: ${contentType.key}\n`))
       continue
     }
 
     // Skip based upon system filter
-    if (contentType.source == 'system' && !allowSystem) {
+    if (!allowSystem && isSystemType(contentType)) {
       if (cfg.debug)
         process.stdout.write(chalk.gray(`${figures.arrowRight} Skipping Content-Type ${contentType.key} due to it being a system type\n`))
       continue
@@ -92,15 +107,6 @@ export async function getContentTypes(
     process.stdout.write(chalk.gray(`${figures.arrowRight} Applied content type filters, reduced from ${allContentTypes.length} to ${filteredContentTypes.length} items\n`))
 
   return { all: allContentTypes, contentTypes: filteredContentTypes }
-}
-
-function shouldInclude<T>(value: T, allow?: T[] | null, disallow?: T[] | null) {
-  // Item is allowed when either allow is not set, an empty array or has the value
-  const isAllowed = !Array.isArray(allow) || allow.length === 0 || allow.includes(value);
-  // Item is disallowed when and the array is set and includes the value
-  const isDisallowed = Array.isArray(disallow) && disallow.includes(value);
-
-  return isAllowed && !isDisallowed
 }
 
 /**

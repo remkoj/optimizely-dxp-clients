@@ -1,15 +1,12 @@
 import type { CliModule } from '../types.js'
 import { parseArgs } from '../tools/parseArgs.js'
-import { type IntegrationApi, OptiCmsVersion } from '@remkoj/optimizely-cms-api'
 import chalk from 'chalk'
 import figures from 'figures'
-import fs from 'node:fs'
-import path from 'node:path'
 import fsAsync from 'node:fs/promises'
 
 import { createCmsClient } from '../tools/cmsClient.js'
-import { StylesArgs, stylesBuilder, getStyles } from '../tools/styles.js'
-import { toTypeFilesList, createTemplateMetadata, createDisplayTemplateHelper, TypeFilesListEntry } from "./styles_pull.js"
+import { StylesArgs, stylesBuilder, getStyles, TypeFilesListEntry, toTypeFilesList } from '../tools/styles.js'
+import { createDisplayTemplateHelper } from "./styles_pull.js"
 
 type StylesDeleteModule = CliModule<{
   definitions?: boolean
@@ -46,10 +43,10 @@ export const StylesDeleteCommand: StylesDeleteModule = {
     }
 
     const keysToDelete = styles.map(displayTemplate => displayTemplate.key)
-    const styleHelpers = await toTypeFilesList(client, allStyles, basePath, false)
+    const styleHelpers = await toTypeFilesList(allStyles, client, basePath)
 
     for (const displayTemplate of styles) {
-      const { styleFilePath, targetType, itemPath, typesPath } = await createTemplateMetadata(client, displayTemplate, basePath, false)
+      const { styleFile: styleFilePath, styleFolder: itemPath, identifier: targetType, helperFolder: typesPath } = styleHelpers.getDisplayTemplatePathsByKey(displayTemplate.key);
 
       // Remove style file
       if (args.withStyleFile) {
@@ -71,7 +68,7 @@ export const StylesDeleteCommand: StylesDeleteModule = {
       }
 
       // Remove/update typescript helper
-      if (args.definitions && styleHelpers[targetType]) {
+      if (args.definitions && styleHelpers.has(targetType)) {
         process.stdout.write(chalk.yellowBright(`${figures.arrowRight} Removing/updating displayTemplates.ts file for ${displayTemplate.displayName} [${displayTemplate.key}]\n`));
         const remainingTemplates = styleHelpers[targetType].templates.filter(x => !keysToDelete.includes(x.key))
         if (remainingTemplates.length === 0) {
@@ -92,6 +89,7 @@ export const StylesDeleteCommand: StylesDeleteModule = {
         } else {
           const newEntry: TypeFilesListEntry = {
             filePath: styleHelpers[targetType].filePath,
+            fileFolder: styleHelpers[targetType].fileFolder,
             templates: remainingTemplates
           }
           if (!await createDisplayTemplateHelper(newEntry, targetType, false, false))
@@ -101,7 +99,7 @@ export const StylesDeleteCommand: StylesDeleteModule = {
 
       // Actually remove from CMS
       process.stdout.write(chalk.yellowBright(`${figures.arrowRight} Removing the display template ${displayTemplate.displayName} [${displayTemplate.key}] from Optimizely CMS\n`));
-      const deleteResult = await client.displayTemplatesDelete({ path: { key: displayTemplate.key } })
+      void await client.displayTemplatesDelete({ path: { key: displayTemplate.key } })
     }
 
     process.stdout.write("\n" + chalk.green(chalk.bold(figures.tick + " Done")) + "\n")

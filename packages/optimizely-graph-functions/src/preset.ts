@@ -155,18 +155,19 @@ export const preset: Types.OutputPreset<PresetOptions> = {
         {
           add: {
             content: [
+              '// This is an auto-generated file, do not modify',
               'import type * as Schema from "./graphql";',
             ],
           },
         },
         {
           'typescript-graphql-request': {
-            //rawRequest: true,
             useTypeImports: true,
             importOperationTypesFrom: 'Schema',
-            //documentMode: DocumentMode.string,
-            //experimentalAddDocumentNodeType: false,
-            //rawString: true,
+            rawRequest: options.presetConfig.recursion ? true : undefined,
+            documentMode: options.presetConfig.recursion ? DocumentMode.string : undefined,
+            //experimentalAddDocumentNodeType: options.presetConfig.recursion ? true : undefined,
+            rawString: options.presetConfig.recursion ? true : undefined,
             ...options.config,
           },
         },

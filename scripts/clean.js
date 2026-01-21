@@ -18,14 +18,14 @@ if (tsBuildInfoFiles.length > 0)
 else process.stdout.write(` - No TypeScript build info files found\n`)
 
 process.stdout.write('\nRemoving build folders from within packages\n')
-const buildFolders = globSync('./packages/**/{build,dist,bin,.rollup.cache}/')
+const buildFolders = globSync('./packages/**/{build,dist,bin,.rollup.cache,node_modules}/')
 if (buildFolders.length > 0)
   buildFolders.forEach((folderPath) => {
-    if (!folderPath.includes('node_modules')) {
+    //if (!folderPath.includes('node_modules')) {
       const fullFolderPath = path.resolve(path.join(process.cwd(), folderPath))
       process.stdout.write(` - Removing folder ${folderPath}`)
       fs.rmSync(fullFolderPath, { recursive: true })
       process.stdout.write(` - done\n`)
-    }
+    //}
   })
 else process.stdout.write(` - No build folders found\n`)

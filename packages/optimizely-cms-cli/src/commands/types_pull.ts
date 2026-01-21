@@ -3,10 +3,12 @@ import { parseArgs } from '../tools/parseArgs.js'
 import fs from 'node:fs'
 import chalk from 'chalk'
 import figures from 'figures'
+import nodePath from 'node:path'
 
 import { createCmsClient } from '../tools/cmsClient.js'
 import { getContentTypes, ContentTypesArgs, contentTypesBuilder } from '../tools/contentTypes.js'
 import { getContentTypePaths } from '../tools/project.js'
+import { isEmptyArray } from '../tools/filters.js'
 
 type TypesPullModule = CliModule<{
   force: boolean
@@ -21,15 +23,15 @@ export const TypesPullCommand: TypesPullModule = {
     return newArgs
   },
   handler: async (args) => {
-    const { _config: { debug }, components: basePath, force } = parseArgs(args)
+    const { _config: { debug }, components: basePath, path: projectPath, force } = parseArgs(args)
     const client = createCmsClient(args)
     const { contentTypes } = await getContentTypes(client, args)
 
     const updatedTypes: Array<string> = contentTypes.map(contentType => {
-      const { typePath, typeFile } = getContentTypePaths(contentType, basePath);
+      const { path, typeFile } = getContentTypePaths(contentType, basePath);
 
-      if (!fs.existsSync(typePath))
-        fs.mkdirSync(typePath, { recursive: true })
+      if (!fs.existsSync(path))
+        fs.mkdirSync(path, { recursive: true })
 
       if (fs.existsSync(typeFile) && !force) {
         if (debug)
@@ -59,7 +61,7 @@ export const TypesPullCommand: TypesPullModule = {
       }
 
       if (debug)
-        process.stdout.write(chalk.gray(`${figures.arrowRight} Writing type definition for ${contentType.displayName} (${contentType.key})\n`))
+        process.stdout.write(chalk.gray(`${figures.arrowRight} Writing type definition for ${contentType.displayName} (${contentType.key}) into ${ nodePath.relative(projectPath, path) }\n`))
       fs.writeFileSync(typeFile, JSON.stringify(outContentType, undefined, 2))
       return contentType.key
     }).filter(x => x)
@@ -69,10 +71,3 @@ export const TypesPullCommand: TypesPullModule = {
 }
 
 export default TypesPullCommand
-
-function isNonEmptyArray<T>(toTest?: Array<T> | null | undefined): toTest is Array<T> {
-  return Array.isArray(toTest) && toTest.length > 0;
-}
-function isEmptyArray<T>(toTest?: Array<T> | null | undefined): toTest is Array<T> | null {
-  return toTest === null || !Array.isArray(toTest) || toTest.length === 0;
-}

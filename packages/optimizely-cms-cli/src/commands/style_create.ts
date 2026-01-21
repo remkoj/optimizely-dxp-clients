@@ -4,13 +4,14 @@ import figures from 'figures'
 import path from 'node:path'
 import fs from 'node:fs'
 import { input, select, confirm } from '@inquirer/prompts';
-import { IntegrationApi, OptiCmsVersion } from '@remkoj/optimizely-cms-api';
+import { IntegrationApi } from '@remkoj/optimizely-cms-api';
 
 // Within this package
 import type { CliModule } from '../types.js'
 import { createCmsClient } from '../tools/cmsClient.js'
 import { getContentTypes } from '../tools/contentTypes.js'
-import { getStyles, getStyleFilePath } from '../tools/styles.js'
+import { getStyles } from '../tools/styles.js'
+import { getStyleFilePaths } from '../tools/project.js';
 import parseArgs from '../tools/parseArgs.js'
 
 export type StylesCreateParams = {
@@ -29,10 +30,6 @@ export const StylesCreateCommand: CliModule<StylesCreateParams> = {
   handler: async (args) => {
     const { components: basePath } = parseArgs(args)
     const client = createCmsClient(args)
-    if (client.runtimeCmsVersion == OptiCmsVersion.CMS12) {
-      process.stdout.write(chalk.gray(`${figures.cross} Styles are not supported on CMS12\n`))
-      return
-    }
     const allowedBaseTypes: Array<string> = ['section', 'component', 'experience']
 
     // Prepare
@@ -83,12 +80,12 @@ export const StylesCreateCommand: CliModule<StylesCreateParams> = {
     definition[type] = typeId
     definition['settings'] = {}
     const contentBaseType = type == "contentType" ? contentTypes.filter(x => x.key == typeId).map(x => x.baseType).at(0) : undefined
-    const styleFilePath = await getStyleFilePath(definition, { contentBaseType, client })
+    const { styleFile: styleFilePath, styleFolder: styleFileFolder } = await getStyleFilePaths(definition, { contentBaseType, client, basePath })
 
-    if (!fs.existsSync(path.join(basePath, path.dirname(styleFilePath))))
-      fs.mkdirSync(path.join(basePath, path.dirname(styleFilePath)), { recursive: true })
+    if (!fs.existsSync(styleFileFolder))
+      fs.mkdirSync(styleFileFolder, { recursive: true })
 
-    if (fs.existsSync(path.join(basePath, styleFilePath))) {
+    if (fs.existsSync(styleFilePath)) {
       const overwrite = await confirm({ message: "The style definition file already exists, do you want to overwrite it?" })
       if (!overwrite) {
         process.stdout.write("\n")
@@ -99,8 +96,8 @@ export const StylesCreateCommand: CliModule<StylesCreateParams> = {
 
     // @ToDo: Add properties
 
-    fs.writeFileSync(path.join(basePath, styleFilePath), JSON.stringify(definition, undefined, 4))
-    process.stdout.write(chalk.yellowBright(chalk.bold(`\nWritten style defintion template to: ${path.normalize(path.join(basePath, styleFilePath))}\n`)))
+    fs.writeFileSync(styleFilePath, JSON.stringify(definition, undefined, 4))
+    process.stdout.write(chalk.yellowBright(chalk.bold(`\nWritten style defintion template to: ${path.normalize(styleFilePath)}\n`)))
 
     if (await confirm({ message: "Do you want to publish this style into Optimizely CMS?" })) {
       const response: IntegrationApi.DisplayTemplate | undefined = await client.displayTemplatesCreate({ body: definition }).catch(_ => undefined)

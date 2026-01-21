@@ -9,7 +9,14 @@ import { isNotNullOrUndefined } from '../utils'
 export async function getComponentDocuments(loader: string = '@remkoj/optimizely-graph-functions/contenttype-loader')
 {
   const componentTypes = await OptiCMS.getContentTypesList(undefined, (ct) => {
-    return ct.key && ct.source !== 'graph' ? true : false
+    if (!ct.key) // The key is required
+      return false;
+    if (ct.source === 'graph' || ct.source === 'globalcontract' || ct.source === '_system') // Only CMS managed types are allowed
+      return false;
+    //@ts-expect-error
+    if (ct.isContract) // Contracts must be ignored
+      return false;
+    return true;
   });
 
   const documents: Types.CustomDocumentLoader[] = [];

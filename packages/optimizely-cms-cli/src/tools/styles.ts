@@ -1,12 +1,13 @@
 import type { OptiCmsArgs } from '../types.js'
 import type { Argv, ArgumentsCamelCase } from 'yargs'
-import { CmsIntegrationApiClient as CmsApiClient, IntegrationApi, OptiCmsVersion } from '@remkoj/optimizely-cms-api'
+import { ApiClientInstance, CmsIntegrationApiClient as CmsApiClient,type IntegrationApi } from '@remkoj/optimizely-cms-api'
 import { parseArgs } from '../tools/parseArgs.js'
 import chalk from 'chalk'
 import figures from 'figures'
-import path from 'node:path'
+import { shouldInclude, isNonEmptyArray, isDefined } from './filters.js'
 
 import { ContentTypesArgs, contentTypesBuilder } from './contentTypes.js'
+import { getStyleFilePathsSync, StyleFilePaths, getDisplayTemplateType } from './project.js'
 
 export type StylesArgs = ContentTypesArgs & {
   excludeNodeTypes: string[]
@@ -29,52 +30,73 @@ export const stylesBuilder: (yargs: Argv<OptiCmsArgs>) => Argv<OptiCmsArgs<Style
 export type GetStylesResult = { all: Array<IntegrationApi.DisplayTemplate>, styles: Array<IntegrationApi.DisplayTemplate> }
 
 export async function getStyles(client: CmsApiClient, args: ArgumentsCamelCase<OptiCmsArgs<StylesArgs>>, pageSize: number = 25): Promise<GetStylesResult> {
-  if (client.runtimeCmsVersion == OptiCmsVersion.CMS12) return { all: [], styles: [] }
-  const { _config: cfg, excludeBaseTypes, excludeTypes, excludeNodeTypes, excludeTemplates, baseTypes, types, nodes, templates, templateTypes } = parseArgs(args)
+  const { 
+    _config: cfg, 
+    excludeBaseTypes: disallowBaseTypes, 
+    excludeTypes: disallowTypes, 
+    excludeNodeTypes: disallowNodeTypes, 
+    excludeTemplates: disallowTemplates, 
+    baseTypes: allowBaseTypes,
+    types: allowTypes,
+    nodes: allowNodeTypes,
+    templates: allowTemplates,
+    templateTypes: baseAllowTemplateTypes
+  } = parseArgs(args)
 
   process.stdout.write(chalk.yellowBright(`${figures.arrowRight} Pulling Style-Definitions from Optimizely CMS\n`))
+
+  const allowTemplateTypes: string[] = [];
+  if (!Array.isArray(baseAllowTemplateTypes) || baseAllowTemplateTypes.length === 0) {
+    if (isNonEmptyArray(allowBaseTypes)) {
+      console.log('BT', allowBaseTypes)
+      if (cfg.debug)
+        process.stdout.write(chalk.gray(`${figures.arrowRight} Base picking filter is active, adjusting template type filter to pick templates targeting a base type\n`));
+      allowTemplateTypes.push('base')
+    }
+    if (isNonEmptyArray(allowNodeTypes)) {
+      if (cfg.debug)
+        process.stdout.write(chalk.gray(`${figures.arrowRight} Node type filter active, adjusting template type filter\n`));
+      allowTemplateTypes.push('node')
+    }
+    if (isNonEmptyArray(allowTypes)) {
+      if (cfg.debug)
+        process.stdout.write(chalk.gray(`${figures.arrowRight} Component type filter active, adjusting template type filter\n`));
+      allowTemplateTypes.push('component')
+    }
+  } else {
+    allowTemplateTypes.push(...baseAllowTemplateTypes);
+  }
 
   const allDisplayTemplates: Array<IntegrationApi.DisplayTemplate> = []
   const filteredDisplayTemplates: Array<IntegrationApi.DisplayTemplate> = []
 
   for await (const displayTemplate of getAllStyles(client, cfg.debug, pageSize)) {
     allDisplayTemplates.push(displayTemplate)
-    const templateType: string = displayTemplate.baseType ? 'base' : displayTemplate.nodeType ? 'node' : displayTemplate.contentType ? 'component' : 'unknown'
+    const templateType = getDisplayTemplateType(displayTemplate)
 
-    if (isExcluded(displayTemplate.key, excludeTemplates, templates)) {
+    if (!shouldInclude(displayTemplate.key, allowTemplates, disallowTemplates)) {
       if (cfg.debug)
         process.stdout.write(chalk.gray(`${figures.arrowRight} Skipping Style-Defintion ${displayTemplate.key} - Style defintion key filtering active\n`))
       continue
     }
-
-    if (isExcluded(templateType, [], templateTypes)) {
+    if (!shouldInclude(templateType, allowTemplateTypes)) {
       if (cfg.debug)
         process.stdout.write(chalk.gray(`${figures.arrowRight} Skipping Style-Defintion ${displayTemplate.key} - Style type filtering is active\n`))
       continue
     }
-    if (displayTemplate.baseType && isExcluded(displayTemplate.baseType, excludeBaseTypes, baseTypes)) {
+    if (templateType === 'base' && !shouldInclude(displayTemplate.baseType, allowBaseTypes, disallowBaseTypes)) {
       if (cfg.debug)
         process.stdout.write(chalk.gray(`${figures.arrowRight} Skipping Style-Defintion ${displayTemplate.key} - Style is defined at base type level and base type filtering is active\n`))
       continue
     }
-    if (displayTemplate.contentType && isExcluded(displayTemplate.contentType, excludeTypes, types)) {
+    if (templateType === 'component' && !shouldInclude(displayTemplate.contentType, allowTypes, disallowTypes)) {
       if (cfg.debug)
         process.stdout.write(chalk.gray(`${figures.arrowRight} Skipping Style-Defintion ${displayTemplate.key} - Style is defined at component type level and component type filtering is active\n`))
       continue
     }
-    if (templateType != 'component' && types.length > 0) {
-      if (cfg.debug)
-        process.stdout.write(chalk.gray(`${figures.arrowRight} Skipping Style-Defintion ${displayTemplate.key} - Style is targeting the ${templateType} level and component type selection is active\n`))
-      continue
-    }
-    if (displayTemplate.nodeType && isExcluded(displayTemplate.nodeType, excludeNodeTypes, nodes)) {
+    if (templateType === 'node' && !shouldInclude(displayTemplate.nodeType, allowNodeTypes, disallowNodeTypes)) {
       if (cfg.debug)
         process.stdout.write(chalk.gray(`${figures.arrowRight} Skipping Style-Defintion ${displayTemplate.key} - Style is defined at node type level and node type filtering is active\n`))
-      continue
-    }
-    if (templateType != 'node' && nodes.length > 0) {
-      if (cfg.debug)
-        process.stdout.write(chalk.gray(`${figures.arrowRight} Skipping Style-Defintion ${displayTemplate.key} - Style is targeting the ${templateType} level and node type selection is active\n`))
       continue
     }
 
@@ -91,8 +113,6 @@ export async function getStyles(client: CmsApiClient, args: ArgumentsCamelCase<O
 }
 
 export async function* getAllStyles(client: CmsApiClient, debug: boolean = false, pageSize: number = 5): AsyncGenerator<IntegrationApi.DisplayTemplate, void, IntegrationApi.DisplayTemplate> {
-  if (client.runtimeCmsVersion == OptiCmsVersion.CMS12) return;
-
   let requestPageSize = pageSize;
   let requestPageIndex = 0
   let totalItemCount = 0
@@ -125,162 +145,65 @@ export async function* getAllStyles(client: CmsApiClient, debug: boolean = false
   } while (requestPageIndex < totalPages)
 }
 
-export async function getStylesOld(client: CmsApiClient, args: ArgumentsCamelCase<OptiCmsArgs<StylesArgs>>, pageSize: number = 100): Promise<GetStylesResult> {
-  if (client.runtimeCmsVersion == OptiCmsVersion.CMS12) return { all: [], styles: [] }
-  const { _config: cfg, excludeBaseTypes, excludeTypes, excludeNodeTypes, excludeTemplates, baseTypes, types, nodes, templates, templateTypes } = parseArgs(args)
-
-  process.stdout.write(chalk.yellowBright(`${figures.arrowRight} Pulling Style-Definitions from Optimizely CMS\n`))
-
-  if (cfg.debug)
-    process.stdout.write(chalk.gray(`${figures.arrowRight} Fetching page 1 of ? (${pageSize} items per page)\n`))
-  let resultsPage = await client.displayTemplatesList({ query: { pageIndex: 0, pageSize } })
-  const results: (typeof resultsPage)["items"] = resultsPage.items ?? []
-  let pagesRemaining = Math.ceil(resultsPage.totalItemCount / resultsPage.pageSize) - (resultsPage.pageIndex + 1)
-
-  while (pagesRemaining > 0 && results.length < resultsPage.totalItemCount) {
-    if (cfg.debug)
-      process.stdout.write(chalk.gray(`${figures.arrowRight} Fetching page ${resultsPage.pageIndex + 2} of ${Math.ceil(resultsPage.totalItemCount / resultsPage.pageSize)} (${resultsPage.pageSize} items per page)\n`))
-    resultsPage = await client.displayTemplatesList({ query: { pageIndex: resultsPage.pageIndex + 1, pageSize: resultsPage.pageSize } })
-    results.push(...resultsPage.items)
-    pagesRemaining = Math.ceil(resultsPage.totalItemCount / resultsPage.pageSize) - (resultsPage.pageIndex + 1)
+export type TypeFilesListEntry = { templates: Array<{ key: string, file: string, data: IntegrationApi.DisplayTemplate, folder: string }>, filePath: string, fileFolder: string }
+export class TypeFilesList extends Map<string, TypeFilesListEntry> {
+  getDisplayTemplateByKey(displayTemplateKey: string): IntegrationApi.DisplayTemplate | undefined
+  {
+    for (const groupKey of this.keys()) {
+      const templates = this.get(groupKey)?.templates || [];
+      const displayTemplate = templates.find(x => x.key === displayTemplateKey)
+      if (displayTemplate)
+        return displayTemplate.data
+    }
+    return undefined
   }
-
-  if (cfg.debug) {
-    process.stdout.write(chalk.gray(`${figures.arrowRight} Fetched ${results.length} Style-Definitions from Optimizely CMS\n`))
-    process.stdout.write(chalk.gray(`${figures.arrowRight} Filtering Style-Definitions based upon arguments\n`))
-  }
-
-  const styles = results.filter(data => {
-    if (isExcluded(data.key, excludeTemplates, templates)) {
-      if (cfg.debug)
-        process.stdout.write(chalk.gray(`${figures.arrowRight} Skipping Style-Defintion ${data.key} - Style defintion key filtering active\n`))
-      return false
+  getDisplayTemplatePathsByKey(displayTemplateKey: string): StyleFilePaths | undefined
+  {
+    for (const identifier of this.keys()) {
+      const groupInfo = this.get(identifier);
+      const templates = groupInfo?.templates || [];
+      const helperFile = groupInfo?.filePath;
+      const helperFolder = groupInfo?.fileFolder;
+      const info = templates.find(x => x.key === displayTemplateKey)
+      if (info)
+        return {
+          styleFile: info.file,
+          styleFolder: info.folder,
+          identifier,
+          helperFile,
+          helperFolder
+        }
     }
-    const templateType: string = data.baseType ? 'base' : data.nodeType ? 'node' : data.contentType ? 'component' : 'unknown'
-    if (isExcluded(templateType, [], templateTypes)) {
-      if (cfg.debug)
-        process.stdout.write(chalk.gray(`${figures.arrowRight} Skipping Style-Defintion ${data.key} - Style type filtering is active (${templateType} is not in ${templateTypes.join(", ")}\n`))
-      return false
-    }
-    if (data.baseType && isExcluded(data.baseType, excludeBaseTypes, baseTypes)) {
-      if (cfg.debug)
-        process.stdout.write(chalk.gray(`${figures.arrowRight} Skipping Style-Defintion ${data.key} - Style is defined at base type level and base type filtering is active\n`))
-      return false
-    }
-    if (data.contentType && isExcluded(data.contentType, excludeTypes, types)) {
-      if (cfg.debug)
-        process.stdout.write(chalk.gray(`${figures.arrowRight} Skipping Style-Defintion ${data.key} - Style is defined at component type level and component type filtering is active\n`))
-      return false
-    }
-    if (templateType != 'component' && types.length > 0) {
-      if (cfg.debug)
-        process.stdout.write(chalk.gray(`${figures.arrowRight} Skipping Style-Defintion ${data.key} - Style is targeting the ${templateType} level and component type selection is active\n`))
-      return false
-    }
-    if (data.nodeType && isExcluded(data.nodeType, excludeNodeTypes, nodes)) {
-      if (cfg.debug)
-        process.stdout.write(chalk.gray(`${figures.arrowRight} Skipping Style-Defintion ${data.key} - Style is defined at node type level and node type filtering is active\n`))
-      return false
-    }
-    if (templateType != 'node' && nodes.length > 0) {
-      if (cfg.debug)
-        process.stdout.write(chalk.gray(`${figures.arrowRight} Skipping Style-Defintion ${data.key} - Style is targeting the ${templateType} level and node type selection is active\n`))
-      return false
-    }
-    return true
-  })
-
-  if (cfg.debug)
-    process.stdout.write(chalk.gray(`${figures.arrowRight} Applied content type filters, reduced from ${results.length} to ${styles.length} items\n`))
-
-  return {
-    all: results,
-    styles
+    return undefined
   }
 }
 
-function isExcluded<T>(value: T, exclusions: Array<T>, inclusions: Array<T>): boolean {
-  if (value == undefined || value == null)
-    return false
-  return exclusions.includes(value) || (inclusions.length > 0 && !inclusions.includes(value))
-}
+export async function toTypeFilesList(displayTemplates: Array<IntegrationApi.DisplayTemplate>, client: ApiClientInstance, basePath: string) : Promise<TypeFilesList>
+{
+  if (isNonEmptyArray(displayTemplates)) {
+    // Get all content types we need to get the type file lists
+    const targetContentTypes = (await Promise.allSettled(displayTemplates.map(async displayTemplate => {
+      if (!displayTemplate.contentType) return undefined;
+      return client.contentTypesGet({ path: { key: displayTemplate.contentType }})
+    }))).map(x => x.status == 'fulfilled' ? x.value : undefined).filter(isDefined);
 
-export async function getStyleFilePath(definition: IntegrationApi.DisplayTemplate, opts?: { contentBaseType?: IntegrationApi.ContentType['baseType'], client?: CmsApiClient }): Promise<string> {
-  if (definition.nodeType)
-    return `nodes/${definition.nodeType}/${definition.key}/${definition.key}.opti-style.json`
-  if (definition.baseType)
-    return `${definition.baseType}/styles/${definition.key}/${definition.key}.opti-style.json`
-  if (definition.contentType) {
-    if (opts?.contentBaseType)
-      return `${opts?.contentBaseType}/${definition.contentType}/${definition.key}.opti-style.json`
-
-    if (!opts?.client)
-      throw new Error("Neither the contentBaseType, nor the ApiClient has been provided for a definition for a specific ContentType - unable to generate the path")
-
-    const contentType: IntegrationApi.ContentType | undefined = await opts.client.contentTypesGet({ path: { key: definition.contentType } }).catch(() => undefined)
-    if (contentType)
-      return `${contentType.baseType}/${definition.contentType}/${definition.key}.opti-style.json`
-
-  }
-  throw new Error(`Unable to resolve the target for the DisplayTemplate: ${definition.key}`)
-}
-
-export type StyleFilePaths = {
-  /**
-   * Folder of the style definition file
-   */
-  itemFile: string
-  /**
-   * Folder for the style defintion
-   */
-  itemPath: string
-  /**
-   * Folder for the displayTemplates.ts file
-   */
-  typesPath: string
-  /**
-   * Textual identifier of the style definition
-   */
-  targetType: string
-}
-
-export async function getStyleFilePaths(definition: IntegrationApi.DisplayTemplate, opts?: { contentBaseType?: IntegrationApi.ContentType['baseType'], client?: CmsApiClient }): Promise<StyleFilePaths> {
-  if (definition.nodeType)
-    return {
-      itemFile: path.join('nodes', definition.nodeType, definition.key, definition.key + '.opti-style.json'),
-      itemPath: path.join('nodes', definition.nodeType, definition.key),
-      typesPath: path.join('nodes', definition.nodeType),
-      targetType: 'node/' + definition.nodeType
+    // Simple helper to get the base type from the list
+    function getBaseTypeOf(contentTypeKey?: string | null): string | undefined
+    {
+      if (!contentTypeKey) return undefined;
+      return targetContentTypes.find(x => x.key === contentTypeKey)?.baseType;
     }
-
-  if (definition.baseType)
-    return {
-      itemFile: path.join(definition.baseType, 'styles', definition.key, definition.key + '.opti-style.json'),
-      itemPath: path.join(definition.baseType, 'styles', definition.key),
-      typesPath: path.join(definition.baseType, 'styles'),
-      targetType: 'base/' + definition.baseType
-    }
-
-  if (definition.contentType) {
-    if (opts?.contentBaseType)
-      return {
-        itemFile: path.join(opts.contentBaseType, definition.contentType, definition.key + '.opti-style.json'),
-        itemPath: path.join(opts.contentBaseType, definition.contentType),
-        typesPath: path.join(opts.contentBaseType, definition.contentType),
-        targetType: 'content/' + definition.contentType
-      }
-
-    if (!opts?.client)
-      throw new Error("Neither the contentBaseType, nor the ApiClient has been provided for a definition for a specific ContentType - unable to generate the path")
-
-    const contentType: IntegrationApi.ContentType | undefined = await opts.client.contentTypesGet({ path: { key: definition.contentType } }).catch(() => undefined)
-    if (contentType)
-      return {
-        itemFile: path.join(contentType.baseType, definition.contentType, definition.key + '.opti-style.json'),
-        itemPath: path.join(contentType.baseType, definition.contentType),
-        typesPath: path.join(contentType.baseType, definition.contentType),
-        targetType: 'content/' + definition.contentType
-      }
-  }
-  throw new Error(`Unable to resolve the target for the DisplayTemplate: ${definition.key}`)
+    
+    // Now reduce the list into the Map we need
+    return displayTemplates.reduce((aggregator, displayTemplate) => {
+      const contentTypeBaseType = getBaseTypeOf(displayTemplate.contentType);
+      const { identifier, helperFile, helperFolder, styleFile, styleFolder } = getStyleFilePathsSync(displayTemplate, contentTypeBaseType, basePath, true);
+      const info = aggregator.get(identifier) ?? { filePath: helperFile, fileFolder: helperFolder, templates: [] };
+      info.templates.push({ key: displayTemplate.key, file: styleFile, data: displayTemplate, folder: styleFolder });
+      aggregator.set(identifier, info);
+      return aggregator;
+    }, new TypeFilesList());
+  } 
+    
+  return new TypeFilesList()
 }
