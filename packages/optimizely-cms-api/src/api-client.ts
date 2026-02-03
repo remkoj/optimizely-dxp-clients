@@ -1,12 +1,5 @@
 import * as Operations from './client/sdk.gen'
 import { createClient, createConfig, type RequestResult, type ResponseStyle } from './client/client';
-import * as InstanceOperations from './instance.client/sdk.gen'
-import {
-  createClient as createInstanceClient,
-  createConfig as createInstanceConfig,
-  type RequestResult as InstanceRequestResult,
-  type ResponseStyle as InstanceResponseStyle
-} from './instance.client/client';
 import { type CmsIntegrationApiOptions, readEnvConfig } from "./config";
 import { type InstanceApiVersionInfo, OptiCmsVersion } from "./types";
 import { createClientConfig } from './client-config'
@@ -16,21 +9,11 @@ type OperationsType = { -readonly [KT in keyof typeof Operations]: (typeof Opera
 type OperationsNames = keyof OperationsType
 type OperationReturnType<RT extends (...args: any) => any> = ReturnType<RT> extends RequestResult<any, any, boolean, ResponseStyle> ? Promise<NonNullable<Awaited<ReturnType<RT>>['data']>> : never
 
-type InstanceOperationsType = { -readonly [KT in keyof typeof InstanceOperations]: (typeof InstanceOperations)[KT] }
-type InstanceOperationsNames = keyof InstanceOperationsType
-type InstanceOperationReturnType<RT extends (...args: any) => any> = ReturnType<RT> extends InstanceRequestResult<any, any, boolean, InstanceResponseStyle> ? Promise<NonNullable<Awaited<ReturnType<RT>>['data']>> : never
-
-type BaseApiClientFunctions = {
+type ApiClientFunctions = {
   readonly [KT in OperationsNames]: OperationsType[KT] extends Function ?
   (options?: Parameters<OperationsType[KT]>[0]) => OperationReturnType<OperationsType[KT]> :
   never
 }
-type InstanceClientFunctions = {
-  readonly [KT in InstanceOperationsNames as InstanceOperationsType[KT] extends Function ? `preview2${Capitalize<KT>}` : never]: InstanceOperationsType[KT] extends Function ?
-  (options?: Parameters<InstanceOperationsType[KT]>[0]) => InstanceOperationReturnType<InstanceOperationsType[KT]> :
-  never
-}
-type ApiClientFunctions = BaseApiClientFunctions & InstanceClientFunctions
 type FunctionList<T extends Object> = keyof { [PN in keyof T as T[PN] extends Function ? PN : never]: T[PN] }
 
 type BaseClass = {
@@ -74,37 +57,8 @@ function applyOperations<TBase extends BaseClass>(Base: TBase): ClassWithMixin<T
     NewClass.prototype[propName] = wrapper
   })
 
-  // Bind the older Preview2 operations
-  Object.getOwnPropertyNames(InstanceOperations).filter(isInstanceClientFunction).forEach(propName => {
-    type PropNameKey = typeof propName
-    type MethodArgs = NonNullable<Parameters<typeof InstanceOperations[PropNameKey]>[0]> extends Operations.Options<infer TData, boolean> ? TData : never
-
-    async function wrapper(args: Omit<MethodArgs, 'url'>) {
-      const operationArgs: Omit<Operations.Options<MethodArgs>, 'headers'> = {
-        throwOnError: false,
-        ...args,
-        //@ts-expect-error
-        client: this._instanceClient
-      }
-      //@ts-expect-error
-      const result = await InstanceOperations[propName](operationArgs)
-      if (result.data)
-        return result.data
-      throw new ApiError(result)
-    }
-
-    const fnName: keyof InstanceClientFunctions = `preview2${toCapitalized(propName)}`
-
-    //@ts-expect-error
-    NewClass.prototype[fnName] = wrapper
-  })
-
   // Return the new class
   return NewClass as unknown as ClassWithMixin<TBase, ApiClientFunctions>
-}
-
-function toCapitalized<S extends string>(toCapitalize: S): Capitalize<S> {
-  return (toCapitalize.substring(0, 1).toUpperCase() + toCapitalize.substring(1)) as Capitalize<S>
 }
 
 function createIsFunctionValidator<T extends Object>(baseType: T): (propName: string) => propName is FunctionList<T> {
@@ -114,12 +68,10 @@ function createIsFunctionValidator<T extends Object>(baseType: T): (propName: st
 }
 
 const isApiClientFunction = createIsFunctionValidator(Operations)
-const isInstanceClientFunction = createIsFunctionValidator(InstanceOperations)
 
 class BaseApiClient {
   protected _config: CmsIntegrationApiOptions
   protected _client: ReturnType<typeof createClient>
-  protected _instanceClient: ReturnType<typeof createInstanceClient>
 
   public constructor(config?: CmsIntegrationApiOptions) {
     // Store instance variables
@@ -127,9 +79,6 @@ class BaseApiClient {
     this._client = createClient(createClientConfig(createConfig({
       baseUrl: 'https://api.cms.optimizely.com/preview3',
     }), this._config));
-    this._instanceClient = createInstanceClient(createClientConfig(createInstanceConfig({
-      baseUrl: new URL('/_cms/preview2', this._config.base).href,
-    })));
 
     // Configure Client
     if (this._config.debug) {
@@ -138,14 +87,6 @@ class BaseApiClient {
         return request
       })
       this._client.interceptors.response.use((response, request) => {
-        console.log(`✨ [CMS API] Received response ${response.status} ${response.statusText} of type ${response.headers.get('Content-Type') ?? 'unknown'} for ${request.url}`)
-        return response
-      })
-      this._instanceClient.interceptors.request.use(async (request) => {
-        console.log(`🔍 [CMS API] Sending ${request.method} request to ${request.url}`)
-        return request
-      })
-      this._instanceClient.interceptors.response.use((response, request) => {
         console.log(`✨ [CMS API] Received response ${response.status} ${response.statusText} of type ${response.headers.get('Content-Type') ?? 'unknown'} for ${request.url}`)
         return response
       })
@@ -214,19 +155,9 @@ class BaseApiClient {
     const result = await this._client.get({
       url: '/info'
     })
-    const instanceResult = await this._instanceClient.get({
-      url: '/info'
-    })
     if (result.data) {
       const data = result.data as InstanceApiVersionInfo
       data.baseUrl = this._client.getConfig().baseUrl;
-      data.results = {
-        preview2Data: {
-          baseUrl: this._instanceClient.getConfig().baseUrl,
-          ...instanceResult?.data ?? {}
-        },
-        ...data.results,
-      }
       return data;
     }
 

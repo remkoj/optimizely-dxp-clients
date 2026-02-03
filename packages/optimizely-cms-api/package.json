@@ -2,7 +2,7 @@
   "name": "@remkoj/optimizely-cms-api",
   "displayName": "Optimizely CMS - Integration API Client",
   "description": "A Javascript client for the Integration API provided by the Optimizely CMS.",
-  "version": "6.0.0-pre15",
+  "version": "6.0.0-pre16",
   "type": "commonjs",
   "license": "Apache-2.0",
   "main": "./dist/index.js",
@@ -12,11 +12,11 @@
   ],
   "devDependencies": {
     "@hey-api/client-fetch": "^0.13.1",
-    "@hey-api/openapi-ts": "^0.90.7",
+    "@hey-api/openapi-ts": "^0.91.1",
     "rimraf": "^6.1.2"
   },
   "dependencies": {
-    "@types/node": "^22.19.7",
+    "@types/node": "^22.19.8",
     "dotenv": "^17.2.3",
     "dotenv-expand": "^12.0.3",
     "glob": "^13.0.0",
@@ -25,7 +25,7 @@
     "typescript": "^5.9.3"
   },
   "scripts": {
-    "clean": "rimraf -g ./dist ./*.tsbuildinfo ./openapi-ts*log",
+    "clean": "rimraf -g ./dist ./src/client ./*.tsbuildinfo",
     "prepare": "tsc --build && yarn node scripts/copy-client.mjs",
     "watch": "tsc --watch",
     "rebuild": "yarn clean && yarn generate && tsc --build --force",

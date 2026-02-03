@@ -1,6 +1,5 @@
 export * from './config'
 export * as IntegrationApi from './client/types.gen'
-export * as Preview2IntegrationApi from './instance.client/types.gen'
 export { ApiClient, ApiError, ApiClient as CoreClient, type ApiClientStatic, type CmsIntegrationApiClient } from './api-client'
 export { OptiCmsVersion } from "./types"
 

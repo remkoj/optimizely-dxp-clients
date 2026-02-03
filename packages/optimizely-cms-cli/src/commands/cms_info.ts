@@ -1,5 +1,5 @@
 import type { CliModule } from '../types.js'
-import type { ApiError, IntegrationApi, Preview2IntegrationApi } from '@remkoj/optimizely-cms-api'
+import type { ApiError } from '@remkoj/optimizely-cms-api'
 import createClient from '../tools/cmsClient.js'
 import chalk from 'chalk'
 import figures from 'figures'
@@ -26,8 +26,6 @@ export const CmsVersionCommand: CliModule = {
       }
     })
 
-    const hasPreview2Info = versionInfo.results.preview2Data?.baseUrl ? true : false
-
     const info = new Table({
       head: [
         chalk.yellow(chalk.bold("Component")),
@@ -37,12 +35,8 @@ export const CmsVersionCommand: CliModule = {
       colAligns: ["left", "left"]
     })
     info.push(["Base URL", versionInfo.baseUrl ?? client.cmsUrl.href])
-    if (hasPreview2Info)
-      info.push(["Base URL (Preview 2)", versionInfo.results.preview2Data?.baseUrl ?? 'n/a'])
     info.push(["Client API", client.apiVersion])
     info.push(["Service API", versionInfo.apiVersion])
-    if (hasPreview2Info)
-      info.push(["Service API (Preview 2)", versionInfo.results.preview2Data?.apiVersion ?? 'n/a'])
     info.push(["CMS Build", versionInfo.cmsVersion])
     info.push(["Service Build", versionInfo.serviceVersion])
     info.push(["SDK", CLIInfo.version])

@@ -21,18 +21,12 @@ const CMS_PATHS = {
 
   //Create client
   const openApiSpecV3 = await readOpenApiSpec(accessToken);
-  const openApiSpecV2 = await readOpenApiSpec(accessToken, buildCmsEndpoint);
   const plugins = createPluginConfig();
 
-  process.stdout.write(`➡ Creating Preview3 & Preview2 CMS API Client\n`);
+  process.stdout.write(`➡ Creating Optimizely CMS API Client\n`);
   void await createClient({
         input: openApiSpecV3,
         output: createOutputConfig(path.resolve(path.join(process.cwd(), 'src', 'client'))),
-        plugins,
-      });
-  void await createClient({
-        input: openApiSpecV2,
-        output: createOutputConfig(path.resolve(path.join(process.cwd(), 'src', 'instance.client'))),
         plugins,
       });
 
