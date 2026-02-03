@@ -1,3 +1,8 @@
+/**
+ * List of content base types used by the CMS
+ * 
+ * @deprecated Only retained here for compatibility
+ */
 export enum ContentBaseType {
     PAGE = 'page',
     COMPONENT = 'component',
@@ -10,6 +15,11 @@ export enum ContentBaseType {
     ELEMENT = 'element',
 }
 
+/**
+ * List of property types used by the CMS
+ * 
+ * @deprecated Only retained here for compatibility
+ */
 export enum PropertyDataType {
     STRING = 'string',
     URL = 'url',
