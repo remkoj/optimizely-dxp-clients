@@ -13,7 +13,7 @@ export type ChangesetItemPage = {
      */
     readonly pageIndex?: number;
     /**
-     * The number of item in each page. Not necessarily the same as the number of items in this page.
+     * The number of items in each page. Not necessarily the same as the number of items in this page.
      */
     readonly pageSize?: number;
     /**

@@ -1,4 +1,4 @@
-import { type IntegrationApi } from '@remkoj/optimizely-cms-api'
+import { type IntegrationApi, type ContentBaseType } from '@remkoj/optimizely-cms-api'
 import path from 'node:path'
 import fs from 'node:fs'
 import chalk from 'chalk'
@@ -99,7 +99,7 @@ function getDisplayTemplateInfo(contentType: IntegrationApi.ContentType, typePat
 
 type TemplateFn = (contentType: IntegrationApi.ContentType, varName: string, displayTemplate?: string, baseDisplayTemplate?: string) => string
 
-const Templates: Record<'default', TemplateFn> & Partial<Record<IntegrationApi.ContentBaseType, TemplateFn>> =
+const Templates: Record<'default', TemplateFn> & Partial<Record<ContentBaseType, TemplateFn>> =
 {
   // Default Template for all components without specifics
   default: (contentType, varName, displayTemplate, baseDisplayTemplate) => `import { CmsEditable, type CmsComponent } from "@remkoj/optimizely-cms-react/rsc";

@@ -1,4 +1,4 @@
-import { IntegrationApi, OptiCmsVersion } from '@remkoj/optimizely-cms-api'
+import { IntegrationApi, OptiCmsVersion, PropertyDataType } from '@remkoj/optimizely-cms-api'
 import path from 'node:path'
 import fs from 'node:fs'
 import chalk from 'chalk'
@@ -132,29 +132,29 @@ export function renderProperties(contentType: IntegrationApi.ContentType, genera
     const propName = isConflict ? `${contentType.key}${propKey}: ${propKey}` : propKey
 
     // Write the property
-    switch (propType) {
-      case IntegrationApi.PropertyDataType.ARRAY:
+    switch (propType as unknown as PropertyDataType) {
+      case PropertyDataType.ARRAY:
         {
-          const typeData = typeProps[propKey] as IntegrationApi.ListProperty
-          switch (typeData.items.type) {
-            case IntegrationApi.PropertyDataType.INTEGER:
+          const typeData = typeProps[propKey]
+          switch (typeData.items.type as unknown as PropertyDataType) {
+            case PropertyDataType.INTEGER:
               if (typeData.format == 'categorization') {
                 //fragmentFields.push(`${propName} { Id, Name, Description }`)
                 console.warn(chalk.redBright(`❗ Property ${ propName } is a 'categorization', this is not supported. If you need to use this property, add it manually into the generated files`));
               } else
                 fragmentFields.push(propName)
               break
-            case IntegrationApi.PropertyDataType.STRING:
+            case PropertyDataType.STRING:
               fragmentFields.push(propName)
               break;
-            case IntegrationApi.PropertyDataType.CONTENT:
+            case PropertyDataType.CONTENT:
               if (contentType.baseType == 'page' || (contentType.baseType as string) == 'experience')
                 fragmentFields.push(`${propName} { ...${forCms12 ? 'PageIContentListItem' : 'BlockData'} }`)
               else
                 fragmentFields.push(`${propName} { ...IContentListItem }`)
               break;
-            case IntegrationApi.PropertyDataType.COMPONENT:
-              const componentType = (typeData.items as IntegrationApi.ComponentListItem).contentType.split(':').pop()
+            case PropertyDataType.COMPONENT:
+              const componentType = typeData.items.contentType.split(':').pop()
               switch (componentType) {
                 case 'link':
                   fragmentFields.push(`${propName} { ...LinkItemData }`)
@@ -168,7 +168,7 @@ export function renderProperties(contentType: IntegrationApi.ContentType, genera
                   }
               }
               break;
-            case IntegrationApi.PropertyDataType.CONTENT_REFERENCE:
+            case PropertyDataType.CONTENT_REFERENCE:
               fragmentFields.push(`${propName} { ...ReferenceData }`)
               break;
             default:
@@ -177,8 +177,8 @@ export function renderProperties(contentType: IntegrationApi.ContentType, genera
           }
           break;
         }
-      case IntegrationApi.PropertyDataType.STRING: {
-        const propDetails = typeProps[propKey] as IntegrationApi.StringProperty
+      case PropertyDataType.STRING: {
+        const propDetails = typeProps[propKey]
         switch (propDetails.format ?? "") {
           case 'html':
             fragmentFields.push(forCms12 ? `${propName} { Structure, Html }` : `${propName} { json, html }`)
@@ -195,14 +195,14 @@ export function renderProperties(contentType: IntegrationApi.ContentType, genera
         }
         break;
       }
-      case IntegrationApi.PropertyDataType.URL:
+      case PropertyDataType.URL:
         fragmentFields.push(forCms12 ? propName : `${propName} { ...LinkData }`)
         break;
-      case IntegrationApi.PropertyDataType.CONTENT_REFERENCE:
+      case PropertyDataType.CONTENT_REFERENCE:
         fragmentFields.push(`${propName} { ...ReferenceData }`)
         break;
-      case IntegrationApi.PropertyDataType.COMPONENT: {
-        const componentType = (typeProps[propKey] as IntegrationApi.ComponentProperty).contentType.split(':').pop()
+      case PropertyDataType.COMPONENT: {
+        const componentType = typeProps[propKey].contentType.split(':').pop()
         if (componentType == "link") {
           fragmentFields.push(`${propName} { ...LinkItemData }`)
         } else {
@@ -212,10 +212,10 @@ export function renderProperties(contentType: IntegrationApi.ContentType, genera
         }
         break;
       }
-      case IntegrationApi.PropertyDataType.BINARY:
+      case PropertyDataType.BINARY:
         fragmentFields.push(propName)
         break;
-      case IntegrationApi.PropertyDataType.CONTENT:
+      case PropertyDataType.CONTENT:
         fragmentFields.push(`${propName} { ...${forCms12 ? 'PageIContentListItem' : 'BlockData'} }`)
         break;
       default:
@@ -256,7 +256,7 @@ function getPropDataType(baseInfo: IntegrationApi.ContentTypeProperty)
   const baseType = baseInfo.type;
   if (!baseType)
     throw new Error("Invalid property type definition");
-  const propInfo: { type: IntegrationApi.PropertyDataType, format?: string } = baseInfo.type === "array" ? (baseInfo as IntegrationApi.ListProperty).items : baseInfo
+  const propInfo: { type?: string, format?: string } = baseInfo.type === "array" ? baseInfo.items : baseInfo
   switch (propInfo.type) {
     case "string":
       return propInfo.format === 'html' ? 'richtext' : propInfo.type;

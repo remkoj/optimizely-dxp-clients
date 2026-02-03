@@ -2,7 +2,6 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-import type { LocaleStatus } from './LocaleStatus';
 /**
  * Describes information about a locale instance of a content item.
  */
@@ -19,6 +18,18 @@ export type ContentLocaleInfo = {
      * The username of the user that created this locale version of content.
      */
     readonly createdBy?: string;
-    status?: LocaleStatus;
+    /**
+     * The status of the current locale.
+     */
+    readonly status?: ContentLocaleInfo.status;
 };
+export namespace ContentLocaleInfo {
+    /**
+     * The status of the current locale.
+     */
+    export enum status {
+        DRAFT = 'draft',
+        PUBLISHED = 'published',
+    }
+}
 

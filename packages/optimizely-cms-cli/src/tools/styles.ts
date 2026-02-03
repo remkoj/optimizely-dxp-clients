@@ -116,7 +116,12 @@ function isExcluded<T>(value: T, exclusions: Array<T>, inclusions: Array<T>): bo
   return exclusions.includes(value) || (inclusions.length > 0 && !inclusions.includes(value))
 }
 
-export async function getStyleFilePath(definition: IntegrationApi.DisplayTemplate, opts?: { contentBaseType?: IntegrationApi.ContentBaseType, client?: CmsApiClient }): Promise<string> {
+export async function getStyleFilePath(
+  definition: IntegrationApi.DisplayTemplate, 
+  opts?: { 
+    contentBaseType?: string, 
+    client?: CmsApiClient 
+  }): Promise<string> {
   if (definition.nodeType)
     return `nodes/${definition.nodeType}/${definition.key}/${definition.key}.opti-style.json`
   if (definition.baseType)

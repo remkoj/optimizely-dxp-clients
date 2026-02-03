@@ -9,11 +9,11 @@ export type Changeset = {
     /**
      * The unique key of this Changeset.
      */
-    key: string;
+    key?: string;
     /**
-     * The source of this Changeset
+     * The source of this Changeset.
      */
-    source?: string;
+    readonly source?: string;
     /**
      * The name of this Changeset.
      */

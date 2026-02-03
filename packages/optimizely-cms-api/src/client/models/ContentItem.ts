@@ -2,7 +2,7 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-import type { VersionStatus } from './VersionStatus';
+import type { CompositionNode } from './CompositionNode';
 /**
  * Represents a version of a content item.
  */
@@ -14,7 +14,7 @@ export type ContentItem = {
     /**
      * The key that identifies this content item.
      */
-    readonly key: string;
+    readonly key?: string;
     /**
      * The locale of this content instance.
      */
@@ -23,6 +23,11 @@ export type ContentItem = {
      * The version identifier of this content instance.
      */
     readonly version?: string;
+    /**
+     * The variation of this content item, if any. Variations are used to represent different states or forms of the same content item.
+     * A variation has it's own publish lifecycle. A variation can though not be published before the default version of same local is published.
+     */
+    readonly variation?: string | null;
     /**
      * The content type of this content item.
      */
@@ -39,7 +44,10 @@ export type ContentItem = {
      * Indicates a time when this content expired or should expire.
      */
     expired?: string | null;
-    status?: VersionStatus;
+    /**
+     * The status of this version of the content item.
+     */
+    status?: ContentItem.status;
     /**
      * Indicates a time when this content version should transition to published status. Must only be assigned when Status is set to Scheduled.
      */
@@ -61,5 +69,20 @@ export type ContentItem = {
      * The username of the user that made the latest modification to this content instance.
      */
     readonly lastModifiedBy?: string;
+    composition?: CompositionNode;
 };
+export namespace ContentItem {
+    /**
+     * The status of this version of the content item.
+     */
+    export enum status {
+        DRAFT = 'draft',
+        READY = 'ready',
+        PUBLISHED = 'published',
+        PREVIOUS = 'previous',
+        SCHEDULED = 'scheduled',
+        REJECTED = 'rejected',
+        IN_REVIEW = 'inReview',
+    }
+}
 

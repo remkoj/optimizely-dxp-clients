@@ -15,7 +15,7 @@ export type ImageDescriptor = {
      */
     height?: number;
     /**
-     * Indicates if the image should be pregenerated when a new image is uploaded rather than when first requested.
+     * Indicates if the image should be pre-generated when a new image is uploaded rather than when first requested.
      */
     pregenerated?: boolean;
 };

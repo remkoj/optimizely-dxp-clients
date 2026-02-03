@@ -10,11 +10,10 @@ export class ContentTypesService {
     constructor(public readonly httpRequest: BaseHttpRequest) {}
     /**
      * List content types
-     * List content types using the provided options.
+     * List content types using the provided parameters.
      * @param forContainerType Only include types that are available for creation under the provided container type
      * @param sources Indicates which sources should be included when listing content types.
-     * Use All to include content types from all sources or
-     * Default to include content types without a specific sources.
+     * Use 'DEFAULT' to include content types without a specific source.
      * @param pageIndex
      * @param pageSize
      * @returns ContentTypePage OK
@@ -43,8 +42,8 @@ export class ContentTypesService {
     /**
      * Create content type
      * Create a new content type.
-     * @param requestBody The content type that should be created.
-     * @returns ContentType OK
+     * @param requestBody The content type that should be created or replaced.
+     * @returns ContentType Created
      * @throws ApiError
      */
     public contentTypesCreate(
@@ -65,11 +64,15 @@ export class ContentTypesService {
      * Get content type
      * Get the content type with the provided key.
      * @param key The key of the content type to retrieve.
+     * @param ifNoneMatch If provided and the value matches the RFC7232 ETag of the current resource a 304 NotModified response will be returned. Weak ETags will always be ignored.
+     * @param ifModifiedSince If provided and the resource has not been modified since the date a 304 NotModified response will be returned. This parameter will be ignored if an 'If-None-Match' parameter is also provided.
      * @returns ContentType OK
      * @throws ApiError
      */
     public contentTypesGet(
         key: string,
+        ifNoneMatch?: string,
+        ifModifiedSince?: string,
     ): CancelablePromise<ContentType> {
         return this.httpRequest.request({
             method: 'GET',
@@ -77,56 +80,34 @@ export class ContentTypesService {
             path: {
                 'key': key,
             },
+            headers: {
+                'If-None-Match': ifNoneMatch,
+                'If-Modified-Since': ifModifiedSince,
+            },
             errors: {
+                304: `Not Modified`,
                 403: `Forbidden`,
+                404: `Not Found`,
             },
         });
     }
     /**
-     * Create or replace content type
-     * Create or replace a content type. If a content type with the provided key exist it is replaced.
-     * Otherwise a new content type is created.
-     * @param key The key of the content type to update or create.
-     * @param requestBody The values of the created or replaced content type.
-     * @param ignoreDataLossWarnings Update the content type even though the changes might result in data loss.
-     * @returns ContentType OK
-     * @throws ApiError
-     */
-    public contentTypesPut(
-        key: string,
-        requestBody: ContentType,
-        ignoreDataLossWarnings?: boolean,
-    ): CancelablePromise<ContentType> {
-        return this.httpRequest.request({
-            method: 'PUT',
-            url: '/contenttypes/{key}',
-            path: {
-                'key': key,
-            },
-            query: {
-                'ignoreDataLossWarnings': ignoreDataLossWarnings,
-            },
-            body: requestBody,
-            mediaType: 'application/json',
-            errors: {
-                400: `Bad Request`,
-                403: `Forbidden`,
-            },
-        });
-    }
-    /**
-     * Update content type
-     * Update an existing content type. If a content type with the provided key does not exist an error is returned.
+     * Patch content type
+     * Patch an existing content type. If a content type with the provided key does not exist an error is returned.
      * @param key The key of the content type to patch.
-     * @param requestBody The values of the content type that should be updated.
-     * @param ignoreDataLossWarnings Update the content type even though the changes might result in data loss.
+     * @param requestBody The values of the content type that should be patched formatted according to RFC7396.
+     * @param cmsIgnoreDataLossWarnings Patch the content type even though the changes might result in data loss.
+     * @param ifMatch If provided, the PATCH request will only be considered if the value matches the RFC7232 ETag of the current resource. Weak ETags will always be ignored.
+     * @param ifUnmodifiedSince If provided, the PATCH request will only be considered if the resource has not been modified since the provided date. This parameter will be ignored if an 'If-Match' parameter is also provided.
      * @returns ContentType OK
      * @throws ApiError
      */
     public contentTypesPatch(
         key: string,
         requestBody: ContentType,
-        ignoreDataLossWarnings?: boolean,
+        cmsIgnoreDataLossWarnings?: boolean,
+        ifMatch?: string,
+        ifUnmodifiedSince?: string,
     ): CancelablePromise<ContentType> {
         return this.httpRequest.request({
             method: 'PATCH',
@@ -134,14 +115,18 @@ export class ContentTypesService {
             path: {
                 'key': key,
             },
-            query: {
-                'ignoreDataLossWarnings': ignoreDataLossWarnings,
+            headers: {
+                'cms-ignore-data-loss-warnings': cmsIgnoreDataLossWarnings,
+                'If-Match': ifMatch,
+                'If-Unmodified-Since': ifUnmodifiedSince,
             },
             body: requestBody,
             mediaType: 'application/merge-patch+json',
             errors: {
                 400: `Bad Request`,
                 403: `Forbidden`,
+                404: `Not Found`,
+                412: `Precondition Failed`,
             },
         });
     }
@@ -149,11 +134,15 @@ export class ContentTypesService {
      * Delete content type
      * Deletes the content type with the provided key. If a content type with the provided key does not exist an error is returned.
      * @param key The key of the content type to delete.
+     * @param ifMatch If provided, the DELETE request will only be considered if the value matches the RFC7232 ETag of the current resource. Weak ETags will always be ignored.
+     * @param ifUnmodifiedSince If provided, the DELETE request will only be considered if the resource has not been modified since the provided date. This parameter will be ignored if an 'If-Match' parameter is also provided.
      * @returns ContentType OK
      * @throws ApiError
      */
     public contentTypesDelete(
         key: string,
+        ifMatch?: string,
+        ifUnmodifiedSince?: string,
     ): CancelablePromise<ContentType> {
         return this.httpRequest.request({
             method: 'DELETE',
@@ -161,9 +150,15 @@ export class ContentTypesService {
             path: {
                 'key': key,
             },
+            headers: {
+                'If-Match': ifMatch,
+                'If-Unmodified-Since': ifUnmodifiedSince,
+            },
             errors: {
                 400: `Bad Request`,
                 403: `Forbidden`,
+                404: `Not Found`,
+                412: `Precondition Failed`,
             },
         });
     }

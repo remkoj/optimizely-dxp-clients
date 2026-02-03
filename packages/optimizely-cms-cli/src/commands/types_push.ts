@@ -56,9 +56,9 @@ export const TypesPushCommand : TypesPushModule = {
             if (outType.created || outType.created == "") delete outType.created
             if (outType.lastModified || outType.lastModified == "") delete outType.lastModified
             if (outType.lastModifiedBy || outType.lastModifiedBy == "") delete outType.lastModifiedBy
-            if (outType.features) delete outType.features
-            if (outType.usage) delete outType.usage
-            return client.contentTypes.contentTypesPut(outType.key, outType, force)
+            if ((outType as any).features) delete (outType as any).features
+            if ((outType as any).usage) delete (outType as any).usage
+            return client.contentTypes.contentTypesPatch(outType.key, outType, force)
                 .then(ct => { return { key: type.definition.key, type: ct, file: type.file }})
                 .catch(e => { return { key: type.definition.key, type: type.definition, file: type.file, error: e }})
         }))

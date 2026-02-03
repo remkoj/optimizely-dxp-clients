@@ -37,12 +37,16 @@ export class PropertyFormatsService {
      * Get the property format with the provided key.
      * @param key The key of the property format to retrieve.
      * @param allowDeleted Indicates that a deleted property format may be returned.
+     * @param ifNoneMatch If provided and the value matches the RFC7232 ETag of the current resource a 304 NotModified response will be returned. Weak ETags will always be ignored.
+     * @param ifModifiedSince If provided and the resource has not been modified since the date a 304 NotModified response will be returned. This parameter will be ignored if an 'If-None-Match' parameter is also provided.
      * @returns PropertyFormat OK
      * @throws ApiError
      */
     public propertyFormatsGet(
         key: string,
         allowDeleted?: boolean,
+        ifNoneMatch?: string,
+        ifModifiedSince?: string,
     ): CancelablePromise<PropertyFormat> {
         return this.httpRequest.request({
             method: 'GET',
@@ -50,11 +54,17 @@ export class PropertyFormatsService {
             path: {
                 'key': key,
             },
+            headers: {
+                'If-None-Match': ifNoneMatch,
+                'If-Modified-Since': ifModifiedSince,
+            },
             query: {
                 'allowDeleted': allowDeleted,
             },
             errors: {
+                304: `Not Modified`,
                 403: `Forbidden`,
+                404: `Not Found`,
             },
         });
     }

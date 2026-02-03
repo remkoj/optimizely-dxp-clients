@@ -2,12 +2,12 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-import type { ContentItem } from './ContentItem';
-export type ContentItemPage = {
+import type { Blueprint } from './Blueprint';
+export type BlueprintPage = {
     /**
      * The items in this paged collection.
      */
-    readonly items?: Array<ContentItem>;
+    readonly items?: Array<Blueprint>;
     /**
      * The zero-based index of the current page.
      */

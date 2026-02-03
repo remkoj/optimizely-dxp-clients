@@ -48,7 +48,7 @@ export const StylesPushCommand : StylesPushModule = {
             if (cfg.debug)
                 process.stdout.write(chalk.gray(`${ figures.arrowRight } Pushing: ${ styleKey }\n`))
 
-            const newTemplate = await client.displayTemplates.displayTemplatesPut(styleKey, styleDefinition)
+            const newTemplate = await client.displayTemplates.displayTemplatesPatch(styleKey, styleDefinition)
             return newTemplate
         }))).filter(isNotNullOrUndefined)
 

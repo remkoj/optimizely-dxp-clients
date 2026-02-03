@@ -18,13 +18,18 @@ export class ApiClient extends CmsIntegrationApiClient
     public constructor (config?: CmsIntegrationApiOptions)
     {
         const options = config ?? getCmsIntegrationApiConfigFromEnvironment()
-        options.base = new URL(OpenAPI.BASE, options.base)
-        if (options.cmsVersion == OptiCmsVersion.CMS12)
-            options.base.pathname = options.base.pathname.replace('preview2','preview1')
-        const apiVersion = options.cmsVersion == OptiCmsVersion.CMS12 ? 'preview1' : OpenAPI.VERSION 
+        let base = OpenAPI.BASE;
+        let version = OpenAPI.VERSION;
+        if (options.cmsVersion == OptiCmsVersion.CMS12) {
+          base = options.base.toString();
+          version = 'preview1';
+          if (options.debug)
+            console.info(`🚧 Switched to CMS 12 compatibility mode. Overridden Base URL ${base}, version: ${ version }`);
+        }
         let access_token : string | undefined = undefined
         super({
-            BASE: options.base.href, 
+            BASE: base,
+            VERSION: version,
             TOKEN: async () => {
                 if (!access_token)
                     access_token = await getAccessToken(options).catch(e => {
@@ -40,8 +45,7 @@ export class ApiClient extends CmsIntegrationApiClient
                 Connection: "Close"
             },
             WITH_CREDENTIALS: true,
-            CREDENTIALS: "include",
-            VERSION: apiVersion
+            CREDENTIALS: "include"
         })
         this._config = options
     }

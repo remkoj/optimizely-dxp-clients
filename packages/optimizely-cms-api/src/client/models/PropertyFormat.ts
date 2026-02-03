@@ -2,7 +2,6 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-import type { PropertyDataType } from './PropertyDataType';
 /**
  * Represent the definition of semantic property formats for content items.
  */
@@ -11,32 +10,77 @@ export type PropertyFormat = {
      * The key that identifies this PropertyFormat.
      */
     key?: string;
-    dataType?: PropertyDataType;
-    itemType?: PropertyDataType;
+    /**
+     * The underlying data type used for this PropertyFormat.
+     */
+    dataType?: PropertyFormat.dataType;
+    /**
+     * The underlying item type used for this PropertyFormat.
+     */
+    itemType?: PropertyFormat.itemType;
     /**
      * The name and identifier of this PropertyFormat.
      */
     displayName?: string;
     /**
-     * Editor used for managing properties with this format.
-     */
-    editor?: string | null;
-    /**
      * Indicates if this property format has been deleted.
      */
-    deleted?: boolean;
+    readonly deleted?: boolean;
     /**
-     * Settings for the editor.
+     * A timestamp indicating when this display template was first created.
      */
-    editorSettings?: Record<string, Record<string, any>> | null;
+    readonly created?: string;
     /**
-     * Enumerations for the format.
+     * The username of the user that created this display template.
      */
-    enum?: {
-        values?: Array<{
-            value?: (string | number);
-            displayName?: string;
-        }>;
-    } | null;
+    readonly createdBy?: string;
+    /**
+     * A timestamp indicating when this display template was last modified.
+     */
+    readonly lastModified?: string;
+    /**
+     * The username of the user that last modified this display template.
+     */
+    readonly lastModifiedBy?: string;
 };
+export namespace PropertyFormat {
+    /**
+     * The underlying data type used for this PropertyFormat.
+     */
+    export enum dataType {
+        STRING = 'string',
+        URL = 'url',
+        BOOLEAN = 'boolean',
+        INTEGER = 'integer',
+        FLOAT = 'float',
+        DATE_TIME = 'dateTime',
+        CONTENT_REFERENCE = 'contentReference',
+        CONTENT = 'content',
+        BINARY = 'binary',
+        LINK = 'link',
+        RICH_TEXT = 'richText',
+        JSON = 'json',
+        ARRAY = 'array',
+        COMPONENT = 'component',
+    }
+    /**
+     * The underlying item type used for this PropertyFormat.
+     */
+    export enum itemType {
+        STRING = 'string',
+        URL = 'url',
+        BOOLEAN = 'boolean',
+        INTEGER = 'integer',
+        FLOAT = 'float',
+        DATE_TIME = 'dateTime',
+        CONTENT_REFERENCE = 'contentReference',
+        CONTENT = 'content',
+        BINARY = 'binary',
+        LINK = 'link',
+        RICH_TEXT = 'richText',
+        JSON = 'json',
+        ARRAY = 'array',
+        COMPONENT = 'component',
+    }
+}
 

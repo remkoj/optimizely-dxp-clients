@@ -9,7 +9,7 @@ export type PropertyGroup = {
     /**
      * The key that identifies this PropertyGroup.
      */
-    readonly key: string;
+    key?: string;
     /**
      * The display name of this PropertyGroup.
      */
@@ -22,5 +22,18 @@ export type PropertyGroup = {
      * An value that is used to when sorting PropertyGroup instances.
      */
     sortOrder?: number;
+    /**
+     * A timestamp indicating when this property group was first created.
+     */
+    readonly created?: string;
+    /**
+     * The username of the user that created this property group.
+     */
+    readonly createdBy?: string;
+    readonly lastModified?: string;
+    /**
+     * The username of the user that last modified this property group.
+     */
+    readonly lastModifiedBy?: string;
 };
 

@@ -1,11 +1,15 @@
-/* generated using openapi-typescript-codegen -- do not edit */
-/* istanbul ignore file */
-/* tslint:disable */
-/* eslint-disable */
-/**
- * Represent the basic type that a PropertyFormat
- * is using for data storage and data transport.
- */
+export enum ContentBaseType {
+    PAGE = 'page',
+    COMPONENT = 'component',
+    MEDIA = 'media',
+    IMAGE = 'image',
+    VIDEO = 'video',
+    FOLDER = 'folder',
+    EXPERIENCE = 'experience',
+    SECTION = 'section',
+    ELEMENT = 'element',
+}
+
 export enum PropertyDataType {
     STRING = 'string',
     URL = 'url',

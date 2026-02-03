@@ -4,6 +4,7 @@ export { CmsIntegrationApiClient as CoreClient } from './client'
 export { ApiClient } from './api-client'
 export { ApiClient as CmsIntegrationApiClient } from './api-client'
 export { OptiCmsVersion } from "./types"
+export * from './enums'
 
 import { type CmsIntegrationApiOptions } from './config'
 import { ApiClient as CmsIntegrationApiClient } from './api-client'

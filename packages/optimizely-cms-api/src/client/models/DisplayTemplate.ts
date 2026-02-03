@@ -2,7 +2,6 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-import type { ContentBaseType } from './ContentBaseType';
 import type { DisplaySetting } from './DisplaySetting';
 /**
  * Describes a display template that can be assigned to content.
@@ -11,7 +10,7 @@ export type DisplayTemplate = {
     /**
      * The key that identifies this display template.
      */
-    readonly key: string;
+    key?: string;
     /**
      * The display name of this display template.
      */
@@ -20,14 +19,16 @@ export type DisplayTemplate = {
      * The optional node type this display template is valid for.
      */
     nodeType?: string | null;
-    baseType?: ContentBaseType;
+    /**
+     * The optional base type this display template is valid for.
+     */
+    baseType?: string | null;
     /**
      * The optional key of the content type this display template is valid for.
      */
     contentType?: string | null;
     /**
-     * If this is the default display template for the associated base type,
-     * node type or content type.
+     * If this is the default display template for the associated base type, node type or content type.
      */
     isDefault?: boolean;
     /**

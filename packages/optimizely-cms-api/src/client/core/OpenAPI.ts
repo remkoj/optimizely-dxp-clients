@@ -20,8 +20,8 @@ export type OpenAPIConfig = {
 };
 
 export const OpenAPI: OpenAPIConfig = {
-    BASE: '/_cms/preview2',
-    VERSION: 'preview2',
+    BASE: 'https://api.cms.optimizely.com/preview3',
+    VERSION: 'preview3',
     WITH_CREDENTIALS: false,
     CREDENTIALS: 'include',
     TOKEN: undefined,

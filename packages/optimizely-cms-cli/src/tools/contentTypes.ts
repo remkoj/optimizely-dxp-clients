@@ -1,6 +1,6 @@
 import type { OptiCmsArgs } from '../types.js'
 import type { Argv, ArgumentsCamelCase } from 'yargs'
-import { IntegrationApi, type ApiClient as CmsApiClient } from '@remkoj/optimizely-cms-api'
+import { IntegrationApi, type ApiClient as CmsApiClient, ContentBaseType } from '@remkoj/optimizely-cms-api'
 import { parseArgs } from '../tools/parseArgs.js'
 import chalk from 'chalk'
 import figures from 'figures'
@@ -62,7 +62,8 @@ export async function getContentTypes(client: CmsApiClient, args: ArgumentsCamel
     process.stdout.write(chalk.gray(`${figures.arrowRight} Filtering Content-Types based upon arguments\n`))
   }
 
-  const validBaseTypes = getEnumOptions(IntegrationApi.ContentBaseType).map(x => x.toLowerCase())
+  const validBaseTypes = getEnumOptions(ContentBaseType).map(x => x.toLowerCase());
+
   if (cfg.debug)
     process.stdout.write(`Allowing base types: ${ validBaseTypes.join(', ')}\n`);
   const allContentTypes = all ?

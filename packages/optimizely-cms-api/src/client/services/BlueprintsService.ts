@@ -2,27 +2,27 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-import type { DisplayTemplate } from '../models/DisplayTemplate';
-import type { DisplayTemplatePage } from '../models/DisplayTemplatePage';
+import type { Blueprint } from '../models/Blueprint';
+import type { BlueprintPage } from '../models/BlueprintPage';
 import type { CancelablePromise } from '../core/CancelablePromise';
 import type { BaseHttpRequest } from '../core/BaseHttpRequest';
-export class DisplayTemplatesService {
+export class BlueprintsService {
     constructor(public readonly httpRequest: BaseHttpRequest) {}
     /**
-     * List display templates
-     * List display templates using the provided parameters.
+     * List blueprints
+     * List blueprints using the provided parameters. This API is experimental and may change in future releases.
      * @param pageIndex
      * @param pageSize
-     * @returns DisplayTemplatePage OK
+     * @returns BlueprintPage OK
      * @throws ApiError
      */
-    public displayTemplatesList(
+    public blueprintsList(
         pageIndex?: number,
         pageSize?: number,
-    ): CancelablePromise<DisplayTemplatePage> {
+    ): CancelablePromise<BlueprintPage> {
         return this.httpRequest.request({
             method: 'GET',
-            url: '/displaytemplates',
+            url: '/experimental/blueprints',
             query: {
                 'pageIndex': pageIndex,
                 'pageSize': pageSize,
@@ -33,18 +33,18 @@ export class DisplayTemplatesService {
         });
     }
     /**
-     * Create display template
-     * Create a new display template.
-     * @param requestBody The display template that should be created.
-     * @returns DisplayTemplate Created
+     * Create a blueprint
+     * Create a new blueprint. This API is experimental and may change in future releases.
+     * @param requestBody The blueprint that should be created.
+     * @returns Blueprint Created
      * @throws ApiError
      */
-    public displayTemplatesCreate(
-        requestBody: DisplayTemplate,
-    ): CancelablePromise<DisplayTemplate> {
+    public blueprintsCreate(
+        requestBody: Blueprint,
+    ): CancelablePromise<Blueprint> {
         return this.httpRequest.request({
             method: 'POST',
-            url: '/displaytemplates',
+            url: '/experimental/blueprints',
             body: requestBody,
             mediaType: 'application/json',
             errors: {
@@ -54,22 +54,22 @@ export class DisplayTemplatesService {
         });
     }
     /**
-     * Get display template
-     * Get the display template with the provided key.
-     * @param key The key of the display template to retrieve.
+     * Get a specific blueprint
+     * Get the blueprint with the provided key. This API is experimental and may change in future releases.
+     * @param key The key of the blueprint to retrieve.
      * @param ifNoneMatch If provided and the value matches the RFC7232 ETag of the current resource a 304 NotModified response will be returned. Weak ETags will always be ignored.
      * @param ifModifiedSince If provided and the resource has not been modified since the date a 304 NotModified response will be returned. This parameter will be ignored if an 'If-None-Match' parameter is also provided.
-     * @returns DisplayTemplate OK
+     * @returns Blueprint OK
      * @throws ApiError
      */
-    public displayTemplatesGet(
+    public blueprintsGet(
         key: string,
         ifNoneMatch?: string,
         ifModifiedSince?: string,
-    ): CancelablePromise<DisplayTemplate> {
+    ): CancelablePromise<Blueprint> {
         return this.httpRequest.request({
             method: 'GET',
-            url: '/displaytemplates/{key}',
+            url: '/experimental/blueprints/{key}',
             path: {
                 'key': key,
             },
@@ -85,24 +85,24 @@ export class DisplayTemplatesService {
         });
     }
     /**
-     * Patch display template
-     * Patch an existing display template.
-     * @param key The key of the display template to patch.
-     * @param requestBody The values of the display template that should be patched formatted according to RFC7396.
+     * Patch blueprint
+     * Patch an existing blueprint. This API is experimental and may change in future releases.
+     * @param key The key of the blueprint to patch.
+     * @param requestBody The values of the blueprint that should be patched formatted according to RFC7396.
      * @param ifMatch If provided, the PATCH request will only be considered if the value matches the RFC7232 ETag of the current resource. Weak ETags will always be ignored.
      * @param ifUnmodifiedSince If provided, the PATCH request will only be considered if the resource has not been modified since the provided date. This parameter will be ignored if an 'If-Match' parameter is also provided.
-     * @returns DisplayTemplate OK
+     * @returns Blueprint OK
      * @throws ApiError
      */
-    public displayTemplatesPatch(
+    public blueprintsPatch(
         key: string,
-        requestBody: DisplayTemplate,
+        requestBody: Blueprint,
         ifMatch?: string,
         ifUnmodifiedSince?: string,
-    ): CancelablePromise<DisplayTemplate> {
+    ): CancelablePromise<Blueprint> {
         return this.httpRequest.request({
             method: 'PATCH',
-            url: '/displaytemplates/{key}',
+            url: '/experimental/blueprints/{key}',
             path: {
                 'key': key,
             },
@@ -121,22 +121,22 @@ export class DisplayTemplatesService {
         });
     }
     /**
-     * Delete display template
-     * Deletes the display template with the provided key.
-     * @param key The key of the display template to delete.
+     * Delete a blueprint
+     * Deletes the blueprint with the provided key. This API is experimental and may change in future releases.
+     * @param key The key of the blueprint to delete.
      * @param ifMatch If provided, the DELETE request will only be considered if the value matches the RFC7232 ETag of the current resource. Weak ETags will always be ignored.
      * @param ifUnmodifiedSince If provided, the DELETE request will only be considered if the resource has not been modified since the provided date. This parameter will be ignored if an 'If-Match' parameter is also provided.
-     * @returns DisplayTemplate OK
+     * @returns Blueprint OK
      * @throws ApiError
      */
-    public displayTemplatesDelete(
+    public blueprintsDelete(
         key: string,
         ifMatch?: string,
         ifUnmodifiedSince?: string,
-    ): CancelablePromise<DisplayTemplate> {
+    ): CancelablePromise<Blueprint> {
         return this.httpRequest.request({
             method: 'DELETE',
-            url: '/displaytemplates/{key}',
+            url: '/experimental/blueprints/{key}',
             path: {
                 'key': key,
             },
