@@ -160,7 +160,7 @@ export class DocumentGenerator
       properties.push("...ExperienceData")
 
     // Ensure that there's at least one property
-    if (properties.length === 0)
+    if (properties.filter(isNonEmptyString).length === 0)
       properties.unshift("__typename")
 
     // Construct fragment rawSDL
@@ -192,6 +192,10 @@ export class DocumentGenerator
   }
 
   protected buildProperty(propertyName: string, propertyConfig?: IntegrationApi.ContentTypeProperty, propertyTracker: Map<string,string> = new Map()): string | null {
+    // Skip all disabled properties
+    if (propertyConfig?.indexingType === "disabled")
+      return null; 
+
     // Get type information rendering
     const propertyItemConfig = propertyConfig?.type === 'array' ? propertyConfig?.items ?? propertyConfig : propertyConfig
     const propertyType = propertyItemConfig?.type ?? 'any'

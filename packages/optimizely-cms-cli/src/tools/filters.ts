@@ -61,7 +61,7 @@ export function shouldInclude<T>(value: T, allow?: T[] | null, disallow?: T[] | 
   // Item is allowed when either allow is not set, an empty array or has the value
   const isAllowed = !Array.isArray(allow) || allow.length === 0 || allow.includes(value) || (compareSlugified && allow.some(av => keyToSlug(av.toString(), slugifyOptions) === keyToSlug(value.toString(), slugifyOptions)));
   // Item is disallowed when and the array is set and includes the value
-  const isDisallowed = Array.isArray(disallow) && (disallow.includes(value) || (compareSlugified && allow.some(av => keyToSlug(av.toString(), slugifyOptions) === keyToSlug(value.toString(), slugifyOptions))));
+  const isDisallowed = Array.isArray(disallow) && (disallow.includes(value) || (compareSlugified && disallow.some(av => keyToSlug(av.toString(), slugifyOptions) === keyToSlug(value.toString(), slugifyOptions))));
   // Return the outcome
   return isAllowed && !isDisallowed;
 }

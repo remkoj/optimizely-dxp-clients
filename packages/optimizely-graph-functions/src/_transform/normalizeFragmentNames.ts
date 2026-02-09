@@ -15,7 +15,6 @@ import type { PresetOptions } from '../types'
 export function normalizeFragmentNames(files: Types.DocumentFile[], options: Types.PresetFnArgs<PresetOptions>): Types.DocumentFile[] {
   if (options.presetConfig.verbose)
     console.log(`✨ [Optimizely] Making all internal fragments available, which have not be overridden by the project`)
-
   // Filter & rename fragments
   const allFragmentNames = files.reduce<string[]>((list, file) => {
     if (file.document) visit(file.document, {
@@ -37,6 +36,8 @@ export function normalizeFragmentNames(files: Types.DocumentFile[], options: Typ
     }
     return prev
   }, { toRename: [], toRemove: [] })
+  if (options.presetConfig.verbose)
+    console.log(`✨ [Optimizely] Identified ${ operations.toRemove.length } fragments to remove (${ operations.toRemove.join(", ") }) and ${ operations.toRename.length } fragments to rename`);
   const filteredFiles: Types.DocumentFile[] = files.map(file => {
     let isModified = false;
     const newDocument = file.document ? visit(file.document, {

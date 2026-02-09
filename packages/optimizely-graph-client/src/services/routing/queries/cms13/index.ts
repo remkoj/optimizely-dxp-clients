@@ -163,7 +163,7 @@ export class OptimizelyCms13Client implements OptimizelyCmsRoutingApi {
     const variables: GetRouteById.Variables = {
       key: contentId,
       version: version?.toString(),
-      locale: localeToGraphLocale(locale),
+      locale: locale ? localeToGraphLocale(locale) : undefined,
       changeset: this._changeset || client.getChangeset(),
       variation: version ? { include: 'ALL' } : undefined,
     }

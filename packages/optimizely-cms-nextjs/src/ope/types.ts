@@ -1,7 +1,7 @@
 import { type ComponentType, type PropsWithChildren, type JSX } from 'react'
 import { type IOptiGraphClient } from '@remkoj/optimizely-graph-client'
 import { type GraphQLClient } from 'graphql-request'
-import { type ContentQueryProps } from '@remkoj/optimizely-cms-react/rsc'
+import { GenericContext, type ContentQueryProps } from '@remkoj/optimizely-cms-react/rsc'
 
 export type ContentRequest = (Omit<ContentQueryProps<string>, 'path'> & { path: string | null, token: string, ctx: 'edit' | 'preview' })
 
@@ -52,6 +52,8 @@ export type ValidatedEditPageProps = {
   })
 }
 
+export type EditViewPageLayout = ComponentType<PropsWithChildren<{ locale: string, ctx: GenericContext }>>
+
 export type EditViewOptions<LocaleType = string> = {
   /**
    * The message to show to the editor when awaiting the data to be updated
@@ -62,7 +64,7 @@ export type EditViewOptions<LocaleType = string> = {
   /**
    * The layout to use when rendering a page component
    */
-  layout: ComponentType<PropsWithChildren<{ locale: string }>>
+  layout: EditViewPageLayout
 
   /**
    * The fourth step of the handling of a Preview/On-Page-Edit view,

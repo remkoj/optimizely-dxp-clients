@@ -34,11 +34,16 @@ export class ChannelDefinition implements Readonly<ChannelDefinitionData> {
     this.dxp_url = dxp_url
   }
 
-  public getPrimaryDomain(): URL {
+  /**
+   * Get the primary domain for this channel. The primary domain is the domain
+   * marked as `primary` or the first one in the list of domains for this channel
+   * 
+   * @param     fallbackValue     The URL to return if no domains have been defined
+   * @returns   A URL object for the primary domain
+   */
+  public getPrimaryDomain(fallbackValue: URL = new URL('http://localhost:3000')): URL {
     const pd = this.getPrimaryChannelDomain()
-    if (pd)
-      return this.channelDomainToUrl(pd)
-    return new URL('http://localhost:3000')
+    return pd ? this.channelDomainToUrl(pd) : fallbackValue;
   }
 
   public getEditDomain(): URL {
@@ -51,7 +56,9 @@ export class ChannelDefinition implements Readonly<ChannelDefinitionData> {
   }
 
   protected getPrimaryChannelDomain() {
-    return this.domains.filter(x => x.isPrimary).at(0) || this.domains.filter(x => x.name.startsWith('localhost') || x.name.includes('.local')).at(0)
+    return this.domains.find(x => x.isPrimary) || // First get the configured primary
+        //this.domains.find(x => x.name.startsWith('localhost') || x.name.includes('.local')) || // Then get a localhost or .local
+        this.domains.at(0) //Finally try to get the first one
   }
 
   public getDomainForLocale(locale: string): URL {

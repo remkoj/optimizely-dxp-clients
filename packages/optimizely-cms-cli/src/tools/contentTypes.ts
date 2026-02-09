@@ -81,7 +81,7 @@ export async function getContentTypes(
     // Skip based upon type filters
     if (!shouldInclude(contentType.key, types, excludeTypes, true)) {
       if (cfg.debug)
-        process.stdout.write(chalk.gray(`${figures.arrowRight} Skipping ${contentType.key} as it has a restricted type: ${contentType.key}\n`))
+        process.stdout.write(chalk.gray(`${figures.arrowRight} Skipping ${contentType.key} as it is a restricted type (${types.join(', ')})(${excludeTypes.join(', ')})\n`))
       continue
     }
 

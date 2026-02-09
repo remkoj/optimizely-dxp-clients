@@ -68,7 +68,7 @@ export function applyConfigDefaults(configuredValues: Types.OptimizelyGraphConfi
  * 
  * @returns The resolved deployment domain
  */
-function resolveDeploymentDomain(): string | undefined {
+export function resolveDeploymentDomain(): string | undefined {
   // First resolve based upon Optimizely Frontend configuration
   const opti_variables = getOptional('SITE_DOMAIN', () => getOptional('SITE_PRIMARY'));
   if (opti_variables && opti_variables != "")
@@ -79,7 +79,7 @@ function resolveDeploymentDomain(): string | undefined {
   if (vercelEnv && vercelEnv != 'development') {
     const vercelDomain = vercelEnv == 'production' ? getOptional('VERCEL_PROJECT_PRODUCTION_URL') : getOptional('VERCEL_BRANCH_URL');
     if (vercelDomain && vercelDomain != "")
-      return vercelDomain
+      return vercelDomain;
   }
 
   // Then try to resolve based upon Netlify environment variables

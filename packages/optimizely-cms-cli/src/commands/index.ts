@@ -25,6 +25,9 @@ import SchemaListCommand from './schema_list.js'
 import SchemaValidateCommand from './schema_validate.js'
 import SchemaVsCodeCommand from './schema_vscode.js'
 
+// Upgrades
+import MigrateCommand from './migrate.js'
+
 // Generic
 import CmsVersionCommand from './cms_info.js'
 import CmsResetCommand from './cms_reset.js'
@@ -48,7 +51,8 @@ export const commands: CliModuleList = [
   StylesPushCommand,
   StylesDeleteCommand,
   TypesPullCommand,
-  TypesPushCommand
+  TypesPushCommand,
+  MigrateCommand
 ]
 
 export default commands

@@ -23,17 +23,7 @@ export function getChannelId(client: IOptiGraphClient, channel?: ChannelDefiniti
     return channel
   return client.currentOptiCmsSchema == OptiCmsSchema.CMS12
     ? channel.id
-    : getPrimaryURL(channel).origin
-}
-
-function getPrimaryURL(chnl: ChannelDefinition): URL {
-  const dd = chnl.domains.filter((x) => x.isPrimary).at(0) ?? chnl.domains.at(0)
-  if (!dd) return chnl.getPrimaryDomain()
-  const s =
-    dd.name.startsWith('localhost') || dd.name.indexOf('.local') > 0
-      ? 'http:'
-      : 'https:'
-  return new URL(`${s}//${dd.name}`)
+    : channel.getPrimaryDomain().origin
 }
 
 function isString(toTest: any): toTest is string {

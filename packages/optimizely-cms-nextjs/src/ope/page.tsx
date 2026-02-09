@@ -4,15 +4,13 @@ import type {
   EditPageProps,
   EditPageComponent,
   EditViewOptions,
+  EditViewPageLayout
 } from './types.js'
 import {
   contentLinkToString,
-  localeToGraphLocale,
 } from '@remkoj/optimizely-graph-client/utils'
-import { type ContentLinkWithLocale } from '@remkoj/optimizely-graph-client'
 import {
   ServerContext,
-  Utils,
   CmsContent,
   OptimizelyComposition,
   isNode,
@@ -22,14 +20,16 @@ import {
 import { notFound } from 'next/navigation.js'
 import OnPageEdit from '../components/on-page-edit.js'
 import { createAuthorizedClient } from '../client.js'
-import React, { type JSX } from 'react'
+import { type JSX } from 'react'
 import Script from 'next/script.js'
 import { getContentRequest, isValidRequest } from './tools.js'
 import loadContent from './load-content.js'
 
+const EmptyPageLayout : EditViewPageLayout = ({ children }) => <>{children}</>
+
 const defaultOptions: EditViewOptions<string> = {
   refreshNotice: () => <></>,
-  layout: (props) => <>{props.children}</>,
+  layout: EmptyPageLayout,
   clientFactory: (token?: string) => createAuthorizedClient(token),
   communicationInjectorPath: '/util/javascript/communicationinjector.js',
   contentResolver: getContentRequest,
@@ -97,26 +97,26 @@ export function createEditPageComponent<LocaleType = string>(
 
     // Get information from the Request URI
     if (context.isDebug) {
-      console.log('⚪ [OnPageEdit] Request context:', ctx)
-      console.log('⚪ [OnPageEdit] Request token:', token)
-      console.log(
-        '⚪ [OnPageEdit] Requested content:',
-        JSON.stringify(contentRequest)
-      )
+      console.log('⚪ [OnPageEdit] Requested content:', JSON.stringify(contentRequest))
     }
 
     try {
 
       const { contentLink, contentItem, contentType } = await loadContent(contentRequest, client, getContentById)
 
+      if (context.isDebug) {
+        console.log('⚪ [OnPageEdit] Identified content:', JSON.stringify(contentLink))
+        console.log('⚪ [OnPageEdit] Content type:', contentType)
+      }
+
       // Store the editable content so it can be tested
       context.setEditableContentId(contentLink)
       if (contentLink.locale) context.setLocale(contentLink.locale)
 
       // Determine rendering flow controls
-      const isPage = contentType ? contentType.some((x) => x?.toLowerCase() === 'page') ?? false : false;
-      const isSection = contentType?.some(x => x?.toLowerCase() == 'section') ?? false
-      const sectionData = isSection && isNode(contentItem?.composition) ? contentItem.composition as CompositionNode : undefined
+      const isPage    = contentType?.some(x => x?.toLowerCase().replace(/^_/, '') === 'page') ?? false;
+      const isSection = contentType?.some(x => x?.toLowerCase().replace(/^_/, '') === 'section') ?? false;
+      const sectionData = isSection && isNode(contentItem?.composition) ? contentItem.composition as CompositionNode : undefined;
       if (sectionData) {
         if (contentItem?.composition)
           delete contentItem.composition
@@ -128,12 +128,12 @@ export function createEditPageComponent<LocaleType = string>(
       const injectorUrl = new URL(communicationInjectorPath, client.siteInfo.cmsURL).href
 
       // Render edit page
-      const Layout = isPage ? PageLayout : React.Fragment
+      const Layout = isPage ? PageLayout : EmptyPageLayout
       const output = (
         <>
           {/* @ts-expect-error */}
           <Script src={ injectorUrl } strategy="afterInteractive"/>
-          <Layout locale={contentItem?.locale?.name ?? ''}>
+          <Layout locale={contentLink?.locale ?? ''} ctx={context}>
             <OnPageEdit refreshTimeout={refreshTimeout}>
               <RefreshNotice />
             </OnPageEdit>

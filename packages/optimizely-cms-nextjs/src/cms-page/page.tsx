@@ -1,6 +1,5 @@
 import 'server-only'
 import type { Metadata, ResolvingMetadata } from 'next'
-import deepmerge from 'deepmerge'
 import { notFound } from 'next/navigation.js'
 import { type JSX, cache } from 'react'
 
@@ -20,6 +19,7 @@ import { type IOptiGraphClient } from '@remkoj/optimizely-graph-client/client'
 import {
   CmsContent,
   ServerContext,
+  isNonEmptyString,
   type GenericContext,
   type ComponentFactory,
 } from '@remkoj/optimizely-cms-react/rsc'
@@ -161,7 +161,8 @@ export type CreatePageOptions<
    *              function
    */
   propsToCmsPath: (
-    props: DefaultCmsPageProps<TParams, TSearchParams>
+    props: DefaultCmsPageProps<TParams, TSearchParams>,
+    channel?: ChannelDefinition
   ) => Promise<string | null>
 
   /**
@@ -174,7 +175,8 @@ export type CreatePageOptions<
    *              function
    */
   propsToVariant: (
-    props: DefaultCmsPageProps<TParams, TSearchParams>
+    props: DefaultCmsPageProps<TParams, TSearchParams>,
+    channel?: ChannelDefinition
   ) => Promise<string | null | undefined>
 
   /**
@@ -201,23 +203,43 @@ export type CreatePageOptions<
   ) => Promise<string | undefined>
 }
 
+type SupportedPageParams = {
+  path?: string[]
+  lang?: string
+}
+
 const CreatePageOptionDefaults: CreatePageOptions<string> = {
   client: createClient,
   routerFactory: (client) => new RouteResolver(client),
-  propsToCmsPath: async ({ params }) => buildRequestPath(await params),
-  propsToVariant: async ({ params }) => {
+  async propsToCmsPath(props) {
+    const params : SupportedPageParams = await props.params; // Read the parameters
+    const slugs = [ params.lang, ...(params.path ?? [])] // Build the full set of slugs for the path
+        .filter(isNonEmptyString) // Remove empty values
+        .filter((x) => !x.startsWith(encodeURIComponent('var:'))) // Remove any variant specification
+        .map((x) => decodeURIComponent(x)); // Decode the URI components
+
+    if (slugs.length === 0) return '/'; // We're requesting the homepage, so just return that path
+
+    // Build the URL
+    const fullPath = !slugs[slugs.length - 1].includes('.') ? '/' + slugs.join('/') + '/' : '/' + slugs.join('/');
+    return fullPath;
+  },
+
+  async propsToVariant({ params }) {
     const pathSegments = (await params).path
     const variantPrefix = encodeURIComponent('var:');
     const variantSegment = Array.isArray(pathSegments) ? pathSegments.filter(x => typeof x === 'string' && x.startsWith(variantPrefix)).at(0) : undefined
     return variantSegment ? variantSegment.substring(variantPrefix.length) : undefined
   },
-  routeToParams: (route) => {
+
+  routeToParams(route) {
     const pathSegments = urlToPath(route.url)
     if (route.variation)
       pathSegments.push(`var:${ route.variation }`)
     return { path: pathSegments, lang: route.locale }
   },
-  paramsToLocale: async (params, channel) => {
+
+  async paramsToLocale(params, channel) {
     // If there's no channel, just return undefined
     if (!channel) return undefined
 
@@ -310,9 +332,9 @@ export function createPage<
 
       // Analyze the Next.JS Request props
       const [requestPath, initialLocale, variation] = await Promise.all([
-        propsToCmsPath({ params, searchParams }),
+        propsToCmsPath({ params, searchParams }, ifChannelDefinition(channel)),
         paramsToLocale(params, ifChannelDefinition(channel)),
-        (await propsToVariant({ params, searchParams })) ?? undefined
+        propsToVariant({ params, searchParams }, ifChannelDefinition(channel)).then(variant => variant || undefined)
       ])
 
       // Valdiate path
@@ -322,7 +344,10 @@ export function createPage<
       if (initialLocale) context.setLocale(initialLocale)
       
       // Resolve route
-      const [ route, contentLink, contentType, graphLocale ] = (await getInfoByPath(context.client, routerFactory, requestPath, channel, variation)) || {} as Partial<LookupResponse>
+      const pathInfo = await getInfoByPath(context.client, routerFactory, requestPath, channel, variation);
+      if (!pathInfo)
+        return {};
+      const [ route, contentLink, contentType, graphLocale ] = pathInfo
       if (!contentLink || !contentType)
         return {}
 
@@ -338,87 +363,6 @@ export function createPage<
       ])
       
       return pageMetadata
-
-      /*// Get context
-      const context = await buildContext()
-      const channelId = getChannelId(context.client, channel)
-
-      // Read variables from request
-      const [requestPath, initialLocale] = await Promise.all([
-        propsToCmsPath({ params, searchParams }),
-        paramsToLocale(params, ifChannelDefinition(channel)),
-      ])
-      if (!requestPath) return {}
-      if (initialLocale) context.setLocale(initialLocale)
-
-      const awaitedParams = await params
-
-      // Debug output
-      if (context.isDebug)
-        console.log(
-          `⚪ [CmsPage.generateMetadata] Processed Next.JS route: ${JSON.stringify(awaitedParams)} => Optimizely CMS route: ${JSON.stringify({ path: requestPath, siteId: channelId })}`
-        )
-
-      // Resolve the route to a content link
-      const routeInfo = await getInfoByPath(
-        context.client,
-        routerFactory,
-        requestPath,
-        channel
-      )
-      if (!routeInfo || !routeInfo[0]) {
-        if (context.isDebug)
-          console.log('⚪ [CmsPage.generateMetadata] No data received')
-        return {}
-      }
-      const [route, contentLink, contentType, graphLocale] = routeInfo
-      if (context.isDebug)
-        console.log(
-          `⚪ [CmsPage.generateMetadata] Retrieved content info:`,
-          route
-        )
-
-      // Update context from route
-      context.setLocale(route.locale)
-
-      // Fetch the metadata based upon the actual content type and resolve parent
-      const metaResolver = new MetaDataResolver(context.client)
-      const [pageMetadata, baseMetadata] = await Promise.all([
-        metaResolver.resolve(factory, contentLink, contentType, graphLocale),
-        parent,
-      ])
-
-      if (context.isDebug)
-        console.log(
-          `⚪ [CmsPage.generateMetadata] Component yielded metadata:`,
-          pageMetadata
-        )
-
-      // Make sure merging of objects goes correctly
-      for (const metaKey of Object.getOwnPropertyNames(
-        pageMetadata
-      ) as (keyof Metadata)[]) {
-        if (
-          isObject(pageMetadata[metaKey]) &&
-          isObject(baseMetadata[metaKey])
-        ) {
-          //@ts-expect-error Silence error due to failed introspection...
-          pageMetadata[metaKey] = deepmerge<object>(
-            baseMetadata[metaKey],
-            pageMetadata[metaKey],
-            { arrayMerge: (target, source) => [...source] }
-          )
-        }
-      }
-
-      // Not sure, but needed somehow...
-      if (
-        typeof baseMetadata.metadataBase == 'string' &&
-        (baseMetadata.metadataBase as string).length > 1
-      ) {
-        pageMetadata.metadataBase = new URL(baseMetadata.metadataBase)
-      }
-      return pageMetadata*/
     },
 
     CmsPage: async ({ params, searchParams }) => {
@@ -427,7 +371,7 @@ export function createPage<
 
       // Analyze the Next.JS Request props
       const [requestPath, initialLocale, requestVariant] = await Promise.all([
-        propsToCmsPath({ params, searchParams }),
+        propsToCmsPath({ params, searchParams }, ifChannelDefinition(channel)),
         paramsToLocale(params, ifChannelDefinition(channel)),
         (await propsToVariant({ params, searchParams })) ?? undefined
       ])
@@ -482,36 +426,4 @@ export function createPage<
 
 type ContextWith<C extends GenericContext, T extends keyof C> = Omit<C, T> & {
   [P in T]: NonNullable<C[P]>
-}
-
-/**
- *
- *
- * @param   param0  The URL parameters
- * @returns The request path as understood by Graph
- */
-function buildRequestPath({
-  lang,
-  path,
-}: {
-  lang?: string | null
-  path?: (string | null)[] | null
-}): string {
-  const slugs: string[] = []
-  if (path) slugs.push(...(path.filter((x) => x) as string[]))
-  if (lang) slugs.unshift(lang)
-  if (slugs.length == 0) return '/'
-
-  const fullPath =
-    '/' +
-    slugs
-      .filter((x) => x && x.length > 0 && !x.startsWith(encodeURIComponent('var:')))
-      .map((x) => decodeURIComponent(x))
-      .join('/')
-  if (!slugs[slugs.length - 1].includes('.')) return fullPath + '/'
-  return fullPath
-}
-
-function isObject(toTest: any): toTest is object {
-  return typeof toTest == 'object' && toTest != null && toTest != undefined
 }

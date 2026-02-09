@@ -94,10 +94,8 @@ export const preset: Types.OutputPreset<PresetOptions> = {
       return 0;
     }
 
-    allDocuments.sort(compareOperationDocuments)
-
-    //console.log(allDocuments);
-    return [...documents, ...allDocuments]
+    allDocuments.sort(compareOperationDocuments);
+    return [...documents, ...allDocuments];
   },
 
   buildGeneratesSection: async (options) => {
@@ -163,11 +161,12 @@ export const preset: Types.OutputPreset<PresetOptions> = {
         {
           'typescript-graphql-request': {
             useTypeImports: true,
+
             importOperationTypesFrom: 'Schema',
-            rawRequest: options.presetConfig.recursion ? true : undefined,
-            documentMode: options.presetConfig.recursion ? DocumentMode.string : undefined,
-            //experimentalAddDocumentNodeType: options.presetConfig.recursion ? true : undefined,
-            rawString: options.presetConfig.recursion ? true : undefined,
+            //rawRequest: options.presetConfig.recursion ? true : undefined,
+            //documentMode: options.presetConfig.recursion ? DocumentMode.string : undefined,
+            experimentalAddDocumentNodeType: options.presetConfig.recursion ? true : undefined,
+            //rawString: options.presetConfig.recursion ? true : undefined,
             ...options.config,
           },
         },
