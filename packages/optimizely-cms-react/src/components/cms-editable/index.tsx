@@ -139,14 +139,14 @@ export const CmsEditable: CmsEditableBaseComponent = <CT extends ElementType>({
   // If we're rendering for an experience, we don't need to inject property names, as the
   // experience editor only deals with property ids - injecting property names will cause
   // it to outline incorrect items.
-  const dataEpiPropertyName = editableContentIsExperience
+  const dataEpiPropertyName = false && editableContentIsExperience
     ? undefined
     : (cmsFieldName ?? undefined)
 
-  const showBlockId =
-    cmsId && cmsId?.length != 32 && (forceBlockId || !dataEpiPropertyName)
+  const showBlockId = true;
+    //cmsId && (cmsId?.length != 32 || forceBlockId)
   const showContentId =
-    cmsId?.length == 32 && (forceBlockId || !dataEpiPropertyName)
+    cmsId && (cmsId?.length == 32 || forceBlockId)
 
   const itemProps: Record<string, any> = addEditProps
     ? {
@@ -156,9 +156,9 @@ export const CmsEditable: CmsEditableBaseComponent = <CT extends ElementType>({
         // We assume GUIDs are represented as 32 char long strings
         'data-epi-content-id': showContentId ? cmsId : undefined,
         // We pass through the property name if provided
-        'data-epi-property-name': dataEpiPropertyName,
+        'data-epi-property-name': editType ? dataEpiPropertyName : undefined,
         // We pass through the property name if provided
-        'data-epi-edit': dataEpiPropertyName,
+        'data-epi-edit': editType ? undefined : dataEpiPropertyName,
         // Configure the rendition of the property editor
         'data-epi-property-edittype': editType ?? undefined,
       }

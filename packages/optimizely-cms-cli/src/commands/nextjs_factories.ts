@@ -1,4 +1,4 @@
-import path, { basename, dirname } from 'node:path'
+import path from 'node:path'
 import fs from 'node:fs'
 import chalk from 'chalk'
 import figures from 'figures'
@@ -6,6 +6,7 @@ import { parseArgs } from '../tools/parseArgs.js'
 import { type NextJsModule, builder } from './_nextjs_base.js'
 import { ucFirst } from '../tools/string.js'
 import { globSync } from 'glob'
+import { IntegrationApi } from '@remkoj/optimizely-cms-api'
 
 const ROOT_FACTORY_KEY = "."
 const FACTORY_FILE_NAME = "index.ts"
@@ -80,9 +81,10 @@ export const NextJsFactoryCommand : NextJsModule = {
         const componentFactoryDefintions = new Map<string, ComponentFactoryDefintion>()
         components.forEach(component => {
             const componentDir = path.dirname(path.join(...component));
+            const componentFile = path.basename(path.join(...component));
 
             // Determine component target
-            const componentKey = processName(component.length == 1 ? ucFirst(path.basename(component[0], path.extname(component[0]))) : component.at(component.length - 2));
+            const componentKey = getComponentKey(component, basePath)
             let componentVariant = (component.length > 1 ? component.at(component.length - 1) ?? 'default' : 'default').replace('index','default');
             componentVariant = path.basename(componentVariant, path.extname(componentVariant));
 
@@ -175,6 +177,40 @@ export const NextJsFactoryCommand : NextJsModule = {
 }
 
 export default NextJsFactoryCommand
+
+/**
+ * Get the component key that must be used for the variable in the factory
+ * this looks first at the component-type file.
+ * 
+ * @param     component     The file path broken into parts
+ * @returns   The key to use
+ */
+function getComponentKey(component: string[], componentsRootDir: string) : string
+{
+  // Prepare context
+  //const componentFile = path.basename(path.join(...component));
+  const componentDir = path.dirname(path.join(...component));
+
+  // Calculate the fallback value
+  const baseName = processName(component.length == 1 ? ucFirst(path.basename(component[0], path.extname(component[0]))) : component.at(component.length - 2));
+
+  // Try to read the key from the opti-type.json file in the same folder
+  const definitions = globSync("*.opti-type.json", { cwd: path.join(componentsRootDir, componentDir) });
+  console.log(definitions, componentDir);
+  if (definitions.length == 1) {
+    try {
+      const data = JSON.parse(fs.readFileSync(path.join(componentsRootDir, componentDir, definitions[0])).toString('utf8')) as IntegrationApi.ContentType;
+      console.log('Updating to', data.key)
+      if (data.key)
+        return data.key;
+    } catch {
+      // Ignored on purpose
+    }
+  }
+
+  // Return the fallback value
+  return baseName
+}
 
 function shouldWriteFactory(factoryFile: string, force: boolean = false, debug: boolean = false) : boolean
 {

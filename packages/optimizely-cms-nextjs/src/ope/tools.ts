@@ -60,22 +60,22 @@ export function isValidRequest(toTest: AwaitedEditPageProps, throwOnInvalid: boo
 }
 
 // Helper function to read the ContentID & WorkID
-export function getContentRequest({ params: { path, lang }, searchParams: { preview_token: token, ...searchParams } }: ValidatedEditPageProps): ContentRequest | undefined {
+export function getContentRequest({ params: { path, lang }, searchParams }: ValidatedEditPageProps): ContentRequest | undefined {
   try {
     // First try to use the new style parameters
     if (searchParams.key) {
       return {
-        token,
+        token: searchParams.preview_token,
         ctx: searchParams.ctx,
         key: searchParams.key,
-        locale: searchParams.loc,
+        locale: searchParams.ver ? undefined : searchParams.loc,
         version: searchParams.ver,
         path: searchParams.path ?? null
       }
     }
 
     // Then fall back to old-mode URL parsing for developer URLs
-    if (token == AuthMode.HMAC || token == AuthMode.Basic) {
+    if (searchParams.preview_token == AuthMode.HMAC || searchParams.preview_token == AuthMode.Basic) {
       console.error("🦺 [OnPageEdit] Edit mode requested with developer tokens, falling back to URL parsing to determine content")
       // Determine the contentPath
       const fullPath = Array.isArray(path) ? path.map(p => decodeURIComponent(p)).join('/') : decodeURIComponent(path ?? '');
@@ -85,7 +85,7 @@ export function getContentRequest({ params: { path, lang }, searchParams: { prev
       const firstSlug: string | undefined = contentPath.split('/')[0]
       const contentLocale = firstSlug?.length == 2 || firstSlug?.length == 5 ? firstSlug : lang
       return {
-        token,
+        token: searchParams.preview_token,
         ctx: searchParams.epieditmode?.toLowerCase() == 'true' ? 'edit' : 'preview',
         key: contentKey,
         version: contentVersion,
@@ -95,9 +95,9 @@ export function getContentRequest({ params: { path, lang }, searchParams: { prev
     }
 
     // Finally parse the token, this is a last-restort, as it might change at any given time
-    const tokenInfo = JSON.parse(atob(token.split('.')[1]))
+    const tokenInfo = JSON.parse(atob(searchParams.preview_token.split('.')[1]))
     return {
-      token,
+      token: searchParams.preview_token,
       ctx: searchParams.epieditmode?.toLowerCase() == 'true' ? 'edit' : 'preview',
       key: tokenInfo.key,
       version: tokenInfo.ver,
