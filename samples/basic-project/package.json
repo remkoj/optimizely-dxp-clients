@@ -15,7 +15,7 @@
     "entities": "^6.0.1",
     "graphql": "^16.11.0",
     "graphql-request": "^6.1.0",
-    "next": "^14.2.30",
+    "next": "^16.1.6",
     "react": "^18.3.1",
     "react-dom": "^18.3.1"
   },

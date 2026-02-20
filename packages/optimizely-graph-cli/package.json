@@ -41,7 +41,7 @@
     "dotenv": "^17.2.3",
     "dotenv-expand": "^12.0.3",
     "figures": "^6.1.0",
-    "glob": "^11.1.0",
+    "glob": "^12.0.0",
     "yargs": "^17.7.2"
   },
   "peerDependencies": {
