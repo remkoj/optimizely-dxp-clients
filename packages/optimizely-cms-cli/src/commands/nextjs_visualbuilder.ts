@@ -48,13 +48,13 @@ function createSpecificNode(template: IntegrationApi.DisplayTemplate, templatePa
   if (fs.existsSync(nodeFile)) {
     if (!force) {
       if (debug)
-        process.stdout.write(chalk.gray(`${figures.arrowRight} Skipping ${template.displayName} (${template.key}) component - file already exists\n`))
+        process.stdout.write(chalk.gray(`${figures.arrowRight} Skipping ${template.displayName} (${template.key}) node - file already exists\n`))
       return undefined
     }
     if (debug)
-      process.stdout.write(chalk.gray(`${figures.arrowRight} Overwriting ${template.displayName} (${template.key}) component\n`))
+      process.stdout.write(chalk.gray(`${figures.arrowRight} Overwriting ${template.displayName} (${template.key}) node\n`))
   } else if (debug)
-    process.stdout.write(chalk.gray(`${figures.arrowRight} Creating ${template.displayName} (${template.key}) component\n`))
+    process.stdout.write(chalk.gray(`${figures.arrowRight} Creating ${template.displayName} (${template.key}) node\n`))
 
   if (!fs.existsSync(templatePath))
     fs.mkdirSync(templatePath, { recursive: true })

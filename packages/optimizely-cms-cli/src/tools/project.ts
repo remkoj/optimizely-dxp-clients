@@ -130,7 +130,7 @@ export function getStyleFilePathsSync(displayTemplate: IntegrationApi.DisplayTem
       break;
     case 'node':
       groupPath = path.join('nodes', keyToSlug(displayTemplate.nodeType));
-      target = displayTemplate.baseType;
+      target = displayTemplate.nodeType;
       break;
     case 'component':
       const baseType = contentBaseType;

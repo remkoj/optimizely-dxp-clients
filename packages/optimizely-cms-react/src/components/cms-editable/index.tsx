@@ -132,7 +132,7 @@ export const CmsEditable: CmsEditableBaseComponent = <CT extends ElementType>({
 
   const addEditProps = inEditMode
     ? currentContent
-      ? editableContent?.key == currentContent.key
+      ? editableContent?.key === currentContent.key
       : true
     : false
 
@@ -143,10 +143,12 @@ export const CmsEditable: CmsEditableBaseComponent = <CT extends ElementType>({
     ? undefined
     : (cmsFieldName ?? undefined)
 
-  const showBlockId = true;
-    //cmsId && (cmsId?.length != 32 || forceBlockId)
-  const showContentId =
-    cmsId && (cmsId?.length == 32 || forceBlockId)
+  const showBlockId = forceBlockId || (cmsId && editableContent?.key ?
+    editableContent.key !== cmsId :
+    true);
+  const showContentId = forceBlockId || (cmsId?.length == 32 && (cmsId && editableContent?.key ?
+    editableContent.key !== cmsId :
+    true));
 
   const itemProps: Record<string, any> = addEditProps
     ? {

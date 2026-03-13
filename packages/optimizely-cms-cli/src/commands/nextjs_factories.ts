@@ -196,11 +196,11 @@ function getComponentKey(component: string[], componentsRootDir: string) : strin
 
   // Try to read the key from the opti-type.json file in the same folder
   const definitions = globSync("*.opti-type.json", { cwd: path.join(componentsRootDir, componentDir) });
-  console.log(definitions, componentDir);
+  //console.log(definitions, componentDir);
   if (definitions.length == 1) {
     try {
       const data = JSON.parse(fs.readFileSync(path.join(componentsRootDir, componentDir, definitions[0])).toString('utf8')) as IntegrationApi.ContentType;
-      console.log('Updating to', data.key)
+      //console.log('Updating to', data.key)
       if (data.key)
         return data.key;
     } catch {

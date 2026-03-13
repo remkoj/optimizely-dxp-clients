@@ -40,9 +40,9 @@
   },
   "devDependencies": {
     "@remkoj/optimizely-graph-client": "workspace:6.0.0-pre16",
-    "@tailwindcss/cli": "^4.1.18",
-    "@types/node": "^22.19.8",
-    "@types/react": "^19.2.10",
+    "@tailwindcss/cli": "^4.2.1",
+    "@types/node": "^22.19.15",
+    "@types/react": "^19.2.14",
     "@types/react-dom": "19.2.3",
     "@types/uuid": "^11.0.0",
     "browserslist": "^4.28.1",
@@ -51,7 +51,7 @@
     "react": "^19.2.4",
     "react-dom": "^19.2.4",
     "scheduler": "^0.27.0",
-    "tailwindcss": "^4.1.18",
+    "tailwindcss": "^4.2.1",
     "typescript": "^5.9.3",
     "update-browserslist-db": "^1.2.3"
   },
@@ -61,11 +61,11 @@
     "react-dom": "^19"
   },
   "dependencies": {
-    "@fastify/deepmerge": "^3.2.0",
+    "@fastify/deepmerge": "^3.2.1",
     "@headlessui/react": "^2.2.9",
     "@heroicons/react": "^2.2.0",
     "@remkoj/optimizely-graph-client": "6.0.0-pre16",
-    "swr": "^2.4.0",
+    "swr": "^2.4.1",
     "uuid": "^13.0.0"
   },
   "scripts": {

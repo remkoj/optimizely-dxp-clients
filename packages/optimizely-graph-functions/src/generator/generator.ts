@@ -117,6 +117,8 @@ export class DocumentGenerator
     // Inject base type based defaults
     if (contentType.baseType === "_experience")
       properties.unshift("...ExperienceData")
+    if (contentType.baseType === "_section")
+      properties.unshift("...SectionCompositionData")
 
     //Render query
     const query = `query ${renderedQueryName}($key: [String!]!, $locale: [Locales], $changeset: String, $variation: VariationInput, $version: String) {

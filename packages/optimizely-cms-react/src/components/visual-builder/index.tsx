@@ -1,6 +1,7 @@
 import { ReactNode } from 'react'
 import {
   isComponentNode,
+  isStructureNode,
   defaultNodePropsFactory,
   defaultPropsFactory,
 } from './functions.js'
@@ -19,15 +20,31 @@ export function OptimizelyComposition({
   nodePropsFactory = defaultNodePropsFactory,
   ctx,
   cmsContent: CmsContent,
-}: BaseOptimizelyCompositionProps): ReactNode {
-  const { factory, isDebug } = ctx
+  isMaster = true
+}: BaseOptimizelyCompositionProps & { isMaster: boolean }): ReactNode {
+  const { factory } = ctx
+
+  // If this is the master composition and the node is a structure node with children, render 
+  // the children directly to avoid unnecessary nesting
+  if (isMaster && isStructureNode(node) && Array.isArray(node.nodes) && node.nodes.length > 0) {
+    return node.nodes.map((child) => {
+      const childKey = child.key ? child.key : `vb::${JSON.stringify(child)}`
+      return (
+        <OptimizelyComposition
+          key={childKey}
+          node={child}
+          leafPropsFactory={leafPropsFactory}
+          nodePropsFactory={nodePropsFactory}
+          ctx={ctx}
+          cmsContent={CmsContent}
+          isMaster={false}
+        />
+      )
+    })
+  }
 
   // Render the element
   if (isComponentNode(node)) {
-    /*if (isDebug)
-      console.log(
-        `⚪ [VisualBuilder] Rendering element node ${JSON.stringify(node)}`
-      )*/
     const [contentLink, contentType, nodeId, fragmentData, layoutProps] =
       leafPropsFactory(node)
     return (
@@ -41,12 +58,6 @@ export function OptimizelyComposition({
       />
     )
   }
-
-  // Debug
-  /*if (isDebug)
-    console.log(
-      `⚪ [VisualBuilder] Rendering structure node ${JSON.stringify(node)}`
-    )*/
 
   // Ensure we've got a factory
   if (!factory)
@@ -85,6 +96,7 @@ export function OptimizelyComposition({
             nodePropsFactory={nodePropsFactory}
             ctx={ctx}
             cmsContent={CmsContent}
+            isMaster={false}
           />
         )
       })}

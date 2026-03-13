@@ -291,7 +291,7 @@ export type ContentItem = {
     /**
      * The locale of this content instance.
      */
-    readonly locale?: string;
+    locale?: string;
     /**
      * The version identifier of this content instance.
      */
@@ -300,11 +300,11 @@ export type ContentItem = {
      * The variation of this content item, if any. Variations are used to represent different states or forms of the same content item.
      * A variation has it's own publish lifecycle. A variation can though not be published before the default version of same local is published.
      */
-    readonly variation?: string | null;
+    variation?: string | null;
     /**
      * The content type of this content item.
      */
-    readonly contentType?: string;
+    contentType?: string;
     /**
      * The display name of this content item.
      */
@@ -819,6 +819,20 @@ export type Link = {
     text?: string;
 };
 
+/**
+ * Represents a preview URL for a content item.
+ */
+export type Preview = {
+    /**
+     * The application that this preview URL is associated with.
+     */
+    application?: string;
+    /**
+     * Gets or sets the preview URL (may be relative or absolute).
+     */
+    url?: string;
+};
+
 export type ProblemDetails = {
     /**
      * A URI reference that identifies the problem type.
@@ -857,16 +871,7 @@ export type ProblemDetails = {
          */
         field?: string | null;
     }> | null;
-    [key: string]: unknown | string | null | string | null | number | null | string | null | string | null | string | null | Array<{
-        /**
-         * A granular explanation of one specific error related to a field, header or query parameter.
-         */
-        detail?: string;
-        /**
-         * A string that may provide a hint to which field that was the source of the error.
-         */
-        field?: string | null;
-    }> | null | undefined;
+    [key: string]: unknown;
 };
 
 /**
@@ -1101,6 +1106,19 @@ export type ContentItemWritable = {
     properties?: {
         [key: string]: unknown;
     };
+    /**
+     * The locale of this content instance.
+     */
+    locale?: string;
+    /**
+     * The variation of this content item, if any. Variations are used to represent different states or forms of the same content item.
+     * A variation has it's own publish lifecycle. A variation can though not be published before the default version of same local is published.
+     */
+    variation?: string | null;
+    /**
+     * The content type of this content item.
+     */
+    contentType?: string;
     /**
      * The display name of this content item.
      */
@@ -2577,6 +2595,44 @@ export type ContentPatchVersionResponses = {
 };
 
 export type ContentPatchVersionResponse = ContentPatchVersionResponses[keyof ContentPatchVersionResponses];
+
+export type ContentGetPreviewsData = {
+    body?: never;
+    path: {
+        /**
+         * The key of the content item.
+         */
+        key: string;
+        /**
+         * The version of the content item.
+         */
+        version: string;
+    };
+    query?: never;
+    url: '/experimental/content/{key}/versions/{version}/previews';
+};
+
+export type ContentGetPreviewsErrors = {
+    /**
+     * Forbidden
+     */
+    403: ProblemDetails;
+    /**
+     * Not Found
+     */
+    404: ProblemDetails;
+};
+
+export type ContentGetPreviewsError = ContentGetPreviewsErrors[keyof ContentGetPreviewsErrors];
+
+export type ContentGetPreviewsResponses = {
+    /**
+     * OK
+     */
+    200: Array<Preview>;
+};
+
+export type ContentGetPreviewsResponse = ContentGetPreviewsResponses[keyof ContentGetPreviewsResponses];
 
 export type ContentTypesListData = {
     body?: never;

@@ -36,14 +36,15 @@ export const StylesPullCommand: StylesPullModule = {
 
     for (const groupIdentifier of styleFiles.keys()) {
       const displayTemplateGroup = styleFiles.get(groupIdentifier);
+
       for (const { file: filePath, data: displayTemplate } of (displayTemplateGroup?.templates || [])) {
         // Write JSON to disk
         var updatedJson = await createDisplayTemplateFile(displayTemplate, filePath, force, cfg.debug);
         if (updatedJson) updatedTemplates.push(displayTemplate.key);
-
-        // Write template to disk
-        void await createDisplayTemplateHelper(displayTemplateGroup, groupIdentifier, force, cfg.debug);
       }
+        
+      // Write template to disk
+      void await createDisplayTemplateHelper(displayTemplateGroup, groupIdentifier, force, cfg.debug);
     }
     
     process.stdout.write(chalk.green(chalk.bold(figures.tick + ` Created/updated style definitions for ${updatedTemplates.join(', ')}`)) + "\n")
@@ -122,8 +123,8 @@ export async function createDisplayTemplateHelper(typeFile: TypeFilesListEntry, 
     typeContents.push(`export type ${displayTemplate.key}Props = LayoutProps<typeof ${displayTemplate.key}Styles>`)
     typeContents.push(`export type ${displayTemplate.key}Keys = LayoutPropsSettingKeys<${displayTemplate.key}Props>`)
     typeContents.push(`export type ${displayTemplate.key}Options<K extends ${displayTemplate.key}Keys> = LayoutPropsSettingValues<${displayTemplate.key}Props, K>`)
-    typeContents.push(`export type ${displayTemplate.key}ComponentProps<DT extends Record<string, any> = Record<string, any>> = Omit<CmsComponentProps<DT, ${displayTemplate.key}Props>,'children'> & JSX.IntrinsicElements['div']`)
-    typeContents.push(`export type ${displayTemplate.key}Component<DT extends Record<string, any> = Record<string, any>> = ComponentType<${displayTemplate.key}ComponentProps<DT>>`)
+    typeContents.push(`export type ${displayTemplate.key}ComponentProps<DT extends Record<string, unknown> = Record<string, unknown>> = Omit<CmsComponentProps<DT, ${displayTemplate.key}Props>,'children'> & JSX.IntrinsicElements['div']`)
+    typeContents.push(`export type ${displayTemplate.key}Component<DT extends Record<string, unknown> = Record<string, unknown>> = ComponentType<${displayTemplate.key}ComponentProps<DT>>`)
     typeContents.push('')
     props.push(`${displayTemplate.key}Props`)
     if (!typeId)
@@ -135,8 +136,8 @@ export async function createDisplayTemplateHelper(typeFile: TypeFilesListEntry, 
     typeContents.push(`export type ${typeId}LayoutProps = ${props.join(' | ')}
 export type ${typeId}LayoutKeys = LayoutPropsSettingKeys<${typeId}LayoutProps>
 export type ${typeId}LayoutOptions<K extends ${typeId}LayoutKeys> = LayoutPropsSettingValues<${typeId}LayoutProps,K>
-export type ${typeId}ComponentProps<DT extends Record<string, any> = Record<string, any>> = Omit<CmsComponentProps<DT, ${typeId}LayoutProps>,'children'> & JSX.IntrinsicElements['div']
-export type ${typeId}Component<DT extends Record<string, any> = Record<string, any>> = ComponentType<${typeId}ComponentProps<DT>>`)
+export type ${typeId}ComponentProps<DT extends Record<string, unknown> = Record<string, unknown>> = Omit<CmsComponentProps<DT, ${typeId}LayoutProps>,'children'> & JSX.IntrinsicElements['div']
+export type ${typeId}Component<DT extends Record<string, unknown> = Record<string, unknown>> = ComponentType<${typeId}ComponentProps<DT>>`)
 
     const defaultTemplate = templates.find(t => t.data.isDefault)
     if (defaultTemplate) {

@@ -134,8 +134,9 @@ ${varName}.getDataFragment = () => ['${contentType.key}Data', ${contentType.key}
 export default ${varName}`,
 
   // Default Template for all section types
-  section: (contentType, varName, displayTemplate, baseDisplayTemplate) => `import { CmsEditable, type CmsComponent } from "@remkoj/optimizely-cms-react/rsc";
-import { ${contentType.key}DataFragmentDoc, type ${contentType.key}DataFragment } from "@/gql/graphql";${displayTemplate ? `
+  section: (contentType, varName, displayTemplate, baseDisplayTemplate) => `import { OptimizelyComposition, isNode, CmsEditable, type CmsComponent } from "@remkoj/optimizely-cms-react/rsc";
+import { get${contentType.key}DataDocument, type get${contentType.key}DataQuery, SectionCompositionDataFragmentDoc } from "@/gql/graphql";
+import { getFragmentData } from "@/gql/fragment-masking";${displayTemplate ? `
 import { ${displayTemplate} } from "./displayTemplates";` : ''}${baseDisplayTemplate ? `
 import { ${baseDisplayTemplate} } from "../styles/displayTemplates";` : ''}
 
@@ -144,19 +145,25 @@ import { ${baseDisplayTemplate} } from "../styles/displayTemplates";` : ''}
  * ---
  * ${contentType.description}
  */
-export const ${varName} : CmsComponent<${contentType.key}DataFragment${(displayTemplate || baseDisplayTemplate) ? ', ' + [displayTemplate, baseDisplayTemplate].filter(x => x).join(" | ") : ''}> = ({ data${(displayTemplate || baseDisplayTemplate) ? ', layoutProps' : ''}, editProps, children }) => {
-    const componentName = '${contentType.displayName}'
-    const componentInfo = '${contentType.description?.replaceAll("'", "\\'") ?? ''}'
-    return <CmsEditable className="w-full border-y border-y-solid border-y-slate-900 py-2 mb-4" {...editProps}>
-        <div className="font-bold italic">{ componentName }</div>
-        <div>{ componentInfo }</div>
-        { Object.getOwnPropertyNames(data).length > 0 && <pre className="w-full overflow-x-hidden font-mono text-sm bg-slate-200 p-2 rounded-sm border border-solid border-slate-900 text-slate-900">{ JSON.stringify(data, undefined, 4) }</pre> }
-        ${(displayTemplate || baseDisplayTemplate) ? '<pre className="w-full overflow-x-hidden font-mono text-sm bg-slate-200 p-2 rounded-sm border border-solid border-slate-900 text-slate-900">{ JSON.stringify(layoutProps, undefined, 4) }</pre>' : '{/* This component doesn\'t have layout options */}'}
-        <div>{ children }</div>
-    </CmsEditable>
+export const ${varName} : CmsComponent<get${contentType.key}DataQuery${(displayTemplate || baseDisplayTemplate) ? ', ' + [displayTemplate, baseDisplayTemplate].filter(x => x).join(" | ") : ''}> = ({ data${(displayTemplate || baseDisplayTemplate) ? ', layoutProps' : ''}, editProps, children, ctx }) => {
+  // If we're rendering stand-alone we'll get a composition back, with ourself included If we're 
+  // rendering as part of an experience, we'll get the data directly. So handle both cases.
+  if (!data?._metadata && children) return children;
+
+  const componentName = '${contentType.displayName}'
+  const componentInfo = '${contentType.description?.replaceAll("'", "\\'") ?? ''}'
+  const composition = getFragmentData(SectionCompositionDataFragmentDoc, data)?.composition;
+  return <CmsEditable className="w-full border-y border-y-solid border-y-slate-900 py-2 mb-4" {...editProps}>
+    <div className="font-bold italic">{ componentName }</div>
+    <div>{ componentInfo }</div>
+    { Object.getOwnPropertyNames(data).length > 0 && <pre className="w-full overflow-x-hidden font-mono text-sm bg-slate-200 p-2 rounded-sm border border-solid border-slate-900 text-slate-900">{ JSON.stringify(data, undefined, 4) }</pre> }
+    ${(displayTemplate || baseDisplayTemplate) ? '<pre className="w-full overflow-x-hidden font-mono text-sm bg-slate-200 p-2 rounded-sm border border-solid border-slate-900 text-slate-900">{ JSON.stringify(layoutProps, undefined, 4) }</pre>' : '{/* This component doesn\'t have layout options */}'}
+    {children && <div>{ children }</div>}
+    {composition && isNode(composition) && <OptimizelyComposition node={composition} ctx={ctx} />}
+  </CmsEditable>
 }
 ${varName}.displayName = "${contentType.displayName} (${ucFirst(contentType.baseType)}/${contentType.key})"
-${varName}.getDataFragment = () => ['${contentType.key}Data', ${contentType.key}DataFragmentDoc]
+${varName}.getDataQuery = () => get${contentType.key}DataDocument
 
 export default ${varName}`,
 

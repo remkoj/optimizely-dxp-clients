@@ -8,10 +8,10 @@
   "license": "Apache-2.0",
   "private": true,
   "devDependencies": {
-    "@types/node": "^22.19.8",
+    "@types/node": "^22.19.15",
     "@yarnpkg/sdks": "^3.2.3",
     "browserslist": "^4.28.1",
-    "glob": "^13.0.0",
+    "glob": "^13.0.6",
     "prettier": "^3.8.1",
     "tslib": "^2.8.1",
     "typescript": "^5.9.3",
