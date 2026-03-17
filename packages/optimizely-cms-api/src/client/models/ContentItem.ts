@@ -18,7 +18,7 @@ export type ContentItem = {
     /**
      * The locale of this content instance.
      */
-    readonly locale?: string;
+    locale?: string;
     /**
      * The version identifier of this content instance.
      */
@@ -27,11 +27,11 @@ export type ContentItem = {
      * The variation of this content item, if any. Variations are used to represent different states or forms of the same content item.
      * A variation has it's own publish lifecycle. A variation can though not be published before the default version of same local is published.
      */
-    readonly variation?: string | null;
+    variation?: string | null;
     /**
      * The content type of this content item.
      */
-    readonly contentType?: string;
+    contentType?: string;
     /**
      * The display name of this content item.
      */

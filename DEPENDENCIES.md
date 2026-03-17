@@ -327,7 +327,6 @@ This overview and list is automatically generated from the dependencies used in 
 | [glob](https://github.com/isaacs/node-glob#readme) | 10.4.5 | ISC | [Isaac Z. Schlueter (i@izs.me)](mailto:i@izs.me) | [isaacs (i@izs.me)](mailto:i@izs.me) | [npm](https://www.npmjs.com/package/glob) |
 | [glob](https://github.com/isaacs/node-glob#readme) | 11.1.0 | BlueOak-1.0.0 | [Isaac Z. Schlueter (i@izs.me)](mailto:i@izs.me) | [isaacs (i@izs.me)](mailto:i@izs.me) | [npm](https://www.npmjs.com/package/glob) |
 | [glob](https://github.com/isaacs/node-glob#readme) | 7.2.3 | ISC | [Isaac Z. Schlueter (i@izs.me)](mailto:i@izs.me) | [isaacs (i@izs.me)](mailto:i@izs.me) | [npm](https://www.npmjs.com/package/glob) |
-| [globals](https://github.com/sindresorhus/globals#readme) | 11.12.0 | MIT | [Sindre Sorhus (sindresorhus@gmail.com)](mailto:sindresorhus@gmail.com) | [byk (ben@byk.im)](mailto:ben@byk.im), [lo1tuma (schreck.mathias@gmail.com)](mailto:schreck.mathias@gmail.com), [nzakas (nicholas@nczconsulting.com)](mailto:nicholas@nczconsulting.com), [sindresorhus (sindresorhus@gmail.com)](mailto:sindresorhus@gmail.com) | [npm](https://www.npmjs.com/package/globals) |
 | [got](https://github.com/sindresorhus/got#readme) | 11.8.6 | MIT |  | [sindresorhus (sindresorhus@gmail.com)](mailto:sindresorhus@gmail.com), [szmarczak (sz.marczak@gmail.com)](mailto:sz.marczak@gmail.com) | [npm](https://www.npmjs.com/package/got) |
 | [graceful-fs](https://github.com/isaacs/node-graceful-fs#readme) | 4.2.11 | ISC |  | [isaacs (i@izs.me)](mailto:i@izs.me) | [npm](https://www.npmjs.com/package/graceful-fs) |
 | [grapheme-splitter](https://github.com/orling/grapheme-splitter) | 1.0.4 | MIT | Orlin Georgiev | [orling (orlin.georgiev@gmail.com)](mailto:orlin.georgiev@gmail.com) | [npm](https://www.npmjs.com/package/grapheme-splitter) |
@@ -591,5 +590,5 @@ The dependencies make use of these licenses:
 | BlueOak-1.0.0 | 7 |
 | CC-BY-4.0 | 1 |
 | ISC | 64 |
-| MIT | 452 |
+| MIT | 451 |
 | Python-2.0 | 1 |

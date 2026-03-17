@@ -38,6 +38,7 @@ export type { DisplayTemplatePage } from './models/DisplayTemplatePage';
 export type { EnumerationValue } from './models/EnumerationValue';
 export type { ImageDescriptor } from './models/ImageDescriptor';
 export type { Link } from './models/Link';
+export type { Preview } from './models/Preview';
 export type { ProblemDetails } from './models/ProblemDetails';
 export { PropertyFormat } from './models/PropertyFormat';
 export type { PropertyFormatPage } from './models/PropertyFormatPage';

@@ -2464,6 +2464,71 @@
                 }
             }
         },
+        "/experimental/content/{key}/versions/{version}/previews": {
+            "get": {
+                "tags": [
+                    "Content"
+                ],
+                "summary": "Get previews",
+                "description": "Generate preview URLs for the content item with fresh authentication tokens. This API is experimental and may change in future releases.",
+                "operationId": "Content_GetPreviews",
+                "parameters": [
+                    {
+                        "name": "key",
+                        "in": "path",
+                        "description": "The key of the content item.",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "version",
+                        "in": "path",
+                        "description": "The version of the content item.",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/Preview"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetails"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetails"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/contenttypes": {
             "get": {
                 "tags": [
@@ -4414,8 +4479,7 @@
                     },
                     "locale": {
                         "type": "string",
-                        "description": "The locale of this content instance.",
-                        "readOnly": true
+                        "description": "The locale of this content instance."
                     },
                     "version": {
                         "type": "string",
@@ -4428,13 +4492,11 @@
                         "pattern": "^[A-Za-z][_0-9A-Za-z]+\\z",
                         "type": "string",
                         "description": "The variation of this content item, if any. Variations are used to represent different states or forms of the same content item.\r\nA variation has it's own publish lifecycle. A variation can though not be published before the default version of same local is published.",
-                        "nullable": true,
-                        "readOnly": true
+                        "nullable": true
                     },
                     "contentType": {
                         "type": "string",
-                        "description": "The content type of this content item.",
-                        "readOnly": true
+                        "description": "The content type of this content item."
                     },
                     "displayName": {
                         "maxLength": 255,
@@ -5264,6 +5326,21 @@
                 "additionalProperties": false,
                 "description": "Represents a hyperlink."
             },
+            "Preview": {
+                "type": "object",
+                "properties": {
+                    "application": {
+                        "type": "string",
+                        "description": "The application that this preview URL is associated with."
+                    },
+                    "url": {
+                        "type": "string",
+                        "description": "Gets or sets the preview URL (may be relative or absolute)."
+                    }
+                },
+                "additionalProperties": false,
+                "description": "Represents a preview URL for a content item."
+            },
             "ProblemDetails": {
                 "type": "object",
                 "properties": {
@@ -5551,6 +5628,29 @@
             "apiAuth": [
                 "api:admin"
             ]
+        }
+    ],
+    "tags": [
+        {
+            "name": "Blueprints"
+        },
+        {
+            "name": "Changesets"
+        },
+        {
+            "name": "Content"
+        },
+        {
+            "name": "ContentTypes"
+        },
+        {
+            "name": "DisplayTemplates"
+        },
+        {
+            "name": "PropertyFormats"
+        },
+        {
+            "name": "PropertyGroups"
         }
     ]
 }

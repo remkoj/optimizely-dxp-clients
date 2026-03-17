@@ -7,6 +7,7 @@ import type { ContentItemPage } from '../models/ContentItemPage';
 import type { ContentMetadata } from '../models/ContentMetadata';
 import type { ContentMetadataPage } from '../models/ContentMetadataPage';
 import type { CopyContentOptions } from '../models/CopyContentOptions';
+import type { Preview } from '../models/Preview';
 import type { CancelablePromise } from '../core/CancelablePromise';
 import type { BaseHttpRequest } from '../core/BaseHttpRequest';
 export class ContentService {
@@ -493,6 +494,31 @@ export class ContentService {
             },
             errors: {
                 400: `Bad Request`,
+                403: `Forbidden`,
+                404: `Not Found`,
+            },
+        });
+    }
+    /**
+     * Get previews
+     * Generate preview URLs for the content item with fresh authentication tokens. This API is experimental and may change in future releases.
+     * @param key The key of the content item.
+     * @param version The version of the content item.
+     * @returns Preview OK
+     * @throws ApiError
+     */
+    public contentGetPreviews(
+        key: string,
+        version: string,
+    ): CancelablePromise<Array<Preview>> {
+        return this.httpRequest.request({
+            method: 'GET',
+            url: '/experimental/content/{key}/versions/{version}/previews',
+            path: {
+                'key': key,
+                'version': version,
+            },
+            errors: {
                 403: `Forbidden`,
                 404: `Not Found`,
             },
