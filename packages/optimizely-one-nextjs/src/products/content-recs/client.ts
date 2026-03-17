@@ -12,6 +12,9 @@ export class ContentRecsService implements ClientApi.OptimizelyOneService<Client
         if (enabledServices) {
             this._apiEnabled = enabledServices.includes("contentRecsApi")
             this._clientEnabled = enabledServices.includes("contentRecsClient")
+        } else {
+          this._apiEnabled = false
+          this._clientEnabled = false
         }
     }
 
