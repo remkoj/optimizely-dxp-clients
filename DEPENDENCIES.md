@@ -276,6 +276,7 @@ This overview and list is automatically generated from the dependencies used in 
 | [debug](https://github.com/debug-js/debug#readme) | 4.3.4 | MIT | [Josh Junon (josh.junon@protonmail.com)](mailto:josh.junon@protonmail.com) | [qix (josh@junon.me)](mailto:josh@junon.me), [thebigredgeek (rhyneandrew@gmail.com)](mailto:rhyneandrew@gmail.com), [tootallnate (nathan@tootallnate.net)](mailto:nathan@tootallnate.net), [tjholowaychuk (tj@vision-media.ca)](mailto:tj@vision-media.ca) | [npm](https://www.npmjs.com/package/debug) |
 | [decamelize](https://github.com/sindresorhus/decamelize#readme) | 1.2.0 | MIT | [Sindre Sorhus (sindresorhus@gmail.com)](mailto:sindresorhus@gmail.com) | [sindresorhus (sindresorhus@gmail.com)](mailto:sindresorhus@gmail.com) | [npm](https://www.npmjs.com/package/decamelize) |
 | [decompress-response](https://github.com/sindresorhus/decompress-response#readme) | 6.0.0 | MIT | [Sindre Sorhus (sindresorhus@gmail.com)](mailto:sindresorhus@gmail.com) | [sindresorhus (sindresorhus@gmail.com)](mailto:sindresorhus@gmail.com) | [npm](https://www.npmjs.com/package/decompress-response) |
+| [deep-object-diff](https://github.com/mattphillips/deep-object-diff#readme) | 1.1.9 | MIT | Matt Phillips | [mattphillips (matt@mattphillips.io)](mailto:matt@mattphillips.io) | [npm](https://www.npmjs.com/package/deep-object-diff) |
 | [deepmerge](https://github.com/TehShrike/deepmerge) | 4.3.1 | MIT |  | [tehshrike (me@JoshDuff.com)](mailto:me@JoshDuff.com) | [npm](https://www.npmjs.com/package/deepmerge) |
 | [defer-to-connect](https://github.com/szmarczak/defer-to-connect#readme) | 2.0.1 | MIT | Szymon Marczak | [szmarczak (sz.marczak@gmail.com)](mailto:sz.marczak@gmail.com) | [npm](https://www.npmjs.com/package/defer-to-connect) |
 | [dependency-graph](https://github.com/jriecken/dependency-graph#readme) | 0.11.0 | MIT | [Jim Riecken (jriecken@gmail.com)](mailto:jriecken@gmail.com) | [jriecken (jriecken@gmail.com)](mailto:jriecken@gmail.com) | [npm](https://www.npmjs.com/package/dependency-graph) |
@@ -327,6 +328,7 @@ This overview and list is automatically generated from the dependencies used in 
 | [glob](https://github.com/isaacs/node-glob#readme) | 10.4.5 | ISC | [Isaac Z. Schlueter (i@izs.me)](mailto:i@izs.me) | [isaacs (i@izs.me)](mailto:i@izs.me) | [npm](https://www.npmjs.com/package/glob) |
 | [glob](https://github.com/isaacs/node-glob#readme) | 11.1.0 | BlueOak-1.0.0 | [Isaac Z. Schlueter (i@izs.me)](mailto:i@izs.me) | [isaacs (i@izs.me)](mailto:i@izs.me) | [npm](https://www.npmjs.com/package/glob) |
 | [glob](https://github.com/isaacs/node-glob#readme) | 7.2.3 | ISC | [Isaac Z. Schlueter (i@izs.me)](mailto:i@izs.me) | [isaacs (i@izs.me)](mailto:i@izs.me) | [npm](https://www.npmjs.com/package/glob) |
+| [globals](https://github.com/sindresorhus/globals#readme) | 11.12.0 | MIT | [Sindre Sorhus (sindresorhus@gmail.com)](mailto:sindresorhus@gmail.com) | [byk (ben@byk.im)](mailto:ben@byk.im), [lo1tuma (schreck.mathias@gmail.com)](mailto:schreck.mathias@gmail.com), [nzakas (nicholas@nczconsulting.com)](mailto:nicholas@nczconsulting.com), [sindresorhus (sindresorhus@gmail.com)](mailto:sindresorhus@gmail.com) | [npm](https://www.npmjs.com/package/globals) |
 | [got](https://github.com/sindresorhus/got#readme) | 11.8.6 | MIT |  | [sindresorhus (sindresorhus@gmail.com)](mailto:sindresorhus@gmail.com), [szmarczak (sz.marczak@gmail.com)](mailto:sz.marczak@gmail.com) | [npm](https://www.npmjs.com/package/got) |
 | [graceful-fs](https://github.com/isaacs/node-graceful-fs#readme) | 4.2.11 | ISC |  | [isaacs (i@izs.me)](mailto:i@izs.me) | [npm](https://www.npmjs.com/package/graceful-fs) |
 | [grapheme-splitter](https://github.com/orling/grapheme-splitter) | 1.0.4 | MIT | Orlin Georgiev | [orling (orlin.georgiev@gmail.com)](mailto:orlin.georgiev@gmail.com) | [npm](https://www.npmjs.com/package/grapheme-splitter) |
@@ -590,5 +592,5 @@ The dependencies make use of these licenses:
 | BlueOak-1.0.0 | 7 |
 | CC-BY-4.0 | 1 |
 | ISC | 64 |
-| MIT | 451 |
+| MIT | 453 |
 | Python-2.0 | 1 |

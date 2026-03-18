@@ -1644,6 +1644,7 @@ __metadata:
     "@types/yargs": "npm:^17.0.35"
     chalk: "npm:^5.6.2"
     cli-table3: "npm:^0.6.5"
+    deep-object-diff: "npm:^1.1.9"
     dotenv: "npm:^17.2.3"
     dotenv-expand: "npm:^12.0.3"
     figures: "npm:^6.1.0"
@@ -3069,6 +3070,13 @@ __metadata:
   dependencies:
     mimic-response: "npm:^3.1.0"
   checksum: 10c0/bd89d23141b96d80577e70c54fb226b2f40e74a6817652b80a116d7befb8758261ad073a8895648a29cc0a5947021ab66705cb542fa9c143c82022b27c5b175e
+  languageName: node
+  linkType: hard
+
+"deep-object-diff@npm:^1.1.9":
+  version: 1.1.9
+  resolution: "deep-object-diff@npm:1.1.9"
+  checksum: 10c0/12cfd1b000d16c9192fc649923c972f8aac2ddca4f71a292f8f2c1e2d5cf3c9c16c85e73ab3e7d8a89a5ec6918d6460677d0b05bd160f7bd50bb4816d496dc24
   languageName: node
   linkType: hard
 
