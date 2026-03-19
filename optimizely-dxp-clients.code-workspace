@@ -44,6 +44,7 @@
 	"settings": {
 		"postman.settings.dotenv-detection-notification-visibility": false,
     "typescript.tsdk": "Repository/node_modules/typescript/lib",
-    "typescript.enablePromptUseWorkspaceTsdk": true
+    "typescript.enablePromptUseWorkspaceTsdk": true,
+    "js/ts.tsdk.path": "Repository/node_modules/typescript/lib"
 	}
 }

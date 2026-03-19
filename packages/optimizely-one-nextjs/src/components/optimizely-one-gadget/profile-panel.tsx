@@ -1,3 +1,4 @@
+'use client'
 import { type FunctionComponent } from 'react'
 import { ArrowPathIcon, UserCircleIcon } from '@heroicons/react/20/solid'
 import useSWR from 'swr'

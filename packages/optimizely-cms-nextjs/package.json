@@ -50,7 +50,7 @@
     "@types/node": "^22.19.15",
     "@types/react": "^19.2.14",
     "@types/react-dom": "19.2.3",
-    "next": "^16.1.6",
+    "next": "^16.1.7",
     "prop-types": "^15.8.1",
     "react": "^19.2.4",
     "react-dom": "^19.2.4",
@@ -58,11 +58,11 @@
     "typescript": "^5.9.3"
   },
   "dependencies": {
-    "@formatjs/intl-localematcher": "^0.8.1",
+    "@formatjs/intl-localematcher": "^0.8.2",
     "@remkoj/optimizely-cms-react": "6.0.0-pre16",
     "@remkoj/optimizely-graph-client": "6.0.0-pre16",
     "deepmerge": "^4.3.1",
-    "entities": "^7.0.1",
+    "entities": "^8.0.0",
     "graphql": "^16.13.1",
     "graphql-request": "^7.4.0",
     "negotiator": "^1.0.0"

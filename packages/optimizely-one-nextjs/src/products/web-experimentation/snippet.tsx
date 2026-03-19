@@ -38,6 +38,7 @@ export const OptimizelyWebExperimentationScript = ({ projectId, allowProjectOver
             `}</Script> :
             <Script id='web-experimentation-project' strategy='beforeInteractive' src={ buildUrl(projectId) } />
         }
+        <link rel="preconnect" href="https://logx.optimizely.com/v1/events" />
     </>
 }
 

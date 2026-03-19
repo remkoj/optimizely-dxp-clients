@@ -1,6 +1,6 @@
 import type { CliModule } from '../types.js'
 import { parseArgs } from '../tools/parseArgs.js'
-import { OptiCmsVersion } from '@remkoj/optimizely-cms-api'
+import { IntegrationApi } from '@remkoj/optimizely-cms-api'
 import { createCmsClient } from '../tools/cmsClient.js'
 import { glob } from 'glob'
 import path from 'node:path'
@@ -8,6 +8,8 @@ import fs from 'node:fs'
 import chalk from 'chalk'
 import figures from 'figures'
 import Table from 'cli-table3'
+import { getStyles } from '../tools/styles.js'
+import { generatePatch, getPatchFields } from '../tools/patch.js'
 
 type StylesPushModule = CliModule<{
   excludeTemplates: string[]
@@ -25,19 +27,28 @@ export const StylesPushCommand: StylesPushModule = {
   handler: async (args) => {
     const { _config: cfg, excludeTemplates, templates, ...opts } = parseArgs(args)
     const client = createCmsClient(args)
-    if (client.runtimeCmsVersion == OptiCmsVersion.CMS12) {
-      process.stdout.write(chalk.gray(`${figures.cross} Styles are not supported on CMS12\n`))
-      return
-    }
+
+    const { styles: displayTemplates } = await getStyles(client, {
+      all: false,
+      baseTypes: [],
+      excludeBaseTypes: [],
+      excludeNodeTypes: [],
+      excludeTemplates: [],
+      excludeTypes: [],
+      nodes: [],
+      templates: [],
+      templateTypes: [],
+      types: [],
+      ...args
+    }, 50);
 
     process.stdout.write(chalk.yellowBright(`${figures.arrowRight} Pushing (create/replace) DisplayStyles into Optimizely CMS\n`))
-
     const styleDefinitionFiles = await glob("./**/*.opti-style.json", {
       cwd: opts.components
     })
-    const results = (await Promise.all(styleDefinitionFiles.map(async styleDefinitionFile => {
+    const results = (await Promise.allSettled(styleDefinitionFiles.map(async styleDefinitionFile => {
       const filePath = path.normalize(path.join(opts.components, styleDefinitionFile))
-      const styleDefinition = tryReadJsonFile(filePath, cfg.debug)
+      const styleDefinition = tryReadJsonFile<IntegrationApi.DisplayTemplate>(filePath, cfg.debug)
       const styleKey = styleDefinition.key
       if (!styleKey) {
         process.stderr.write(chalk.redBright(`${chalk.bold(figures.cross)} The style definition in ${path.relative(opts.path, filePath)} does not have a key defined\n`))
@@ -49,15 +60,29 @@ export const StylesPushCommand: StylesPushModule = {
         process.stdout.write(chalk.gray(`${figures.arrowRight} Pushing: ${styleKey}\n`))
 
       // Try to fetch the current template
-      const currentTemplate = await client.displayTemplatesGet({ path: { key: styleKey } }).catch(() => { return undefined });
+      const currentTemplate = displayTemplates.find(dt => dt.key === styleKey)
 
       // Create / Replace the current template
-      const newTemplate = await (currentTemplate ?
-        client.displayTemplatesPatch({ path: { key: styleKey }, body: styleDefinition }) :
+      const newTemplate = await (currentTemplate ? (async () => {
+        const patch = generatePatch(currentTemplate, styleDefinition, {
+          readonlyFields: ['key', 'created', 'lastModified', 'createdBy', 'lastModifiedBy']
+        })
+        if (!path || Object.entries(patch).length === 0) return currentTemplate
+        // @ts-expect-error There's a mis-match between the logic in the CMS and the contents of the 
+        // OpenAPI Spec file.
+        return client.displayTemplatesPatch({ path: { key: styleKey }, body: patch }) 
+        })() :
         client.displayTemplatesCreate({ body: styleDefinition })
       )
+
+      const missedFields = generatePatch(newTemplate, currentTemplate, {
+        readonlyFields: ['key', 'created', 'lastModified', 'createdBy', 'lastModifiedBy']
+      });
+      if (missedFields && Object.keys(missedFields).length > 0)
+        throw new Error(`The Display template ${ styleKey } failed to update properties: ${ getPatchFields(missedFields).join('; ') }`)
+
       return newTemplate
-    }))).filter(isNotNullOrUndefined)
+    })))
 
     const styles = new Table({
       head: [
@@ -69,13 +94,18 @@ export const StylesPushCommand: StylesPushModule = {
       colWidths: [31, 20, 9, 20],
       colAligns: ["left", "left", "center", "left"]
     })
-    results.forEach(tpl => {
-      styles.push([
-        tpl.displayName,
-        tpl.key,
-        tpl.isDefault ? figures.tick : figures.cross,
-        tpl.contentType ? `${tpl.contentType} (C)` : tpl.baseType ? `${tpl.baseType} (B)` : `${tpl.nodeType} (N)`
-      ])
+    results.forEach(result => {
+      if (result.status === 'fulfilled') {
+        const tpl = result.value;
+        styles.push([
+          tpl.displayName,
+          tpl.key,
+          tpl.isDefault ? figures.tick : figures.cross,
+          tpl.contentType ? `${tpl.contentType} (C)` : tpl.baseType ? `${tpl.baseType} (B)` : `${tpl.nodeType} (N)`
+        ])
+      } else {
+        process.stderr.write(`Error processing DisplayTemplate: ${ result.reason }\n`)
+      }
     })
     process.stdout.write(styles.toString() + "\n")
     process.stdout.write(chalk.green(chalk.bold(figures.tick + " Done")) + "\n")
@@ -92,8 +122,4 @@ function tryReadJsonFile<T = any>(filePath: string, debug: boolean = false): T |
     process.stderr.write(chalk.redBright(`${chalk.bold(figures.cross)} Error while reading ${filePath}\n`))
   }
   return undefined
-}
-
-function isNotNullOrUndefined<T>(i: T | null | undefined | void): i is T {
-  return i ? true : false
 }

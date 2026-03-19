@@ -57,6 +57,8 @@ export class DataPlatformService implements ClientApi.OptimizelyOneService<Clien
         }
     }
 
+    private _hasTrackedVisitorId: boolean = false;
+
     /**
      * Discover the visitorId cookie and make it available to the systems as identifier
      * 
@@ -66,10 +68,14 @@ export class DataPlatformService implements ClientApi.OptimizelyOneService<Clien
     {
         return new Promise((resolve) => {
             try {
-                const cookies = document.cookie.split(';').map(x=>x.trim().split('=',2)).reduce((obj,cData) => { obj[cData[0]] = cData[1]; return obj; }, {} as Record<string,string>)
-                const visitorId = cookies['visitorId']
-                if (visitorId)
+                if (!this._hasTrackedVisitorId) {
+                  const cookies = document.cookie.split(';').map(x=>x.trim().split('=',2)).reduce((obj,cData) => { obj[cData[0]] = cData[1]; return obj; }, {} as Record<string,string>)
+                  const visitorId = cookies['visitorId']
+                  if (visitorId) {
+                    this._hasTrackedVisitorId = true
                     return resolve({ feature_experimentation_id: visitorId, custom: {} })
+                  }
+                }
             } catch {
                 //Ignore errors on purpose
             }

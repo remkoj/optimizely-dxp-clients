@@ -23,11 +23,11 @@ export type ArrayItem = {
     /**
      * The minimum value that properties of this type should be able to contain. Value type must match the type of the array item.
      */
-    minimum?: number | null | number | string;
+    minimum?: number | null | number | string | Date;
     /**
      * The maximum value that properties of this type should be able to contain. Value type must match the type of the array item.
      */
-    maximum?: number | null | number | string;
+    maximum?: number | null | number | string | Date;
     /**
      * The minimum string length that list items of this type should be able to contain.
      */
@@ -593,11 +593,11 @@ export type ContentTypeProperty = {
     /**
      * The minimum value that properties of this type should be able to contain. Value type must match the type of the property.
      */
-    minimum?: number | null | number | string;
+    minimum?: number | null | number | string | Date;
     /**
      * The minimum value that properties of this type should be able to contain. Value type must match the type of the property.
      */
-    maximum?: number | null | number | string;
+    maximum?: number | null | number | string | Date;
     /**
      * A list of possible values that properties of this type should be able to contain.
      */
@@ -772,7 +772,7 @@ export type EnumerationValue = {
     /**
      * The defined enumeration value. Value type must match the property type.
      */
-    value: number | null | number | string;
+    value: number | null | number | string | Date;
     /**
      * The display name of the enumeration value.
      */

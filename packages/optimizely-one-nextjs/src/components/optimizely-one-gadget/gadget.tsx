@@ -2,7 +2,6 @@
 import type { OptimizelyOneGadgetProps } from './_types'
 import {
   Fragment,
-  useLayoutEffect,
   useCallback,
   useMemo,
   type FunctionComponent,

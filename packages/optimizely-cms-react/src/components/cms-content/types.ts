@@ -3,6 +3,42 @@ import type { CmsComponent } from '../../types.js'
 import type { PropsWithContext, PropsWithOptionalContext } from "../../context/types.js"
 import type { ContentLinkWithLocale, InlineContentLinkWithLocale } from "@remkoj/optimizely-graph-client"
 
+/**
+ * Properties for `CmsContent`.
+ *
+ * `CmsContent` resolves and renders a CMS template component for the item
+ * identified by `contentLink`.
+ *
+ * Property overview:
+ * - `contentLink` (required): content identity (`key` + optional locale).
+ * - `contentType`: explicit content type array; skips content-type lookup when set.
+ * - `contentTypePrefix`: template prefix (for example `Page`, `Component`).
+ * - `variant`: template variant suffix.
+ * - `fragmentData`: preloaded data for rendering.
+ * - `noDataLoad`: skip loading data from Graph.
+ * - `layoutProps`: layout metadata forwarded to resolved component.
+ * - `editorComponentId`: explicit editor id override for `editProps.cmsId`.
+ * - `ctx`: explicit CMS context override.
+ * - `children`: nested content passed through to resolved component.
+ *
+ * @example
+ * ```tsx
+ * <CmsContent
+ *   contentLink={{ key: 'b9f76fd06f5d4e2e8d2cc3f010f7abf9', locale: 'en' }}
+ *   contentTypePrefix="Page"
+ * />
+ * ```
+ *
+ * @example
+ * ```tsx
+ * <CmsContent
+ *   contentLink={{ key: '4f9ac0f95ed147b6956c9f6bd4151f38' }}
+ *   contentType={["Component", "HeroBlock"]}
+ *   fragmentData={heroData}
+ *   noDataLoad
+ * />
+ * ```
+ */
 export type CmsContentProps<LocalesType = string> = PropsWithChildren<PropsWithOptionalContext<{
   /**
    * The content type to render
@@ -36,7 +72,7 @@ export type CmsContentProps<LocalesType = string> = PropsWithChildren<PropsWithO
   }
 
   /**
-   * The native key to use when the element is part of an array
+    * React key to use when the component is rendered in a list.
    */
   key?: string
 
@@ -54,7 +90,7 @@ export type CmsContentProps<LocalesType = string> = PropsWithChildren<PropsWithO
   variant?: string
 
   /**
-   * Any layout properties inferred from the context
+    * Additional layout properties forwarded to the resolved CMS template.
    */
   layoutProps?: Record<string, any>
 

@@ -7,60 +7,123 @@ import type {
 } from '../type-utils.js'
 import { type ContentLink } from '@remkoj/optimizely-graph-client'
 
+/**
+ * Properties for `CmsEditable`.
+ *
+ * `CmsEditable` wraps output with Optimizely edit markers so fields and blocks can be
+ * selected in edit mode.
+ *
+ * Quick start:
+ * - Provide `cmsId` for block/content identification.
+ * - Provide `cmsFieldName` when you want field-level editing.
+ * - Choose wrapper element with `as` (defaults to `div`).
+ *
+ * @example
+ * ```tsx
+ * <CmsEditable as="section" cmsId={content._metadata.key} cmsFieldName="MainBody">
+ *   <p>{content.MainBody}</p>
+ * </CmsEditable>
+ * ```
+ *
+ * @example
+ * ```tsx
+ * <CmsEditable
+ *   as="h2"
+ *   cmsId={content._metadata.key}
+ *   cmsFieldName="Heading"
+ *   editType="inline"
+ * >
+ *   {content.Heading}
+ * </CmsEditable>
+ * ```
+ */
 export type CmsEditableProps<FT extends ElementType> = PropsWithChildren<
   {
     /**
-     * Override the component used to render, instead of wrapping the children. It allows
-     * any valid JSX identifier (e.g. HTML Element, Component or ExoticComponent)
+     * Wrapper element or component used for rendering.
+     *
+     * Defaults to `div`.
+     * Accepts intrinsic elements (for example `"span"`, `"section"`) or custom
+     * React components.
      */
     as?: FT
 
     /**
-     * The identifier of the component wrapped in this CmsEditable component. This will
-     * add the 'data-epi-block-id' property to the component.
+     * Identifier of the rendered CMS content item.
+     *
+     * When edit attributes are active, this is written to `data-epi-block-id` and/or
+     * `data-epi-content-id`.
+     *
+     * Recommended value: content key from your model metadata.
      */
     cmsId?: string | null
 
     /**
-     * The name of the component field wrapped by this CmsEditable component. This will
-     * add the 'data-epi-property-name' property to the component.
+     * Field name to mark as editable (for example `"Heading"`, `"MainBody"`).
+     *
+     * In edit mode this enables field-level highlighting/editing metadata.
      */
     cmsFieldName?: string | null
 
     /**
-     * The Context to be used when determining if the page rendering happens in edit mode
-     * or not.
+     * Optional CMS context override.
+     *
+     * Use this when you need to provide context explicitly; otherwise context is resolved
+     * by the caller/wrapper.
      */
     ctx?: GenericContext
 
     /**
-     * The default CTX paramteer is caught by this component, set this to true to pass the
-     * `ctx` property to the 'as' Component, or set to a valid property name to pass into
-     * that property.
+     * Forward `ctx` to the custom `as` component.
+     *
+      * - `true` (default): forward as prop name `ctx`.
+      * - `false`: do not forward context.
+     * - `"propName"`: forward using custom prop name.
+     *
+     * Ignored for intrinsic HTML elements.
+      *
+      * If the component passed through `as` is on the opposite rendering side,
+      * set this to `false` to prevent boundary issues:
+      * - `CmsEditable` on client + `as` server component -> use `forwardCtx={false}`
+      * - `CmsEditable` on server + `as` client component -> use `forwardCtx={false}`
      */
     forwardCtx?: boolean | GenericContextProps<FT>
 
     /**
-     * If set, the `data-epi-block-id` attribute will always be included when the `cmsId`
-     * parameter is being set.
+     * Force adding `data-epi-block-id` when `cmsId` is present.
+     *
+     * Useful when you need block-level markers even if the default filtering logic would
+     * otherwise suppress them.
      */
     forceBlockId?: boolean
 
     /**
-     * If set `CmsEditable` will output both `cmsId` and `cmsFieldName` (if both are provided)
-     * otherwise it will prioritize `cmsFieldName`.
+     * Reserved compatibility flag.
+     *
+     * This property is currently accepted for API compatibility but is not used by the
+     * current implementation.
+     * 
+     * @deprecated This property is preserved for historical use and should not be used in new code.
      */
     forceId?: boolean
 
     /**
-     * If set, this will be used to test if the content item being rendered is actually
-     * the one being edited. This allows conditional output of the edit properties. This will
-     * only affect `cmsFieldName`, not `cmsId`.
+     * Content identity check used to conditionally output field-level edit markers.
+     *
+     * When provided, field attributes are added only if
+     * `currentContent.key === editableContent.key`.
+     * This condition affects field-level markers, not `cmsId` output.
      */
     currentContent?: ContentLink
 
     /**
-     * Override the value for the `data-epi-property-edittype` property
+     * Override edit rendering mode.
+     *
+     * - `"floating"`: floating editor UI.
+     * - `"inline"`: inline editor UI.
+     * - `null`/`undefined`: default behavior via `data-epi-edit`.
+     * 
+     * @deprecated The `editType` property is deprecated and should not be used in new code. Future versions may remove support for this property.
      */
     editType?: 'floating' | 'inline' | null
   } & Omit<

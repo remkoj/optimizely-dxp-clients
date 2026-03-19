@@ -1,3 +1,4 @@
+'use client'
 import { useState, useEffect, type FunctionComponent } from 'react'
 import Link from 'next/link'
 import { useOptimizelyOne } from '../context'

@@ -1,3 +1,5 @@
+'use client'
+
 import { type FunctionComponent, type JSX } from 'react'
 import { TagIcon } from '@heroicons/react/20/solid'
 import useSWR from 'swr'

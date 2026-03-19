@@ -58,36 +58,36 @@ export type PassthroughProps<T extends ElementType, ParentKeys extends string | 
 
 export type CmsContentAreaCoreProps = PropsWithOptionalContext<{
   /**
-   * The content area items to be rendered
+  * Content area items to render.
+  *
+  * Each item should contain `_metadata` with at least a key and content type data.
    */
   items: (ContentAreaItemDefinition | null | undefined)[] | undefined | null
 
   /**
-   * Whether or not a suspense must be applied around each item of the 
-   * ContentArea to allow dynamic content within the ContentArea items.
+    * Whether a suspense boundary is applied around each rendered content area item.
    */
   useSuspense?: boolean
 
   /**
-   * The fallback component to use as suspense boundary
+    * Fallback UI rendered while suspense-wrapped items are loading.
    */
   fallback?: SuspenseProps['fallback']
 
   /**
-   * The fieldname of this content area, provide this to allow in-context 
-   * editing
+    * Name of the CMS field represented by this content area.
+    *
+    * Set this to enable in-context edit markers for the content area container.
    */
   fieldName?: string
 
   /**
-   * If set to true, there will be no wrapping element around the 
-   * items in the Content Area. Setting this to `true` ignores
+    * If `true`, no container wrapper is rendered around the full list of items.
    */
   noWrapper?: boolean
 
   /**
-   * Allows requesting of specific template variant, to accomodate different
-   * renditions, without changing the main path of the component.
+   * Optional template variant forwarded to each `CmsContent` item render.
    */
   variant?: string
 }>
@@ -135,6 +135,47 @@ export type CmsContentAreaItemWrapperProps<CT extends ElementType> = ({
 } & ItemsProperty<CT> & PassthroughProps<CT, "as" | "noWrapper" | "className">)
 
 
+/**
+ * Properties for `CmsContentArea`.
+ *
+ * Combines core rendering options and wrapper customization options.
+ *
+ * Property overview:
+ * - `items` (required): content area items to render.
+ * - `fieldName`: enables edit marker output for the content area.
+ * - `variant`: template variant for all rendered items.
+ * - `useSuspense` + `fallback`: per-item suspense rendering.
+ * - `noWrapper`: disables outer content area container.
+ * - `as`: outer container element/component.
+ * - `itemsProperty`: target prop on `as` component to inject item list.
+ * - `className`: classes for outer container.
+ * - `classMapper`: computes per-item wrapper classes from display option/type/index.
+ * - `itemWrapper`: configures per-item wrapper element, classes and prop target.
+ * - `ctx`: optional CMS context override.
+ *
+ * @example
+ * ```tsx
+ * <CmsContentArea
+ *   items={content.MainContentArea}
+ *   fieldName="MainContentArea"
+ *   as="section"
+ *   className="main-content"
+ * />
+ * ```
+ *
+ * @example
+ * ```tsx
+ * <CmsContentArea
+ *   items={content.SidebarContentArea}
+ *   itemWrapper={{ as: 'aside', className: 'sidebar-item' }}
+ *   classMapper={(displayOption, contentType, index) =>
+ *     `item-${index} display-${displayOption} type-${contentType?.join('-') ?? 'unknown'}`
+ *   }
+ *   useSuspense
+ *   fallback={<div>Loading…</div>}
+ * />
+ * ```
+ */
 export type CmsContentAreaProps<T extends ElementType, CT extends ElementType> =
   CmsContentAreaCoreProps &
   CmsContentAreaWrapperProps<T, CT>

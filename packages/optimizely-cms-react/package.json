@@ -42,7 +42,7 @@
     "@graphql-typed-document-node/core": "^3.2.0",
     "@remkoj/optimizely-graph-client": "6.0.0-pre16",
     "crypto-js": "^4.2.0",
-    "entities": "^7.0.1",
+    "entities": "^8.0.0",
     "graphql": "^16.13.1",
     "graphql-request": "^7.4.0"
   },

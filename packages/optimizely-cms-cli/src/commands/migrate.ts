@@ -11,7 +11,7 @@ import { type NextJsModule, builder } from './_nextjs_base.js'
 type MigrateModule = NextJsModule<{}>
 
 export const MigrateCommand: MigrateModule = {
-  command: "migrate",
+  command: "project:migrate",
   describe: "Automate the directory naming convention update",
   builder,
   async handler(args, opts) {

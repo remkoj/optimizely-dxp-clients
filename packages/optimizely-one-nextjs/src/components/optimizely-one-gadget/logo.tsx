@@ -1,3 +1,4 @@
+'use client'
 import React, { type FunctionComponent } from 'react'
 
 export type OptimizelyLogoProps = React.SVGProps<SVGSVGElement> & { title?: string }

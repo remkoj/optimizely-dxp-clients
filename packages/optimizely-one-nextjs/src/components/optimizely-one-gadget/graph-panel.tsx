@@ -1,3 +1,4 @@
+'use client'
 import { type FunctionComponent } from 'react'
 import useSWR from 'swr'
 import type { GraphInfoApiResponse as ApiResponse } from '../../api/graph-info-service'

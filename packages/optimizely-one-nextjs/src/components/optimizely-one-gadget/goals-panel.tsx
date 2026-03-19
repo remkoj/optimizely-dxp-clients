@@ -1,3 +1,4 @@
+'use client'
 import { type FunctionComponent, type JSX } from 'react'
 import { TrophyIcon } from '@heroicons/react/20/solid'
 import useSWR from 'swr'

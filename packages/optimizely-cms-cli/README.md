@@ -14,11 +14,6 @@ The defaults and methods are based upon using a Next.JS application with the con
   - [2.1. Global parameters](#21-global-parameters)
   - [2.2. Environment variables](#22-environment-variables)
 - [3. Available commands](#3-available-commands)
-  - [3.1. General CMS Commands](#31-general-cms-commands)
-  - [3.2. JSON Schema's and Schema Validation](#32-json-schemas-and-schema-validation)
-  - [3.3. Display Templates (Styles)](#33-display-templates-styles)
-  - [3.4. Content Types](#34-content-types)
-  - [3.5. Next.JS Project support](#35-nextjs-project-support)
 - [4. Detailed command descriptions](#4-detailed-command-descriptions)
   - [4.1. Generate React Component Factory](#41-generate-react-component-factory)
 
@@ -76,38 +71,349 @@ All commands share these parameters that configure the frontend environment.
 This CLI tool shares the environment variables with [@remkoj/optimizely-cms-api](https://www.npmjs.com/package/@remkoj/optimizely-cms-api). When starting the CLI tool, it looks for `.env` and `.env.local` to extend the environment variables and thus works using the Next.JS conventions.
 
 ## 3. Available commands
-The following commands are available, you can always run `opti-cms --help` or `opti-cms [command] --help` to see all information for the CLI utility or command. If the command is omitted, the CLI will assume the `cms:version` command.
+The following commands are currently available in `src/commands`. Use `yarn opti-cms [command] --help` for runtime help.
 
-### 3.1. General CMS Commands
-| Command | Description |
-| --- | --- |
-|`cms:version`| Fetch and display the version of the CMS from the endpoint, allowing validation of the connection with Optimizely CMS. |
-|`cms:reset` | Reset the CMS instance by removing all Content, Content Types and Display Templates.<br/>***Note:*** This currently requires some manual steps, the CLI will provide the needed guidance on these manual steps. |
+All commands also support the [global parameters](#21-global-parameters).
 
-### 3.2. JSON Schema's and Schema Validation
-| Command | Description |
-| --- | --- |
-| `schema:download` | Download schema definitions into a `.schema` folder within your project to facilitate JSON Schema validation by your IDE of choice. Use one or more `-s [schemaName]` parameters to override the schemas that must be downloaded. The `-d [relativePath]` to change where the location where the schema files must be stored. Using `-f` enables overwriting of existing schema files. |
-| `schema:list` | Display a list of all schema's available within the Optimizely CMS instance.
-| `schema:validate` | Downloads the OpenAPI Specification from the configured Optimizely CMS instance, extracts the appropriate types from it and uses those to validate all `*.opti-style.json` and `*.opti-type.json` files in the project. The output provides detailled error messages for each file that is not valid. |
-| `schema:vscode` | Updates the `.vscode` folder to include the JSON Schema for both Content Type defintions and Display Templates. This will also create or update the `settings.json` to enable code-completion and validation on `*.opti-style.json` and `*.opti-type.json` files, using these schema's. Rerun this command to ensure that the definitions remain in sync with the OpenAPI specification of the CMS API. |
+### `cms:*`
+| Command | Description | Usage |
+| --- | --- | --- |
+| `cms:reset` | Completely clear & reset the CMS Database | `yarn opti-cms cms:reset` |
+| `cms:version` | Get the CMS Version information | `yarn opti-cms cms:version` |
 
-### 3.3. Display Templates (Styles)
-| Command | Description |
-| --- | --- |
-| `style:create` | Create a new Style definition file *(and optionally create it immediately within the CMS as well)* using a CLI interface, that will guide you through the process of setting the required properties.<br/>***Visual Studio Code users:*** Running `yarn opti-cms schema:vscode` will enable VS-Code to provide validation and completion for the generated `*.opti-style.json` file. |
+### `project:*`
+| Command | Description | Usage |
+| --- | --- | --- |
+| `project:migrate` | Automate the directory naming convention update | `yarn opti-cms project:migrate` |
 
-### 3.4. Content Types
-| Command | Description |
-| --- | --- |
-|`types:pull`| Read all existing content types from the Optimizely CMS and create their representation within the codebase. Use the parameters of this method to control which types will be pulled and to allow overwriting of existing files. |
-|`types:push`| Create or overwrite the content type defintions from the codebase into Optimizely CMS, use the parameters of this method to control which types will be transferred and whether destructive changes are allowed. |
+### `nextjs:*`
+| Command | Description | Usage |
+| --- | --- | --- |
+| `nextjs:components` | Create the React Components for a Next.JS / Optimizely Graph structure | `yarn opti-cms nextjs:components` |
+| `nextjs:create` | Scaffold a complete Next.JS / Optimizely Graph structure | `yarn opti-cms nextjs:create` |
+| `nextjs:factory` | Create the ComponentFactory for a Next.JS / Optimizely Graph structure | `yarn opti-cms nextjs:factory` |
+| `nextjs:fragments` | Create the GrapQL Fragments for a Next.JS / Optimizely Graph structure | `yarn opti-cms nextjs:fragments` |
+| `nextjs:queries` | Create the GrapQL Queries to use two queries to load content | `yarn opti-cms nextjs:queries` |
+| `nextjs:visualbuilder` | Create the React Components for Visual Builder in a Next.JS / Optimizely Graph structure | `yarn opti-cms nextjs:visualbuilder` |
 
-### 3.5. Next.JS Project support
-| Command | Description |
-| --- | --- |
-| `nextjs:factory` | Generate the component factories needed for suggested implementation pattern of Optimizely CMS in Next.JS. See [4.1. Generate React Component Factory](#41-generate-react-component-factory) |
-| `nextjs:create` | An conveniance command, that will run the appropriate commands from the CLI in the right order to fully scaffold a frontend based upon the Content Types and Display Templates that already exist within the Optimizely CMS instance.<br/>It runs these commands: `types:pull`, `styles:pull`, `nextjs:fragments` `nextjs:components`, `nextjs:visualbuilder` and `nextjs:factory`. The command line arguments you provide to `nextjs:create` will be forwarded to each of these commands. |
+### `schema:*`
+| Command | Description | Usage |
+| --- | --- | --- |
+| `schema:download` | Create JSON schema files for selected types | `yarn opti-cms schema:download` |
+| `schema:list` | List all schema's that are available within the SaaS CMS instance | `yarn opti-cms schema:list` |
+| `schema:validate` | Validate the opti-type.json & opti-style.json files | `yarn opti-cms schema:validate` |
+| `schema:vscode` | Configure schema validation for opti-type.json & opti-style.json files by VSCode | `yarn opti-cms schema:vscode` |
+
+### `style*` and `styles:*`
+| Command | Description | Usage |
+| --- | --- | --- |
+| `style:create` | Create a new style definition | `yarn opti-cms style:create` |
+| `styles:delete` | Remove Visual Builder style definitions from the CMS | `yarn opti-cms styles:delete` |
+| `styles:list` | List Visual Builder style definitions from the CMS | `yarn opti-cms styles:list` |
+| `styles:pull` | Create Visual Builder style definitions from the CMS | `yarn opti-cms styles:pull` |
+| `styles:push` | Push Visual Builder style definitions into the CMS (create/replace) | `yarn opti-cms styles:push` |
+
+### `types:*`
+| Command | Description | Usage |
+| --- | --- | --- |
+| `types:pull` | Pull content type definition files into the project | `yarn opti-cms types:pull` |
+| `types:push` | Push content type definition into Optimizely CMS (create / replace) | `yarn opti-cms types:push` |
+
+### `cms:reset`
+Description: Completely clear & reset the CMS database.
+
+Usage:
+```bash
+yarn opti-cms cms:reset
+```
+
+Parameters: no command-specific parameters (global parameters still apply).
+
+### `cms:version`
+Description: Get CMS version and service info.
+
+Usage:
+```bash
+yarn opti-cms cms:version
+```
+
+Parameters: no command-specific parameters (global parameters still apply).
+
+### `project:migrate`
+Description: Rename folders/files to match the updated naming conventions and regenerate factories.
+
+Usage:
+```bash
+yarn opti-cms project:migrate [options]
+```
+
+| Parameter | Alias | Optional | Default | Usage |
+| --- | --- | --- | --- | --- |
+| `--excludeTypes` | `--ect` | Yes | `['folder','media','image','video']` | Exclude content type keys while preparing context |
+| `--excludeBaseTypes` | `--ebt` | Yes | `[]` | Exclude content base types while preparing context |
+| `--baseTypes` | `-b` | Yes | `[]` | Include only selected base types |
+| `--types` | `-t` | Yes | `[]` | Include only selected content types |
+| `--all` | `-a` | Yes | `false` | Include unsupported base types |
+| `--force` | `-f` | Yes | `false` | Overwrite generated files where applicable |
+
+### `nextjs:components`
+Description: Generate React component stubs for selected content types.
+
+Usage:
+```bash
+yarn opti-cms nextjs:components [options]
+```
+
+| Parameter | Alias | Optional | Default | Usage |
+| --- | --- | --- | --- | --- |
+| `--excludeTypes` | `--ect` | Yes | `['folder','media','image','video']` | Exclude content type keys |
+| `--excludeBaseTypes` | `--ebt` | Yes | `[]` | Exclude content base types |
+| `--baseTypes` | `-b` | Yes | `[]` | Include only selected base types |
+| `--types` | `-t` | Yes | `[]` | Include only selected content type keys |
+| `--all` | `-a` | Yes | `false` | Include unsupported base types |
+| `--force` | `-f` | Yes | `false` | Overwrite existing files |
+
+### `nextjs:create`
+Description: Run the full Next.js scaffold flow from CMS definitions.
+
+Usage:
+```bash
+yarn opti-cms nextjs:create [options]
+```
+
+| Parameter | Alias | Optional | Default | Usage |
+| --- | --- | --- | --- | --- |
+| `--excludeTypes` | `--ect` | Yes | `['folder','media','image','video']` | Exclude content type keys |
+| `--excludeBaseTypes` | `--ebt` | Yes | `[]` | Exclude content base types |
+| `--baseTypes` | `-b` | Yes | `[]` | Include only selected base types |
+| `--types` | `-t` | Yes | `[]` | Include only selected content type keys |
+| `--all` | `-a` | Yes | `false` | Include unsupported base types |
+| `--force` | `-f` | Yes | `false` | Overwrite existing generated files |
+
+### `nextjs:factory`
+Description: Generate component factory files.
+
+Usage:
+```bash
+yarn opti-cms nextjs:factory [options]
+```
+
+| Parameter | Alias | Optional | Default | Usage |
+| --- | --- | --- | --- | --- |
+| `--excludeTypes` | `--ect` | Yes | `['folder','media','image','video']` | Exclude content type keys |
+| `--excludeBaseTypes` | `--ebt` | Yes | `[]` | Exclude content base types |
+| `--baseTypes` | `-b` | Yes | `[]` | Include only selected base types |
+| `--types` | `-t` | Yes | `[]` | Include only selected content type keys |
+| `--all` | `-a` | Yes | `false` | Include unsupported base types |
+| `--force` | `-f` | Yes | `false` | Overwrite existing generated files |
+
+### `nextjs:fragments`
+Description: Generate GraphQL fragments for selected content types.
+
+Usage:
+```bash
+yarn opti-cms nextjs:fragments [options]
+```
+
+| Parameter | Alias | Optional | Default | Usage |
+| --- | --- | --- | --- | --- |
+| `--excludeTypes` | `--ect` | Yes | `['folder','media','image','video']` | Exclude content type keys |
+| `--excludeBaseTypes` | `--ebt` | Yes | `[]` | Exclude content base types |
+| `--baseTypes` | `-b` | Yes | `[]` | Include only selected base types |
+| `--types` | `-t` | Yes | `[]` | Include only selected content type keys |
+| `--all` | `-a` | Yes | `false` | Include unsupported base types |
+| `--force` | `-f` | Yes | `false` | Overwrite existing generated files |
+
+### `nextjs:queries`
+Description: Generate GraphQL queries (defaults to page/experience base types).
+
+Usage:
+```bash
+yarn opti-cms nextjs:queries [options]
+```
+
+| Parameter | Alias | Optional | Default | Usage |
+| --- | --- | --- | --- | --- |
+| `--excludeTypes` | `--ect` | Yes | `['folder','media','image','video']` | Exclude content type keys |
+| `--excludeBaseTypes` | `--ebt` | Yes | `[]` | Exclude content base types |
+| `--baseTypes` | `-b` | Yes | `['page','experience']` | Include only selected base types |
+| `--types` | `-t` | Yes | `[]` | Include only selected content type keys |
+| `--all` | `-a` | Yes | `false` | Include unsupported base types |
+| `--force` | `-f` | Yes | `false` | Overwrite existing generated files |
+
+### `nextjs:visualbuilder`
+Description: Generate Visual Builder components and node templates.
+
+Usage:
+```bash
+yarn opti-cms nextjs:visualbuilder [options]
+```
+
+| Parameter | Alias | Optional | Default | Usage |
+| --- | --- | --- | --- | --- |
+| `--excludeTypes` | `--ect` | Yes | `['folder','media','image','video']` | Exclude content type keys |
+| `--excludeBaseTypes` | `--ebt` | Yes | `[]` | Exclude content base types |
+| `--baseTypes` | `-b` | Yes | `[]` | Include only selected base types |
+| `--types` | `-t` | Yes | `[]` | Include only selected content type keys |
+| `--all` | `-a` | Yes | `false` | Include unsupported base types |
+| `--force` | `-f` | Yes | `false` | Overwrite existing generated files |
+
+### `schema:download`
+Description: Download JSON schema files from the CMS OpenAPI specification.
+
+Usage:
+```bash
+yarn opti-cms schema:download [options]
+```
+
+| Parameter | Alias | Optional | Default | Usage |
+| --- | --- | --- | --- | --- |
+| `--schemaDir` | `-d` | Yes | `'./.schema'` | Target schema directory relative to project root |
+| `--schemas` | `-s` | Yes | `['DisplayTemplate','ContentType']` | Schema names to download |
+| `--force` | `-f` | Yes | `false` | Overwrite existing schema files |
+
+### `schema:list`
+Description: List schemas exposed by the CMS OpenAPI specification.
+
+Usage:
+```bash
+yarn opti-cms schema:list
+```
+
+Parameters: no command-specific parameters (global parameters still apply).
+
+### `schema:validate`
+Description: Validate `*.opti-type.json` and `*.opti-style.json` files against CMS schemas.
+
+Usage:
+```bash
+yarn opti-cms schema:validate
+```
+
+Parameters: no command-specific parameters (global parameters still apply).
+
+### `schema:vscode`
+Description: Configure VS Code schema mappings for Optimizely type/style JSON files.
+
+Usage:
+```bash
+yarn opti-cms schema:vscode
+```
+
+Parameters: no command-specific parameters (global parameters still apply).
+
+### `style:create`
+Description: Interactive wizard to create a new style definition.
+
+Usage:
+```bash
+yarn opti-cms style:create
+```
+
+Parameters: no command-specific parameters (global parameters still apply).
+
+### `styles:delete`
+Description: Delete display templates from CMS and optionally update/remove local files.
+
+Usage:
+```bash
+yarn opti-cms styles:delete [options]
+```
+
+| Parameter | Alias | Optional | Default | Usage |
+| --- | --- | --- | --- | --- |
+| `--excludeTypes` | `--ect` | Yes | `['folder','media','image','video']` | Exclude content type keys |
+| `--excludeBaseTypes` | `--ebt` | Yes | `[]` | Exclude content base types |
+| `--baseTypes` | `-b` | Yes | `[]` | Include only selected base types |
+| `--types` | `-t` | Yes | `[]` | Include only selected content type keys |
+| `--all` | `-a` | Yes | `false` | Include unsupported base types |
+| `--excludeNodeTypes` | `--ent` | Yes | `[]` | Exclude node types |
+| `--excludeTemplates` | `--et` | Yes | `['folder','media','image','video']` | Exclude style template keys |
+| `--nodes` | `-n` | Yes | `[]` | Include only selected node types |
+| `--templates` | `-d` | Yes | `[]` | Include only selected templates |
+| `--templateTypes` | `--tt` | Yes | `[]` | Include only selected template types (`node`,`base`,`component`) |
+| `--force` | `-f` | Yes | `false` | Execute deletion (otherwise preview) |
+| `--withStyleFile` | `-w` | Yes | `true` | Delete local `*.opti-style.json` files |
+| `--definitions` | `-u` | Yes | `true` | Update/remove generated TypeScript display template definitions |
+
+### `styles:list`
+Description: List display templates from CMS.
+
+Usage:
+```bash
+yarn opti-cms styles:list
+```
+
+Parameters: no command-specific parameters (global parameters still apply).
+
+### `styles:pull`
+Description: Pull display templates from CMS and generate style files/helpers.
+
+Usage:
+```bash
+yarn opti-cms styles:pull [options]
+```
+
+| Parameter | Alias | Optional | Default | Usage |
+| --- | --- | --- | --- | --- |
+| `--excludeTypes` | `--ect` | Yes | `['folder','media','image','video']` | Exclude content type keys |
+| `--excludeBaseTypes` | `--ebt` | Yes | `[]` | Exclude content base types |
+| `--baseTypes` | `-b` | Yes | `[]` | Include only selected base types |
+| `--types` | `-t` | Yes | `[]` | Include only selected content type keys |
+| `--all` | `-a` | Yes | `false` | Include unsupported base types |
+| `--excludeNodeTypes` | `--ent` | Yes | `[]` | Exclude node types |
+| `--excludeTemplates` | `--et` | Yes | `['folder','media','image','video']` | Exclude style template keys |
+| `--nodes` | `-n` | Yes | `[]` | Include only selected node types |
+| `--templates` | `-d` | Yes | `[]` | Include only selected templates |
+| `--templateTypes` | `--tt` | Yes | `[]` | Include only selected template types (`node`,`base`,`component`) |
+| `--force` | `-f` | Yes | `false` | Overwrite existing files |
+| `--definitions` | `-u` | Yes | `true` | Create/update generated TypeScript display template definitions |
+
+### `styles:push`
+Description: Push local style definitions into CMS.
+
+Usage:
+```bash
+yarn opti-cms styles:push [options]
+```
+
+| Parameter | Alias | Optional | Default | Usage |
+| --- | --- | --- | --- | --- |
+| `--excludeTemplates` | `-e` | Yes | `[]` | Exclude template keys from push |
+| `--templates` | `-t` | Yes | `[]` | Include only selected template keys |
+
+### `types:pull`
+Description: Pull content type definitions from CMS to local files.
+
+Usage:
+```bash
+yarn opti-cms types:pull [options]
+```
+
+| Parameter | Alias | Optional | Default | Usage |
+| --- | --- | --- | --- | --- |
+| `--excludeTypes` | `--ect` | Yes | `['folder','media','image','video']` | Exclude content type keys |
+| `--excludeBaseTypes` | `--ebt` | Yes | `[]` | Exclude content base types |
+| `--baseTypes` | `-b` | Yes | `[]` | Include only selected base types |
+| `--types` | `-t` | Yes | `[]` | Include only selected content type keys |
+| `--all` | `-a` | Yes | `false` | Include unsupported base types |
+| `--force` | `-f` | Yes | `false` | Overwrite existing files |
+
+### `types:push`
+Description: Push local content type definitions to CMS.
+
+Usage:
+```bash
+yarn opti-cms types:push [options]
+```
+
+| Parameter | Alias | Optional | Default | Usage |
+| --- | --- | --- | --- | --- |
+| `--force` | `-f` | Yes | `false` | Overwrite/replace while pushing |
+| `--excludeTypes` | `--ect` | Yes | `[]` | Exclude content type keys |
+| `--excludeBaseTypes` | `--ebt` | Yes | `['folder','media','image','video']` | Exclude content base types |
+| `--baseTypes` | `-b` | Yes | `[]` | Include only selected base types |
+| `--types` | `-t` | Yes | `[]` | Include only selected content type keys |
 
 ## 4. Detailed command descriptions
 ### 4.1. Generate React Component Factory

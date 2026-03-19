@@ -15,9 +15,7 @@
     ".": "./dist/client.js",
     "./api": "./dist/api.js",
     "./client": "./dist/client.js",
-    "./server": "./dist/server.js",
-    "./types": "./dist/types.js",
-    "./optimizely-one-gadget": "./dist/components/optimizely-one-gadget/index.js"
+    "./server": "./dist/server.js"
   },
   "typesVersions": {
     "*": {
@@ -29,12 +27,6 @@
       ],
       "server": [
         "dist/server.d.ts"
-      ],
-      "types": [
-        "dist/types.d.ts"
-      ],
-      "optimizely-one-gadget": [
-        "dist/components/optimizely-one-gadget/index.d.ts"
       ]
     }
   },
@@ -46,7 +38,7 @@
     "@types/react-dom": "19.2.3",
     "@types/uuid": "^11.0.0",
     "browserslist": "^4.28.1",
-    "next": "^16.1.6",
+    "next": "^16.1.7",
     "prop-types": "^15.8.1",
     "react": "^19.2.4",
     "react-dom": "^19.2.4",
