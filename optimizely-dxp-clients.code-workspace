@@ -43,7 +43,7 @@
 	],
 	"settings": {
 		"postman.settings.dotenv-detection-notification-visibility": false,
-    "typescript.tsdk": "Repository/.yarn/sdks/typescript/lib",
-    "typescript.enablePromptUseWorkspaceTsdk": true
+    "js/ts.tsdk.promptToUseWorkspaceVersion": true,
+    "js/ts.tsdk.path": "Repository/.yarn/sdks/typescript/lib"
 	}
 }

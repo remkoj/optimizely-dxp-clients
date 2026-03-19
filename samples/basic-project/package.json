@@ -48,5 +48,5 @@
     "@remkoj/optimizely-graph-cli": "portal:../../packages/optimizely-graph-cli",
     "@remkoj/optimizely-graph-functions": "portal:../../packages/optimizely-graph-functions"
   },
-  "packageManager": "yarn@4.12.0"
+  "packageManager": "yarn@4.9.2"
 }

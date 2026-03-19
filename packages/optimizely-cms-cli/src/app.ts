@@ -43,7 +43,7 @@ export function createOptiCmsApp(scriptName: string, version?: string, epilogue?
             if (error)
                 console.error(`[${ chalk.bold(error.name ?? 'Error') }]: ${ error.message ?? ''}\n`)
 
-            args.showHelp("error")
+            //args.showHelp("error")
         })
 }
 

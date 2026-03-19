@@ -14,10 +14,11 @@ function isErrorResponse(response: AuthResponse) : response is ErrorResponse
 export async function getAccessToken(config?: CmsIntegrationApiOptions) : Promise<string>
 {
     const options = config ?? getCmsIntegrationApiConfigFromEnvironment()
-    let authUrl = new URL(`${ OpenAPI.BASE }/oauth/token`, options.base).href
+    let authUrl = options.cmsVersion === OptiCmsVersion.CMS12 ? (() => {
+      let u = new URL(`${ OpenAPI.BASE }/oauth/token`, options.base).href;
+      return u.replace('preview2', 'preview1');
+    })() : new URL('/oauth/token', OpenAPI.BASE).href;
     const headers = new Headers()
-    if (options.cmsVersion == OptiCmsVersion.CMS12)
-        authUrl = authUrl.replace('preview2', 'preview1')
 
     headers.append('Authorization', `Basic ${ base64Encode(`${ options.clientId }:${ options.clientSecret }`)}`)
     headers.append('Content-Type','application/x-www-form-urlencoded')

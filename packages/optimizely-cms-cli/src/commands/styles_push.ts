@@ -59,11 +59,6 @@ export const StylesPushCommand: StylesPushModule = {
       return
     }
 
-    process.stdout.write(
-      chalk.yellowBright(
-        `${figures.arrowRight} Loading existing DisplayStyles from Optimizely CMS\n`
-      )
-    )
     const { styles: displayTemplates } = await getStyles(
       client,
       {
@@ -96,63 +91,81 @@ export const StylesPushCommand: StylesPushModule = {
       cwd: opts.components,
     })
 
+    type StyleFileData = { 
+      styleKey: string|null, 
+      styleDefinition: IntegrationApi.DisplayTemplate,
+      styleFile?: string|null
+    }
+
+    // Helper function to read the files from disk
+    function readStyleFile(styleDefinitionFile: string): Partial<StyleFileData> | undefined {
+      const filePath = path.normalize(path.join(opts.components, styleDefinitionFile))
+      const styleDefinition = tryReadJsonFile<IntegrationApi.DisplayTemplate>(filePath, debug)
+      return styleDefinition ? {
+        styleKey: styleDefinition.key,
+        styleDefinition,
+        styleFile: filePath
+      } as Partial<StyleFileData> : undefined
+    }
+
+    // Helper function to filter the files read from disk
+    function filterStyleDefinition(data?: Partial<StyleFileData> | null): data is StyleFileData {
+      if (!data || !data.styleKey) return false;
+      const { styleKey } = data;
+      if (excludeTemplates.includes(styleKey)) {
+        if (debug)
+          process.stdout.write(chalk.gray(`${figures.arrowRight} Skipping ${styleKey} - explicitly excluded\n`))
+        return false
+      }
+
+      // Skip if there a selectin and this template is not in it
+      if (templates.length > 0 && !templates.includes(styleKey)) {
+        if (debug)
+          process.stdout.write(chalk.gray(`${figures.arrowRight} Skipping ${styleKey} - not in selected list of templates\n`))
+        return false // Only include defined styles, if any
+      }
+      return true
+    }
+
     // Processing each file
     const results = await Promise.allSettled(
-      styleDefinitionFiles.map(async (styleDefinitionFile) => {
-        // Get context
-        const filePath = path.normalize(path.join(opts.components, styleDefinitionFile))
-        const styleDefinition = tryReadJsonFile<IntegrationApi.DisplayTemplate>(filePath, debug)
-        const styleKey = styleDefinition.key
-        if (!styleKey) {
-          process.stderr.write(
-            chalk.redBright(
-              `${chalk.bold(figures.cross)} The style definition in ${path.relative(opts.path, filePath)} does not have a key defined\n`
+      styleDefinitionFiles
+        .map(readStyleFile)
+        .filter(filterStyleDefinition)
+        .map(async ({ styleKey, styleDefinition, styleFile }) => {
+          const displayTemplate = displayTemplates.find(dt => dt.key === styleKey);
+
+          // Confirm we're including
+          process.stdout.write(
+            chalk.yellowBright(
+              `${figures.arrowRight} ${ displayTemplate ? 'Updating' : 'Creating'} ${styleKey}\n`
             )
           )
-          return undefined
-        }
-        const displayTemplate = displayTemplates.find(dt => dt.key === styleKey);
-
-        // Skip if it's explicitly excluded
-        if (excludeTemplates.includes(styleKey)) {
           if (debug)
-            process.stdout.write(chalk.gray(`${figures.arrowRight} Skipping ${styleKey} - explicitly excluded\n`))
-          return undefined
-        }
+            process.stdout.write(chalk.gray(`${figures.arrowRight} from ${ styleFile || 'unknown source'}\n`))
 
-        // Skip if there a selectin and this template is not in it
-        if (templates.length > 0 && !templates.includes(styleKey)) {
-          if (debug)
-            process.stdout.write(chalk.gray(`${figures.arrowRight} Skipping  ${styleKey} - not in selected list of templates\n`))
-          return undefined // Only include defined styles, if any
-        }
+          // Patch or create the template
+          const newTemplate = await (displayTemplate ? (async () => {
+            const patch = generatePatch(displayTemplate, styleDefinition, {
+              readonlyFields: ['key','created','createdBy','lastModified','lastModifiedBy'],
+            });
+            if (!path || Object.entries(patch).length === 0) return displayTemplate
+            
+            // @ts-expect-error: We're expecting an error here due to the CMS Logic not matching 
+            // the OpenAPI Specification.
+            return client.displayTemplates.displayTemplatesPatch(styleKey, patch);
+          })() : client.displayTemplates.displayTemplatesCreate(displayTemplate));
 
-        // Confirm we're including
-        if (debug)
-          process.stdout.write(chalk.gray(`${figures.arrowRight} Pushing: ${styleKey}\n`))
-
-        // Patch or create the template
-        const newTemplate = await (displayTemplate ? (async () => {
-          const patch = generatePatch(displayTemplate, styleDefinition, {
-            readonlyFields: ['key','created','createdBy','lastModified','lastModifiedBy'],
+          // Validate the result
+          const unpatchedFields = generatePatch(newTemplate, styleDefinition, {
+            readonlyFields: ['key','created','createdBy','lastModified','lastModifiedBy']
           });
-          if (!path || Object.entries(patch).length === 0) return displayTemplate
-          
-          // @ts-expect-error: We're expecting an error here due to the CMS Logic not  matching 
-          // the OpenAPI Specification.
-          return client.displayTemplates.displayTemplatesPatch(styleKey, patch);
-        })() : client.displayTemplates.displayTemplatesCreate(displayTemplate));
+          if (unpatchedFields && Object.entries(unpatchedFields).length > 0)
+            throw new Error(`Creating/patching of displayTemplate failed, the following fields failed: ${ getPatchFields(unpatchedFields).join('; ') }`)
 
-        // Validate the result
-        const unpatchedFields = generatePatch(newTemplate, styleDefinition, {
-          readonlyFields: ['key','created','createdBy','lastModified','lastModifiedBy']
-        });
-        if (unpatchedFields && Object.entries(unpatchedFields).length > 0)
-          throw new Error(`Creating/patching of displayTemplate failed, the following fields failed: ${ getPatchFields(unpatchedFields).join('; ') }`)
-
-        // Return the template after Create/Patch
-        return newTemplate
-      })
+          // Return the template after Create/Patch
+          return newTemplate
+        })
     )
 
     const styles = new Table({
@@ -167,7 +180,7 @@ export const StylesPushCommand: StylesPushModule = {
     })
     results.forEach((result) => {
       if (result.status === 'fulfilled') {
-        const tpl = result.value
+        const tpl = result.value;
         styles.push([
           tpl.displayName,
           tpl.key,
