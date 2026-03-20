@@ -39,10 +39,12 @@ export class DataPlatformService implements ClientApi.OptimizelyOneService<Clien
         const zaius = this.getBrowserApi()
         if (!zaius) return
         const event_name = event.event
-        const event_data : Record<string, any> = {}
-        for (const prop_name of (Object.getOwnPropertyNames(event) as (keyof ClientApi.OptimizelyOneEvent)[])) {
-            if (prop_name != 'event') event_data[prop_name] = event[prop_name] 
-        }
+        const event_data = Object.entries(event).reduce((data, [ prop_name, prop_value ]) => {
+          if (prop_name != 'event')
+            data[prop_name] = prop_value
+          return data
+        }, {} as Record<string,unknown>)
+        
         if (this.debug) console.log("🏬 Data platform - Tracking event:", event_name, event_data)
         zaius.event(event_name, event_data)
     }

@@ -1,14 +1,20 @@
+// This is a server only component
+import 'server-only';
+
+// Import global libararies and shared utilities
 import { PropsWithChildren } from "react";
-import { getEnabledProducts } from "../utils/products";
+import { getEnabledProducts } from "../utils/products.js";
+import { type OptiOneConfig, readConfigFromEnv } from "../config.js";
 
 // Import client-side components that need a server side data
 // to render correctly
-import { PageActivator } from "./page-activator";
-import { OptimizelyOneProvider } from "./context";
+import { PageActivator } from "../components/page-activator.js";
+import { OptimizelyOneProvider } from "../components/context.js";
 
 // Import server side component wrappers for components that are
 // server context aware.
-import { OptimizelyOneGadget } from './optimizely-one-gadget'
+import { OptimizelyOneGadget } from './optimizely-one-gadget.js'
+import FeatureExperimentationProvider from '../products/feature-experimentation/provider.js';
 
 /**
  * Properties for the `OptimizelyOne` root component.
@@ -41,6 +47,7 @@ import { OptimizelyOneGadget } from './optimizely-one-gadget'
  * ```
  */
 export type OptimizelyOneProps = PropsWithChildren<{
+  config?: Partial<OptiOneConfig>
   /**
    * Disable automatic page activation and tracking.
    *
@@ -231,19 +238,31 @@ export type OptimizelyOneProps = PropsWithChildren<{
  * ```
  */
 export function OptimizelyOne({
+  config: partialConfig,
   apiPath,
   disableAutoTracking = false,
   disableTracking = false,
   disableGadget = false,
-  debug = false,
+  debug: requestedDebug,
   children,
   gadgetRefreshInterval = 0
 }: OptimizelyOneProps) {
-  const enabledProducts = getEnabledProducts();
+  const config = partialConfig ? { ...readConfigFromEnv(), ...partialConfig } : readConfigFromEnv();
+  const enabledProducts = getEnabledProducts(config);
+  const fxSdkKey = config.FeatureExperimentationSdkKey;
+  const frontendCookie = config.FrontendCookie;
+  const debug = requestedDebug === undefined ? config.OptimizelyDebug ?? false : requestedDebug;
   return <>
     <OptimizelyOneProvider value={{ debug, disableAutotracking: disableAutoTracking, disableTracking }} enabledOptimizelyServices={ enabledProducts }>
-      {!disableAutoTracking && <PageActivator />}
-      {children}
+      {fxSdkKey ? 
+        <FeatureExperimentationProvider sdkKey={fxSdkKey} frontendCookie={frontendCookie} debug={debug}>
+          {!disableAutoTracking && <PageActivator />}
+          {children}
+        </FeatureExperimentationProvider> : 
+        <>
+          {!disableAutoTracking && <PageActivator />}
+          {children}
+        </>}
       <OptimizelyOneGadget show={ disableGadget ? false : undefined } servicePrefix={ apiPath } refreshInterval={ gadgetRefreshInterval } />
     </OptimizelyOneProvider>
   </>

@@ -2,7 +2,7 @@
 import { type FunctionComponent, type JSX } from 'react'
 import { TrophyIcon } from '@heroicons/react/20/solid'
 import useSWR from 'swr'
-import { type GoalsReponse as ApiResponse } from '../../api/content-goals'
+import { type GoalsReponse as ApiResponse } from '../../products/content-recs/webservice-goals'
 import Notice from './_notice'
 
 export type GoalsPanelProps = {

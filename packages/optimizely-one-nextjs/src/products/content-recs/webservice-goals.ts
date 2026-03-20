@@ -1,7 +1,7 @@
-import type { ApiService } from './types'
-import { ContentRecs } from '../products'
-import getConfig, { checkProductStatus } from '../config'
-import * as Responses from './responses'
+import type { ApiService } from '../../api/types'
+import * as ContentRecs from './'
+import getConfig, { checkProductStatus } from '../../config'
+import * as Responses from '../../api/responses'
 
 export type GoalsReponse = {
   goals: Array<{

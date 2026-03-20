@@ -1,5 +1,5 @@
-import type { ApiService } from './types'
-import getConfig from '../config'
+import type { ApiService } from '../../api/types.js'
+import getConfig from '../../config.js'
 
 export const ExperimentationApiService : ApiService<any> = {
     for: { path: '/exp', verb: 'get' },

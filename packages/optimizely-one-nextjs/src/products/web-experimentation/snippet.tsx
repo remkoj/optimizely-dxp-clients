@@ -13,7 +13,7 @@ export const OptimizelyWebExperimentationScript = ({ projectId, allowProjectOver
     function buildUrl(pid: string|number)
     {
         return useProxy ?
-            `${ apiPrefix }/exp?pid=${ pid }` :
+            `${ apiPrefix }/exp${ allowProjectOverride ? '?pid=' + pid : '' }` :
             `https://cdn.optimizely.com/js/${ pid }.js`
     }
 

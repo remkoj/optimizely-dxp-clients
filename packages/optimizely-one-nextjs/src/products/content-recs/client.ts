@@ -42,6 +42,17 @@ export class ContentRecsService implements ClientApi.OptimizelyOneService<Client
         idio.push(['track', 'consume'])
     }
 
+    public trackEvent(event: ClientApi.OptimizelyOneEvent)
+    {
+      const idio = this.getBrowserApi();
+      if (!idio) return; // We're disabled so, stop here
+      const goalName = [event.event, event.action].filter(x=>x).join('-');
+      if (!goalName || goalName.length == 0) return; // Only track if we've a goal
+      if (this.debug) console.log("Content Recommendations / Analytics - Tracking goal: " + goalName)
+      idio.push(['goal', goalName]);
+      idio.push(['track', 'convert']);
+    }
+
     public getBrowserApi()
     {
         try {

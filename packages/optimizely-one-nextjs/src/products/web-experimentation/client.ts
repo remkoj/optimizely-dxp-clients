@@ -33,10 +33,12 @@ export class WebExperimenationService implements ClientApi.OptimizelyOneService<
         const webex = this.getBrowserApi()
         if (!webex) return
         const eventName = `${event.event}_${event.action}`
-        const eventTags : Record<string, any> = {}
-        for (const prop_name of (Object.getOwnPropertyNames(event) as (keyof ClientApi.OptimizelyOneEvent)[])) {
-            if (prop_name != 'event' && prop_name != 'action') eventTags[prop_name] = event[prop_name] 
-        }
+        const eventTags = Object.entries(event).reduce((tags, [prop_name, prop_value]) => {
+          if (prop_name.startsWith('tag_')) {
+            tags[prop_name.substring(4)] = prop_value
+          }
+          return tags;
+        }, {} as Record<string, unknown>)
         if (this.debug) console.log("🚀 Web Experimentation - Tracking event:", { type: 'event', eventName, tags: eventTags })
         webex.push({ type: 'event', eventName, tags: eventTags })
     }

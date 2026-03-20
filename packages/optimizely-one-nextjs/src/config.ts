@@ -61,7 +61,10 @@ export function readConfigFromEnv() {
     ContentRecsHost: readValue(EnvVars.ContentRecsHost, "idio.co"),
     FrontendCookie: readValue(EnvVars.FrontendCookie, "visitorId"),
     WebExperimentationProject: readValue(EnvVars.WebExperimentationProject),
-    OptimizelyDebug: readValueAsBoolean(EnvVars.OptimizelyDebug, false)
+    OptimizelyDebug: readValueAsBoolean(EnvVars.OptimizelyDebug, false),
+    FeatureExperimentationProject: readValue(EnvVars.FeatureExperimentationProject),
+    FeatureExperimentationSdkKey: readValue(EnvVars.FeatureExperimentationSdkKey),
+    FeatureExperimentationToken: readValue(EnvVars.FeatureExperimentationPat)
   }
 }
 
@@ -117,14 +120,16 @@ export function checkProductStatus(config?: Partial<OptiOneConfig>): {
   dataPlatform: boolean,
   contentRecsClient: boolean,
   contentRecsApi: boolean,
-  webExperimentation: boolean
+  webExperimentation: boolean,
+  featureExperimentation: boolean
 } {
   const appConfig: Partial<OptiOneConfig> = config ?? readConfigFromEnv()
   return {
     dataPlatform: typeof (appConfig.OdpApiKey) == 'string' && appConfig.OdpApiKey.length > 8,
     contentRecsClient: appConfig.ContentRecsClient && appConfig.ContentRecsDelivery ? true : false,
     contentRecsApi: appConfig.ContentRecsClient && appConfig.ContentRecsDeliveryKey ? true : false,
-    webExperimentation: typeof (appConfig.WebExperimentationProject) == 'string' && appConfig.WebExperimentationProject.length > 5
+    webExperimentation: typeof (appConfig.WebExperimentationProject) == 'string' && appConfig.WebExperimentationProject.length > 5,
+    featureExperimentation: typeof (appConfig.FeatureExperimentationSdkKey) == 'string' && appConfig.FeatureExperimentationSdkKey.length > 5
   }
 }
 

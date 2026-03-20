@@ -2,11 +2,15 @@ import 'server-only'
 import { type NextRequest, NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
 import type { ApiService } from './types'
+
+// General services
 import ProfileApiService from './profile-api-service'
 import GraphInfoApiService from './graph-info-service'
-import ExperimentationApiService from './experimentation-api'
-import ContentRecsApiService from './content-recs'
-import ContentRecsGoalsService from './content-goals'
+
+// Product specific services
+import ExperimentationApiService from '../products/web-experimentation/webservice'
+import ContentRecsApiService from '../products/content-recs/webservice'
+import ContentRecsGoalsService from '../products/content-recs/webservice-goals'
 
 type RequestContext = { params: Promise<Record<string, string | string[]>> }
 type OptimizelyOneApi = (req: NextRequest, ctx: RequestContext) => Promise<NextResponse>

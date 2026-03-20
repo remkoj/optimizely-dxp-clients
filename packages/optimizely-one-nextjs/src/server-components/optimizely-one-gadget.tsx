@@ -1,10 +1,10 @@
-import type { OptimizelyOneGadgetProps } from './_types'
-import getConfig, { checkProductStatus } from '../../config'
+import type { OptimizelyOneGadgetProps } from '../components/optimizely-one-gadget/_types.js'
+import getConfig, { checkProductStatus } from '../config.js'
 import dynamic from 'next/dynamic'
 
 import 'server-only'
 
-const OptimizelyOneClientGadget = dynamic(() => import('./gadget'), { ssr: false, loading: () => null })
+const OptimizelyOneClientGadget = dynamic(() => import('../components/optimizely-one-gadget/gadget.js'), { ssr: false, loading: () => null })
 
 export const OptimizelyOneGadget = ({
   refreshInterval = 0,

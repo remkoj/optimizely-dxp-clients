@@ -1,8 +1,8 @@
-import type { ApiService } from './types'
+import type { ApiService } from '../../api/types.js'
 
-import { ContentRecs } from '../products'
-import { readConfigFromEnv } from '../config'
-import * as Responses from './responses'
+import { ContentRecs } from '../index.js'
+import { readConfigFromEnv } from '../../config.js'
+import * as Responses from '../../api/responses.js'
 
 export const ContentRecsApiService: ApiService<any> = {
   for: { path: '/crecs', verb: 'get' },

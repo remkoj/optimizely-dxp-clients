@@ -9,6 +9,9 @@ export const enum EnvVars {
   ContentRecsHost = 'OPTIMIZELY_CONTENTRECS_DOMAIN',
   FrontendCookie = 'OPTIMIZELY_FRONTEND_COOKIE',
   WebExperimentationProject = 'OPTIMIZELY_WEB_EXPERIMENTATION_PROJECT',
+  FeatureExperimentationSdkKey = 'OPTIMIZELY_FX_SDKKEY',
+  FeatureExperimentationProject = 'OPTIMIZELY_FX_PROJECT',
+  FeatureExperimentationPat = 'OPTIMIZELY_FX_PAT',
   OptimizelyDebug = 'OPTIMIZELY_DEBUG'
 }
 
