@@ -4,7 +4,7 @@
   "repository": "https://github.com/remkoj/optimizely-dxp-clients.git",
   "author": "Remko Jantzen <693172+remkoj@users.noreply.github.com>",
   "homepage": "https://github.com/remkoj/optimizely-dxp-clients",
-  "version": "6.0.0-pre16",
+  "version": "6.0.0-rc.1",
   "license": "Apache-2.0",
   "type": "module",
   "main": "bin/index.js",
@@ -17,11 +17,12 @@
   },
   "scripts": {
     "watch": "yarn rollup --config rollup.config.js --watch",
-    "prepare": "yarn rollup --config rollup.config.js",
+    "update-cfg": "node ./script/update-cfg.js",
+    "prepare": "node ./script/update-cfg.js && yarn rollup --config rollup.config.js",
     "opti-graph": "yarn node bin/index.js"
   },
   "devDependencies": {
-    "@remkoj/optimizely-graph-client": "workspace:6.0.0-pre16",
+    "@remkoj/optimizely-graph-client": "workspace:6.0.0-rc.1",
     "@rollup/plugin-commonjs": "^29.0.2",
     "@rollup/plugin-json": "^6.1.0",
     "@rollup/plugin-typescript": "^12.3.0",
@@ -36,7 +37,7 @@
     "typescript": "^5.9.3"
   },
   "dependencies": {
-    "@remkoj/optimizely-graph-client": "6.0.0-pre16",
+    "@remkoj/optimizely-graph-client": "6.0.0-rc.1",
     "chalk": "^5.6.2",
     "cli-table3": "^0.6.5",
     "compare-versions": "^6.1.1",

@@ -26,8 +26,8 @@
       "allowSyntheticDefaultImports": true, // Needed for CommonJS Module Interop
       "importHelpers": true,
       "removeComments": true,
-      //"resolveJsonModule": true,
-      //"resolvePackageJsonImports": true,
+      "resolveJsonModule": true,
+      "resolvePackageJsonImports": true,
       //"resolvePackageJsonExports": true
     },
     

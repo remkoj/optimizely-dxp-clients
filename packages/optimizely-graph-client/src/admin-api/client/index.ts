@@ -58,7 +58,6 @@ export type { Webhook } from './models/Webhook.js';
 export type { WebhookPayload } from './models/WebhookPayload.js';
 
 export { BestBetsService } from './services/BestBetsService.js';
-export { DefaultService } from './services/DefaultService.js';
 export { DefinitionV2Service } from './services/DefinitionV2Service.js';
 export { DefinitionV3Service } from './services/DefinitionV3Service.js';
 export { LogsService } from './services/LogsService.js';

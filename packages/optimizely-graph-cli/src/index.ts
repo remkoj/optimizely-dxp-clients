@@ -1,18 +1,13 @@
 import initEnvironment from './context/env.js'
 import createCliApp from './app.js'
 import commands from './commands/index.js'
-
-// Define the package constants
-const enum APP {
-  Script = "opti-graph",
-  Version = "1.0.3"
-}
+import AppInfo from './version.json'
 
 // Make sure the environment variables are correctly processed
 initEnvironment()
 
 // Create the application
-const app = createCliApp(APP.Script, APP.Version)
+const app = createCliApp(AppInfo.name, AppInfo.version)
 app.command(commands)
 
 // Parse the command line
