@@ -4,15 +4,15 @@
  * @deprecated Only retained here for compatibility
  */
 export enum ContentBaseType {
-    PAGE = 'page',
-    COMPONENT = 'component',
-    MEDIA = 'media',
-    IMAGE = 'image',
-    VIDEO = 'video',
-    FOLDER = 'folder',
-    EXPERIENCE = 'experience',
-    SECTION = 'section',
-    ELEMENT = 'element',
+    PAGE = '_page',
+    COMPONENT = '_component',
+    MEDIA = '_media',
+    IMAGE = '_image',
+    VIDEO = '_video',
+    FOLDER = '_folder',
+    EXPERIENCE = '_experience',
+    SECTION = '_section',
+    ELEMENT = '_element',
 }
 
 /**
