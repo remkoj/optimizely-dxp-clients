@@ -3,7 +3,7 @@
 import * as ClientApi from '../../client-types'
 import * as GlobalClientTypes from '../../components/types'
 
-export class DataPlatformService implements ClientApi.OptimizelyOneService<ClientApi.OptimizelyDataPlatformApi>
+export class DataPlatformService implements ClientApi.OptimizelyOneService<ClientApi.OptimizelyDataPlatformApi, 'odp'>
 {
     private _odpEnabled : boolean = true
     constructor(enabledServices?: Array<GlobalClientTypes.SupportedProductNames>) {
@@ -12,7 +12,7 @@ export class DataPlatformService implements ClientApi.OptimizelyOneService<Clien
     }
 
     public order : Readonly<number> = 200
-    public code : Readonly<string> = "odp"
+    public code : Readonly<'odp'> = 'odp'
     public debug: boolean = false
     public get isActive() : boolean {
         return this._odpEnabled
@@ -59,29 +59,22 @@ export class DataPlatformService implements ClientApi.OptimizelyOneService<Clien
         }
     }
 
-    private _hasTrackedVisitorId: boolean = false;
-
     /**
      * Discover the visitorId cookie and make it available to the systems as identifier
      * 
      * @returns The partial profile data
      */
-    public discoverProfileData() : Promise<ClientApi.OptimizelyOneProfileData>
+    public discoverProfileData() : Promise<Partial<ClientApi.OptimizelyOneProfileData>>
     {
         return new Promise((resolve) => {
             try {
-                if (!this._hasTrackedVisitorId) {
                   const cookies = document.cookie.split(';').map(x=>x.trim().split('=',2)).reduce((obj,cData) => { obj[cData[0]] = cData[1]; return obj; }, {} as Record<string,string>)
                   const visitorId = cookies['visitorId']
-                  if (visitorId) {
-                    this._hasTrackedVisitorId = true
-                    return resolve({ feature_experimentation_id: visitorId, custom: {} })
-                  }
-                }
+                  if (visitorId) return resolve({ feature_experimentation_id: visitorId })
             } catch {
                 //Ignore errors on purpose
             }
-            return resolve({ custom: {} })
+            return resolve({})
         })
     }
 
@@ -89,13 +82,26 @@ export class DataPlatformService implements ClientApi.OptimizelyOneService<Clien
     {
         const zaius = this.getBrowserApi()
         if (!zaius) return
-        const ids : Record<string,string> = {}
+
+        // Build IDs
+        const ids : Record<string,string> = { ...profileData.ids }
         if (profileData.content_intelligence_id)
             ids.content_intelligence_id = profileData.content_intelligence_id
         if (profileData.feature_experimentation_id)
             ids.fs_user_id = profileData.feature_experimentation_id
-        if (this.debug) console.log("🏬 Data platform - Updating profile (ids, attributes):", ids, profileData.custom)
-        zaius.customer(ids, profileData.custom)
+
+        // Build fields
+        const fields = Object.entries({
+          ...ids,
+          ...profileData.custom,
+          ...profileData.customPII
+        } as Record<string,unknown>).reduce((acc, [key, value]) => {
+          if (value)
+            acc[key]=value
+          return acc;
+        }, {} as Record<string,unknown>)
+        if (this.debug) console.log("🏬 Data platform - Updating profile (ids, attributes):", ids, fields)
+        zaius.customer(ids, fields)
     }
 
     private lastTrackedContentIntelligenceId : string | undefined = undefined

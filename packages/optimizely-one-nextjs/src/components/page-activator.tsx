@@ -7,10 +7,6 @@ import {
 } from 'react'
 import { usePathname } from 'next/navigation'
 import { useOptimizelyOne } from './context'
-import { type OptimizelyOneProfileData } from '@/client-types'
-import createDeepMerge from '@fastify/deepmerge'
-
-const deepmerge = createDeepMerge()
 
 export type PageActivatorProps = PropsWithChildren<{}>
 
@@ -36,52 +32,19 @@ export const PageActivator: FunctionComponent<PageActivatorProps> = (props) => {
   useEffect(() => {
     if (opti.disableAutotracking) {
       if (opti.debug)
-        console.log('🔐 [Optimizely One] Automatic page tracking disabled')
+        console.log('🔐 [Optimizely One] Automatic page tracking and profile data updates disabled')
       return
     }
 
     if (opti.debug)
       console.groupCollapsed(
-        `📢 [Optimizely One] Tracking page view for: ${path}`
+        `📢 [Optimizely One] Path update detected, tracking page view and updating profile data for: ${path}`
       )
-    opti.getTrackPageServices().forEach((service) => service.trackPage(path))
-    if (opti.debug) console.groupEnd()
-  }, [path, opti])
-
-  // Profile data effect
-  useEffect(() => {
-    if (opti.debug)
-      console.log(`📢 [Optimizely One] Refreshing profile data for: ${path}`)
     const abort = new AbortController()
-    Promise.allSettled(
-      opti
-        .getProfileDataSources()
-        .map((pds) => pds.discoverProfileData(abort.signal))
-    ).then((results) => {
-      const mergedProfileData = results.reduce(
-        (merged, current) =>
-          current.status == 'fulfilled'
-            ? deepmerge(merged, current.value)
-            : merged,
-        { custom: {} } as OptimizelyOneProfileData
-      )
-      const hasIds = Object.getOwnPropertyNames(mergedProfileData).some(x => x!="custom")
-      if (
-        hasIds ||
-        Object.getOwnPropertyNames(mergedProfileData.custom).length > 0
-      ) {
-        if (opti.debug)
-          console.log(
-            `📢 [Optimizely One] Discovered profile data: ${JSON.stringify(mergedProfileData)}`
-          )
-        opti
-          .getProfileServices()
-          .forEach((service) => service.updateProfile(mergedProfileData))
-      }
-    })
-    return () => {
-      abort.abort(`[Optimizely One] Profile data refresh cancelled`)
-    }
+    opti.getTrackPageServices().forEach((service) => service.trackPage(path));
+    opti.discoverProfileData(abort.signal);
+    if (opti.debug) console.groupEnd();
+    return () => abort.abort(`[Optimizely One] Page tracking cancelled for: ${path}`);
   }, [path, opti])
 
   return <>{props.children}</>

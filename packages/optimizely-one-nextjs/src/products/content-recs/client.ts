@@ -3,7 +3,7 @@
 import * as ClientApi from '../../client-types'
 import * as GlobalClientTypes from '../../components/types'
 
-export class ContentRecsService implements ClientApi.OptimizelyOneService<ClientApi.OptimizelyContentRecsApi>
+export class ContentRecsService implements ClientApi.OptimizelyOneService<ClientApi.OptimizelyContentRecsApi, 'crecs'>
 {
     private _apiEnabled : boolean = true
     private _clientEnabled : boolean = true
@@ -26,7 +26,7 @@ export class ContentRecsService implements ClientApi.OptimizelyOneService<Client
     }
 
     public order : Readonly<number> = 300
-    public code : Readonly<string> = "crecs"
+    public code : Readonly<'crecs'> = 'crecs'
     public debug : boolean = false
     public endpoint : string = "/api/me/cgoals"
     public get isActive() : boolean {
@@ -65,18 +65,17 @@ export class ContentRecsService implements ClientApi.OptimizelyOneService<Client
         }
     }
 
-    public async discoverProfileData(signal?: AbortSignal | null) : Promise<ClientApi.OptimizelyOneProfileData>
-    {
-        if (!this._apiEnabled)
-            return { custom: {} }
-        const nbg = await fetch(this.endpoint, { cache: 'no-store', signal }).then(r => r.ok ? r.json() as Promise<{ goals: Array<{ goal: string, score: number }>}> : undefined)
-        return {
-            custom: {
-                "next_best_goal": (nbg?.goals || []).at(0)?.goal || '',
-                "next_best_goals": (nbg?.goals || []).map(x => x.goal).join(", ")
-            }
-        }
+  public async discoverProfileData(signal?: AbortSignal | null) : Promise<Partial<ClientApi.OptimizelyOneProfileData>>
+  {
+    if (!this._apiEnabled) return {}
+    const nbg = await fetch(this.endpoint, { cache: 'no-store', signal }).then(r => r.ok ? r.json() as Promise<{ goals: Array<{ goal: string, score: number }>}> : undefined)
+    return {
+      custom: {
+        "next_best_goal": (nbg?.goals || []).at(0)?.goal || '',
+        "next_best_goals": (nbg?.goals || []).map(x => x.goal).join(", ")
+      }
     }
+  }
 }
 
 export default ContentRecsService

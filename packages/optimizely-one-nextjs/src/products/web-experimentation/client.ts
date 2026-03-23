@@ -3,7 +3,7 @@
 import * as ClientApi from '../../client-types'
 import * as GlobalClientTypes from '../../components/types'
 
-export class WebExperimenationService implements ClientApi.OptimizelyOneService<ClientApi.OptimizelyWebExperimentationApi>
+export class WebExperimenationService implements ClientApi.OptimizelyOneService<ClientApi.OptimizelyWebExperimentationApi, 'webex'>
 {
     private _wxEnabled : boolean = true
     constructor(enabledServices?: Array<GlobalClientTypes.SupportedProductNames>) {
@@ -12,7 +12,7 @@ export class WebExperimenationService implements ClientApi.OptimizelyOneService<
     }
 
     public order : Readonly<number> = 100
-    public code : Readonly<string> = "webex"
+    public code : Readonly<'webex'> = 'webex'
     public debug: boolean = false
     public get isActive() : boolean {
         return this._wxEnabled

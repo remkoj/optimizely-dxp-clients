@@ -7,11 +7,35 @@ declare global
     }
 }
 
-export interface OptimizelyOneService<T = any>
+/**
+ * Contract implemented by Optimizely One client services.
+ *
+ * A service can expose one or more optional capabilities (activation, tracking,
+ * profile updates/discovery) and provides access to an underlying browser API.
+ *
+ * @typeParam T The concrete browser API client type exposed by the service.
+ * @typeParam SC The service code type used to identify the service.
+ */
+export interface OptimizelyOneService<T = any, SC = string>
 {
+    /**
+     * Sort order for service execution. Lower values run first.
+     */
     order: Readonly<number>
+
+    /**
+     * Indicates whether the service is currently active.
+     */
     isActive: Readonly<boolean>
-    code: Readonly<string>
+
+    /**
+     * Stable service identifier used to locate a service by code.
+     */
+    code: Readonly<SC>
+
+    /**
+     * Enables or disables debug logging for this service instance.
+     */
     debug: boolean
 
     /**
@@ -33,16 +57,39 @@ export interface OptimizelyOneService<T = any>
      */
     trackPage?: (path: string) => void
 
+    /**
+     * Tracks a custom event through this service.
+     *
+     * @param event The event payload.
+     * @returns void
+     */
     trackEvent?: (event: OptimizelyOneEvent) => void
 
+    /**
+     * Updates profile data known to this service.
+     *
+     * @param profileData Complete new profile
+     * @returns void
+     */
     updateProfile?: (profileData: OptimizelyOneProfileData) => void
 
-    discoverProfileData?: (signal?: AbortSignal | null) => Promise<OptimizelyOneProfileData>
+    /**
+     * Discovers profile data from this service.
+     *
+     * @param signal Optional abort signal used to cancel discovery.
+     * @returns A partial profile payload discovered by this service.
+     */
+    discoverProfileData?: (signal?: AbortSignal | null) => Promise<Partial<OptimizelyOneProfileData>>
 
+    /**
+     * Retrieves the underlying browser API client for this service.
+     *
+     * @returns The browser API instance, or `undefined` when unavailable.
+     */
     getBrowserApi: () => T | undefined
 }
 
-
+export type OptimizelyOneServiceWithCapability<T = any, SC extends string = string, K extends keyof OptimizelyOneService = keyof OptimizelyOneService> = Omit<OptimizelyOneService<T,SC>,K | 'active'> & Required<Pick<OptimizelyOneService<T,SC>,K> & { active: true }>
 
 export type OptimizelyOneEvent = NavigationSearchEvent | {
     event: string
@@ -57,9 +104,37 @@ type NavigationSearchEvent = {
 }
 
 export type OptimizelyOneProfileData = {
-    feature_experimentation_id?: string,
-    content_intelligence_id?: string,
-    custom: Record<string, string | number | boolean>
+  /**
+   * The Pseudo ID used by Optimizely Feature experimentation
+   */
+  feature_experimentation_id?: string,
+  /**
+   * The Pseudo ID used by Optimizely Content Recommendations 
+   * and intelligence
+   */
+  content_intelligence_id?: string,
+  /**
+   * Any other ID tracked within the profile, these IDs are
+   * considered PII and thus should not be sent to systems
+   * that may not process PII.
+   */
+  ids: Record<string, string>,
+  /**
+   * Any custom field to be tracked within the profile, the
+   * values here may not be PII.
+   */
+  custom: Record<string, string | number | boolean>
+  /**
+   * Any custom field to be tracked within the profile, the
+   * values here may or may not be PII
+   */
+  customPII: Record<string, string | number | boolean>
+}
+
+export const DefaultProfileData : OptimizelyOneProfileData = {
+  custom: {},
+  customPII: {},
+  ids: {}
 }
 
 export type OptimizelyDataPlatformApi = {
