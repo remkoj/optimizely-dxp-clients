@@ -38,6 +38,10 @@ function getEnumOptions<T extends object>(enumObject: T): Array<keyof T> {
   });
 }
 
+function getEnumValues<T extends object>(enumObject: T): Array<T[keyof T]> {
+  return Object.values(enumObject)
+}
+
 export async function getContentTypes(client: CmsApiClient, args: ArgumentsCamelCase<OptiCmsArgs<ContentTypesArgs>>, pageSize: number = 100, allowSystem: boolean = false): Promise<GetContentTypesResult> {
   const { _config: cfg, excludeBaseTypes, excludeTypes, baseTypes, types, all } = parseArgs(args)
 
@@ -62,8 +66,7 @@ export async function getContentTypes(client: CmsApiClient, args: ArgumentsCamel
     process.stdout.write(chalk.gray(`${figures.arrowRight} Filtering Content-Types based upon arguments\n`))
   }
 
-  const validBaseTypes = getEnumOptions(ContentBaseType).map(x => x.toLowerCase());
-
+  const validBaseTypes = getEnumValues(ContentBaseType);
   if (cfg.debug)
     process.stdout.write(`Allowing base types: ${ validBaseTypes.join(', ')}\n`);
   const allContentTypes = all ?
@@ -76,7 +79,7 @@ export async function getContentTypes(client: CmsApiClient, args: ArgumentsCamel
     }) :
     // Otherwise filter out any non supported content base type and types that include a ':'
     results.filter(contentType => {
-      const baseType = (contentType.baseType ?? 'default').toLowerCase()
+      const baseType = (contentType.baseType ?? 'default').toLowerCase() as ContentBaseType
       const isValid = validBaseTypes.includes(baseType) && !contentType.key.includes(':')
       if (!isValid && cfg.debug)
         process.stdout.write(chalk.gray(`${figures.arrowRight} Removing ${contentType.key} as it has an unsupported base type: ${baseType}\n`))

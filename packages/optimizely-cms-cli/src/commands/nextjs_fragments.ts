@@ -6,6 +6,7 @@ import figures from 'figures'
 
 import { parseArgs } from '../tools/parseArgs.js'
 import { createCmsClient } from '../tools/cmsClient.js'
+import { trimLeadingUnderscore } from '../tools/string.js'
 import { getContentTypes, type GetContentTypesResult } from '../tools/contentTypes.js'
 import { type NextJsModule, builder, createTypeFolders, getTypeFolder, getGeneratedProps, writeGeneratedProps, type TypeFolderList, type GeneratedPropsArray } from './_nextjs_base.js'
 
@@ -48,7 +49,7 @@ export const NextJsFragmentsCommand: NextJsModule<{ loadedContentTypes: GetConte
 
 export function createGraphFragments(contentType: IntegrationApi.ContentType, typePath: string, basePath: string, force: boolean, debug: boolean, contentTypes: IntegrationApi.ContentType[], generatedProps: GeneratedPropsArray = [], forCms12: boolean = false): Array<string> | undefined {
   const returnValue: Array<string> = []
-  const baseType = contentType.baseType ?? 'default'
+  const baseType = trimLeadingUnderscore(contentType.baseType ?? 'default')
   const baseQueryFile = path.join(typePath, `${contentType.key.split(':').pop()}.${baseType}.graphql`)
   //console.log('Mapping', contentType.key, baseQueryFile);
   if (fs.existsSync(baseQueryFile)) {
@@ -78,7 +79,7 @@ export function createGraphFragments(contentType: IntegrationApi.ContentType, ty
         return
       }
       const fullTypeName = forCms12 ? contentType.key + propContentType.key : propContentType.key
-      const propertyFragmentFile = path.join(basePath, propContentType.baseType, propContentType.key.split(':').pop(), `${fullTypeName.split(':').pop()}.property.graphql`)
+      const propertyFragmentFile = path.join(basePath, trimLeadingUnderscore(propContentType.baseType), propContentType.key.split(':').pop(), `${fullTypeName.split(':').pop()}.property.graphql`)
       const propertyFragmentDir = path.dirname(propertyFragmentFile)
 
       if (!fs.existsSync(propertyFragmentDir))
@@ -132,7 +133,7 @@ export function renderProperties(contentType: IntegrationApi.ContentType, genera
     const propName = isConflict ? `${contentType.key}${propKey}: ${propKey}` : propKey
 
     // Write the property
-    switch (propType as unknown as PropertyDataType) {
+    switch (propType as unknown as PropertyDataType | string) {
       case PropertyDataType.ARRAY:
         {
           const typeData = typeProps[propKey]
@@ -177,6 +178,10 @@ export function renderProperties(contentType: IntegrationApi.ContentType, genera
           }
           break;
         }
+      case 'richText': {
+        fragmentFields.push(forCms12 ? `${propName} { Structure, Html }` : `${propName} { json, html }`)
+        break;
+      }
       case PropertyDataType.STRING: {
         const propDetails = typeProps[propKey]
         switch (propDetails.format ?? "") {
@@ -201,6 +206,10 @@ export function renderProperties(contentType: IntegrationApi.ContentType, genera
       case PropertyDataType.CONTENT_REFERENCE:
         fragmentFields.push(`${propName} { ...ReferenceData }`)
         break;
+      case "link": {
+        fragmentFields.push(`${propName} { ...LinkItemData }`)
+        break;
+      }
       case PropertyDataType.COMPONENT: {
         const componentType = typeProps[propKey].contentType.split(':').pop()
         if (componentType == "link") {

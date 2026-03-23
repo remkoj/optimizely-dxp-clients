@@ -5,6 +5,7 @@ import figures from 'figures'
 import { type ContentTypesArgs, contentTypesBuilder } from '../tools/contentTypes.js'
 import fs from 'node:fs'
 import path from 'node:path'
+import { trimLeadingUnderscore } from '../tools/string.js'
 
 export type NextJsCommandArgs = ContentTypesArgs & { 
   force: boolean
@@ -30,7 +31,7 @@ export function createTypeFolders(contentTypes: Array<IntegrationApi.ContentType
 {    
   const folders = contentTypes.map(contentType => {
 
-    const baseType = contentType.baseType ?? 'default'
+    const baseType = trimLeadingUnderscore(contentType?.baseType ?? 'default')
 
     // Create the type folder
     const typePath = path.join(basePath, baseType, contentType.key.split(':').pop())

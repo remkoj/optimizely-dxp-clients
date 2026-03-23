@@ -6,6 +6,7 @@ import figures from 'figures'
 import { parseArgs } from '../tools/parseArgs.js'
 import { createCmsClient } from '../tools/cmsClient.js'
 import { getStyles } from '../tools/styles.js'
+import { trimLeadingUnderscore } from '../tools/string.js'
 import { type NextJsModule, builder } from './_nextjs_base.js'
 import createStyles from './styles_pull.js'
 
@@ -32,7 +33,7 @@ export const NextJsVisualBuilderCommand: NextJsModule = {
 
     // Process base styles
     styles.filter(x => typeof (x.baseType) == 'string' && x.baseType.length > 0).map(styleDefinition => {
-      const templatePath = path.join(basePath, styleDefinition.baseType, 'styles', styleDefinition.key)
+      const templatePath = path.join(basePath, trimLeadingUnderscore(styleDefinition.baseType), 'styles', styleDefinition.key)
       createSpecificNode(styleDefinition, templatePath, force, debug)
     })
 

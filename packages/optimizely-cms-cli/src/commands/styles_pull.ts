@@ -7,6 +7,7 @@ import fs from 'node:fs'
 import path from 'node:path'
 import fsAsync from 'node:fs/promises'
 
+import { trimLeadingUnderscore } from '../tools/string.js'
 import { createCmsClient } from '../tools/cmsClient.js'
 import { StylesArgs, stylesBuilder, getStyles } from '../tools/styles.js'
 
@@ -146,14 +147,14 @@ export async function createTemplateMetadata(client: ApiClientInstance, displayT
       targetType = targetPrefix + '/' + displayTemplate.nodeType;
       break;
     case 'base':
-      itemPath = path.join(basePath, displayTemplate.baseType, 'styles', displayTemplate.key);
-      typesPath = path.join(basePath, displayTemplate.baseType, 'styles');
-      targetType = targetPrefix + '/' + displayTemplate.baseType;
+      itemPath = path.join(basePath, trimLeadingUnderscore(displayTemplate.baseType), 'styles', displayTemplate.key);
+      typesPath = path.join(basePath, trimLeadingUnderscore(displayTemplate.baseType), 'styles');
+      targetType = targetPrefix + '/' + trimLeadingUnderscore(displayTemplate.baseType);
       break;
     case 'content':
       const contentType = await client.contentTypes.contentTypesGet(displayTemplate.contentType ?? '-')
-      itemPath = path.join(basePath, contentType.baseType, contentType.key.split(':').pop())
-      typesPath = path.join(basePath, contentType.baseType, contentType.key.split(':').pop())
+      itemPath = path.join(basePath, trimLeadingUnderscore(contentType.baseType), contentType.key.split(':').pop())
+      typesPath = path.join(basePath, trimLeadingUnderscore(contentType.baseType), contentType.key.split(':').pop())
       targetType = targetPrefix + '/' + displayTemplate.contentType
       break;
     default:

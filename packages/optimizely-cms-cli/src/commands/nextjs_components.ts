@@ -127,7 +127,7 @@ ${varName}.getDataFragment = () => ['${contentType.key.split(':').pop()}Data', $
 export default ${varName}`,
 
   // Template for all page component types
-  page: (contentType, varName, displayTemplate) => `import { type OptimizelyNextPage as CmsComponent } from "@remkoj/optimizely-cms-nextjs";
+  _page: (contentType, varName, displayTemplate) => `import { type OptimizelyNextPage as CmsComponent } from "@remkoj/optimizely-cms-nextjs";
 import { ${contentType.key.split(':').pop()}DataFragmentDoc, type ${contentType.key.split(':').pop()}DataFragment } from "@/gql/graphql";${displayTemplate ? `
 import { ${displayTemplate} } from "./displayTemplates";` : ''}
 import { getSdk } from "@/gql"
@@ -156,7 +156,7 @@ ${varName}.getMetaData = async (contentLink, locale, client) => {
 export default ${varName}`,
 
   // Template for all experience component types
-  experience: (contentType, varName, displayTemplate) => `import { type OptimizelyNextPage as CmsComponent } from "@remkoj/optimizely-cms-nextjs";
+  _experience: (contentType, varName, displayTemplate) => `import { type OptimizelyNextPage as CmsComponent } from "@remkoj/optimizely-cms-nextjs";
 import { getFragmentData } from "@/gql/fragment-masking";
 import { ExperienceDataFragmentDoc, ${contentType.key.split(':').pop()}DataFragmentDoc, type ${contentType.key.split(':').pop()}DataFragment } from "@/gql/graphql";
 import { OptimizelyComposition, isNode, CmsEditable } from "@remkoj/optimizely-cms-react/rsc";${displayTemplate ? `
