@@ -361,6 +361,7 @@ This overview and list is automatically generated from the dependencies used in 
 | [http-cache-semantics](https://github.com/kornelski/http-cache-semantics#readme) | 4.1.1 | BSD-2-Clause | [Kornel Lesiński (kornel@geekhood.net)](mailto:kornel@geekhood.net) | [kornel (npmspam@geekhood.net)](mailto:npmspam@geekhood.net) | [npm](https://www.npmjs.com/package/http-cache-semantics) |
 | [http-proxy-agent](https://github.com/TooTallNate/proxy-agents#readme) | 7.0.2 | MIT | [Nathan Rajlich (nathan@tootallnate.net)](mailto:nathan@tootallnate.net) | [tootallnate (nathan@tootallnate.net)](mailto:nathan@tootallnate.net) | [npm](https://www.npmjs.com/package/http-proxy-agent) |
 | [http2-wrapper](https://github.com/szmarczak/http2-wrapper#readme) | 1.0.3 | MIT | Szymon Marczak | [sindresorhus (sindresorhus@gmail.com)](mailto:sindresorhus@gmail.com), [szmarczak (sz.marczak@gmail.com)](mailto:sz.marczak@gmail.com) | [npm](https://www.npmjs.com/package/http2-wrapper) |
+| [https-proxy-agent](https://github.com/TooTallNate/proxy-agents#readme) | 7.0.4 | MIT | [Nathan Rajlich (nathan@tootallnate.net)](mailto:nathan@tootallnate.net) | [tootallnate (nathan@tootallnate.net)](mailto:nathan@tootallnate.net) | [npm](https://www.npmjs.com/package/https-proxy-agent) |
 | [iconv-lite](https://github.com/ashtuchkin/iconv-lite) | 0.6.3 | MIT | [Alexander Shtuchkin (ashtuchkin@gmail.com)](mailto:ashtuchkin@gmail.com) | [ashtuchkin (ashtuchkin@gmail.com)](mailto:ashtuchkin@gmail.com) | [npm](https://www.npmjs.com/package/iconv-lite) |
 | [iconv-lite](https://github.com/pillarjs/iconv-lite) | 0.7.2 | MIT | [Alexander Shtuchkin (ashtuchkin@gmail.com)](mailto:ashtuchkin@gmail.com) | [wesleytodd (wes@wesleytodd.com)](mailto:wes@wesleytodd.com), [bsebas (bjohansebas@gmail.com)](mailto:bjohansebas@gmail.com), [ashtuchkin (ashtuchkin@gmail.com)](mailto:ashtuchkin@gmail.com) | [npm](https://www.npmjs.com/package/iconv-lite) |
 | [immutable](https://immutable-js.com) | 5.1.5 | MIT | Lee Byron | [jdeniau (julien.deniau@gmail.com)](mailto:julien.deniau@gmail.com), [leebyron (lee@leebyron.com)](mailto:lee@leebyron.com) | [npm](https://www.npmjs.com/package/immutable) |
@@ -598,6 +599,6 @@ The dependencies make use of these licenses:
 | CC-BY-4.0 | 1 |
 | ISC | 49 |
 | LGPL-3.0-or-later | 10 |
-| MIT | 438 |
+| MIT | 439 |
 | MPL-2.0 | 12 |
 | Python-2.0 | 1 |
