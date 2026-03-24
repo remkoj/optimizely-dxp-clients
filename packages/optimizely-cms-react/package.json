@@ -1,7 +1,7 @@
 {
   "name": "@remkoj/optimizely-cms-react",
   "license": "Apache-2.0",
-  "version": "6.0.0-rc.1",
+  "version": "6.0.0-rc.2",
   "repository": "https://github.com/remkoj/optimizely-dxp-clients.git",
   "author": "Remko Jantzen <693172+remkoj@users.noreply.github.com>",
   "homepage": "https://github.com/remkoj/optimizely-dxp-clients/tree/main/packages/optimizely-cms-react",
@@ -27,7 +27,7 @@
     }
   },
   "devDependencies": {
-    "@remkoj/optimizely-graph-client": "workspace:6.0.0-rc.1",
+    "@remkoj/optimizely-graph-client": "workspace:6.0.0-rc.2",
     "@types/crypto-js": "^4.2.2",
     "@types/node": "^22.19.15",
     "@types/react": "^19.2.14",
@@ -40,7 +40,7 @@
   },
   "dependencies": {
     "@graphql-typed-document-node/core": "^3.2.0",
-    "@remkoj/optimizely-graph-client": "6.0.0-rc.1",
+    "@remkoj/optimizely-graph-client": "6.0.0-rc.2",
     "crypto-js": "^4.2.0",
     "entities": "^8.0.0",
     "graphql": "^16.13.1",

@@ -8,10 +8,22 @@ function getExternals() {
   return [...[...deps, ...peerDeps].map(x => new RegExp(`^${ x }(\/.+){0,1}$`)), /^node\:[a-z\_\/]+$/]
 }
 
+const year = new Date().getFullYear();
+
+const intro =`#!/usr/bin/env node
+/**
+ * Developer Utitility providing helpers for common tasks to building a
+ * frontend application that uses Optimizely CMS/Graph as content repository.
+ * 
+ * License: Apache 2
+ * Copyright (c) 2023-${ year } - Remko Jantzen
+ */`
+
 export default {
   input: 'src/index.ts',
   output: {
     dir: 'dist',
+    intro,
     format: 'module',
     sourcemap: true
   },

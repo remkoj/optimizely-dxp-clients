@@ -2,7 +2,7 @@
   "name": "@remkoj/optimizely-cms-nextjs",
   "description": "Next.JS integration for Optimizely SaaS CMS",
   "license": "Apache-2.0",
-  "version": "6.0.0-rc.1",
+  "version": "6.0.0-rc.2",
   "repository": "https://github.com/remkoj/optimizely-dxp-clients.git",
   "author": "Remko Jantzen <693172+remkoj@users.noreply.github.com>",
   "homepage": "https://github.com/remkoj/optimizely-dxp-clients",
@@ -44,8 +44,8 @@
     }
   },
   "devDependencies": {
-    "@remkoj/optimizely-cms-react": "workspace:6.0.0-rc.1",
-    "@remkoj/optimizely-graph-client": "workspace:6.0.0-rc.1",
+    "@remkoj/optimizely-cms-react": "workspace:6.0.0-rc.2",
+    "@remkoj/optimizely-graph-client": "workspace:6.0.0-rc.2",
     "@types/negotiator": "^0.6.4",
     "@types/node": "^22.19.15",
     "@types/react": "^19.2.14",
@@ -59,8 +59,8 @@
   },
   "dependencies": {
     "@formatjs/intl-localematcher": "^0.8.2",
-    "@remkoj/optimizely-cms-react": "6.0.0-rc.1",
-    "@remkoj/optimizely-graph-client": "6.0.0-rc.1",
+    "@remkoj/optimizely-cms-react": "6.0.0-rc.2",
+    "@remkoj/optimizely-graph-client": "6.0.0-rc.2",
     "deepmerge": "^4.3.1",
     "entities": "^8.0.0",
     "graphql": "^16.13.1",
