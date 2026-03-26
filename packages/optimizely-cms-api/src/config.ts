@@ -82,9 +82,9 @@ export function getCmsIntegrationApiConfigFromEnvironment() : CmsIntegrationApiO
     }
 
     if (debug) {
-        console.log(`[Optimizely CMS API] CMS URL: ${ cmsUrl }`)
-        console.log(`[Optimizely CMS API] API Endpoint: ${ baseUrl }`)
-        console.log(`[Optimizely CMS API] Connecting to ${ baseUrl } as ${ clientId }`)
+        console.log(
+          `[Optimizely CMS API] Connecting to ${baseUrl} as ${clientId}`
+        )
     }
 
     return {
