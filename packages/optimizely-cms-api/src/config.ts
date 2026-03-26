@@ -14,35 +14,6 @@ export type CmsIntegrationApiOptions = {
     cmsVersion?: OptiCmsVersion
 }
 
-/**
- * Extracts the API gateway URL from a CMS frontend URL.
- * Converts patterns like app-xyz.cmstest.optimizely.com → api.cmstest.optimizely.com
- * @param cmsUrl - The CMS frontend URL
- * @returns The API gateway URL, or null if not a recognized SaaS pattern
- */
-function extractApiGateway(cmsUrl: string): string | null
-{
-    try {
-        const urlObj = new URL(cmsUrl)
-        const hostname = urlObj.hostname
-
-        // Check if it's a SaaS CMS URL pattern: app[-tenant].cms[env].optimizely.com
-        const saasMatch = hostname.match(/^app(-[^.]+)?\.cms([^.]*)?\.optimizely\.com$/)
-        if (saasMatch) {
-            // Extract only the environment suffix (not tenant)
-            // e.g., 'test' from '.cmstest.' or '' from '.cms.'
-            const env = saasMatch[2] || ''
-
-            // Construct API gateway: api.cms[env].optimizely.com (no tenant in API URL)
-            return `https://api.cms${env}.optimizely.com`
-        }
-
-        return null
-    } catch {
-        return null
-    }
-}
-
 export function getCmsIntegrationApiConfigFromEnvironment() : CmsIntegrationApiOptions
 {
     const cmsUrl = getOptional('OPTIMIZELY_CMS_URL', 'https://example.cms.optimizely.com')
@@ -81,11 +52,8 @@ export function getCmsIntegrationApiConfigFromEnvironment() : CmsIntegrationApiO
         throw new Error("Invalid Optimizely CMS URL provided")
     }
 
-    if (debug) {
-        console.log(
-          `[Optimizely CMS API] Connecting to ${baseUrl} as ${clientId}`
-        )
-    }
+    if (debug)
+        console.log(`[Optimizely CMS API] Connecting to ${ baseUrl } as ${ clientId }`)
 
     return {
         base: baseUrl,
@@ -104,7 +72,7 @@ function getOptional<DT extends string | undefined>(variable: string, defaultVal
         return defaultValue as DT extends string ? string : undefined
     return envValue
 }
-function getMandatory(variable: string) : string
+function getMandatory(variable: string) : string 
 {
     const envValue = process.env[variable]
     if (!envValue)
@@ -120,4 +88,34 @@ function getSelection<T>(envVarName: string, allowedValues: T[], defaultValue: T
     if (allowedValues.some(av => av == rawValue))
         return rawValue as T
     return defaultValue
+}
+
+
+/**
+ * Extracts the API gateway URL from a CMS frontend URL.
+ * Converts patterns like app-xyz.cmstest.optimizely.com → api.cmstest.optimizely.com
+ * @param cmsUrl - The CMS frontend URL
+ * @returns The API gateway URL, or null if not a recognized SaaS pattern
+ */
+function extractApiGateway(cmsUrl: string): string | null
+{
+    try {
+        const urlObj = new URL(cmsUrl)
+        const hostname = urlObj.hostname
+
+        // Check if it's a SaaS CMS URL pattern: app[-tenant].cms[env].optimizely.com
+        const saasMatch = hostname.match(/^app(-[^.]+)?\.cms([^.]*)?\.optimizely\.com$/)
+        if (saasMatch) {
+            // Extract only the environment suffix (not tenant)
+            // e.g., 'test' from '.cmstest.' or '' from '.cms.'
+            const env = saasMatch[2] || ''
+
+            // Construct API gateway: api.cms[env].optimizely.com (no tenant in API URL)
+            return `https://api.cms${env}.optimizely.com`
+        }
+
+        return null
+    } catch {
+        return null
+    }
 }
