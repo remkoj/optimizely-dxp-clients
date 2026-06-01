@@ -80,8 +80,8 @@ export const NextJsFactoryCommand : NextJsModule = {
         // Build factory / component structure
         const componentFactoryDefintions = new Map<string, ComponentFactoryDefintion>()
         components.forEach(component => {
-            const componentDir = path.dirname(path.join(...component));
-            const componentFile = path.basename(path.join(...component));
+            const componentDir = path.dirname(path.posix.join(...component));
+            const componentFile = path.basename(path.posix.join(...component));
 
             // Determine component target
             const componentKey = getComponentKey(component, basePath)
@@ -245,7 +245,7 @@ function processName(input: string) : string {
 function generateFactory(factoryInfo: ComponentFactoryDefintion, factoryKey: string) : string
 {
   // Get the factory name
-  const factoryName = factoryKey.split(path.sep).map(processName).join("") + "Factory"
+  const factoryName = factoryKey.split(path.posix.sep).map(processName).join("") + "Factory"
 
   // Get the components and sub-factories, sorted by key to minimize changes between runs
   const components = [...factoryInfo.entries].sort((a,b) => { return a.key < b.key ? -1 : a.key > b.key ? 1 : 0 })
