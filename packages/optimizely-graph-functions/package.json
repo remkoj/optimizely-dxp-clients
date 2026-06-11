@@ -3,6 +3,9 @@
   "repository": "https://github.com/remkoj/optimizely-dxp-clients.git",
   "author": "Remko Jantzen <693172+remkoj@users.noreply.github.com>",
   "homepage": "https://github.com/remkoj/optimizely-dxp-clients",
+  "bugs": {
+    "url": "https://github.com/remkoj/optimizely-dxp-clients/issues"
+  },
   "version": "5.2.0",
   "license": "Apache-2.0",
   "type": "commonjs",
