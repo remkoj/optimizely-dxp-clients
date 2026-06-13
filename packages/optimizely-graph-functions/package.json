@@ -4,6 +4,9 @@
   "author": "Remko Jantzen <693172+remkoj@users.noreply.github.com>",
   "homepage": "https://github.com/remkoj/optimizely-dxp-clients",
   "version": "5.2.0",
+  "bugs": {
+    "url": "https://github.com/remkoj/optimizely-dxp-clients/issues"
+  },
   "license": "Apache-2.0",
   "type": "commonjs",
   "description": "GraphQL Codegen preset for Optimizely Graph",
