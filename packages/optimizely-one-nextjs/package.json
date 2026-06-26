@@ -35,18 +35,18 @@
   },
   "devDependencies": {
     "@remkoj/optimizely-graph-client": "workspace:6.0.0-rc.2",
-    "@tailwindcss/cli": "^4.3.0",
+    "@tailwindcss/cli": "^4.3.1",
     "@types/node": "^24.13.2",
     "@types/react": "^19.2.17",
     "@types/react-dom": "19.2.3",
     "@types/uuid": "^11.0.0",
-    "browserslist": "^4.28.2",
+    "browserslist": "^4.28.4",
     "next": "^16.2.9",
     "prop-types": "^15.8.1",
     "react": "^19.2.7",
     "react-dom": "^19.2.7",
     "scheduler": "^0.27.0",
-    "tailwindcss": "^4.3.0",
+    "tailwindcss": "^4.3.1",
     "typescript": "^5.9.3",
     "update-browserslist-db": "^1.2.3"
   },
@@ -62,8 +62,8 @@
     "@optimizely/react-sdk": "^4.0.0",
     "@remkoj/optimizely-graph-client": "6.0.0-rc.2",
     "deep-object-diff": "^1.1.9",
-    "swr": "^2.4.1",
-    "uuid": "^14.0.0"
+    "swr": "^2.4.2",
+    "uuid": "^14.0.1"
   },
   "scripts": {
     "clean": "tsc --build --clean",
