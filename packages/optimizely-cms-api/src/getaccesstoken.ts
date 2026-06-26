@@ -25,13 +25,11 @@ export async function getAccessToken(config?: CmsIntegrationApiOptions, baseUrl?
 
   if (options.debug) {
     console.log(`⚪ [CMS API] Using authentication endpoint: ${authUrl}`);
-    console.log(`⚪ [CMS API] Retrieving new credentials for ${options.clientId ?? '-'}${options.actAs ? ", acting as " + options.actAs : ""}`);
+    console.log(`⚪ [CMS API] Retrieving new credentials for ${options.clientId ?? '-'}`);
   }
 
   const body = new URLSearchParams();
   body.append("grant_type", "client_credentials");
-  if (options.actAs)
-    body.append("act_as", options.actAs);
 
   const httpResponse = await fetch(authUrl, {
     method: "POST",
@@ -39,6 +37,26 @@ export async function getAccessToken(config?: CmsIntegrationApiOptions, baseUrl?
     body: body.toString(),
     cache: "no-store"
   });
+  if (!httpResponse.ok) {
+    console.error(`❌ [CMS API] Network error while authenticating: ${httpResponse.status} ${httpResponse.statusText}`);
+    if (config?.debug) {
+      console.group("Network request")
+      console.log(`URL: ${authUrl}`)
+      console.log(`Method: POST`)
+      headers.entries().forEach(([ headerKey, headerValue ]) => {
+        console.log(`Header ${ headerKey }: ${ headerValue }`);
+      })
+      console.log(body.toString())
+      console.groupEnd()
+      console.group("Network response")
+      httpResponse.headers.entries().forEach(([ headerKey, headerValue ]) => {
+        console.log(`Header ${ headerKey }: ${ headerValue }`);
+      })
+      console.log(await httpResponse.text())
+      console.groupEnd()
+    }
+    throw new Error(`Network error ${httpResponse.status} ${httpResponse.statusText}`);
+  }
   const response = await httpResponse.json() as AuthResponse;
 
   if (isErrorResponse(response))
@@ -51,7 +69,7 @@ function base64Encode(input: string): string {
   if (btoa && typeof (btoa) == 'function')
     return btoa(input)
   if (Buffer && typeof (Buffer) == 'object')
-    //@ts-expect-error
+    //@ts-expect-error We're running in server context, so no need for errors here
     return Buffer.from(input).toString('base64')
 
   throw new Error("Unable to base64Encode")

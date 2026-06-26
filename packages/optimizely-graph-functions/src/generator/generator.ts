@@ -199,8 +199,13 @@ export class DocumentGenerator
       return null; 
 
     // Get type information rendering
+    const propertyFormat = propertyConfig?.format
     const propertyItemConfig = propertyConfig?.type === 'array' ? propertyConfig?.items ?? propertyConfig : propertyConfig
     const propertyType = propertyItemConfig?.type ?? 'any'
+
+    // Skip properties with unsupported formatting
+    if (['categorization'].includes(propertyFormat??''))
+      return null
 
     // Ensure we don't have property naming collisions
     let outputPropertyName = propertyName

@@ -47,24 +47,26 @@ const DefaultContentTypeFilter: ContentTypeFilter = () => true
 async function* getAllContentTypes(clientOrConfig?: CmsIntegrationApiClient | CmsIntegrationApiOptions, pageSize: number = 25, filter: ContentTypeFilter = DefaultContentTypeFilter): AsyncGenerator<IntegrationApi.ContentType> {
   const client = isClientInstance(clientOrConfig) ? clientOrConfig : await getClient(clientOrConfig)
   let requestPageSize = pageSize;
-  let requestPageIndex = 0
-  let totalItemCount = 0
-  let totalPages = 0
+  let requestPageIndex = 0;
+  let totalItemCount : number;
+  let totalPages : number;
   do {
-    const resultsPage = await client.contentTypesList({ query: { pageIndex: requestPageIndex, pageSize: requestPageSize } }).catch((_) => {
+    const resultsPage = await client.contentTypesList({ query: { pageIndex: requestPageIndex, pageSize: requestPageSize } }).catch(() => {
       return {
         items: [],
         totalItemCount: 0,
+        totalCount: 0,
         pageIndex: requestPageIndex,
         pageSize: requestPageSize
       } as IntegrationApi.ContentTypePage
     });
 
     // Calculate fields for next page
-    totalItemCount = resultsPage.totalItemCount ?? 0;
+    // @ts-expect-error Difference between PaaS & SaaS
+    totalItemCount = resultsPage.totalItemCount ?? resultsPage.totalCount ?? 0;
     requestPageSize = resultsPage.pageSize ?? 0;
     requestPageIndex = (resultsPage.pageIndex ?? 0) + 1;
-    totalPages = resultsPage.totalItemCount && resultsPage.pageSize ? Math.ceil(totalItemCount / requestPageSize) : 0
+    totalPages = totalItemCount && resultsPage.pageSize ? Math.ceil(totalItemCount / requestPageSize) : 0
 
     // Yield items
     for (const contentType of (resultsPage.items ?? [])) {
@@ -85,7 +87,7 @@ async function getAllContentTypesMap(clientOrConfig?: CmsIntegrationApiClient | 
   return contentTypeMap
 }
 
-var hasher = createHasher({ sort: true, coerce: true });
+const hasher = createHasher({ sort: true, coerce: true });
 const clientByHash = new Map<string, Promise<CmsIntegrationApiClient>>();
 const contentTypeList = new Map<string, Promise<Map<string, IntegrationApi.ContentType>>>();
 
@@ -126,10 +128,10 @@ function getClient(config?: CmsIntegrationApiOptions): Promise<CmsIntegrationApi
   if (!client) {
     client = new Promise((resolve, reject) => {
       const cms_client = createClient(config);
-      cms_client.getInstanceInfo().then(() => {
+      cms_client.propertyGroupsList({}).then(() => {
         resolve(cms_client)
       }).catch(e => {
-        reject(e)
+        reject(new Error('Unable to connect', { cause: e }))
       })
     })
     clientByHash.set(configHash, client)

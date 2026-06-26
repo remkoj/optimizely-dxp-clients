@@ -1,108 +1,22 @@
+import { withOperations, ApiClient as AbstractApiClient, ApiError } from "@remkoj/hey-api-wrapper";
 import * as Operations from './client/sdk.gen'
-import { createClient, createConfig, type RequestResult, type ResponseStyle } from './client/client';
-import { type CmsIntegrationApiOptions, readEnvConfig } from "./config";
-import { type InstanceApiVersionInfo, OptiCmsVersion } from "./types";
+import { createClient, createConfig } from './client/client';
 import { createClientConfig } from './client-config'
+import { type InstanceApiVersionInfo } from "./types";
+import { type CmsIntegrationApiOptions, readEnvConfig } from "./config";
 import buildInfo from "./version.json"
+import type { OpenAPIV3_1 } from "openapi-types";
 
-type OperationsType = { -readonly [KT in keyof typeof Operations]: (typeof Operations)[KT] }
-type OperationsNames = keyof OperationsType
-type OperationReturnType<RT extends (...args: any) => any> = ReturnType<RT> extends RequestResult<any, any, boolean, ResponseStyle> ? Promise<NonNullable<Awaited<ReturnType<RT>>['data']>> : never
-
-type ApiClientFunctions = {
-  readonly [KT in OperationsNames]: OperationsType[KT] extends Function ?
-  (options?: Parameters<OperationsType[KT]>[0]) => OperationReturnType<OperationsType[KT]> :
-  never
-}
-type FunctionList<T extends Object> = keyof { [PN in keyof T as T[PN] extends Function ? PN : never]: T[PN] }
-
-type BaseClass = {
-  new(...args: any[]): BaseApiClient
-};
-
-type NonConstructorKeys<T> = ({ [P in keyof T]: T[P] extends new () => any ? never : P })[keyof T];
-type OmitConstructor<TBase extends BaseClass> = Pick<TBase, NonConstructorKeys<TBase>>
-export type ClassWithMixin<TBase extends BaseClass, Mixin> = OmitConstructor<TBase> & {
-  new(...args: ConstructorParameters<TBase>): InstanceType<TBase> & Mixin
-}
-
-function applyOperations<TBase extends BaseClass>(Base: TBase): ClassWithMixin<TBase, ApiClientFunctions> {
-  // Create the new class
-  class NewClass extends Base {
-    constructor(...args: any) {
-      super(...args)
-    }
-  }
-
-  // Bind the operations
-  Object.getOwnPropertyNames(Operations).filter(isApiClientFunction).forEach(propName => {
-    type PropNameKey = typeof propName
-    type MethodArgs = NonNullable<Parameters<typeof Operations[PropNameKey]>[0]> extends Operations.Options<infer TData, boolean> ? TData : never
-
-    async function wrapper(args: Omit<MethodArgs, 'url'>) {
-      const operationArgs: Omit<Operations.Options<MethodArgs>, 'headers'> = {
-        throwOnError: false,
-        ...args,
-        //@ts-expect-error
-        client: this._client
-      }
-      //@ts-expect-error
-      const result = await Operations[propName](operationArgs)
-      if (result.data)
-        return result.data
-      throw new ApiError(result)
-    }
-
-    //@ts-expect-error
-    NewClass.prototype[propName] = wrapper
-  })
-
-  // Return the new class
-  return NewClass as unknown as ClassWithMixin<TBase, ApiClientFunctions>
-}
-
-function createIsFunctionValidator<T extends Object>(baseType: T): (propName: string) => propName is FunctionList<T> {
-  return (propName: string): propName is FunctionList<T> => {
-    return typeof (baseType[propName as keyof T]) == 'function'
-  }
-}
-
-const isApiClientFunction = createIsFunctionValidator(Operations)
-
-class BaseApiClient {
-  protected _config: CmsIntegrationApiOptions
-  protected _client: ReturnType<typeof createClient>
-
+/**
+ * Base implementation of the ApiClient wrapper for the Optimizely CMS Rest API
+ */
+class BaseApiClient extends AbstractApiClient<CmsIntegrationApiOptions, ReturnType<typeof createClient>> {
   public constructor(config?: CmsIntegrationApiOptions) {
-    // Store instance variables
-    this._config = config ?? readEnvConfig()
-    this._client = createClient(createClientConfig(createConfig({
-      baseUrl: 'https://api.cms.optimizely.com/preview3',
-    }), this._config));
-
-    // Configure Client
-    if (this._config.debug) {
-      this._client.interceptors.request.use(async (request) => {
-        console.log(`🔍 [CMS API] Sending ${request.method} request to ${request.url}`)
-        return request
-      })
-      this._client.interceptors.response.use((response, request) => {
-        console.log(`✨ [CMS API] Received response ${response.status} ${response.statusText} of type ${response.headers.get('Content-Type') ?? 'unknown'} for ${request.url}`)
-        return response
-      })
-    }
-  }
-
-  /**
-   * Get the runtime configuration of the target CMS version. 
-   * 
-   * If this differs from the cmsVersion the client may not work fully or not
-   * at all.
-   * 
-   * @deprecated  This is based on the OPTIMIZELY_CMS_SCHEMA environment that is ignored by API client
-   */
-  public get runtimeCmsVersion(): OptiCmsVersion {
-    return this._config.cmsVersion ?? OptiCmsVersion.CMSSAAS
+    const apiConfig = config ?? readEnvConfig();
+    const apiClient = createClient(createClientConfig(createConfig({
+      baseUrl: 'https://api.cms.optimizely.com/v1',
+    }), config));
+    super(apiConfig, apiClient);
   }
 
   /**
@@ -116,19 +30,12 @@ class BaseApiClient {
   }
 
   /**
-   * Marker to indicate if the client has debugging enabled
-   */
-  public get debug(): boolean {
-    return this._config.debug ?? false
-  }
-
-  /**
    * Detect the API Version from the URL, returning the runtime version. When
    * this version differs from the `apiVersion` property errors can be expected.
    */
   public get version(): string {
     const baseUrl = this._client.getConfig().baseUrl
-    const detectedVersion = baseUrl?.match(/^https{0,1}:\/\/.+?\/(_cms\/){0,1}([a-z0-9\.]+)(\/|$)/)?.at(2)
+    const detectedVersion = baseUrl?.match(/^https{0,1}:\/\/.+?\/(_cms\/){0,1}([a-z0-9.]+)(\/|$)/)?.at(2)
     return detectedVersion || ""
   }
 
@@ -153,24 +60,24 @@ class BaseApiClient {
    */
   public async getInstanceInfo(): Promise<InstanceApiVersionInfo> {
     const result = await this._client.get({
-      url: '/info'
+      url: '/info',
+      throwOnError: false
     })
-    if (result.data) {
+    if (this.isDataResponse(result)) {
       const data = result.data as InstanceApiVersionInfo
       data.baseUrl = this._client.getConfig().baseUrl;
       return data;
     }
-
     throw new ApiError(result)
   }
 
-  public async getOpenApiSpec(): Promise<any> {
-    const result = await this._client.get({
+  public async getOpenApiSpec(): Promise<OpenAPIV3_1.Document> {
+    const result = await this._client.get<OpenAPIV3_1.Document>({
       url: '/docs/content-openapi.json',
+      throwOnError: false
     })
-    if (result.data)
-      return result.data
-
+    if (this.isDataResponse(result))
+      return result.data as OpenAPIV3_1.Document
     throw new ApiError(result)
   }
 
@@ -182,46 +89,8 @@ class BaseApiClient {
   }
 }
 
-export class ApiError extends Error {
-  protected _ctx: { error: unknown, request: Request, response: Response }
-
-  constructor(data: { error: unknown, request: Request, response: Response }) {
-    if (typeof data.error == 'string')
-      super(data.error)
-    else
-      super(`Optimizely CMS API Error: ${data.response.status} ${data.response.statusText}`)
-    this._ctx = data;
-  }
-
-  public get data(): unknown {
-    return this._ctx.error
-  }
-
-  /**
-   * @deprecated use data() instead
-   */
-  public get body(): unknown {
-    return this._ctx.error
-  }
-
-  public get request(): unknown {
-    return this._ctx.request
-  }
-
-  public get response(): unknown {
-    return this._ctx.response
-  }
-
-  public get status(): number {
-    return this._ctx.response.status
-  }
-
-  public get statusText(): string {
-    return this._ctx.response.statusText
-  }
-}
-
-export const ApiClient = applyOperations(BaseApiClient)
-export type ApiClientStatic = typeof ApiClient
-export type CmsIntegrationApiClient = InstanceType<typeof ApiClient>
-export default ApiClient
+export { ApiError } from "@remkoj/hey-api-wrapper";
+export const ApiClient = withOperations(BaseApiClient, Operations);
+export type ApiClientStatic = typeof ApiClient;
+export type CmsIntegrationApiClient = InstanceType<typeof ApiClient>;
+export default ApiClient;

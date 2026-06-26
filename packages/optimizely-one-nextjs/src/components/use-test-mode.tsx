@@ -12,61 +12,61 @@ import { useState, useEffect, useMemo } from "react"
  */
 export function useIsInTestMode(pollingInterval: number = 500) : boolean
 {
-    // Keep track of state
-    const [hasTestCookie, setHasTestCookie] = useState<boolean>(false)
+  // Keep track of state
+  const [hasTestCookie, setHasTestCookie] = useState<boolean>(false)
 
-    // Get the current host and calculate the derived values, using memoized
-    // values so they only recalculate when needed
-    const host : string | undefined = tryInvoke(() => window.location.hostname)
-    const isDevHost = useMemo(() => (host && host.startsWith('localhost') && process.env.NODE_ENV == 'development') ? true : false, [host])
-    const cookieName = useMemo(() => getCookieName(host), [ host ])
+  // Get the current host and calculate the derived values, using memoized
+  // values so they only recalculate when needed
+  const host : string | undefined = tryInvoke(() => window.location.hostname)
+  const isDevHost = useMemo(() => (host && host.startsWith('localhost') && process.env.NODE_ENV == 'development') ? true : false, [host])
+  const cookieName = useMemo(() => getCookieName(host), [ host ])
 
-    // Start the polling process to discover the cookie
-    useEffect(() => {
-        function updateCookieStatus() 
-        {
-            if (isDevHost) { setHasTestCookie(true); return; }
-            const cookie = tryInvoke(() => document.cookie)
-            if (cookie) {
-                const cookieValue = cookie.match(`(?:^|;)\\s*${ cookieName }=\\s*([^;]+)\\s*(?:;|$)`)?.pop()
-                const testModeStatus = cookieValue == 'true'
-                setHasTestCookie(testModeStatus)
-            } else {
-                setHasTestCookie(false)
-            }
-        }
+  // Start the polling process to discover the cookie
+  useEffect(() => {
+    function updateCookieStatus() 
+    {
+      if (isDevHost) { setHasTestCookie(true); return; }
+      const cookie = tryInvoke(() => document.cookie)
+      if (cookie) {
+        const cookieValue = cookie.match(`(?:^|;)\\s*${ cookieName }=\\s*([^;]+)\\s*(?:;|$)`)?.pop()
+        const testModeStatus = cookieValue == 'true'
+        setHasTestCookie(testModeStatus)
+      } else {
+        setHasTestCookie(false)
+      }
+    }
 
-        updateCookieStatus()
-        const intervalId = setInterval(() => updateCookieStatus(), pollingInterval)
+    updateCookieStatus()
+    const intervalId = setInterval(() => updateCookieStatus(), pollingInterval)
 
-        return () => {
-            clearInterval(intervalId)
-        }
+    return () => {
+      clearInterval(intervalId)
+    }
 
-    }, [ cookieName, pollingInterval, isDevHost ])
-    return hasTestCookie
+  }, [ cookieName, pollingInterval, isDevHost ])
+  return hasTestCookie
 }
 
 function getCookieName(host?: string) : string | undefined
 {
-    if (!host)
-        return 'optly_test'
-    const reservedDomains = ['vercel']
-    try {
-        var hostParts = host.split('.')
-        if (hostParts.length > 1) {
-            hostParts = hostParts.slice(0,-1)
-            if (hostParts.length > 1) {
-                var domain = hostParts.pop() as string
-                if (!reservedDomains.includes(domain)) {
-                    hostParts = [ domain ]
-                }
-            }
+  if (!host)
+    return 'optly_test'
+  const reservedDomains = ['vercel']
+  try {
+    let hostParts = host.split('.')
+    if (hostParts.length > 1) {
+      hostParts = hostParts.slice(0,-1)
+      if (hostParts.length > 1) {
+        const domain = hostParts.pop() as string
+        if (!reservedDomains.includes(domain)) {
+          hostParts = [ domain ]
         }
-        return `optly_${ hostParts.join('.') }_test`
-    } catch {
-        return undefined
+      }
     }
+    return `optly_${ hostParts.join('.') }_test`
+  } catch {
+    return undefined
+  }
 }
 
 /**
@@ -75,13 +75,13 @@ function getCookieName(host?: string) : string | undefined
  * @param       fn      The function to execute
  * @returns     The return value of the function, or undefined in an error occurred
  */
-function tryInvoke<T extends () => any >(fn: T) : ReturnType<T> | undefined
+function tryInvoke<T extends () => unknown >(fn: T) : ReturnType<T> | undefined
 {
-    try {
-        return fn()
-    } catch {
-        return undefined
-    }
+  try {
+    return fn() as ReturnType<T> | undefined
+  } catch {
+    return undefined
+  }
 }
 
 export default useIsInTestMode

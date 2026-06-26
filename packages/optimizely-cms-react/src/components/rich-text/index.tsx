@@ -113,17 +113,17 @@ const RichTextElement: FunctionComponent<
   const childData =
     node.children && node.children.length > 0
       ? node.children.map((child, idx) => {
-          const elementId = idPrefix + idx
-          return (
-            <RichTextElement
-              key={elementId}
-              factory={factory}
-              node={child}
-              idPrefix={elementId + '::'}
-              ctx={ctx}
-            />
-          )
-        })
+        const elementId = idPrefix + idx
+        return (
+          <RichTextElement
+            key={elementId}
+            factory={factory}
+            node={child}
+            idPrefix={elementId + '::'}
+            ctx={ctx}
+          />
+        )
+      })
       : undefined
 
   // Resolve component (and add to factory if not yet present)

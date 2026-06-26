@@ -88,11 +88,11 @@ export function createLayout(
       const base = await resolving
       const title = base?.title?.template
         ? {
-            template: base?.title?.template,
-            default: metadata.name as string,
-          }
+          template: base?.title?.template,
+          default: metadata.name as string,
+        }
         : (metadata.name as string)
-      let pageMetadata: Metadata = {
+      const pageMetadata: Metadata = {
         title,
         alternates: {
           canonical: metadata.canonical as string,

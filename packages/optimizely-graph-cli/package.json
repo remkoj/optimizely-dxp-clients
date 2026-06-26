@@ -8,6 +8,9 @@
   "license": "Apache-2.0",
   "type": "module",
   "main": "bin/index.js",
+  "engines": {
+    "node": ">=24.0.0 <25.0.0"
+  },
   "files": [
     "./bin"
   ],
@@ -23,15 +26,15 @@
   },
   "devDependencies": {
     "@remkoj/optimizely-graph-client": "workspace:6.0.0-rc.2",
-    "@rollup/plugin-commonjs": "^29.0.2",
+    "@rollup/plugin-commonjs": "^29.0.3",
     "@rollup/plugin-json": "^6.1.0",
     "@rollup/plugin-typescript": "^12.3.0",
-    "@rollup/pluginutils": "^5.3.0",
+    "@rollup/pluginutils": "^5.4.0",
     "@types/crypto-js": "^4.2.2",
-    "@types/node": "^22.19.15",
+    "@types/node": "^24.13.2",
     "@types/source-map-support": "^0.5.10",
     "@types/yargs": "^17.0.35",
-    "rollup": "^4.60.0",
+    "rollup": "^4.61.1",
     "source-map-support": "^0.5.21",
     "tslib": "^2.8.1",
     "typescript": "^5.9.3"
@@ -41,8 +44,8 @@
     "chalk": "^5.6.2",
     "cli-table3": "^0.6.5",
     "compare-versions": "^6.1.1",
-    "dotenv": "^17.3.1",
-    "dotenv-expand": "^12.0.3",
+    "dotenv": "^17.4.2",
+    "dotenv-expand": "^13.0.0",
     "figures": "^6.1.0",
     "glob": "^13.0.6",
     "tslib": "^2.8.1",

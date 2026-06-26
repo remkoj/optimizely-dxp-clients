@@ -100,7 +100,7 @@ async function deleteContentItem(client: CmsIntegrationApiClient, key: string, o
   const children = await getContentItemChildren(client, key)
   let hasError = false
   let removedCount = 0
-  for (let child of children.items)
+  for (const child of children.items)
     if (child.key) {
       removedCount = removedCount + await deleteContentItem(client, child.key).catch(e => {
         console.error(e)
@@ -108,7 +108,7 @@ async function deleteContentItem(client: CmsIntegrationApiClient, key: string, o
         return 0
       })
     }
-  for (let child of children.assets)
+  for (const child of children.assets)
     if (child.key) {
       removedCount = removedCount + await deleteContentItem(client, child.key).catch(e => {
         console.error(e)
@@ -172,7 +172,7 @@ async function removeContentTypes(client: CmsIntegrationApiClient): Promise<numb
   const contentTypes = await getAllTypes(client)
   let removedCount = 0
 
-  for (let contentType of contentTypes.filter(item => item.source == '' && !reservedTypes.includes(item.key))) {
+  for (const contentType of contentTypes.filter(item => item.source == '' && !reservedTypes.includes(item.key))) {
     if (client.debug)
       process.stdout.write(`  ${chalk.blueBright(figures.arrowRight)} Removing content type ${contentType.displayName} (${contentType.key})\n`)
     const result: IntegrationApi.ContentType | null = await client.contentTypesDelete({ path: { key: contentType.key } }).catch((e: ApiError) => {

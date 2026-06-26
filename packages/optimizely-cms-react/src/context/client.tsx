@@ -124,31 +124,31 @@ export type OptimizelyCmsProps = {
   initialMode?: OptimizelyCmsMode
 } & (
   | {
-      /**
+    /**
        * The component factory to be used to resolve content within the scope
        * of this provider.
        */
-      factory: ComponentFactory
+    factory: ComponentFactory
 
-      /**
+    /**
        * The defaults components to apply when there's no factory provided. If a
        * factory is provided, these components will not be added to the factory.
        */
-      initialComponents?: never
-    }
+    initialComponents?: never
+  }
   | {
-      /**
+    /**
        * The component factory to be used to resolve content within the scope
        * of this provider.
        */
-      factory?: never
+    factory?: never
 
-      /**
+    /**
        * The defaults components to apply when there's no factory provided. If a
        * factory is provided, these components will not be added to the factory.
        */
-      initialComponents: ComponentTypeDictionary
-    }
+    initialComponents: ComponentTypeDictionary
+  }
 )
 
 export const OptimizelyCms: FunctionComponent<

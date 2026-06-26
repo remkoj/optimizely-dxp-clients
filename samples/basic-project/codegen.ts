@@ -2,7 +2,7 @@
 import { loadEnvConfig } from '@next/env'
 
 const loadEnvResult = loadEnvConfig(__dirname, undefined, console)
-console.log(`Optimizely CMS Configuration`)
+console.log('Optimizely CMS Configuration')
 console.log(`  - Environments: ${loadEnvResult.loadedEnvFiles.map(x => x.path).join(', ')}`)
 
 // Actual code generation setup
@@ -51,32 +51,32 @@ const config: CodegenConfig = {
         injections: [
           // Add Page/Experience GraphQL Files
           {
-            into: "PageData",
-            pathRegex: "src\/components\/cms\/.*\.page\.graphql"
+            into: 'PageData',
+            pathRegex: 'src\/components\/cms\/.*\.page\.graphql'
           },
           {
-            into: "PageData",
-            pathRegex: "src\/components\/cms\/.*\.experience\.graphql"
+            into: 'PageData',
+            pathRegex: 'src\/components\/cms\/.*\.experience\.graphql'
           },
 
           // Add Block/Component/Section GraphQL Files
           {
-            into: "BlockData",
-            pathRegex: "src\/components\/cms\/.*\.block\.graphql"
+            into: 'BlockData',
+            pathRegex: 'src\/components\/cms\/.*\.block\.graphql'
           },
           {
-            into: "BlockData",
-            pathRegex: "src\/components\/cms\/.*\.component\.graphql"
+            into: 'BlockData',
+            pathRegex: 'src\/components\/cms\/.*\.component\.graphql'
           },
           {
-            into: "BlockData",
-            pathRegex: "src\/components\/cms\/.*\.section\.graphql"
+            into: 'BlockData',
+            pathRegex: 'src\/components\/cms\/.*\.section\.graphql'
           },
 
           // Add Element GraphQL Files
           {
-            into: "ElementData",
-            pathRegex: "src\/components\/cms\/.*\.element\.graphql"
+            into: 'ElementData',
+            pathRegex: 'src\/components\/cms\/.*\.element\.graphql'
           }
         ]
       } as OptimizelyGraphPresetOptions

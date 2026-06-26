@@ -39,7 +39,7 @@ export const StylesPullCommand: StylesPullModule = {
 
       for (const { file: filePath, data: displayTemplate } of (displayTemplateGroup?.templates || [])) {
         // Write JSON to disk
-        var updatedJson = await createDisplayTemplateFile(displayTemplate, filePath, force, cfg.debug);
+        const updatedJson = await createDisplayTemplateFile(displayTemplate, filePath, force, cfg.debug);
         if (updatedJson) updatedTemplates.push(displayTemplate.key);
       }
         

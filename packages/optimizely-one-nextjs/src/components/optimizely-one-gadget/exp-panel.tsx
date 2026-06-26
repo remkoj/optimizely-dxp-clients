@@ -4,7 +4,7 @@ import Link from 'next/link'
 import { useOptimizelyOne } from '../context'
 import type { OptlyWebGet } from '../../client-types'
 
-export const ExpPanel: FunctionComponent<{}> = () => {
+export const ExpPanel: FunctionComponent = () => {
   const opti = useOptimizelyOne()
   const webEx = opti.getService('webex')?.getBrowserApi()
   const data = webEx?.get ? webEx.get('data') : undefined

@@ -107,28 +107,28 @@ export type OptimizelyOneContextType = Readonly<{
    *
    * @returns A list of active services with `activatePage` capability.
    */
-  getActivatePageServices: () => ClientApi.OptimizelyOneServiceWithCapability<any, string, 'activatePage'>[]
+  getActivatePageServices: () => ClientApi.OptimizelyOneServiceWithCapability<unknown, string, 'activatePage'>[]
 
   /**
    * Retrieves active services that support page-view tracking.
    *
    * @returns A list of active services with `trackPage` capability.
    */
-  getTrackPageServices: () => ClientApi.OptimizelyOneServiceWithCapability<any, string, 'trackPage'>[]
+  getTrackPageServices: () => ClientApi.OptimizelyOneServiceWithCapability<unknown, string, 'trackPage'>[]
 
   /**
    * Retrieves active services that support profile updates.
    *
    * @returns A list of active services with `updateProfile` capability.
    */
-  getProfileServices: () => ClientApi.OptimizelyOneServiceWithCapability<any, string, 'updateProfile'>[]
+  getProfileServices: () => ClientApi.OptimizelyOneServiceWithCapability<unknown, string, 'updateProfile'>[]
 
   /**
    * Retrieves active services that can discover profile data.
    *
    * @returns A list of active services with `discoverProfileData` capability.
    */
-  getProfileDataSources: () => ClientApi.OptimizelyOneServiceWithCapability<any, string, 'discoverProfileData'>[]
+  getProfileDataSources: () => ClientApi.OptimizelyOneServiceWithCapability<unknown, string, 'discoverProfileData'>[]
 
   /**
    * Retrieves an individual active service by its code.
@@ -136,8 +136,14 @@ export type OptimizelyOneContextType = Readonly<{
    * @param code The service code.
    * @returns The matching service, or `undefined` when not found.
    */
-  getService: <SC extends string>(code: SC) => ClientApi.OptimizelyOneService<any, SC> | undefined
+  getService: <SC extends string>(code: SC) => SC extends keyof CoreServices ? CoreServices[SC] : (ClientApi.OptimizelyOneService<unknown, SC> | undefined)
 }>
+
+type CoreServices = {
+  webex: WebExperimenationService,
+  dataPlatform: DataPlatformService,
+  contentRecs: ContentRecsService
+}
 
 const throwNoContextDefined = (): never => {
   throw new Error("No context defined")
@@ -211,16 +217,16 @@ export type ProviderProps = PropsWithChildren<{
  * @returns The Optimizely One context provider element.
  */
 export function OptimizelyOneProvider(
-{ 
-  value: { 
-    disableTracking = false,
-    disableAutotracking = false,
-    services = [],
-    debug = false
-  } = {}, 
-  children, 
-  enabledOptimizelyServices
-}: ProviderProps)
+  { 
+    value: { 
+      disableTracking = false,
+      disableAutotracking = false,
+      services = [],
+      debug = false
+    } = {}, 
+    children, 
+    enabledOptimizelyServices
+  }: ProviderProps)
 {
   // Local state to hold the current profile data, allowing it to be updated and
   // accessed across the context
@@ -334,7 +340,7 @@ export function OptimizelyOneProvider(
       getTrackPageServices: () => activeServices.filter(Filters.isActiveWithTrackPage),
       getProfileServices: () => activeServices.filter(Filters.isActiveWithUpdateProfile),
       getProfileDataSources: () => activeServices.filter(Filters.isActiveWithProfileDiscovery),
-      getService: <SC extends string>(code: SC) => activeServices.find(s => s.code === code) as ClientApi.OptimizelyOneService<any, SC> | undefined,
+      getService: <SC extends string>(code: SC) => activeServices.find(s => s.code === code) as SC extends keyof CoreServices ? CoreServices[SC] : (ClientApi.OptimizelyOneService<unknown, SC> | undefined),
       discoverProfileData,
       updateProfile
     }

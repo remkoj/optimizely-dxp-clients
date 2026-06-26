@@ -1,19 +1,18 @@
-/* eslint @next/next/no-before-interactive-script-outside-document: 0 */
 import Script from 'next/script'
 
 export type OptimizelyContentRecsProps = {
-    client: string
-    delivery: number
-    domain?: string
+  client: string
+  delivery: number
+  domain?: string
 }
 
 export const OptimizelyContentRecsTrackingScript = ({
-    client: client_id,
-    delivery: delivery_id,
-    domain = 'idio.co'
+  client: client_id,
+  delivery: delivery_id,
+  domain = 'idio.co'
 }: OptimizelyContentRecsProps) => {
 
-    return <Script id='content-recs-script' strategy='beforeInteractive'>{`
+  return <Script id='content-recs-script' strategy='beforeInteractive'>{`
     // Set client and delivery
     _iaq = [
         ['client', ${ JSON.stringify(client_id) }],
@@ -30,7 +29,7 @@ export const OptimizelyContentRecsTrackingScript = ({
         s.parentNode.insertBefore(ia,s)
     }(document,'script');
 `}
-</Script>
+  </Script>
 }
 
 export default OptimizelyContentRecsTrackingScript

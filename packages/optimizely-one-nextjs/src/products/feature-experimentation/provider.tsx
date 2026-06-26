@@ -1,6 +1,5 @@
 'use client'
-
-import { createInstance, OptimizelyProvider } from '@optimizely/react-sdk';
+import * as FX from '@optimizely/react-sdk';
 import { useMemo, useEffect, type PropsWithChildren } from 'react';
 import { useCookie } from '../../components/use-cookie.js';
 
@@ -11,18 +10,24 @@ export type FeatureExperimentationProviderProps = PropsWithChildren<{
 }>
 
 export default function FeatureExperimentationProvider({ sdkKey, frontendCookie, debug = false, children }: FeatureExperimentationProviderProps) {
-  const optimizelyClient = useMemo(() => createInstance({
-    sdkKey,
-    datafileOptions: {
+  const optimizelyClient = useMemo(() => FX.createInstance({
+    projectConfigManager: FX.createPollingProjectConfigManager({
+      sdkKey,
       autoUpdate: true,
       updateInterval: 1000 * 60, // Update every minute
-    },
-    eventBatchSize: 10,
-    eventFlushInterval: 1000 * 30, // Flush every 30 seconds
-    logLevel: debug ? 'debug' : 'error',
-    odpOptions: {
-      disabled: false
-    }
+    }),
+    eventProcessor: FX.createBatchEventProcessor({
+      batchSize: 10, // Send events in batches of 10 (or when flush interval is reached)
+      flushInterval: 1000 * 30, // Flush every 30 seconds
+    }),
+    odpManager: FX.createOdpManager({
+      eventBatchSize: 10,
+      eventFlushInterval: 1000 * 30,
+    }),
+    vuidManager: FX.createVuidManager({
+      enableVuid: true,
+      // vuidCache: 
+    })
   }), [sdkKey, debug]);
 
   const [userId] = useCookie(frontendCookie, `optimizely-one-user-${Math.random().toString(36).substring(2, 15)}`);
@@ -38,8 +43,8 @@ export default function FeatureExperimentationProvider({ sdkKey, frontendCookie,
   }, [sdkKey, frontendCookie, userId, debug]);
 
   return (
-    <OptimizelyProvider optimizely={optimizelyClient} user={{ id: userId }}>
+    <FX.OptimizelyProvider client={optimizelyClient} user={{ id: userId }}>
       {children}
-    </OptimizelyProvider>
+    </FX.OptimizelyProvider>
   );
 }

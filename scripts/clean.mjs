@@ -1,6 +1,6 @@
-const { globSync } = require('glob')
-const path = require('node:path')
-const fs = require('node:fs')
+import { globSync } from 'glob';
+import path from 'node:path';
+import fs from 'node:fs';
 
 process.stdout.write('Cleaning package folders\n')
 
@@ -22,10 +22,10 @@ const buildFolders = globSync('./packages/**/{build,dist,bin,.rollup.cache,node_
 if (buildFolders.length > 0)
   buildFolders.forEach((folderPath) => {
     //if (!folderPath.includes('node_modules')) {
-      const fullFolderPath = path.resolve(path.join(process.cwd(), folderPath))
-      process.stdout.write(` - Removing folder ${folderPath}`)
-      fs.rmSync(fullFolderPath, { recursive: true })
-      process.stdout.write(` - done\n`)
+    const fullFolderPath = path.resolve(path.join(process.cwd(), folderPath))
+    process.stdout.write(` - Removing folder ${folderPath}`)
+    fs.rmSync(fullFolderPath, { recursive: true })
+    process.stdout.write(` - done\n`)
     //}
   })
 else process.stdout.write(` - No build folders found\n`)

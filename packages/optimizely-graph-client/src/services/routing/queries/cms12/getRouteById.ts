@@ -2,15 +2,15 @@ import { gql } from "graphql-request"
 import type * as GetAllRoutes from './getAllRoutes.js'
 
 export type Variables = {
-    id: number,
-    workId?: number | null,
-    locale?: string | string[]
+  id: number,
+  workId?: number | null,
+  locale?: string | string[]
 }
 export type Result = {
-    Content: {
-        total: number
-        items: GetAllRoutes.Route[]
-    }
+  Content: {
+    total: number
+    items: GetAllRoutes.Route[]
+  }
 }
 
 export const query = gql`query GetRouteById($id: Int!, $workId: Int, $locale: [Locales]!) {

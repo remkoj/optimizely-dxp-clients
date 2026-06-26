@@ -214,9 +214,9 @@ const CreatePageOptionDefaults: CreatePageOptions<string> = {
   async propsToCmsPath(props) {
     const params : SupportedPageParams = await props.params; // Read the parameters
     const slugs = [ params.lang, ...(params.path ?? [])] // Build the full set of slugs for the path
-        .filter(isNonEmptyString) // Remove empty values
-        .filter((x) => !x.startsWith(encodeURIComponent('var:'))) // Remove any variant specification
-        .map((x) => decodeURIComponent(x)); // Decode the URI components
+      .filter(isNonEmptyString) // Remove empty values
+      .filter((x) => !x.startsWith(encodeURIComponent('var:'))) // Remove any variant specification
+      .map((x) => decodeURIComponent(x)); // Decode the URI components
 
     if (slugs.length === 0) return '/'; // We're requesting the homepage, so just return that path
 
@@ -390,13 +390,13 @@ export function createPage<
       // Resolve the content based upon the path
       const lookupData = await (getContentByPath
         ? loadContentByPath(
-            context.client,
-            getContentByPath,
-            requestPath,
-            channel,
-            initialLocale as LocaleEnum | undefined,
-            requestVariant
-          )
+          context.client,
+          getContentByPath,
+          requestPath,
+          channel,
+          initialLocale as LocaleEnum | undefined,
+          requestVariant
+        )
         : getInfoByPath(context.client, routerFactory, requestPath, channel, requestVariant))
       if (!lookupData) {
         console.error(

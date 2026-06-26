@@ -120,28 +120,32 @@ export async function* getAllContentTypes(client: CmsApiClient, debug: boolean =
   process.stdout.write(chalk.yellowBright(`${figures.arrowRight} Pulling Content Types from Optimizely CMS\n`))
 
   let requestPageSize = pageSize;
-  let requestPageIndex = 0
-  let totalItemCount = 0
-  let totalPages = 0
+  let requestPageIndex = 0;
+  let totalItemCount: number;
+  let totalPages: number;
   do {
-    const resultsPage = await client.contentTypesList({ query: { pageIndex: requestPageIndex, pageSize: requestPageSize } }).catch((_) => {
+    const resultsPage = await client.contentTypesList({ query: { pageIndex: requestPageIndex, pageSize: requestPageSize } }).catch(() => {
       return {
         items: [],
         totalItemCount: 0,
+        totalCount: 0,
         pageIndex: requestPageIndex,
         pageSize: requestPageSize
       } as IntegrationApi.ContentTypePage
     });
 
+    console.log(resultsPage)
+
     // Calculate fields for next page
-    totalItemCount = resultsPage.totalItemCount ?? 0;
+    //@ts-expect-error  There's a difference between the SaaS & PaaS API, hence we're ignoring the next line
+    totalItemCount = resultsPage.totalItemCount ?? resultsPage.totalCount ?? 0;
     requestPageSize = resultsPage.pageSize
     requestPageIndex = resultsPage.pageIndex + 1
     totalPages = Math.ceil(totalItemCount / requestPageSize)
 
     // Debug output
     if (debug)
-      process.stdout.write(chalk.gray(`${figures.arrowRight} Fetched contentTypes page ${requestPageIndex} of ${totalPages} (${requestPageSize} items per page)\n`))
+      process.stdout.write(chalk.gray(`${figures.arrowRight} Fetched contentTypes page ${requestPageIndex} of ${totalPages} (${requestPageSize} items per page, ${ totalItemCount } items available)\n`))
 
     // Yield items
     for (const contentType of (resultsPage.items ?? [])) {

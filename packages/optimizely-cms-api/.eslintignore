@@ -1,0 +1,3 @@
+# Make sure that generated files are not linted, as they can be large and may contain 
+# code that doesn't follow our linting rules.
+*.gen.ts

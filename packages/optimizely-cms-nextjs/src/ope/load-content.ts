@@ -59,15 +59,15 @@ async function loadContentByLoader(contentRequest: Omit<ContentRequest, 'token' 
     locale:
       contentRequest.locale && contentRequest.locale.length > 0
         ? localeToGraphLocale(
-            Array.isArray(contentRequest.locale)
-              ? contentRequest.locale.at(0)
-              : contentRequest.locale
-          )
+          Array.isArray(contentRequest.locale)
+            ? contentRequest.locale.at(0)
+            : contentRequest.locale
+        )
         : undefined,
     changeset: client.getChangeset(),
   }).catch((e) => {
     console.warn(
-    '🟠 [OnPageEdit][loadContent] getContentById for ' +
+      '🟠 [OnPageEdit][loadContent] getContentById for ' +
       JSON.stringify(contentRequest) +
       ' returned an error', e
     );

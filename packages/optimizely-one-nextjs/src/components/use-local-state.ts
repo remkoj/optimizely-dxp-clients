@@ -15,40 +15,40 @@ export function useLocalState<S>(localStorageKey: string): [S | undefined, Dispa
 export function useLocalState<S>(localStorageKey: string, initialState: S | (() => S)): [S, Dispatch<SetStateAction<S>>]
 export function useLocalState<S>(localStorageKey: string, initialState?: S | (() => S)): [S | undefined, Dispatch<SetStateAction<S | undefined>>]
 {
-    const [internalState, setInternalState] = useState<S | undefined>(initialState);
+  const [internalState, setInternalState] = useState<S | undefined>(initialState);
 
-    // Everytime the localstoragekey changes, we'll update the 
-    // state from local storage. Also we'll register event handlers
-    // to ensure state consistency across windows
-    useEffect(() => {
-        function updateFromLocalStorage() {
-            const localStorageValue = window.localStorage.getItem(localStorageKey);
-            if (!localStorageValue)
-                return;
-            const parsedValue = tryParseJson<S>(localStorageValue);
-            setInternalState(parsedValue);
-        }
+  // Everytime the localstoragekey changes, we'll update the 
+  // state from local storage. Also we'll register event handlers
+  // to ensure state consistency across windows
+  useEffect(() => {
+    function updateFromLocalStorage() {
+      const localStorageValue = window.localStorage.getItem(localStorageKey);
+      if (!localStorageValue)
+        return;
+      const parsedValue = tryParseJson<S>(localStorageValue);
+      setInternalState(parsedValue);
+    }
 
-        function eventHandler(e: StorageEvent) {
-            if (e.storageArea === window.localStorage && e.key === localStorageKey) {
-                updateFromLocalStorage()
-            }
-        }
+    function eventHandler(e: StorageEvent) {
+      if (e.storageArea === window.localStorage && e.key === localStorageKey) {
+        updateFromLocalStorage()
+      }
+    }
 
-        updateFromLocalStorage();
-        window.addEventListener('storage', eventHandler);
-        return () => {
-            window.removeEventListener('storage', eventHandler);
-        }
-    }, [ localStorageKey ]);
+    updateFromLocalStorage();
+    window.addEventListener('storage', eventHandler);
+    return () => {
+      window.removeEventListener('storage', eventHandler);
+    }
+  }, [ localStorageKey ]);
 
-    // Every time the internal state, or storage key changes, we'll
-    // write to localstorage
-    useEffect(() => {
-        window.localStorage.setItem(localStorageKey, JSON.stringify(internalState))
-    }, [ internalState, localStorageKey ])
+  // Every time the internal state, or storage key changes, we'll
+  // write to localstorage
+  useEffect(() => {
+    window.localStorage.setItem(localStorageKey, JSON.stringify(internalState))
+  }, [ internalState, localStorageKey ])
 
-    return [internalState, setInternalState]
+  return [internalState, setInternalState]
 }
 
 
@@ -62,7 +62,7 @@ export function useLocalState<S>(localStorageKey: string, initialState?: S | (()
  * @param reviver The reviver passed to `JSON.parse()`.
  * @returns The parsed value, the original non-string input, or `undefined` when parsing fails.
  */
-export function tryParseJson<R = any>(input?: R | string | null, reviver?: (this: any, key: string, value: any) => any) : R|undefined {
+export function tryParseJson<R = unknown>(input?: R | string | null, reviver?: (this: unknown, key: string, value: unknown) => unknown) : R|undefined {
   try {
     if (input && typeof(input) === "string")
       return JSON.parse(input, reviver) as R

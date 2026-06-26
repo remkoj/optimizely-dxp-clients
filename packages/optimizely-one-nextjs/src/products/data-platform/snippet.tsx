@@ -1,15 +1,14 @@
-/* eslint @next/next/no-before-interactive-script-outside-document: 0 */
 import Script from 'next/script'
 
 export type OptimizelyDataPlatformProps = {
-    trackerId: string
+  trackerId: string
 }
 
 export const OptimizelyDataPlatformScript = (props: OptimizelyDataPlatformProps) => {
-    const odp_id = props.trackerId.split('.').shift() ?? ''
-    if (odp_id == '')
-        return null
-    return <>
+  const odp_id = props.trackerId.split('.').shift() ?? ''
+  if (odp_id == '')
+    return null
+  return <>
     <Script id='data-platform-script' strategy='beforeInteractive'>{`
     var zaius = window['zaius'] || (window['zaius'] = []);
     zaius.methods = ['initialize', 'onload', 'customer', 'entity', 'event', 'subscribe', 'unsubscribe', 'consent', 'identify', 'anonymize', 'dispatch'];
@@ -39,7 +38,7 @@ export const OptimizelyDataPlatformScript = (props: OptimizelyDataPlatformProps)
         firstScript.parentNode.insertBefore(script, firstScript);
     })();
 `}
-</Script>
+    </Script>
     <link rel="preconnect" href="https://api.zaius.com" />
   </>
 }

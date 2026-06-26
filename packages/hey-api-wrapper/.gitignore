@@ -1,0 +1,6 @@
+tsconfig.tsbuildinfo
+openapi-ts*.log
+dist/
+
+# Do not leak build keys
+.env*.local

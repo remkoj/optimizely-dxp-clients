@@ -21,23 +21,23 @@ const intro =`#!/usr/bin/env node
  */`
 
 export default {
-    input: "src/index.ts",
-    output: {
-        dir: "bin",
-        intro,
-        format: 'es',
-        sourcemap: true
+  input: "src/index.ts",
+  output: {
+    dir: "bin",
+    intro,
+    format: 'es',
+    sourcemap: true
   },
-    external: getExternals(),
-    plugins: [
-        typescript({
-            outDir: "./bin"
-        }),
-        json({
-            preferConst: true
-        }),
-        commonjs({
-            extensions: ['.js','.cjs']
-        })
-    ]
+  external: getExternals(),
+  plugins: [
+    typescript({
+      outDir: "./bin"
+    }),
+    json({
+      preferConst: true
+    }),
+    commonjs({
+      extensions: ['.js','.cjs']
+    })
+  ]
 }

@@ -40,7 +40,7 @@ import '../../styles.css'
 import dynamic from 'next/dynamic'
 type PanelList = Array<{
   id: string
-  Tab: ComponentType<{}>
+  Tab: ComponentType<object>
   Panel: ComponentType<{ servicePrefix?: string; refreshInterval?: number }>
   products: Array<string>
 }>
@@ -191,7 +191,7 @@ export const OptimizelyOneGadget: FunctionComponent<
         pathname + (newSearch.length > 0 ? '?' + newParams.toString() : '')
       try {
         window.location.href = newPath
-      } catch (e) {
+      } catch {
         console.log(
           '🛑 Refreshing the page to apply the new Web Experimenation project failed, please refresh manually.'
         )

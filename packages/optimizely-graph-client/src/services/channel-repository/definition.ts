@@ -1,5 +1,11 @@
 import type { ReadonlyChannelDefinitionData, ChannelDefinitionData, ChannelContent, ChannelDomain, ChannelLocale } from './types.js'
 
+/**
+ * Immutable runtime wrapper around channel configuration data.
+ *
+ * `ChannelDefinition` exposes domain and locale helper methods used by
+ * application code to resolve URLs, locales, and Content Graph locale values.
+ */
 export class ChannelDefinition implements Readonly<ChannelDefinitionData> {
   public readonly id: string
   public readonly name: string
@@ -8,23 +14,47 @@ export class ChannelDefinition implements Readonly<ChannelDefinitionData> {
   public readonly content: ChannelContent
   protected readonly dxp_url: string
 
+  /**
+   * Determine if the current runtime environment is development.
+   *
+   * @returns `true` when `NODE_ENV` equals `development`, otherwise `false`
+   */
   public get isDev(): boolean {
     try {
       return process.env.NODE_ENV == 'development'
-    } catch (e) {
+    } catch {
       return false
     }
   }
 
+  /**
+   * Resolve the default channel locale code.
+   *
+   * The first locale marked as default is used, otherwise the first configured
+   * locale. If no locales exist, it falls back to `en`.
+   *
+   * @returns The default locale code
+   */
   public get defaultLocale(): string {
     return (this.locales.filter(x => x.isDefault)[0] || this.locales[0])?.code ?? "en"
   }
 
+  /**
+   * Resolve the default channel domain name.
+   *
+   * @returns The primary domain name, or `localhost:3000` when unavailable
+   */
   public get defaultDomain(): string {
     const pd = this.getPrimaryChannelDomain()
     return pd?.name ?? "localhost:3000"
   }
 
+  /**
+   * Create a new channel definition from persisted channel data.
+   *
+   * @param initialData The channel data payload
+   * @param dxp_url The CMS base URL for this channel
+   */
   public constructor(initialData: ChannelDefinitionData, dxp_url: string) {
     this.id = initialData.id
     this.name = initialData.name
@@ -46,11 +76,22 @@ export class ChannelDefinition implements Readonly<ChannelDefinitionData> {
     return pd ? this.channelDomainToUrl(pd) : fallbackValue;
   }
 
+  /**
+   * Get the edit domain for this channel.
+   *
+   * @returns The configured edit domain URL, or the CMS URL when no explicit
+   *          edit domain is configured
+   */
   public getEditDomain(): URL {
-    const edit = this.domains.filter(x => x.isEdit).at(0)
+    const edit = this.domains.filter(x => x.isEdit)[0]
     return edit ? this.channelDomainToUrl(edit) : new URL(this.dxp_url)
   }
 
+  /**
+   * Retrieve the configured CMS URL for this channel.
+   *
+   * @returns The CMS URL
+   */
   public getCmsUrl(): string {
     return this.dxp_url
   }
@@ -58,11 +99,18 @@ export class ChannelDefinition implements Readonly<ChannelDefinitionData> {
   protected getPrimaryChannelDomain() {
     return this.domains.find(x => x.isPrimary) || // First get the configured primary
         //this.domains.find(x => x.name.startsWith('localhost') || x.name.includes('.local')) || // Then get a localhost or .local
-        this.domains.at(0) //Finally try to get the first one
+        this.domains[0] //Finally try to get the first one
   }
 
+  /**
+   * Get the domain URL that should be used for a specific locale.
+   *
+   * @param locale The locale code to resolve a domain for
+   * @returns The locale-specific domain URL, the primary domain URL, or a
+   *          localhost fallback URL
+   */
   public getDomainForLocale(locale: string): URL {
-    const selected = this.domains.filter(x => x.forLocale === locale).at(0) || this.getPrimaryChannelDomain()
+    const selected = this.domains.filter(x => x.forLocale === locale)[0] || this.getPrimaryChannelDomain()
     if (selected)
       return this.channelDomainToUrl(selected)
     return new URL('http://localhost:3000')
@@ -186,7 +234,7 @@ export class ChannelDefinition implements Readonly<ChannelDefinitionData> {
  * @param     toTest    The value to test
  * @returns   `true` if the value is a ChannelDefinition, `false` otherwise
  */
-export function isChannelDefinition(toTest: any): toTest is ChannelDefinition {
+export function isChannelDefinition(toTest: unknown): toTest is ChannelDefinition {
   if (typeof toTest !== 'object' || toTest === null)
     return false;
   return typeof (toTest as ChannelDefinition).id === 'string' && typeof (toTest as ChannelDefinition).getPrimaryDomain === 'function';
@@ -199,7 +247,7 @@ export function isChannelDefinition(toTest: any): toTest is ChannelDefinition {
  * @param     toTest    The value to gate
  * @returns   Either `toTest` or `undefined`, depending on the type of `toTest`
  */
-export function ifChannelDefinition(toTest: any): ChannelDefinition | undefined {
+export function ifChannelDefinition(toTest: unknown): ChannelDefinition | undefined {
   return isChannelDefinition(toTest) ? toTest : undefined
 }
 

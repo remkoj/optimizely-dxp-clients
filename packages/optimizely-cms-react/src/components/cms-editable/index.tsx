@@ -215,21 +215,21 @@ export const CmsEditable: CmsEditableBaseComponent = <CT extends ElementType>({
 
   const itemProps: Record<string, any> = addEditProps
     ? {
-        ...props,
-        // We assume GUIDs are represented as 32 char long strings, all other values are IDs
-        'data-epi-block-id': showBlockId ? cmsId : undefined,
-        // We assume GUIDs are represented as 32 char long strings
-        'data-epi-content-id': showContentId ? cmsId : undefined,
-        // We pass through the property name if provided
-        'data-epi-property-name': editType ? dataEpiPropertyName : undefined,
-        // We pass through the property name if provided
-        'data-epi-edit': editType ? undefined : dataEpiPropertyName,
-        // Configure the rendition of the property editor
-        'data-epi-property-edittype': editType ?? undefined,
-      }
+      ...props,
+      // We assume GUIDs are represented as 32 char long strings, all other values are IDs
+      'data-epi-block-id': showBlockId ? cmsId : undefined,
+      // We assume GUIDs are represented as 32 char long strings
+      'data-epi-content-id': showContentId ? cmsId : undefined,
+      // We pass through the property name if provided
+      'data-epi-property-name': editType ? dataEpiPropertyName : undefined,
+      // We pass through the property name if provided
+      'data-epi-edit': editType ? undefined : dataEpiPropertyName,
+      // Configure the rendition of the property editor
+      'data-epi-property-edittype': editType ?? undefined,
+    }
     : {
-        ...props,
-      }
+      ...props,
+    }
 
   if (typeof DefaultElement !== 'string') {
     if (forwardCtx === true) itemProps['ctx'] = ctx

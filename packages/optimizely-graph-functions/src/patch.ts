@@ -11,7 +11,7 @@ const downloadPath = "./packages"
 const packageJsonPath = path.join(process.cwd(), 'package.json')
 if (!fs.existsSync(packageJsonPath))
 {
-    process.exit(0)
+  process.exit(0)
 }
 
 const packageData = JSON.parse(fs.readFileSync(packageJsonPath).toString())
@@ -21,25 +21,25 @@ console.log("🚀 [Optimizely Graph Functions] Enabling recursive query support 
 
 const downloadDir = path.normalize(path.join(process.cwd(), downloadPath))
 fetch(downloadLink).then(response => {
-    if (!response.ok || !response.body)
-        return
+  if (!response.ok || !response.body)
+    return
     
-    fs.mkdirSync(downloadDir, { recursive: true })
-    const downloadTarget = path.join(downloadDir, downloadFile)
+  fs.mkdirSync(downloadDir, { recursive: true })
+  const downloadTarget = path.join(downloadDir, downloadFile)
     
-    console.log("🚀 [Optimizely Graph Functions] Downloading patched visitor-plugin-common from GitHub")
-    finished(Readable.fromWeb(response.body as Parameters<typeof Readable['fromWeb']>[0]).pipe(fs.createWriteStream(downloadTarget, { flags: 'w' }))).then(() => {
-        console.log("🚀 [Optimizely Graph Functions] Downloaded patched visitor-plugin-common")
+  console.log("🚀 [Optimizely Graph Functions] Downloading patched visitor-plugin-common from GitHub")
+  finished(Readable.fromWeb(response.body as Parameters<typeof Readable['fromWeb']>[0]).pipe(fs.createWriteStream(downloadTarget, { flags: 'w' }))).then(() => {
+    console.log("🚀 [Optimizely Graph Functions] Downloaded patched visitor-plugin-common")
 
-        packageData.resolutions = packageData.resolutions || {}
-        const importPath = 'file:./' + posix.normalize(posix.join(downloadPath, downloadFile))
-        if (packageData.resolutions["@graphql-codegen/visitor-plugin-common"] != importPath) {
-            packageData.resolutions["@graphql-codegen/visitor-plugin-common"] = importPath
-            const updatedPackageData = JSON.stringify(packageData, undefined, 2)
-            fs.writeFileSync(packageJsonPath, updatedPackageData, { flag: 'w' })
-            console.log("🚀 [Optimizely Graph Functions] Applied resolution to project "+packageName)
-        } else { 
-            console.log("🚀 [Optimizely Graph Functions] Resolution already exists "+packageName)
-        }
-    })
+    packageData.resolutions = packageData.resolutions || {}
+    const importPath = 'file:./' + posix.normalize(posix.join(downloadPath, downloadFile))
+    if (packageData.resolutions["@graphql-codegen/visitor-plugin-common"] != importPath) {
+      packageData.resolutions["@graphql-codegen/visitor-plugin-common"] = importPath
+      const updatedPackageData = JSON.stringify(packageData, undefined, 2)
+      fs.writeFileSync(packageJsonPath, updatedPackageData, { flag: 'w' })
+      console.log("🚀 [Optimizely Graph Functions] Applied resolution to project "+packageName)
+    } else { 
+      console.log("🚀 [Optimizely Graph Functions] Resolution already exists "+packageName)
+    }
+  })
 })

@@ -1,5 +1,5 @@
-import { NextResponse } from "next/server";
-import channel from "@/channel";
+import { NextResponse } from 'next/server';
+import channel from '@/channel';
 
 export function GET() {
   return NextResponse.json(channel)

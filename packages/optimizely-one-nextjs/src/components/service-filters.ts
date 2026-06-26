@@ -8,8 +8,8 @@ import * as ClientApi from '../client-types';
  * @param toTest The service instance to validate.
  * @returns `true` when the service is active and exposes `activatePage`.
  */
-export function isActiveWithActivatePage<T = any, SC extends string = string>(toTest: ClientApi.OptimizelyOneService<T, SC>): toTest is ClientApi.OptimizelyOneServiceWithCapability<T, SC, 'activatePage'> {
-    return (toTest.isActive && toTest.activatePage && typeof toTest.activatePage === 'function') ?? false
+export function isActiveWithActivatePage<T = unknown, SC extends string = string>(toTest: ClientApi.OptimizelyOneService<T, SC>): toTest is ClientApi.OptimizelyOneServiceWithCapability<T, SC, 'activatePage'> {
+  return (toTest.isActive && toTest.activatePage && typeof toTest.activatePage === 'function') ?? false
 }
 
 /**
@@ -20,8 +20,8 @@ export function isActiveWithActivatePage<T = any, SC extends string = string>(to
  * @param toTest The service instance to validate.
  * @returns `true` when the service is active and exposes `trackPage`.
  */
-export function isActiveWithTrackPage<T = any, SC extends string = string>(toTest: ClientApi.OptimizelyOneService<T, SC>): toTest is ClientApi.OptimizelyOneServiceWithCapability<T, SC, 'trackPage'> {
-    return (toTest.isActive && toTest.trackPage && typeof toTest.trackPage === 'function') ?? false
+export function isActiveWithTrackPage<T = unknown, SC extends string = string>(toTest: ClientApi.OptimizelyOneService<T, SC>): toTest is ClientApi.OptimizelyOneServiceWithCapability<T, SC, 'trackPage'> {
+  return (toTest.isActive && toTest.trackPage && typeof toTest.trackPage === 'function') ?? false
 }
 
 /**
@@ -32,8 +32,8 @@ export function isActiveWithTrackPage<T = any, SC extends string = string>(toTes
  * @param toTest The service instance to validate.
  * @returns `true` when the service is active and exposes `updateProfile`.
  */
-export function isActiveWithUpdateProfile<T = any, SC extends string = string>(toTest: ClientApi.OptimizelyOneService<T, SC>): toTest is ClientApi.OptimizelyOneServiceWithCapability<T, SC, 'updateProfile'> {
-    return (toTest.isActive && toTest.updateProfile && typeof toTest.updateProfile === 'function') ?? false
+export function isActiveWithUpdateProfile<T = unknown, SC extends string = string>(toTest: ClientApi.OptimizelyOneService<T, SC>): toTest is ClientApi.OptimizelyOneServiceWithCapability<T, SC, 'updateProfile'> {
+  return (toTest.isActive && toTest.updateProfile && typeof toTest.updateProfile === 'function') ?? false
 }
 
 /**
@@ -44,8 +44,8 @@ export function isActiveWithUpdateProfile<T = any, SC extends string = string>(t
  * @param toTest The service instance to validate.
  * @returns `true` when the service is active and exposes `discoverProfileData`.
  */
-export function isActiveWithProfileDiscovery<T = any, SC extends string = string>(toTest: ClientApi.OptimizelyOneService<T, SC>): toTest is ClientApi.OptimizelyOneServiceWithCapability<T, SC, 'discoverProfileData'> {
-    return (toTest.isActive && toTest.discoverProfileData && typeof toTest.discoverProfileData === 'function') ?? false
+export function isActiveWithProfileDiscovery<T = unknown, SC extends string = string>(toTest: ClientApi.OptimizelyOneService<T, SC>): toTest is ClientApi.OptimizelyOneServiceWithCapability<T, SC, 'discoverProfileData'> {
+  return (toTest.isActive && toTest.discoverProfileData && typeof toTest.discoverProfileData === 'function') ?? false
 }
 
 /**
@@ -56,6 +56,6 @@ export function isActiveWithProfileDiscovery<T = any, SC extends string = string
  * @param toTest The service instance to validate.
  * @returns `true` when the service is active and exposes `trackEvent`.
  */
-export function isActiveWithEventTracker<T = any, SC extends string = string>(toTest: ClientApi.OptimizelyOneService<T, SC>): toTest is ClientApi.OptimizelyOneServiceWithCapability<T, SC, 'trackEvent'> {
-    return (toTest.isActive && toTest.trackEvent && typeof toTest.trackEvent === 'function') ?? false
+export function isActiveWithEventTracker<T = unknown, SC extends string = string>(toTest: ClientApi.OptimizelyOneService<T, SC>): toTest is ClientApi.OptimizelyOneServiceWithCapability<T, SC, 'trackEvent'> {
+  return (toTest.isActive && toTest.trackEvent && typeof toTest.trackEvent === 'function') ?? false
 }
