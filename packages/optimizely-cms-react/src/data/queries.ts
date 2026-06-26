@@ -1,18 +1,18 @@
 import { gql } from 'graphql-request'
 
 export const CmsContentFragments = {
-    IContentDataProps: ["_metadata","_type","__typename"],
-    ContentLink: gql`fragment ContentLink on ContentModelReference {
+  IContentDataProps: ["_metadata","_type","__typename"],
+  ContentLink: gql`fragment ContentLink on ContentModelReference {
         id: Id,
         workId: WorkId,
         guidValue: GuidValue
     }`,
-    ContentLinkSearch: gql`fragment ContentLinkSearch on ContentModelReferenceSearch {
+  ContentLinkSearch: gql`fragment ContentLinkSearch on ContentModelReferenceSearch {
         id: Id,
         workId: WorkId,
         guidValue: GuidValue
     }`,
-    IContentData: gql`fragment IContentData on IContent {
+  IContentData: gql`fragment IContentData on IContent {
         contentType: ContentType
         id: ContentLink {
             ...ContentLink
@@ -22,7 +22,7 @@ export const CmsContentFragments = {
         }
         path:RelativePath
     }`,
-    ContentAreaItemData: gql`fragment ContentAreaItemData on ContentAreaItemModelSearch {
+  ContentAreaItemData: gql`fragment ContentAreaItemData on ContentAreaItemModelSearch {
         item: ContentLink {
             ...ContentLinkSearch
             data: Expanded {
@@ -31,7 +31,7 @@ export const CmsContentFragments = {
         }
         displayOption:DisplayOption
     }`,
-    BlockContentAreaItemSearchData: gql`fragment BlockContentAreaItemSearchData on ContentAreaItemModelSearch {
+  BlockContentAreaItemSearchData: gql`fragment BlockContentAreaItemSearchData on ContentAreaItemModelSearch {
         item: ContentLink {
             ...ContentLinkSearch
             data: Expanded {
@@ -40,7 +40,7 @@ export const CmsContentFragments = {
         }
         displayOption:DisplayOption
     }`,
-    BlockContentAreaItemData: gql`fragment BlockContentAreaItemData on ContentAreaItemModel {
+  BlockContentAreaItemData: gql`fragment BlockContentAreaItemData on ContentAreaItemModel {
         item: ContentLink {
             ...ContentLink
             data: Expanded {
@@ -49,7 +49,7 @@ export const CmsContentFragments = {
         }
         displayOption:DisplayOption
     }`,
-    LinkItemData: gql`fragment LinkItemData on LinkItemNode {
+  LinkItemData: gql`fragment LinkItemData on LinkItemNode {
       children: Text
       title: Title
       href: Href
@@ -61,7 +61,7 @@ export const CmsContentFragments = {
         }
       }
     }`,
-    ImageData: gql`fragment ImageData on ContentModelReference {
+  ImageData: gql`fragment ImageData on ContentModelReference {
       ...ContentLink
       url: Url
       data: Expanded {
@@ -71,7 +71,7 @@ export const CmsContentFragments = {
         path: RelativePath
       }
     }`,
-    ImageDataSearch: gql`fragment ImageDataSearch on ContentModelReferenceSearch {
+  ImageDataSearch: gql`fragment ImageDataSearch on ContentModelReferenceSearch {
       ...ContentLinkSearch
       url: Url
       data: Expanded {
@@ -81,10 +81,10 @@ export const CmsContentFragments = {
         path: RelativePath
       }
     }`,
-    BlockData: gql`fragment BlockData on IContent {
+  BlockData: gql`fragment BlockData on IContent {
         ...IContentData
     }`,
-    PageData: gql`fragment PageData on IContent {
+  PageData: gql`fragment PageData on IContent {
         ...IContentData
     }`
 }

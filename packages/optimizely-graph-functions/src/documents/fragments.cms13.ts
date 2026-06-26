@@ -183,7 +183,7 @@ export default [
     default
   }
 }`,
-`fragment _CmpImageAssetInfo on cmp_PublicImageAsset {
+  `fragment _CmpImageAssetInfo on cmp_PublicImageAsset {
   __typename
   Title
   AltText
@@ -197,7 +197,7 @@ export default [
     Url
   }
 }`,
-`fragment _CmpVideoAssetInfo on cmp_PublicVideoAsset {
+  `fragment _CmpVideoAssetInfo on cmp_PublicVideoAsset {
   Title
   AltText
   Url

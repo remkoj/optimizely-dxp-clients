@@ -119,7 +119,7 @@ export class DefaultComponentFactory implements ComponentFactory {
    * @returns 
    */
   private processComponentTypeHandle(handle: ComponentTypeHandle, variant?: string): string {
-    let handleToProcess = typeof handle === 'string' ? handle.split(MERGE_SYMBOL) : [...handle];
+    const handleToProcess = typeof handle === 'string' ? handle.split(MERGE_SYMBOL) : [...handle];
     if (Array.isArray(handleToProcess) && handleToProcess.every((s) => typeof s === 'string')) {
       
       const offset = (

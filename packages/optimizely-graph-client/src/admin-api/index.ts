@@ -7,41 +7,41 @@ export * from './types.js'
 export * from './client/index.js'
 
 export class OptimizelyGraphAdminApi extends BaseOptimizelyGraphAdminApi {
-    protected readonly graphConfig : OptimizelyGraphConfigInternal
+  protected readonly graphConfig : OptimizelyGraphConfigInternal
 
-    public constructor(config?: OptimizelyGraphConfig) {
-        const graphConfig = applyConfigDefaults(config ?? readEnvironmentVariables())
-        if (!validateConfig(graphConfig, true))
-            throw new Error("The Optimizely Graph Admin API requires the App Key and Secret to be defined")
-        const apiConfig : Partial<OpenAPIConfig> = {
-            BASE: graphConfig.gateway,
-            CREDENTIALS: "include",
-            HEADERS: {
-                "X-Client": "@RemkoJ/OptimizelyGraphClient",
-            }
-        }
-        super(apiConfig, OptiHttpRequest)
-        if (isOptiHttpRequest(this.request))
-            this.request.setOptiGraphConfig(graphConfig)
-        this.graphConfig = graphConfig
+  public constructor(config?: OptimizelyGraphConfig) {
+    const graphConfig = applyConfigDefaults(config ?? readEnvironmentVariables())
+    if (!validateConfig(graphConfig, true))
+      throw new Error("The Optimizely Graph Admin API requires the App Key and Secret to be defined")
+    const apiConfig : Partial<OpenAPIConfig> = {
+      BASE: graphConfig.gateway,
+      CREDENTIALS: "include",
+      HEADERS: {
+        "X-Client": "@RemkoJ/OptimizelyGraphClient",
+      }
     }
-    /**
+    super(apiConfig, OptiHttpRequest)
+    if (isOptiHttpRequest(this.request))
+      this.request.setOptiGraphConfig(graphConfig)
+    this.graphConfig = graphConfig
+  }
+  /**
      * Retrieve the journal contents from a Content Source post operation
      * 
      * @param       journalId       The journal identifier, typically something like 'stream/{guid}'
      * @returns     The journal contents
      */
-    public getJournal(journalId: string) : CancelablePromise<ClientTypes.JournalResponse> {
-        return this.request.request<ClientTypes.JournalResponse>({
-            method: "GET",
-            url: "/journal/{journalId}",
-            path: {
-                'journalId': journalId,
-            }
-        })
-    }
+  public getJournal(journalId: string) : CancelablePromise<ClientTypes.JournalResponse> {
+    return this.request.request<ClientTypes.JournalResponse>({
+      method: "GET",
+      url: "/journal/{journalId}",
+      path: {
+        'journalId': journalId,
+      }
+    })
+  }
 
-    /**
+  /**
      * Convenience mehtod that chains the two needed service calls to get the
      * actual result from submitting content into Optimizely Graph.
      * 
@@ -49,20 +49,20 @@ export class OptimizelyGraphAdminApi extends BaseOptimizelyGraphAdminApi {
      * @param   contentItems    The data to be sent to Optimizely Graph in the required NDJson format
      * @returns The results of the operation
      */
-    public postSourceContent(sourceId: string, contentItems: string) : CancelablePromise<ClientTypes.PostContentV2DataHandlerResponse>
-    {
-        return this.request.request<ClientTypes.PostContentV2DataHandlerResponse>({
-            method: 'POST',
-            url: '/api/content/v2/data',
-            query: {
-                'id': sourceId,
-            },
-            body: contentItems,
-            mediaType: 'application/x-ndjson',
-        });
-    }
+  public postSourceContent(sourceId: string, contentItems: string) : CancelablePromise<ClientTypes.PostContentV2DataHandlerResponse>
+  {
+    return this.request.request<ClientTypes.PostContentV2DataHandlerResponse>({
+      method: 'POST',
+      url: '/api/content/v2/data',
+      query: {
+        'id': sourceId,
+      },
+      body: contentItems,
+      mediaType: 'application/x-ndjson',
+    });
+  }
 
-    /**
+  /**
      * Retrieve the OpenAPI Specification of the Optimizely Graph management
      * API, that is wrapped by this client. This will fetch the OpenAPI spec
      * from the service, so it might be ahead of the OpenAPI spec that was 
@@ -70,13 +70,13 @@ export class OptimizelyGraphAdminApi extends BaseOptimizelyGraphAdminApi {
      * 
      * @returns     The OpenAPI spec
      */
-    public getOpenApiSpec() : CancelablePromise<any>
-    {
-        return this.request.request({
-            method: 'GET',
-            url: '/app/swagger/swagger.json'
-        })
-    }
+  public getOpenApiSpec() : CancelablePromise<any>
+  {
+    return this.request.request({
+      method: 'GET',
+      url: '/app/swagger/swagger.json'
+    })
+  }
 }
 
 /**
@@ -87,9 +87,9 @@ export class OptimizelyGraphAdminApi extends BaseOptimizelyGraphAdminApi {
  */
 export function isApiError(error: any) : error is ApiError
 {
-    if (typeof error != 'object' || error == null)
-        return false
-    return typeof (error as ApiError).status == 'number' && typeof (error as ApiError).url == 'string'
+  if (typeof error != 'object' || error == null)
+    return false
+  return typeof (error as ApiError).status == 'number' && typeof (error as ApiError).url == 'string'
 }
 
 /**
@@ -101,7 +101,7 @@ export function isApiError(error: any) : error is ApiError
  */
 export function createClient(config?: OptimizelyGraphConfig) : OptimizelyGraphAdminApi
 {
-    return new OptimizelyGraphAdminApi(config)
+  return new OptimizelyGraphAdminApi(config)
 }
 
 export default createClient

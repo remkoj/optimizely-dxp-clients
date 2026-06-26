@@ -119,7 +119,7 @@ export default [
     path:RelativePath
     _type: __typename
   }`,
-    `fragment ImageData on ContentModelReference {
+  `fragment ImageData on ContentModelReference {
       ...ContentLink
       url: Url
       data: Expanded {
@@ -129,7 +129,7 @@ export default [
         path: RelativePath
       }
     }`,
-    `fragment ImageDataSearch on ContentModelReferenceSearch {
+  `fragment ImageDataSearch on ContentModelReferenceSearch {
       ...ContentLinkSearch
       url: Url
       data: Expanded {

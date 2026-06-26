@@ -132,7 +132,8 @@ export function getStyleFilePathsSync(displayTemplate: IntegrationApi.DisplayTem
       groupPath = path.join('nodes', keyToSlug(displayTemplate.nodeType));
       target = displayTemplate.nodeType;
       break;
-    case 'component':
+    case 'component': 
+    {
       const baseType = contentBaseType;
       target = displayTemplate.contentType;
       groupPath = path.join(
@@ -140,6 +141,7 @@ export function getStyleFilePathsSync(displayTemplate: IntegrationApi.DisplayTem
         keyToSlug(displayTemplate.contentType, { stripLeadingGroup: true })
       )
       break;
+    }
     default:
       throw new Error(`Unsupported DisplayTemplate target for ${ displayTemplate.key }`)
   }
@@ -160,7 +162,7 @@ export function getStyleFilePathsSync(displayTemplate: IntegrationApi.DisplayTem
 }
 
 export async function getStyleFilePaths(definition: IntegrationApi.DisplayTemplate, opts?: { contentBaseType?: IntegrationApi.ContentType['baseType'], client?: CmsApiClient, basePath?: string, createFolder?: boolean }): Promise<StyleFilePaths> {
-  let defintionBaseType = undefined;
+  let defintionBaseType : string | undefined;
   if (definition.contentType && !opts.contentBaseType && opts.client) {
     const contentType = await opts.client.contentTypesGet({ path: { key: definition.contentType }}).catch(() => undefined as IntegrationApi.ContentType)
     defintionBaseType = contentType?.baseType
@@ -192,7 +194,7 @@ export type KeyToSlugOptions = {
    * 
 	 * @default true
   */
-	readonly stripLeadingUnderscore: boolean;
+  readonly stripLeadingUnderscore: boolean;
 } & Omit<SlugifyOptions, 'preserveLeadingUnderscore'>
 
 /**

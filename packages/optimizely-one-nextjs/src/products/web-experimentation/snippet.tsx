@@ -1,26 +1,25 @@
-/* eslint @next/next/no-before-interactive-script-outside-document: 0 */
 import Script from 'next/script'
 
 export type OptimizelyWebExperimentationProps = {
-    projectId: string | number
-    allowProjectOverride?: boolean
-    useProxy?: boolean
-    apiPrefix?: string
+  projectId: string | number
+  allowProjectOverride?: boolean
+  useProxy?: boolean
+  apiPrefix?: string
 }
 
 export const OptimizelyWebExperimentationScript = ({ projectId, allowProjectOverride = false, useProxy = false, apiPrefix = '/api/me' }: OptimizelyWebExperimentationProps) => 
 {
-    function buildUrl(pid: string|number)
-    {
-        return useProxy ?
-            `${ apiPrefix }/exp${ allowProjectOverride ? '?pid=' + pid : '' }` :
-            `https://cdn.optimizely.com/js/${ pid }.js`
-    }
+  function buildUrl(pid: string|number)
+  {
+    return useProxy ?
+      `${ apiPrefix }/exp${ allowProjectOverride ? '?pid=' + pid : '' }` :
+      `https://cdn.optimizely.com/js/${ pid }.js`
+  }
 
-    return <>
-        <Script id='web-experimentation-startup' strategy='beforeInteractive'>{ `window["optimizely"] = window["optimizely"] || [];`}</Script>
-        { allowProjectOverride ? 
-            <Script id='web-experimentation-project' strategy='beforeInteractive'>{`
+  return <>
+    <Script id='web-experimentation-startup' strategy='beforeInteractive'>{ `window["optimizely"] = window["optimizely"] || [];`}</Script>
+    { allowProjectOverride ? 
+      <Script id='web-experimentation-project' strategy='beforeInteractive'>{`
 ((w,d,l) => {
     const localProject = l.getItem('_pid');
     const queryProject = (new URLSearchParams(w.location.search)).get('pid');
@@ -36,10 +35,10 @@ export const OptimizelyWebExperimentationScript = ({ projectId, allowProjectOver
     s.parentNode.insertBefore(wx,s);
 })(window,document,localStorage)
             `}</Script> :
-            <Script id='web-experimentation-project' strategy='beforeInteractive' src={ buildUrl(projectId) } />
-        }
-        <link rel="preconnect" href="https://logx.optimizely.com/v1/events" />
-    </>
+      <Script id='web-experimentation-project' strategy='beforeInteractive' src={ buildUrl(projectId) } />
+    }
+    <link rel="preconnect" href="https://logx.optimizely.com/v1/events" />
+  </>
 }
 
 export default OptimizelyWebExperimentationScript

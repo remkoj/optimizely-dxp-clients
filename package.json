@@ -8,17 +8,17 @@
   "license": "Apache-2.0",
   "private": true,
   "devDependencies": {
-    "@types/node": "^22.19.15",
-    "@yarnpkg/sdks": "^3.2.3",
-    "browserslist": "^4.28.1",
+    "@eslint/compat": "^2.1.0",
+    "@eslint/js": "^10.0.1",
+    "@stylistic/eslint-plugin": "^5.10.0",
+    "eslint": "^10.4.1",
     "glob": "^13.0.6",
-    "prettier": "^3.8.1",
-    "tslib": "^2.8.1",
+    "globals": "^17.6.0",
     "typescript": "^5.9.3",
-    "update-browserslist-db": "^1.2.3",
-    "yaml": "^2.8.3"
+    "typescript-eslint": "^8.61.0",
+    "yaml": "^2.9.0"
   },
-  "packageManager": "yarn@4.13.0",
+  "packageManager": "yarn@4.16.0",
   "workspaces": [
     "packages/*"
   ],
@@ -26,17 +26,13 @@
     "node": ">=22.0.0 <23.0.0",
     "vscode": "^1.22.0"
   },
-  "prettier": {
-    "trailingComma": "es5",
-    "tabWidth": 2,
-    "semi": false,
-    "singleQuote": true
-  },
   "scripts": {
     "opti-graph": "yarn workspace @remkoj/optimizely-graph-cli opti-graph",
     "opti-cms": "yarn workspace @remkoj/optimizely-cms-cli opti-cms",
-    "clean": "yarn node ./scripts/clean.js",
-    "generate": "yarn update-browserslist-db && yarn workspaces foreach -Apt --topological-dev --exclude optimizely-dxp-clients run generate",
+    "clean": "yarn node ./scripts/clean.mjs",
+    "lint": "eslint",
+    "lint:fix": "eslint --fix",
+    "generate": "npx -y update-browserslist-db && yarn workspaces foreach -Apt --topological-dev --exclude optimizely-dxp-clients run generate",
     "prepare": "yarn workspaces foreach -Apt --topological-dev --exclude optimizely-dxp-clients run prepare",
     "recompile": "yarn workspaces foreach -Apt --topological-dev --exclude optimizely-dxp-clients run recompile",
     "watch": "yarn workspaces foreach -Api -j unlimited --exclude optimizely-dxp-clients run watch",
@@ -48,11 +44,10 @@
     "version-bump-patch": "yarn workspaces foreach -At --topological-dev version -d patch",
     "version-apply": "yarn workspaces foreach -At --topological-dev version apply",
     "versions": "yarn workspaces foreach -At --topological-dev version",
-    "update:sdks": "yarn sdks vscode",
     "update:deps": "yarn upgrade-interactive && yarn dedupe && yarn update:sdks && yarn update:license-info",
     "update:yarn": "yarn set version stable && yarn install && yarn dedupe && yarn run update:sdks",
     "update:all": "yarn run update:yarn && yarn run update:deps && yarn run artefacts",
-    "update:license-info": "yarn node ./scripts/licenses.js",
+    "update:license-info": "yarn node ./scripts/licenses.mjs",
     "publish": "yarn workspaces foreach -Apt --topological-dev --exclude optimizely-dxp-clients npm publish --access public"
   },
   "resolutions": {

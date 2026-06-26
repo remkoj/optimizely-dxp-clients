@@ -118,10 +118,10 @@ export type CmsComponentWithOptionalQuery<T = DocumentNode, L extends Record<str
  */
 export type CmsComponent<T = DocumentNode, L extends Record<string, any> = Record<string, any>> =
   T extends TypedDocumentNode<infer R, any> ? CmsComponentWithQuery<R, L> :
-  T extends DocumentNode ? CmsComponentWithQuery<{ [key: string]: any }, L> :
-  T extends GraphQLFragmentBase ? CmsComponentWithFragment<T, L> :
-  T extends GraphQLQueryBase ? CmsComponentWithQuery<T, L> :
-  CmsComponentWithOptionalQuery<T, L>
+    T extends DocumentNode ? CmsComponentWithQuery<{ [key: string]: any }, L> :
+      T extends GraphQLFragmentBase ? CmsComponentWithFragment<T, L> :
+        T extends GraphQLQueryBase ? CmsComponentWithQuery<T, L> :
+          CmsComponentWithOptionalQuery<T, L>
 
 /**
  * A generic Optimizely CMS Component used to render a layout node from an experience, which cannot

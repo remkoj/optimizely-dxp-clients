@@ -1,6 +1,6 @@
 'use client'
 import { type FunctionComponent } from 'react'
-import { ArrowPathIcon, UserCircleIcon } from '@heroicons/react/20/solid'
+import { UserCircleIcon } from '@heroicons/react/20/solid'
 import useSWR from 'swr'
 import type { ProfileApiResponse as MeResponse } from '../../api/profile-api-service'
 import Notice from './_notice'
@@ -18,7 +18,6 @@ export const ProfilePanel: FunctionComponent<ProfilePanelProps> = ({
   const {
     data: profile,
     isLoading,
-    isValidating,
     error,
   } = useSWR<MeResponse>(topics, {
     revalidateOnMount: true,
@@ -40,7 +39,7 @@ export const ProfilePanel: FunctionComponent<ProfilePanelProps> = ({
       {profile && !profile.profile && <Notice message="Anonymous session" />}
       {profile && profile.profile && (
         <div className="oo:w-full oo:flex oo:flex-row oo:gap-4 oo:mb-2">
-          <div className="oo:flex-none oo:w-[100px]">
+          <div className="oo:flex-none oo:w-25">
             {profile.profile.image_url ? (
               <img
                 src={profile.profile.image_url}
@@ -51,7 +50,7 @@ export const ProfilePanel: FunctionComponent<ProfilePanelProps> = ({
               <UserCircleIcon className="oo:w-full oo:aspect-square oo:rounded-[15px]" />
             )}
           </div>
-          <div className="oo:flex-grow">
+          <div className="oo:grow">
             <dl className="oo:grid oo:grid-cols-3 oo:gap-x-4 oo:gap-y-1">
               <dt className="oo:font-bold">Name:</dt>
               <dd className="oo:col-span-2">

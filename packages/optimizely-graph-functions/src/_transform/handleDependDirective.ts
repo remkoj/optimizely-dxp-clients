@@ -71,10 +71,10 @@ export async function handleDependDirective(
     }) : undefined
     return isModified
       ? ({
-          ...file,
-          rawSDL: newDocument ? print(newDocument) : undefined,
-          document: newDocument,
-        } as Types.DocumentFile)
+        ...file,
+        rawSDL: newDocument ? print(newDocument) : undefined,
+        document: newDocument,
+      } as Types.DocumentFile)
       : file
   })
   return filteredFiles
@@ -123,7 +123,7 @@ function getObjectFieldNames(
   objectName: string
 ): string[] | undefined {
   let currentObjectName: string | undefined
-  let objectFields: string[] = []
+  const objectFields: string[] = []
   let hasType: boolean = false
   visit(schema, {
     ObjectTypeDefinition: {

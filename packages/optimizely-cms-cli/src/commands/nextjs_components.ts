@@ -107,9 +107,9 @@ function getDisplayTemplateInfo(contentType: IntegrationApi.ContentType, typePat
 type TemplateFn = (contentType: IntegrationApi.ContentType, varName: string, displayTemplate?: string, baseDisplayTemplate?: string) => string
 
 const Templates: Record<'default', TemplateFn> & Partial<Record<Required<IntegrationApi.ContentType>['baseType'], TemplateFn>> =
-{
+  {
   // Default Template for all components without specifics
-  default: (contentType, varName, displayTemplate, baseDisplayTemplate) => `import { CmsEditable, type CmsComponent } from "@remkoj/optimizely-cms-react/rsc";
+    default: (contentType, varName, displayTemplate, baseDisplayTemplate) => `import { CmsEditable, type CmsComponent } from "@remkoj/optimizely-cms-react/rsc";
 import { ${contentType.key}DataFragmentDoc, type ${contentType.key}DataFragment } from "@/gql/graphql";${displayTemplate ? `
 import { ${displayTemplate} } from "./displayTemplates";` : ''}${baseDisplayTemplate ? `
 import { ${baseDisplayTemplate} } from "../styles/displayTemplates";` : ''}
@@ -133,8 +133,8 @@ ${varName}.getDataFragment = () => ['${contentType.key}Data', ${contentType.key}
 
 export default ${varName}`,
 
-  // Default Template for all section types
-  section: (contentType, varName, displayTemplate, baseDisplayTemplate) => `import { OptimizelyComposition, isNode, CmsEditable, type CmsComponent } from "@remkoj/optimizely-cms-react/rsc";
+    // Default Template for all section types
+    section: (contentType, varName, displayTemplate, baseDisplayTemplate) => `import { OptimizelyComposition, isNode, CmsEditable, type CmsComponent } from "@remkoj/optimizely-cms-react/rsc";
 import { get${contentType.key}DataDocument, type get${contentType.key}DataQuery, SectionCompositionDataFragmentDoc } from "@/gql/graphql";
 import { getFragmentData } from "@/gql/fragment-masking";${displayTemplate ? `
 import { ${displayTemplate} } from "./displayTemplates";` : ''}${baseDisplayTemplate ? `
@@ -167,8 +167,8 @@ ${varName}.getDataQuery = () => get${contentType.key}DataDocument
 
 export default ${varName}`,
 
-  // Template for all page component types
-  page: (contentType, varName, displayTemplate) => `import { type OptimizelyNextPage as CmsComponent } from "@remkoj/optimizely-cms-nextjs";
+    // Template for all page component types
+    page: (contentType, varName, displayTemplate) => `import { type OptimizelyNextPage as CmsComponent } from "@remkoj/optimizely-cms-nextjs";
 import { get${contentType.key}DataDocument, type get${contentType.key}DataQuery } from '@/gql/graphql'${displayTemplate ? `
 import { ${displayTemplate} } from "./displayTemplates";` : ''}
 import { getSdk } from "@/gql"
@@ -203,11 +203,12 @@ ${varName}.getMetaData = async (contentLink, locale, client) => {
 
 export default ${varName}`,
 
-  // Template for all experience component types
-  experience: (contentType, varName, displayTemplate) => `import { type OptimizelyNextPage as CmsComponent } from "@remkoj/optimizely-cms-nextjs";
+    // Template for all experience component types
+    experience: (contentType, varName, displayTemplate) => `import 'server-only'
+import { type OptimizelyNextPage as CmsComponent } from "@remkoj/optimizely-cms-nextjs";
 import { ExperienceDataFragmentDoc, get${contentType.key}DataDocument, type get${contentType.key}DataQuery } from '@/gql/graphql'
 import { getFragmentData } from '@/gql/fragment-masking'
-import { OptimizelyComposition, isNode, CmsEditable } from "@remkoj/optimizely-cms-react/rsc";${displayTemplate ? `
+import { OptimizelyComposition, isNode, CmsEditable, type ServerContext } from "@remkoj/optimizely-cms-react/rsc";${displayTemplate ? `
 import { ${displayTemplate} } from "./displayTemplates";` : ''}
 import { getSdk } from "@/gql/client"
 
@@ -223,7 +224,7 @@ import { getSdk } from "@/gql/client"
  * [Documentation: Customizing queries](https://github.com/remkoj/optimizely-dxp-clients/blob/main/packages/optimizely-graph-functions/docs/customizing_queries.md)
  */
 export const ${varName} : CmsComponent<get${contentType.key}DataQuery${displayTemplate ? ', ' + displayTemplate : ''}> = ({ data${displayTemplate ? ', layoutProps' : ''}, ctx }) => {
-  if (ctx) ctx.editableContentIsExperience = true
+  if (ctx) (ctx as ServerContext).setEditableContentIsExperience(true)
   const composition = getFragmentData(ExperienceDataFragmentDoc, data).composition
   const componentName = '${contentType.displayName}'
   const componentInfo = '${contentType.description?.replaceAll("'", "\\'") ?? ''}'
@@ -242,4 +243,4 @@ ${varName}.getMetaData = async (contentLink, locale, client) => {
 }
 
 export default ${varName}`
-}
+  }

@@ -13,7 +13,6 @@ export async function getComponentDocuments(loader: string = '@remkoj/optimizely
       return false;
     if (ct.source === 'graph' || ct.source === 'globalcontract' || ct.source === '_system') // Only CMS managed types are allowed
       return false;
-    //@ts-expect-error
     if (ct.isContract) // Contracts must be ignored
       return false;
     return true;
@@ -106,7 +105,7 @@ export async function injectComponentDocuments(files: Types.DocumentFile[], opti
 
   const propTracker: Map<string,string> = new Map()
 
-  for (const [_, contentType] of allContentTypes) {
+  for (const [, contentType] of allContentTypes) {
     // Skip over content types without a key
     if (!contentType.key)
       continue

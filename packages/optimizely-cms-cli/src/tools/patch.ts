@@ -4,14 +4,14 @@ type Primitive = string | number | boolean | bigint | symbol | null | undefined
 
 type DiffValue<T> =
   T extends Primitive ? T | undefined :
-  T extends Array<infer U> ? Array<DiffValue<U>> | undefined :
-  T extends object ? { [K in keyof T]?: DiffValue<T[K]> } | undefined :
+    T extends Array<infer U> ? Array<DiffValue<U>> | undefined :
+      T extends object ? { [K in keyof T]?: DiffValue<T[K]> } | undefined :
   T | undefined
 
 type MergePatchValue<T> =
   T extends Primitive ? Exclude<T, undefined> | null :
-  T extends Array<infer U> ? Array<MergePatchValue<U>> | null :
-  T extends object ? MergePatch<T> | null :
+    T extends Array<infer U> ? Array<MergePatchValue<U>> | null :
+      T extends object ? MergePatch<T> | null :
   Exclude<T, undefined> | null
 
 /**

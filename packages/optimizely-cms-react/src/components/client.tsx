@@ -33,12 +33,12 @@ export { isNodeInput, isNonEmptyString, isRichTextNode, isStringNode, isText, is
  */
 export function clientContextAware<P = any>(component: ComponentType<PropsWithContext<P>>) : ComponentType<P>
 {
-    const BaseComponent = component
-    const ClientContextInjector = (props: P) => {
-        const ctx = useOptimizelyCms()
-        return <BaseComponent ctx={ctx} { ...props } />
-    }
-    return ClientContextInjector
+  const BaseComponent = component
+  const ClientContextInjector = (props: P) => {
+    const ctx = useOptimizelyCms()
+    return <BaseComponent ctx={ctx} { ...props } />
+  }
+  return ClientContextInjector
 }
 
 /**

@@ -8,7 +8,6 @@ import { type OptimizelyCmsRoutingApi } from '../types.js'
 import { AnyContentLink } from '../../../types.js'
 import {
   isContentLinkWithLocale,
-  isInlineContentLink,
   localeToGraphLocale,
 } from '../../../utils.js'
 
@@ -35,9 +34,9 @@ export class OptimizelyCms13Client implements OptimizelyCmsRoutingApi {
       )
 
     let totalRoutes: number = 0
-    let retrievedRoutes: number = 0
+    let retrievedRoutes: number
     let currentPage: number = 0
-    let pageSize: number = 100
+    const pageSize: number = 100
     const graphRoutes: GraphRoute[] = []
 
     do {
@@ -95,7 +94,7 @@ export class OptimizelyCms13Client implements OptimizelyCmsRoutingApi {
         `⚪ [RouteResolver] Resolving content info for ${path} on ${siteId ? siteId : 'all domains'}`
       )
 
-      // Calculate the paths
+    // Calculate the paths
     const paths = [
       path,
       path.endsWith('/') ? path.substring(0, path.length - 1) : path + '/',
@@ -185,14 +184,13 @@ export class OptimizelyCms13Client implements OptimizelyCmsRoutingApi {
     if (resultSet.Content?.total >= 1) {
       let selectedItem = resultSet.Content.items[0]
       if (client.debug && resultSet.Content?.total > 1) {
-        let firstEmptyVariantItem = resultSet.Content?.items
+        const firstEmptyVariantItems = resultSet.Content?.items
           ?.filter(
             (x) =>
               x._metadata?.variation === null ||
               x._metadata?.variation === undefined
           )
-          ?.at(0)
-        selectedItem = firstEmptyVariantItem ?? selectedItem
+        selectedItem = Array.isArray(firstEmptyVariantItems) && firstEmptyVariantItems.length > 0 ? firstEmptyVariantItems[0] : selectedItem
         console.warn(
           `🟠 [RouteResolver] Received multiple entries with this ID, returning the first default variant from: ${(
             resultSet.Content?.items || []
@@ -246,14 +244,13 @@ export class OptimizelyCms13Client implements OptimizelyCmsRoutingApi {
     if (resultSet.Content?.total >= 1) {
       let selectedItem = resultSet.Content.items[0]
       if (client.debug && resultSet.Content?.total > 1) {
-        let firstEmptyVariantItem = resultSet.Content?.items
+        const firstEmptyVariantItems = resultSet.Content?.items
           ?.filter(
             (x) =>
               x._metadata?.variation === null ||
               x._metadata?.variation === undefined
           )
-          ?.at(0)
-        selectedItem = firstEmptyVariantItem ?? selectedItem
+        selectedItem = Array.isArray(firstEmptyVariantItems) && firstEmptyVariantItems.length > 0 ? firstEmptyVariantItems[0] : selectedItem
         console.warn(
           `🟠 [RouteResolver] Received multiple entries with this ID, returning the first default variant from: ${(
             resultSet.Content?.items || []

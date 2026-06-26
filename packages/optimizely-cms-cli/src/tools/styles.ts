@@ -114,11 +114,11 @@ export async function getStyles(client: CmsApiClient, args: ArgumentsCamelCase<O
 
 export async function* getAllStyles(client: CmsApiClient, debug: boolean = false, pageSize: number = 5): AsyncGenerator<IntegrationApi.DisplayTemplate, void, IntegrationApi.DisplayTemplate> {
   let requestPageSize = pageSize;
-  let requestPageIndex = 0
-  let totalItemCount = 0
-  let totalPages = 0
+  let requestPageIndex = 0;
+  let totalItemCount: number;
+  let totalPages: number;
   do {
-    const resultsPage = await client.displayTemplatesList({ query: { pageIndex: requestPageIndex, pageSize: requestPageSize } }).catch((_) => {
+    const resultsPage = await client.displayTemplatesList({ query: { pageIndex: requestPageIndex, pageSize: requestPageSize } }).catch(() => {
       return {
         items: [],
         totalItemCount: 0,
@@ -128,14 +128,15 @@ export async function* getAllStyles(client: CmsApiClient, debug: boolean = false
     });
 
     // Calculate fields for next page
-    totalItemCount = resultsPage.totalItemCount ?? 0;
+    //@ts-expect-error Difference between PaaS & SaaS
+    totalItemCount = resultsPage.totalItemCount ?? resultsPage.totalCount ?? 0;
     requestPageSize = resultsPage.pageSize
     requestPageIndex = resultsPage.pageIndex + 1
     totalPages = Math.ceil(totalItemCount / requestPageSize)
 
     // Debug output
     if (debug)
-      process.stdout.write(chalk.gray(`${figures.arrowRight} Fetched displayTemplates page ${requestPageIndex} of ${totalPages} (${requestPageSize} items per page)\n`))
+      process.stdout.write(chalk.gray(`${figures.arrowRight} Fetched displayTemplates page ${requestPageIndex} of ${totalPages} (${requestPageSize} items per page, ${totalItemCount} items available)\n`))
 
     // Yield items
     for (const displayTemplate of (resultsPage.items ?? [])) {

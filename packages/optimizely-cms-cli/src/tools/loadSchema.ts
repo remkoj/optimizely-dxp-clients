@@ -12,7 +12,7 @@ type BaseSchema = {
   description?: string
   title?: string
   format?: string
-  [x: string]: any
+  [x: string]: unknown
   properties?: {
     [propName: string]: BaseSchema | RefSchema
   }
@@ -39,7 +39,7 @@ export async function loadSchema(client: CmsApiClient, schemaName: string | stri
   process.stdout.write(`\n${figures.arrowRight} Constructing schema for ${schemas.join(', ')}\n`)
   for await (const schema of schemas) if (specSchemas[schema]) {
     const definitions = {}
-    const processedSchema = processSchema(specSchemas[schema], definitions, spec)
+    const processedSchema = processSchema(specSchemas[schema] as BaseSchema | BaseSchema[], definitions, spec as unknown as TypedSchema)
     const jsonSchema: TypedSchema = {
       //"$schema": "https://json-schema.org/draft-07/schema",
       "$id": new URL(`schema/${schema}`,client.getSchemaItemBase()).href,
@@ -83,7 +83,7 @@ function postProcessDefintions(jsonSchema: TypedSchema): TypedSchema {
           typeValue = typeValue === 'jsonString' ? 'json' : typeValue
           if (typeSchema.enum.includes(typeValue)) {
             const newTypeDef = deepmerge({}, typeSchema)
-            newTypeDef.enum = newTypeDef.enum.filter((x: string) => x === typeValue)
+            newTypeDef.enum = (newTypeDef.enum as string[]).filter((x: string) => x === typeValue)
             jsonSchema.definitions[definitionName].properties.type = newTypeDef as BaseSchema
           }
         }
@@ -141,7 +141,7 @@ function processSchema(schema: BaseSchema | BaseSchema[], defs: { [name: string]
 
     const merged = allOfSchemas.reduce<BaseSchema>((previous, current) => deepmerge(previous, current) as BaseSchema, newObject as BaseSchema)
     if (newObject['description'])
-      merged['description'] = newObject['description']
+      merged['description'] = newObject['description'] as string
     if (newObject['title'])
       merged['title'] = newObject['title']
 

@@ -111,8 +111,8 @@ export class ServerContext implements GenericContext {
     client:
       | IOptiGraphClient
       | ((
-          currentClient: IOptiGraphClient | undefined
-        ) => IOptiGraphClient | undefined)
+        currentClient: IOptiGraphClient | undefined
+      ) => IOptiGraphClient | undefined)
   ) {
     if (this.isDebug)
       console.log(`🦺 [ServerContext] Assigning new Optimizely Graph Client`)
@@ -185,9 +185,9 @@ export class ServerContext implements GenericContext {
  *              components
  */
 export const getServerContext = () => {
-    throw new Error(
-      '🦺 [ServerContext] getServerContext has been removed, due to potential leakage across requests'
-    )
+  throw new Error(
+    '🦺 [ServerContext] getServerContext has been removed, due to potential leakage across requests'
+  )
 }
 
 /**
@@ -204,7 +204,7 @@ export function updateSharedServerContext(
   currentCtx: GenericContext
 ): ServerContext {
   throw new Error(
-      '🦺 [ServerContext] getServerContext has been removed, due to potential leakage across requests'
-    )
+    '🦺 [ServerContext] getServerContext has been removed, due to potential leakage across requests'
+  )
 }
 //#endregion

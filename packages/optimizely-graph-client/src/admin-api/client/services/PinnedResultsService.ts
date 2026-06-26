@@ -16,17 +16,20 @@ export class PinnedResultsService {
      * Get pinned collection(s)
      * Get pinned collections
      * @param page
+     * @param sort
      * @returns PinnedCollectionResult Ok
      * @throws ApiError
      */
     public listPinnedCollectionHandler(
         page?: number,
+        sort?: string,
     ): CancelablePromise<Array<PinnedCollectionResult>> {
         return this.httpRequest.request({
             method: 'GET',
             url: '/api/pinned/collections',
             query: {
                 'page': page,
+                'sort': sort,
             },
         });
     }

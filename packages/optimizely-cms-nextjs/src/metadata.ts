@@ -7,14 +7,14 @@ import { type FunctionComponent } from 'react'
 
 export class MetaDataResolver
 {
-    private _cgClient : IOptiGraphClient
+  private _cgClient : IOptiGraphClient
 
-    public constructor(clientOrConfig?: OptimizelyGraphConfig | IOptiGraphClient)
-    {
-        this._cgClient = isOptiGraphClient(clientOrConfig) ? clientOrConfig : createClient(clientOrConfig)
-    }
+  public constructor(clientOrConfig?: OptimizelyGraphConfig | IOptiGraphClient)
+  {
+    this._cgClient = isOptiGraphClient(clientOrConfig) ? clientOrConfig : createClient(clientOrConfig)
+  }
 
-    /**
+  /**
      * Resolve the meta data for a component, if it has a meta-data method exposed.
      * 
      * @param factory       The component factory used to load the component
@@ -23,42 +23,42 @@ export class MetaDataResolver
      * @param locale        The locale to be used, in a ContentGraph locale format
      * @returns             A Promise for the metadata of the given content type & instance
      */
-    public async resolve(factory: ComponentFactory, contentLink: ContentLink, contentType: string[], locale?: string | null): Promise<Metadata>
-    {
-        if (this._cgClient.debug)
-            console.log(`⚪ [MetaDataResolver] Resolving metadata for: ${ JSON.stringify({contentLink, contentType, locale})}`)
+  public async resolve(factory: ComponentFactory, contentLink: ContentLink, contentType: string[], locale?: string | null): Promise<Metadata>
+  {
+    if (this._cgClient.debug)
+      console.log(`⚪ [MetaDataResolver] Resolving metadata for: ${ JSON.stringify({contentLink, contentType, locale})}`)
 
-        if (locale && locale.includes("-"))
-            throw new Error("🟠 [MetaDataResolver] Invalid character detected within the locale")
+    if (locale && locale.includes("-"))
+      throw new Error("🟠 [MetaDataResolver] Invalid character detected within the locale")
 
-        const normalizedContentType = Utils.normalizeContentType(Array.isArray(contentType) ? [...contentType].reverse() : contentType, true)
-        if (!normalizedContentType) {
-            if (this._cgClient.debug)
-                console.log(`🟠 [MetaDataResolver] Could not normalize content type for ${ contentType.join('/') }`)
-            return {}
-        }
-        const Component = factory.resolve(normalizedContentType) as FunctionComponent<any>
-        if (!Component) {
-            if (this._cgClient.debug)
-                console.log(`🟠 [MetaDataResolver] No component found for ${ contentType.join('/') }`)
-            return {}
-        }
-        if (this._cgClient.debug)
-            console.log(`⚪ [MetaDataResolver] Using component ${ Component.displayName ?? 'Unnamed component' }`)
-
-        if (isOptimizelyNextPageWithMetaData(Component) && Component.getMetaData) {
-            if (this._cgClient.debug)
-                console.log("⚪ [MetaDataResolver] Component for content type has 'getMetaData, invoking...")
-            const meta = await Component.getMetaData(contentLink, locale, this._cgClient)
-            if (this._cgClient.debug)
-                console.log(`⚪ [MetaDataResolver] Resolved metadata to: ${ JSON.stringify(meta) }`)
-            return meta
-        } else {
-            if (this._cgClient.debug)
-                console.warn(`🟠 [MetaDataResolver] Resolved component for ${ contentType.join('/') } does not provide additional metadata`)
-        }
-        return {}
+    const normalizedContentType = Utils.normalizeContentType(Array.isArray(contentType) ? [...contentType].reverse() : contentType, true)
+    if (!normalizedContentType) {
+      if (this._cgClient.debug)
+        console.log(`🟠 [MetaDataResolver] Could not normalize content type for ${ contentType.join('/') }`)
+      return {}
     }
+    const Component = factory.resolve(normalizedContentType) as FunctionComponent<any>
+    if (!Component) {
+      if (this._cgClient.debug)
+        console.log(`🟠 [MetaDataResolver] No component found for ${ contentType.join('/') }`)
+      return {}
+    }
+    if (this._cgClient.debug)
+      console.log(`⚪ [MetaDataResolver] Using component ${ Component.displayName ?? 'Unnamed component' }`)
+
+    if (isOptimizelyNextPageWithMetaData(Component) && Component.getMetaData) {
+      if (this._cgClient.debug)
+        console.log("⚪ [MetaDataResolver] Component for content type has 'getMetaData, invoking...")
+      const meta = await Component.getMetaData(contentLink, locale, this._cgClient)
+      if (this._cgClient.debug)
+        console.log(`⚪ [MetaDataResolver] Resolved metadata to: ${ JSON.stringify(meta) }`)
+      return meta
+    } else {
+      if (this._cgClient.debug)
+        console.warn(`🟠 [MetaDataResolver] Resolved component for ${ contentType.join('/') } does not provide additional metadata`)
+    }
+    return {}
+  }
 }
 
 export default MetaDataResolver

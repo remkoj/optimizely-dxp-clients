@@ -66,7 +66,7 @@ export const OnPageEdit: FunctionComponent<
       .then((epi) => {
         if (!cancelled) {
           console.log(`⚪ Enabling ContentSaved event handler`)
-          let r = epi.subscribe('contentSaved', onContentSaved)
+          const r = epi.subscribe('contentSaved', onContentSaved)
           unsub = r.remove
         }
       })

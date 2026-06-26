@@ -8,33 +8,33 @@ import { createHmacFetch } from '../../hmac-fetch.js'
 
 export class OptiHttpRequest extends BaseHttpRequest 
 {
-    protected optiGraphConfig : OptimizelyGraphConfig | undefined
+  protected optiGraphConfig : OptimizelyGraphConfig | undefined
 
-    constructor(config: OpenAPIConfig) {
-        super(config);
-    }
+  constructor(config: OpenAPIConfig) {
+    super(config);
+  }
 
-    public setOptiGraphConfig(config: OptimizelyGraphConfig)
-    {
-        this.optiGraphConfig = config
-    }
+  public setOptiGraphConfig(config: OptimizelyGraphConfig)
+  {
+    this.optiGraphConfig = config
+  }
 
-    /**
+  /**
      * Request method
      * @param options The request options from the service
      * @returns CancelablePromise<T>
      * @throws ApiError
      */
-    public override request<T>(options: ApiRequestOptions): CancelablePromise<T> {
-        const fetchApi = this.optiGraphConfig?.app_key && this.optiGraphConfig?.secret ? createHmacFetch(this.optiGraphConfig.app_key, this.optiGraphConfig.secret) : fetch
-        return __request(this.config, options, fetchApi);
-    }
+  public override request<T>(options: ApiRequestOptions): CancelablePromise<T> {
+    const fetchApi = this.optiGraphConfig?.app_key && this.optiGraphConfig?.secret ? createHmacFetch(this.optiGraphConfig.app_key, this.optiGraphConfig.secret) : fetch
+    return __request(this.config, options, fetchApi);
+  }
 }
 
 export function isOptiHttpRequest(toTest: any) : toTest is OptiHttpRequest
 {
-    if (!toTest || typeof(toTest) != 'object')
-        return false
+  if (!toTest || typeof(toTest) != 'object')
+    return false
 
-    return typeof((toTest as OptiHttpRequest).request) == 'function' && typeof((toTest as OptiHttpRequest).setOptiGraphConfig) == 'function'
+  return typeof((toTest as OptiHttpRequest).request) == 'function' && typeof((toTest as OptiHttpRequest).setOptiGraphConfig) == 'function'
 }

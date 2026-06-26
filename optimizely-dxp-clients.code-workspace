@@ -33,6 +33,10 @@
       "path": "./packages/optimizely-one-nextjs"
     },
     {
+      "name": "Package: API-Wrapper",
+      "path": "./packages/hey-api-wrapper"
+    },
+    {
       "name": "Sample Project",
       "path": "./samples/basic-project",
     },
@@ -43,8 +47,7 @@
 	],
 	"settings": {
 		"postman.settings.dotenv-detection-notification-visibility": false,
-    "typescript.tsdk": "Repository/node_modules/typescript/lib",
-    "typescript.enablePromptUseWorkspaceTsdk": true,
+    "js/ts.tsdk.promptToUseWorkspaceVersion": true,
     "js/ts.tsdk.path": "Repository/node_modules/typescript/lib"
 	}
 }

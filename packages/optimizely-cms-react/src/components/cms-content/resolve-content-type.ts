@@ -13,20 +13,20 @@ import { isNonEmptyString } from "../../utilities.js"
  */
 export function resolveContentType(contentType: string | (string | null)[] | null | undefined, fragmentData?: {[fieldname: string]: any}) : string[] | undefined
 {
-    if (Array.isArray(contentType)) {
-        const filtered = contentType.filter(isNonEmptyString)
-        if (filtered.length > 0)
-            return filtered
-    } else if (typeof(contentType) == 'string' && contentType.length > 0)
-        return contentType.split("/")
+  if (Array.isArray(contentType)) {
+    const filtered = contentType.filter(isNonEmptyString)
+    if (filtered.length > 0)
+      return filtered
+  } else if (typeof(contentType) == 'string' && contentType.length > 0)
+    return contentType.split("/")
     
-    if (fragmentData) {
-        const metaTypes = fragmentData._metadata?.types
-        if (metaTypes && Array.isArray(metaTypes))
-            return resolveContentType(metaTypes)
-    }
+  if (fragmentData) {
+    const metaTypes = fragmentData._metadata?.types
+    if (metaTypes && Array.isArray(metaTypes))
+      return resolveContentType(metaTypes)
+  }
 
-    return undefined
+  return undefined
 }
 
 export default resolveContentType

@@ -71,7 +71,7 @@ export const StylesPushCommand: StylesPushModule = {
         // @ts-expect-error There's a mis-match between the logic in the CMS and the contents of the 
         // OpenAPI Spec file.
         return client.displayTemplatesPatch({ path: { key: styleKey }, body: patch }) 
-        })() :
+      })() :
         client.displayTemplatesCreate({ body: styleDefinition })
       )
 

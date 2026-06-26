@@ -8,7 +8,7 @@ import {
 import { usePathname } from 'next/navigation'
 import { useOptimizelyOne } from './context'
 
-export type PageActivatorProps = PropsWithChildren<{}>
+export type PageActivatorProps = PropsWithChildren
 
 export const PageActivator: FunctionComponent<PageActivatorProps> = (props) => {
   const path = usePathname()

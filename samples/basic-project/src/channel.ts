@@ -6,9 +6,9 @@ const cms_url = process.env.OPTIMIZELY_CMS_URL ?? 'https://example.cms.optimizel
  * The default channel definition for this deployment
  */
 export const channel = ChannelRepository.createDefinition(
-  "Basic Project",
-  "http://localhost:3000",
-  ["en", "en-US", "en-UK"],
+  'Basic Project',
+  'http://localhost:3000',
+  ['en', 'en-US', 'en-UK'],
   cms_url
 );
 export default channel;

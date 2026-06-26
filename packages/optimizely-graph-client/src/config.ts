@@ -126,7 +126,7 @@ function isValidUrl(toTest: any): boolean {
   if (!isNonEmptyString(toTest))
     return false
   try {
-    var u = new URL(toTest)
+    const u = new URL(toTest)
     if (u.protocol != 'https:')
       return false
     return true

@@ -16,7 +16,7 @@ export const ProfileApiService: ApiService<ProfileApiResponse> = {
       return Responses.NotFound
 
     // Start timer
-    let start = Date.now()
+    const start = Date.now()
 
     // Read requested scopes
     const scopes = query.get('scope')?.toLowerCase()?.split(',')?.map(x => x.trim())
@@ -119,6 +119,8 @@ function stringToInt(value: string | undefined | null, defaultValue: number) {
   try {
     const result = Number.parseInt(value ?? defaultValue.toString(), 10)
     return isNaN(result) ? defaultValue : result
-  } catch { }
+  } catch {
+    // Ingored on purpose
+  }
   return defaultValue
 }

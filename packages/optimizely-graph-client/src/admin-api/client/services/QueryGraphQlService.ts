@@ -15,6 +15,7 @@ export class QueryGraphQlService {
      * @param mutation
      * @param operationName
      * @param variables
+     * @param sources
      * @returns GraphQLResponse Returns query result
      * @throws ApiError
      */
@@ -23,6 +24,7 @@ export class QueryGraphQlService {
         mutation?: string,
         operationName?: string,
         variables?: string,
+        sources?: string,
     ): CancelablePromise<GraphQLResponse> {
         return this.httpRequest.request({
             method: 'GET',
@@ -32,22 +34,28 @@ export class QueryGraphQlService {
                 'mutation': mutation,
                 'operationName': operationName,
                 'variables': variables,
+                'sources': sources,
             },
         });
     }
     /**
      * Execute graphql query
      * Retrieve content respect to graphql query
+     * @param sources
      * @param requestBody
      * @returns GraphQLResponse Returns query result
      * @throws ApiError
      */
     public postGraphQlv2Handler(
+        sources?: string,
         requestBody?: GraphQLRequest,
     ): CancelablePromise<GraphQLResponse> {
         return this.httpRequest.request({
             method: 'POST',
             url: '/content/v2',
+            query: {
+                'sources': sources,
+            },
             body: requestBody,
             mediaType: 'application/json',
         });

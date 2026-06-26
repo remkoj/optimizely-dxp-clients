@@ -1,4 +1,4 @@
-import { createClient, defaultPlugins } from '@hey-api/openapi-ts'
+import { createClient } from '@hey-api/openapi-ts'
 
 import { globSync as glob } from 'glob'
 import { config } from 'dotenv'
@@ -9,42 +9,52 @@ import fs from 'node:fs'
 // CONSTANTS
 const CMS_PATHS = {
   apiSpec: 'docs/content-openapi.json',
-  info: 'info',
+  info: 'docs/info',
   token: 'oauth/token'
 }
 
-// Main script file
+/**
+ * Entry point: loads the local environment, authenticates against the CMS,
+ * downloads the OpenAPI specification and generates the typed API client into
+ * `src/client`, then records the targeted CMS instance version in
+ * `src/version.json`.
+ *
+ * @returns {Promise<void>}
+ */
 ;(async function main() {
   // Prepare context
   loadDotEnvFiles()
   const accessToken = await getAccessToken();
 
   //Create client
-  const openApiSpecV3 = await readOpenApiSpec(accessToken);
+  const input = await readOpenApiSpec(accessToken);
   const plugins = createPluginConfig();
+  const output = createOutputConfig(path.resolve(path.join(process.cwd(), 'src', 'client')));
 
   process.stdout.write(`➡ Creating Optimizely CMS API Client\n`);
-  void await createClient({
-        input: openApiSpecV3,
-        output: createOutputConfig(path.resolve(path.join(process.cwd(), 'src', 'client'))),
-        plugins,
-      });
+  void await createClient({ input, output, plugins });
 
   process.stdout.write(`⚓ Tracking CMS instance version\n`);
   void await createVersionFile(accessToken);
   process.stdout.write(`🏁 Done\n`);
 })()
 
+/**
+ * Builds the `@hey-api/openapi-ts` plugin list that configures the generated
+ * client: the fetch transport (with runtime config), date/BigInt transformers,
+ * TypeScript types/enums and the SDK layer.
+ *
+ * @returns {Array<object>} The ordered plugin configuration.
+ */
 function createPluginConfig()
 {
   return [
-    ...defaultPlugins,
     {
       name: '@hey-api/client-fetch',
       bundle: true,
       exportFromIndex: true,
       throwOnError: false,
-      runtimeConfigPath: '../client-config',
+      runtimeConfigPath: './src/client-config',
     },
     {
       name: '@hey-api/transformers',
@@ -70,21 +80,37 @@ function createPluginConfig()
   ]
 }
 
+/**
+ * Builds the generator output configuration: the destination folder is cleaned
+ * before writing, files use camelCase naming and the package `tsconfig.json` is
+ * used for type resolution.
+ *
+ * @param {string} destFolder Absolute path the client is written to.
+ * @returns {object} The output configuration for `createClient`.
+ */
 function createOutputConfig(destFolder)
 {
   return {
-      clean: true,
-      case: 'camelCase',
-      path: destFolder,
-      tsConfigPath: path.resolve(path.join(process.cwd(), 'tsconfig.json')),
-    }
+    clean: true,
+    case: 'camelCase',
+    path: destFolder,
+
+    tsConfigPath: path.resolve(path.join(process.cwd(), 'tsconfig.json')),
+  }
 }
 
+/**
+ * Performs an OAuth client-credentials exchange against the CMS token endpoint
+ * using `OPTIMIZELY_CMS_CLIENT_ID`/`OPTIMIZELY_CMS_CLIENT_SECRET` from the
+ * environment.
+ *
+ * @returns {Promise<string>} The `Authorization` header value (`"<type> <token>"`).
+ * @throws {Error} When the token endpoint returns a non-OK response.
+ */
 async function getAccessToken() {
   const authUrl = buildApiEndpoint(CMS_PATHS.token, true);
   const clientId = process.env.OPTIMIZELY_CMS_CLIENT_ID || '';
   const clientSecret = process.env.OPTIMIZELY_CMS_CLIENT_SECRET || '';
-  const actAs = process.env.OPTIMIZELY_CMS_USER_ID || undefined;
 
   const headers = new Headers()
   headers.append('Authorization', `Basic ${Buffer.from(`${clientId ?? ''}:${clientSecret ?? ''}`).toString('base64')}`);
@@ -92,12 +118,10 @@ async function getAccessToken() {
   headers.append('Connection', 'close');
 
   console.log(`⚪ [CMS API] Using authentication endpoint: ${authUrl}`);
-  console.log(`⚪ [CMS API] Retrieving new credentials for ${clientId}${actAs ? ", acting as " + actAs : ""}`);
+  console.log(`⚪ [CMS API] Retrieving new credentials for ${clientId}`);
 
   const body = new URLSearchParams()
   body.append("grant_type", "client_credentials")
-  if (actAs)
-    body.append("act_as", actAs)
 
   const httpResponse = await fetch(authUrl, {
     method: "POST",
@@ -108,14 +132,21 @@ async function getAccessToken() {
   const response = await httpResponse.json()
 
   if (!httpResponse.ok)
-    throw new Error("Authentication error: " + response.error_description)
+    throw new Error("Authentication error: " + response.error_description, { cause: httpResponse })
 
-  console.log(`⚪ [CMS API] Authenticated as: ${actAs ?? clientId ?? '-'}`)
-
-  return response.access_token
+  console.log(`⚪ [CMS API] Authenticated as: ${clientId ?? '-'}`)
+  return `${response.token_type} ${response.access_token}`;
 }
 
-
+/**
+ * Fetches the CMS OpenAPI specification as JSON, authenticating with the given
+ * token (or acquiring one if none is supplied).
+ *
+ * @param {string} [token] Authorization header value; obtained via {@link getAccessToken} when omitted.
+ * @param {typeof buildApiEndpoint} [endpointBuilder] Endpoint builder, overridable for testing.
+ * @returns {Promise<object>} The parsed OpenAPI specification.
+ * @throws {Error} When the spec endpoint returns a non-OK response.
+ */
 async function readOpenApiSpec(token, endpointBuilder = buildApiEndpoint) {
   const accessToken = token || await getAccessToken();
   const specUrl = endpointBuilder(CMS_PATHS.apiSpec);
@@ -124,40 +155,26 @@ async function readOpenApiSpec(token, endpointBuilder = buildApiEndpoint) {
   const httpResponse = await fetch(specUrl, {
     headers: {
       accept: "application/json",
-      authorization: "Bearer " + accessToken
+      authorization: accessToken
     }
   })
 
   if (!httpResponse.ok)
-    throw new Error("Unable to read the OpenAPI Specification")
+    throw new Error(`Unable to read the OpenAPI Specification: HTTP ${ httpResponse.status } ${ httpResponse.statusText   }`, { cause: httpResponse })
 
   const specData = await httpResponse.json();
   console.log(`⚪ [CMS API] Loaded OpenAPI Specification`)
   return specData;
 }
 
+/**
+ * Resolves the CMS instance version info and writes it to `src/version.json`.
+ *
+ * @param {string} [token] Authorization header value passed through to {@link getVersionInfo}.
+ * @returns {Promise<void>}
+ */
 async function createVersionFile(token) {
-  const infoEndpoint = buildApiEndpoint(CMS_PATHS.info);
-  const accessToken = token || await getAccessToken();
-  console.log(` - Reading CMS version information from: ${infoEndpoint}`);
-  const response = await fetch(infoEndpoint, {
-    headers: {
-      accept: "application/json",
-      authorization: "Bearer " + accessToken
-    }
-  });
-  if (!response.ok) {
-    throw new Error(
-      `HTTP Error while reading version: ${response.status} ${response.statusText}`
-    )
-  }
-  const body = await response.json()
-  const versionInfo = {
-    api: body.apiVersion,
-    service: body.serviceVersion?.split('+')[0],
-    cms: body.cmsVersion?.split('+')[0],
-  }
-
+  const versionInfo = await getVersionInfo(token);
   const versionFile = path.resolve(
     path.join(process.cwd(), 'src', 'version.json')
   )
@@ -166,7 +183,53 @@ async function createVersionFile(token) {
 }
 
 /**
- * Process environment files within this project used for generation of the API Client
+ * Determines the API/service/CMS version information. For `preview` API
+ * versions the live `docs/info` endpoint is queried; otherwise the configured
+ * `OPTIMIZELY_API_VERSION` is reported and service/CMS are `'unknown'`.
+ *
+ * @param {string} [token] Authorization header value; obtained via {@link getAccessToken} when omitted.
+ * @returns {Promise<{api: string, service: string, cms: string}>} The version descriptor.
+ * @throws {Error} When the info endpoint returns a non-OK response.
+ */
+async function getVersionInfo(token) {
+  if (process.env.OPTIMIZELY_API_VERSION?.includes('preview')) {
+    const infoEndpoint = buildApiEndpoint(CMS_PATHS.info);
+    const accessToken = token || await getAccessToken();
+    console.log(` - Reading CMS version information from: ${infoEndpoint}`);
+    const response = await fetch(infoEndpoint, {
+      headers: {
+        accept: "application/json",
+        authorization: accessToken
+      }
+    });
+    if (!response.ok) {
+      throw new Error(
+        `HTTP Error while reading version: ${response.status} ${response.statusText}`,
+        { cause: response }
+      )
+    }
+    const body = await response.json()
+    return {
+      api: body.apiVersion,
+      service: body.serviceVersion?.split('+')[0],
+      cms: body.cmsVersion?.split('+')[0],
+    }
+  } else  {
+    return {
+      api: process.env.OPTIMIZELY_API_VERSION || 'unknown',
+      service: 'unknown',
+      cms: 'unknown',
+    }
+  }
+}
+
+/**
+ * Loads the project `.env` files into `process.env` for client generation.
+ * Files are matched by `NODE_ENV` (`.env`, `.env.<env>`, `.env.local`,
+ * `.env.<env>.local`), applied shortest-name-first so more specific files
+ * override, and variable expansion is performed.
+ *
+ * @returns {void}
  */
 function loadDotEnvFiles() {
   process.stdout.write('⚪ Constructing runtime environment\n')
@@ -188,6 +251,15 @@ function loadDotEnvFiles() {
   })
 }
 
+/**
+ * Constructs an absolute CMS API URL from `OPTIMIZELY_CMS_API_URL` and, unless
+ * omitted, the `OPTIMIZELY_API_VERSION` prefix.
+ *
+ * @param {string} [path] Path relative to the API base (and version) URL.
+ * @param {boolean} [omitVersion] When true, the version prefix is left off (e.g. for the token endpoint).
+ * @returns {URL} The resolved endpoint URL.
+ * @throws {Error} When the resulting URL is invalid.
+ */
 function buildApiEndpoint(path = '', omitVersion = false) {
   const cmsURL = process.env.OPTIMIZELY_CMS_API_URL || 'https://api.cms.optimizely.com/';
   const cmsVersion = process.env.OPTIMIZELY_API_VERSION || 'preview3';
@@ -196,26 +268,8 @@ function buildApiEndpoint(path = '', omitVersion = false) {
     return new URL(requestPath, cmsURL)
   } catch (e) {
     throw new Error(
-      'Unable to construct the Optimizely CMS endpoint URL, please check your environment configuration'
-    )
-  }
-}
-
-/**
- * 
- * @param {string} path 
- * @param {string|false|undefined|null} pinnedVersion The version of the CMS API, set to an empty string to omit
- * @returns 
- */
-function buildCmsEndpoint(path = '', pinnedVersion = false) {
-  const cmsURL = process.env.OPTIMIZELY_CMS_URL || 'https://api.cms.optimizely.com/';
-  const cmsVersion = pinnedVersion || process.env.OPTIMIZELY_CMS_API_VERSION || 'preview2';
-  const requestPath =  cmsVersion && cmsVersion.length > 0 ? `_cms/${cmsVersion}/${path}` :  `_cms/${path}`;
-  try {
-    return new URL(requestPath, cmsURL)
-  } catch (e) {
-    throw new Error(
-      'Unable to construct the Optimizely CMS endpoint URL, please check your environment configuration'
+      'Unable to construct the Optimizely CMS endpoint URL, please check your environment configuration',
+      { cause: e }
     )
   }
 }

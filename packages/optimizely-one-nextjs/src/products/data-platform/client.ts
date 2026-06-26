@@ -5,118 +5,118 @@ import * as GlobalClientTypes from '../../components/types'
 
 export class DataPlatformService implements ClientApi.OptimizelyOneService<ClientApi.OptimizelyDataPlatformApi, 'odp'>
 {
-    private _odpEnabled : boolean = true
-    constructor(enabledServices?: Array<GlobalClientTypes.SupportedProductNames>) {
-        if (enabledServices) 
-            this._odpEnabled = enabledServices.includes("dataPlatform")
-    }
+  private _odpEnabled : boolean = true
+  constructor(enabledServices?: Array<GlobalClientTypes.SupportedProductNames>) {
+    if (enabledServices) 
+      this._odpEnabled = enabledServices.includes("dataPlatform")
+  }
 
-    public order : Readonly<number> = 200
-    public code : Readonly<'odp'> = 'odp'
-    public debug: boolean = false
-    public get isActive() : boolean {
-        return this._odpEnabled
-    }
+  public order : Readonly<number> = 200
+  public code : Readonly<'odp'> = 'odp'
+  public debug: boolean = false
+  public get isActive() : boolean {
+    return this._odpEnabled
+  }
 
-    public trackPage()
+  public trackPage()
+  {
+    if (!this._odpEnabled) return
+    const zaius = this.getBrowserApi()
+    if (!zaius) return
+    if (this.debug) console.log("🏬 Data platform - Tracking page view")
+    zaius.event('pageview')
+    if (this.lastTrackedContentIntelligenceId != this.contentIntelligenceId && this.contentIntelligenceId != '')
     {
-        if (!this._odpEnabled) return
-        const zaius = this.getBrowserApi()
-        if (!zaius) return
-        if (this.debug) console.log("🏬 Data platform - Tracking page view")
-        zaius.event('pageview')
-        if (this.lastTrackedContentIntelligenceId != this.contentIntelligenceId && this.contentIntelligenceId != '')
-        {
-            if (this.debug) console.log(`🏬 Data platform - Updating Content Intelligence ID to ${ this.contentIntelligenceId }`)
-            zaius.customer({ content_intelligence_id: this.contentIntelligenceId })
-            this.lastTrackedContentIntelligenceId = this.contentIntelligenceId
-        }
+      if (this.debug) console.log(`🏬 Data platform - Updating Content Intelligence ID to ${ this.contentIntelligenceId }`)
+      zaius.customer({ content_intelligence_id: this.contentIntelligenceId })
+      this.lastTrackedContentIntelligenceId = this.contentIntelligenceId
     }
+  }
 
-    public trackEvent(event: ClientApi.OptimizelyOneEvent)
-    {
-        if (!this._odpEnabled) return
-        const zaius = this.getBrowserApi()
-        if (!zaius) return
-        const event_name = event.event
-        const event_data = Object.entries(event).reduce((data, [ prop_name, prop_value ]) => {
-          if (prop_name != 'event')
-            data[prop_name] = prop_value
-          return data
-        }, {} as Record<string,unknown>)
+  public trackEvent(event: ClientApi.OptimizelyOneEvent)
+  {
+    if (!this._odpEnabled) return
+    const zaius = this.getBrowserApi()
+    if (!zaius) return
+    const event_name = event.event
+    const event_data = Object.entries(event).reduce((data, [ prop_name, prop_value ]) => {
+      if (prop_name != 'event')
+        data[prop_name] = prop_value
+      return data
+    }, {} as Record<string,unknown>)
         
-        if (this.debug) console.log("🏬 Data platform - Tracking event:", event_name, event_data)
-        zaius.event(event_name, event_data)
-    }
+    if (this.debug) console.log("🏬 Data platform - Tracking event:", event_name, event_data)
+    zaius.event(event_name, event_data)
+  }
 
-    public getBrowserApi()
-    {
-        try {
-            if (!this._odpEnabled) return undefined
-            return window.zaius
-        } catch {
-            return undefined
-        }
+  public getBrowserApi()
+  {
+    try {
+      if (!this._odpEnabled) return undefined
+      return window.zaius
+    } catch {
+      return undefined
     }
+  }
 
-    /**
+  /**
      * Discover the visitorId cookie and make it available to the systems as identifier
      * 
      * @returns The partial profile data
      */
-    public discoverProfileData() : Promise<Partial<ClientApi.OptimizelyOneProfileData>>
-    {
-        return new Promise((resolve) => {
-            try {
-                  const cookies = document.cookie.split(';').map(x=>x.trim().split('=',2)).reduce((obj,cData) => { obj[cData[0]] = cData[1]; return obj; }, {} as Record<string,string>)
-                  const visitorId = cookies['visitorId']
-                  if (visitorId) return resolve({ feature_experimentation_id: visitorId })
-            } catch {
-                //Ignore errors on purpose
-            }
-            return resolve({})
-        })
+  public discoverProfileData() : Promise<Partial<ClientApi.OptimizelyOneProfileData>>
+  {
+    return new Promise((resolve) => {
+      try {
+        const cookies = document.cookie.split(';').map(x=>x.trim().split('=',2)).reduce((obj,cData) => { obj[cData[0]] = cData[1]; return obj; }, {} as Record<string,string>)
+        const visitorId = cookies['visitorId']
+        if (visitorId) return resolve({ feature_experimentation_id: visitorId })
+      } catch {
+        //Ignore errors on purpose
+      }
+      return resolve({})
+    })
+  }
+
+  public updateProfile(profileData: ClientApi.OptimizelyOneProfileData)
+  {
+    const zaius = this.getBrowserApi()
+    if (!zaius) return
+
+    // Build IDs
+    const ids : Record<string,string> = { ...profileData.ids }
+    if (profileData.content_intelligence_id)
+      ids.content_intelligence_id = profileData.content_intelligence_id
+    if (profileData.feature_experimentation_id)
+      ids.fs_user_id = profileData.feature_experimentation_id
+
+    // Build fields
+    const fields = Object.entries({
+      ...ids,
+      ...profileData.custom,
+      ...profileData.customPII
+    } as Record<string,unknown>).reduce((acc, [key, value]) => {
+      if (value)
+        acc[key]=value
+      return acc;
+    }, {} as Record<string,unknown>)
+    if (this.debug) console.log("🏬 Data platform - Updating profile (ids, attributes):", ids, fields)
+    zaius.customer(ids, fields)
+  }
+
+  private lastTrackedContentIntelligenceId : string | undefined = undefined
+  private get contentIntelligenceId() : string
+  {
+    if (!this._contentIntelligenceId || this._contentIntelligenceId == '') {
+      try {
+        this._contentIntelligenceId = document.cookie.match('(^|;)\\s*iv\\s*=\\s*([^;]+)')?.pop() || ''
+      } catch {
+        this._contentIntelligenceId = ''
+      }
     }
-
-    public updateProfile(profileData: ClientApi.OptimizelyOneProfileData)
-    {
-        const zaius = this.getBrowserApi()
-        if (!zaius) return
-
-        // Build IDs
-        const ids : Record<string,string> = { ...profileData.ids }
-        if (profileData.content_intelligence_id)
-            ids.content_intelligence_id = profileData.content_intelligence_id
-        if (profileData.feature_experimentation_id)
-            ids.fs_user_id = profileData.feature_experimentation_id
-
-        // Build fields
-        const fields = Object.entries({
-          ...ids,
-          ...profileData.custom,
-          ...profileData.customPII
-        } as Record<string,unknown>).reduce((acc, [key, value]) => {
-          if (value)
-            acc[key]=value
-          return acc;
-        }, {} as Record<string,unknown>)
-        if (this.debug) console.log("🏬 Data platform - Updating profile (ids, attributes):", ids, fields)
-        zaius.customer(ids, fields)
-    }
-
-    private lastTrackedContentIntelligenceId : string | undefined = undefined
-    private get contentIntelligenceId() : string
-    {
-        if (!this._contentIntelligenceId || this._contentIntelligenceId == '') {
-            try {
-                this._contentIntelligenceId = document.cookie.match('(^|;)\\s*iv\\s*=\\s*([^;]+)')?.pop() || ''
-            } catch {
-                this._contentIntelligenceId = ''
-            }
-        }
-        return this._contentIntelligenceId
-    }
-    private _contentIntelligenceId : string | undefined = undefined
+    return this._contentIntelligenceId
+  }
+  private _contentIntelligenceId : string | undefined = undefined
 }
 
 export default DataPlatformService

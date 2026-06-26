@@ -1,7 +1,7 @@
-import { createClient } from "@remkoj/optimizely-cms-nextjs";
-import { ServerContext } from "@remkoj/optimizely-cms-react/rsc";
-import { getSdk } from "./gql/client";
-import { factory } from "./components/factory";
+import { createClient } from '@remkoj/optimizely-cms-nextjs';
+import { ServerContext } from '@remkoj/optimizely-cms-react/rsc';
+import { getSdk } from './gql/client';
+import { factory } from './components/factory';
 
 /**
  * The always readonly, published content client that can be used in locations

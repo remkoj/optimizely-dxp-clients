@@ -17,9 +17,9 @@ export const TYPE_MERGE_SYMBOL = MERGE_SYMBOL
  * @returns The ComponentFactory
  */
 export const getFactory : () => ComponentFactory = () => {
-    const DBG = process.env.OPTIMIZELY_DEBUG == '1'
-    if (DBG) console.log("⚪ [ComponentFactory] Creating new Component Factory")
-    return new DefaultComponentFactory()
+  const DBG = process.env.OPTIMIZELY_DEBUG == '1'
+  if (DBG) console.log("⚪ [ComponentFactory] Creating new Component Factory")
+  return new DefaultComponentFactory()
 }
 
 export default getFactory()

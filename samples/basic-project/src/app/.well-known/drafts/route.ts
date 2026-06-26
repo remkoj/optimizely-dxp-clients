@@ -12,13 +12,13 @@ export async function GET(request: Request) {
   // Enable Draft Mode by setting the cookie
   const draft = await draftMode()
   if (!draft.isEnabled) {
-    console.log("Enabling draft mode")
+    console.log('Enabling draft mode')
     draft.enable()
-    if (stop) return new Response("Enabled draft mode")
+    if (stop) return new Response('Enabled draft mode')
   } else {
-    console.log("Disabling draft mode")
+    console.log('Disabling draft mode')
     draft.disable()
-    if (stop) return new Response("Disabled draft mode")
+    if (stop) return new Response('Disabled draft mode')
   }
 
   const safeUrl = new URL(slug ?? '/', 'https://example.com')

@@ -67,7 +67,7 @@ export const AudiencesPanel: FunctionComponent<AudiencesPanelProps> = ({
 
   // Automatically correct to the correct size, based upon the response
   useEffect(() => {
-    let newSize = !profiles ? -1 : profiles[0]?.rts.audiencesPageCount || -1
+    const newSize = !profiles ? -1 : profiles[0]?.rts.audiencesPageCount || -1
     if (newSize >= 1 && size != newSize) setSize(newSize)
   }, [size, profiles])
 

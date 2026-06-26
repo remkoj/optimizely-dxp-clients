@@ -4,7 +4,7 @@ import { ContentRecs } from '../index.js'
 import { readConfigFromEnv } from '../../config.js'
 import * as Responses from '../../api/responses.js'
 
-export const ContentRecsApiService: ApiService<any> = {
+export const ContentRecsApiService: ApiService<object> = {
   for: { path: '/crecs', verb: 'get' },
   handler: async (query, cookies) => {
     // Read configuration
