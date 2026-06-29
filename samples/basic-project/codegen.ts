@@ -8,7 +8,8 @@ console.log(`  - Environments: ${loadEnvResult.loadedEnvFiles.map(x => x.path).j
 // Actual code generation setup
 import type { CodegenConfig } from '@graphql-codegen/cli'
 import getSchemaInfo from '@remkoj/optimizely-graph-client/codegen'
-import OptimizelyGraphPreset, { type PresetOptions as OptimizelyGraphPresetOptions } from '@remkoj/optimizely-graph-functions/preset'
+import { preset as OptimizelyGraphPreset } from '@remkoj/optimizely-graph-functions/preset'
+import type { PresetOptions as OptimizelyGraphPresetOptions } from '@remkoj/optimizely-graph-functions/preset'
 
 if (__dirname !== process.cwd()) {
   process.stderr.write('Code generation isn\'t executed in the project root, this will cause undesired side-effects\n')

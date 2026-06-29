@@ -1,7 +1,12 @@
-import { createClient } from "@remkoj/optimizely-cms-nextjs";
 import { ServerContext } from "@remkoj/optimizely-cms-react/rsc";
+import { createAuthorizedClient as createClient } from "@remkoj/optimizely-cms-nextjs";
 import { getSdk } from "./gql/client";
 import { factory } from "./components/factory";
+
+/**
+ * The channel identifier to use when loading content.
+ */
+export const channelId = process.env.CHANNEL_ID || undefined;
 
 /**
  * The always readonly, published content client that can be used in locations

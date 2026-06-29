@@ -20,7 +20,7 @@ export default function RootLayout({
         <header style={{ borderBottom: "2px solid #000", minHeight: "25px", marginBottom: '5px' }}>
           <CmsContent contentLink={{key: "7950541bb6a84d049784cb6f46262c12"}} variant='header' ctx={ctx} />
         </header>
-        <main>{children}</main>
+        {children}
       </body>
     </html>
   )

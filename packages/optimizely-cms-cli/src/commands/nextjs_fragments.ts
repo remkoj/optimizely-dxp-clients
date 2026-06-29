@@ -239,8 +239,8 @@ export function renderProperties(contentType: IntegrationApi.ContentType, genera
       })
   })
 
-  if ((contentType.baseType as string) == "experience")
-    fragmentFields.push('...ExperienceData')
+  if ((contentType.baseType || '').replaceAll('_','').toLowerCase() == "experience")
+    fragmentFields.push('...ExperienceData');
 
   if (fragmentFields.length == 0) {
     if (forCms12)

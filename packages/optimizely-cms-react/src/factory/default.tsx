@@ -18,6 +18,7 @@ export const EmptyComponentHandle = '$$fragment$$'
 export class DefaultComponentFactory implements ComponentFactory {
   private registry = new Map<string, ComponentTypeDictionaryEntry>()
   private dbg: boolean
+  private withFallback: boolean
 
   /**
    * A list of interfaces to ignore when resolving components. Adjust this
@@ -27,7 +28,9 @@ export class DefaultComponentFactory implements ComponentFactory {
    * 
    * The default value includes the common ones for SaaS CMS.
    */
-  public ignoredContracts: string[] = ['item','assetitem','imageitem','content']
+  public readonly ignoredContracts: string[] = ['item','assetitem','imageitem','content'];
+
+  public readonly defaultVariant: string = 'default';
 
   /**
    * Create a new instance of the DefaultComponentFactory
@@ -35,7 +38,10 @@ export class DefaultComponentFactory implements ComponentFactory {
    * @param   initialComponents   If provided, this dictionary will be registered
    *                              with the factory.
    */
-  public constructor(initialComponents?: ComponentTypeDictionary) {
+  public constructor(initialComponents?: ComponentTypeDictionary, withFallback: boolean = true) {
+    // Set the fallback behavior
+    this.withFallback = withFallback
+
     // Resolve debug mode
     try {
       this.dbg = process.env.OPTIMIZELY_DEBUG == '1'
@@ -52,7 +58,7 @@ export class DefaultComponentFactory implements ComponentFactory {
     component: ComponentType,
     useSuspense: boolean = false,
     loader?: ComponentType,
-    variant: string = 'default'
+    variant: string = this.defaultVariant
   ): void {
     const registryKey = this.processComponentTypeHandle(type, variant)
     if (this.dbg)
@@ -64,17 +70,17 @@ export class DefaultComponentFactory implements ComponentFactory {
     components.forEach(c => this.register(c.type, c.component, c.useSuspense, c.loader, c.variant))
   }
 
-  public has(type: ComponentTypeHandle, variant: string = 'default'): boolean {
+  public has(type: ComponentTypeHandle, variant: string = this.defaultVariant): boolean {
     const registryKey = this.processComponentTypeHandle(type, variant)
+    const result = this._has(type, variant);
     if (this.dbg) 
-      console.log(`🔎 [DefaultComponentFactory] Checking for ${ registryKey } - ${ this.registry.has(registryKey) ? 'YES' : 'NO'}`)
-    return this.registry.has(registryKey)
+      console.log(`🔎 [DefaultComponentFactory] Checking for ${ registryKey } - ${ result ? 'YES' : 'NO'}`)
+    return result
   }
 
-  public resolve(type: ComponentTypeHandle, variant: string = 'default'): undefined | ComponentType {
-    const registryKey = this.processComponentTypeHandle(type, variant)
+  public resolve(type: ComponentTypeHandle, variant: string = this.defaultVariant): undefined | ComponentType {
+    const { entry, key: registryKey } = this._get(type, variant) ?? { entry: undefined, key: this.processComponentTypeHandle(type, variant) }
 
-    const entry = this.registry.get(registryKey)
     if (!entry) {
       if (this.dbg)
         console.warn(
@@ -82,6 +88,12 @@ export class DefaultComponentFactory implements ComponentFactory {
         )
       return undefined // The key is not registered in the factory
     }
+
+    if (this.dbg) 
+      console.log(`🔎 [DefaultComponentFactory] Resolved component for ${ registryKey }. (Suspense: ${entry.useSuspense ? 
+    `yes${ entry.loader ? ' (with custom loading state)': ' (blank while loading)' }` : 
+    'no'}); Variant: ${ entry.variant ?? this.defaultVariant }`)
+
     if (entry.useSuspense != true) return entry.component // There's no suspense, so we're using the component directly
 
     // We need to wrap the component in a Supense
@@ -95,6 +107,25 @@ export class DefaultComponentFactory implements ComponentFactory {
       )
     }
     return Suspended
+  }
+
+  private _get(type: ComponentTypeHandle, variant?: string) {
+    const registryKey = this.processComponentTypeHandleForLookup(type, variant);
+    for (let idx = 0; idx < registryKey.length; idx++) {
+      const entry = this.registry.get(registryKey[idx]);
+      if (entry) return { entry: entry, key: registryKey[idx] }
+    }
+    return undefined
+  }
+
+  private _has(type: ComponentTypeHandle, variant?: string): boolean {
+    const registryKey = this.processComponentTypeHandleForLookup(type, variant);
+    for (let idx = 0; idx < registryKey.length; idx++) {
+      if (this.registry.has(registryKey[idx])) {
+        return true
+      }
+    }
+    return false
   }
 
   public extract(): ComponentTypeDictionary {
@@ -129,11 +160,34 @@ export class DefaultComponentFactory implements ComponentFactory {
 
       const typeName = handleToProcess.at(handleToProcess.length - (1+offset))
       const prefix = handleToProcess.at(handleToProcess.length - (2+offset)) === 'RichText' ? 'RichText/' : '' 
-      const actualVariant = offset > 0 ? handleToProcess.at(handleToProcess.length - 1) ?? variant ?? 'default' : variant ?? 'default'
+      const actualVariant = offset > 0 ? handleToProcess.at(handleToProcess.length - 1) ?? variant ?? this.defaultVariant : variant ?? this.defaultVariant
       const newHandle = prefix + typeName + '/' + actualVariant
 
       return newHandle
     }
     throw new Error(`Invalid component type handle: ${typeof handle}`)
+  }
+
+  private processComponentTypeHandleForLookup(handle: ComponentTypeHandle, variant?: string): string[] {
+    let handleToProcess = typeof handle === 'string' ? handle.split(MERGE_SYMBOL) : [...handle];
+    if (Array.isArray(handleToProcess) && handleToProcess.every((s) => typeof s === 'string')) {
+
+      // First remove ignored contracts from the handle, as they are not relevant for the lookup
+      handleToProcess = handleToProcess.filter((s) => !this.ignoredContracts.includes(s.toLowerCase()));
+
+      // Now build the lookup keys based on the remaining handle parts
+      const list = handleToProcess.flatMap((s, index) => {
+        const subList = [
+          s + (variant ? '/' + variant : ''),
+          handleToProcess.slice(index).join('/') + (variant ? '/' + variant : '')
+        ];
+        if (variant === this.defaultVariant) {
+          subList.push(s, handleToProcess.slice(index).join('/'));
+        }
+        return subList.filter((v, i, a) => a.indexOf(v) === i); // Remove duplicates
+      });
+      return list.reverse() // Reverse to prioritize more specific keys first;
+    }
+    throw new Error(`Invalid component type handle: ${typeof handle}`);
   }
 }
