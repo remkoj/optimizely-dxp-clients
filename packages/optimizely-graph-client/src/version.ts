@@ -1,1 +1,1 @@
-export default {"version":"5.3.1"}
+export default {"version":"5.3.2"}
