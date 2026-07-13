@@ -1,5 +1,6 @@
 {
   "name": "@remkoj/optimizely-cms-react",
+  "description": "React and RSC integration library for Optimizely SaaS CMS",
   "license": "Apache-2.0",
   "version": "6.0.0-rc.2",
   "repository": {
