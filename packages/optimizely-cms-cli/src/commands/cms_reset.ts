@@ -62,7 +62,7 @@ export const CmsResetCommand: CliModule = {
     })
     if (!didRemoveCustomProperties) {
       const ctUrl = new URL('/ui/EPiServer.Cms.UI.Admin/default#/ContentTypes', client.cmsUrl)
-      process.stdout.write(`${chalk.redBright(figures.cross)} Custom properties on the \"Blank Section\" and \"Blank Experience\" Content Types must be removed manually, please remove and restart command.\n`)
+      process.stdout.write(`${chalk.redBright(figures.cross)} Custom properties on the "Blank Section" and "Blank Experience" Content Types must be removed manually, please remove and restart command.\n`)
       process.stdout.write(`  ${figures.arrowRight} Content Type manager: ${ctUrl}\n`)
       process.exit(1)
     }
@@ -130,7 +130,7 @@ async function deleteContentItem(client: CmsIntegrationApiClient, key: string, o
     return removedCount
   }
 
-  const deleteResult = await client.contentDelete({ path: { key }, headers: { "cms-permanent-delete": true } }).then(r => r.key).catch((e: ApiError) => {
+  const deleteResult = await client.contentDelete({ path: { key }, headers: { "cms-permanent-delete": true } }).then(r => r ? r.key : key).catch((e: ApiError) => {
     if (e.status == 404)
       return key
     throw e
@@ -157,7 +157,6 @@ async function resetSystemTypes(client: CmsIntegrationApiClient): Promise<number
     const newType: IntegrationApi.ContentType | undefined | null = await client.contentTypesPatch({
       path: { key: systemType },
       body: {
-        key: systemType,
         properties: {}
       }
     }).catch((e: ApiError) => e.status == 404 ? undefined : null)
@@ -175,7 +174,7 @@ async function removeContentTypes(client: CmsIntegrationApiClient): Promise<numb
   for (const contentType of contentTypes.filter(item => item.source == '' && !reservedTypes.includes(item.key))) {
     if (client.debug)
       process.stdout.write(`  ${chalk.blueBright(figures.arrowRight)} Removing content type ${contentType.displayName} (${contentType.key})\n`)
-    const result: IntegrationApi.ContentType | null = await client.contentTypesDelete({ path: { key: contentType.key } }).catch((e: ApiError) => {
+    const result: IntegrationApi.ContentType | void = await client.contentTypesDelete({ path: { key: contentType.key } }).catch((e: ApiError) => {
       if (e.status == 404)
         return contentType
       return null
@@ -215,7 +214,7 @@ async function getAllTemplates(client: CmsIntegrationApiClient, batchSize: numbe
     }
     throw e
   })
-  const totalItemCount = items.totalItemCount ?? items.items?.length ?? 0
+  const totalItemCount = items.totalCount ?? (items as { totalItemCount?: number }).totalItemCount ?? items.items?.length ?? 0
   const pageSize = items.pageSize ?? items.items?.length ?? 0
   const actualItems = items.items ?? []
   const pageCount = Math.ceil(totalItemCount / pageSize)
@@ -248,7 +247,7 @@ async function getAllTypes(client: CmsIntegrationApiClient, batchSize: number = 
     }
     throw e
   })
-  const totalItemCount = items.totalItemCount ?? items.items?.length ?? 0
+  const totalItemCount = items.totalCount ?? (items as { totalItemCount?: number }).totalItemCount ?? items.items?.length ?? 0
   const pageSize = items.pageSize ?? items.items?.length ?? 0
   const actualItems = items.items ?? []
   const pageCount = Math.ceil(totalItemCount / pageSize)
@@ -270,18 +269,18 @@ async function getAllTypes(client: CmsIntegrationApiClient, batchSize: number = 
   return actualItems
 }
 
-async function getAllAssets(client: CmsIntegrationApiClient, parentKey: string, batchSize: number = 100): Promise<IntegrationApi.ContentMetadata[]> {
+async function getAllAssets(client: CmsIntegrationApiClient, parentKey: string, batchSize: number = 100): Promise<IntegrationApi.ContentNode[]> {
   const items = await client.contentListAssets({ path: { key: parentKey }, query: { pageIndex: 0, pageSize: batchSize } }).catch((e: ApiError) => {
     if (e.status == 404) {
       return {
         items: [],
         totalItemCount: 0,
         pageSize: batchSize,
-      } as IntegrationApi.ContentMetadataPage
+      } as IntegrationApi.ContentNodePage
     }
     throw e
   })
-  const totalItemCount = items.totalItemCount ?? items.items?.length ?? 0
+  const totalItemCount = items.totalCount ?? (items as { totalItemCount?: number }).totalItemCount ?? items.items?.length ?? 0
   const pageSize = items.pageSize ?? items.items?.length ?? 0
   const actualItems = items.items ?? []
   const pageCount = Math.ceil(totalItemCount / pageSize)
@@ -293,7 +292,7 @@ async function getAllAssets(client: CmsIntegrationApiClient, parentKey: string, 
           items: [],
           totalItemCount: 0,
           pageSize: batchSize,
-        } as IntegrationApi.ContentMetadataPage
+        } as IntegrationApi.ContentNodePage
       }
       throw e
     })
@@ -303,18 +302,18 @@ async function getAllAssets(client: CmsIntegrationApiClient, parentKey: string, 
   return actualItems
 }
 
-async function getAllItems(client: CmsIntegrationApiClient, parentKey: string, batchSize: number = 100): Promise<IntegrationApi.ContentMetadata[]> {
+async function getAllItems(client: CmsIntegrationApiClient, parentKey: string, batchSize: number = 100): Promise<IntegrationApi.ContentNode[]> {
   const items = await client.contentListItems({ path: { key: parentKey }, query: { pageIndex: 0, pageSize: batchSize } }).catch((e: ApiError) => {
     if (e.status == 404) {
       return {
         items: [],
         totalItemCount: 0,
         pageSize: batchSize,
-      } as IntegrationApi.ContentMetadataPage
+      } as IntegrationApi.ContentNodePage
     }
     throw e
   })
-  const totalItemCount = items.totalItemCount ?? items.items?.length ?? 0
+  const totalItemCount = items.totalCount ?? (items as { totalItemCount?: number }).totalItemCount ?? items.items?.length ?? 0
   const pageSize = items.pageSize ?? items.items?.length ?? 0
   const actualItems = items.items ?? []
   const pageCount = Math.ceil(totalItemCount / pageSize)
@@ -326,7 +325,7 @@ async function getAllItems(client: CmsIntegrationApiClient, parentKey: string, b
           items: [],
           totalItemCount: 0,
           pageSize: batchSize,
-        } as IntegrationApi.ContentMetadataPage
+        } as IntegrationApi.ContentNodePage
       }
       throw e
     })

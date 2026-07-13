@@ -10,45 +10,45 @@
     "build": "graphql-codegen && next build",
     "start": "next start",
     "lint": "eslint",
-    "lint:fix": "eslint --fix"
+    "lint:fix": "eslint --fix",
+    "schema:install": "opti-cms schema:vscode",
+    "schema:validate": "opti-cms schema:validate"
   },
   "dependencies": {
     "@remkoj/optimizely-cms-nextjs": "6.0.0",
     "@remkoj/optimizely-cms-react": "6.0.0",
     "@remkoj/optimizely-graph-client": "6.0.0",
     "graphql-request": "^7.4.0",
-    "next": "^16.2.9",
+    "next": "^16.2.10",
     "react": "^19.2.7",
     "react-dom": "^19.2.7"
   },
   "devDependencies": {
-    "@eslint/eslintrc": "^3.3.5",
-    "@graphql-codegen/cli": "7.1.2",
-    "@next/env": "^16.2.9",
+    "@eslint/eslintrc": "^3.3.6",
+    "@graphql-codegen/cli": "7.2.0",
+    "@next/env": "^16.2.10",
     "@remkoj/optimizely-cms-cli": "6.0.0",
     "@remkoj/optimizely-graph-cli": "6.0.0",
     "@remkoj/optimizely-graph-functions": "6.0.0",
     "@stylistic/eslint-plugin": "^5.10.0",
-    "@types/node": "^24.13.2",
+    "@types/node": "^24.13.3",
     "@types/react": "^19.2.17",
     "@types/react-dom": "^19.2.3",
-    "eslint": "^9.39.4",
-    "eslint-config-next": "16.2.9",
+    "eslint": "^9.39.5",
+    "eslint-config-next": "16.2.10",
     "graphql": "^16.14.2",
     "typescript": "5.9.3"
   },
   "resolutions": {
     "@graphql-codegen/visitor-plugin-common": "file:../../dependencies/graphql-codegen-visitor-plugin-common-v7.1.0-patched.tgz",
-    "@remkoj/optimizely-cms-api": "file:../../artefacts/@remkoj-optimizely-cms-api-dev.tgz",
-    "@remkoj/optimizely-cms-react": "file:../../artefacts/@remkoj-optimizely-cms-react-dev.tgz",
-    "@remkoj/optimizely-cms-nextjs": "file:../../artefacts/@remkoj-optimizely-cms-nextjs-dev.tgz",
-    "@remkoj/optimizely-graph-client": "file:../../artefacts/@remkoj-optimizely-graph-client-dev.tgz",
-    "@remkoj/optimizely-graph-functions": "file:../../artefacts/@remkoj-optimizely-graph-functions-dev.tgz",
-    "@remkoj/optimizely-cms-cli": "file:../../artefacts/@remkoj-optimizely-cms-cli-dev.tgz",
-    "@remkoj/optimizely-graph-cli": "file:../../artefacts/@remkoj-optimizely-graph-cli-dev.tgz",
-    "@remkoj/hey-api-wrapper": "file:../../artefacts/@remkoj-hey-api-wrapper-dev.tgz",
-    "chalk": "^4.1.0",
-    "graphql": "^16.14.2"
+    "@remkoj/optimizely-cms-api": "file:../../packages/optimizely-cms-api",
+    "@remkoj/optimizely-cms-react": "file:../../packages/optimizely-cms-react",
+    "@remkoj/optimizely-cms-nextjs": "file:../../packages/optimizely-cms-nextjs",
+    "@remkoj/optimizely-graph-client": "file:../../packages/optimizely-graph-client",
+    "@remkoj/optimizely-graph-functions": "file:../../packages/optimizely-graph-functions",
+    "@remkoj/optimizely-cms-cli": "file:../../packages/optimizely-cms-cli",
+    "@remkoj/optimizely-graph-cli": "file:../../packages/optimizely-graph-cli",
+    "@remkoj/hey-api-wrapper": "file:../../packages/hey-api-wrapper"
   },
-  "packageManager": "yarn@4.16.0"
+  "packageManager": "yarn@4.17.1"
 }

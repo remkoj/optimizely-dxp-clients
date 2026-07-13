@@ -3,6 +3,7 @@
 /* tslint:disable */
 /* eslint-disable */
 export type SourceInfo = {
+    count?: number;
     languages: Array<string>;
     description: string;
     label: string;

@@ -46,3 +46,7 @@ next-env.d.ts
 /src/gql
 .opti-props.lock
 yarn.lock
+
+# Local files
+*.local.*
+*.local

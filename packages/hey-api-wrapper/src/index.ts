@@ -12,6 +12,21 @@ import type { ApiClientConfig, ApiClientFunctions, ClassWithMixin, OperationsLis
  * @param Base The {@link ApiClient} subclass to extend.
  * @param Operations Map of hey-api operation functions to bind as methods.
  * @returns A new class combining `Base` with the bound operation methods.
+ *
+ * @example
+ * ```typescript
+ * import * as SdkOps from './client/sdk.gen';
+ * import { createClient } from '@hey-api/client-fetch';
+ *
+ * class MyCmsApiClient extends withOperations(ApiClient, SdkOps) {
+ *   constructor(config: ApiClientConfig, client: ReturnType<typeof createClient>) {
+ *     super(config, client);
+ *   }
+ * }
+ *
+ * const api = new MyCmsApiClient({ debug: true }, createClient({ baseUrl: 'https://cms.example.com' }));
+ * const result = await api.listContent({ query: { pageSize: 10 } });
+ * ```
  */
 export function withOperations<TBase extends ApiClientStatic, TOperations extends OperationsList>(Base: TBase, Operations: TOperations): ClassWithMixin<TBase, ApiClientFunctions<TOperations>> {
   
@@ -108,18 +123,19 @@ export abstract class ApiClient<
 >
 {
   /**
-   * The configuration of this ApiClient instance, only
-   * available to implementations of the API Client.
+   * Immutable configuration snapshot for this client instance.
+   * Accessible to subclasses only.
    */
   protected readonly _config: Readonly<C>;
 
   /**
-   * Get the network client that is needed to perform operations
+   * The `@hey-api` network client bound to this instance.
+   * Injected into every operation call. Accessible to subclasses only.
    */
   protected readonly _client: NC;
 
   /** Whether debug logging is enabled for this client. */
-  protected get debug(): boolean {
+  public get debug(): boolean {
     return this._config.debug ?? false;
   }
 
@@ -201,6 +217,7 @@ export abstract class ApiClient<
  * inspection.
  */
 export class ApiError extends Error {
+  /** Raw error context captured from the failed operation: the error payload and the originating HTTP request and response. */
   protected _ctx: { error?: unknown, request?: Request, response?: Response }
 
   /**
@@ -220,7 +237,7 @@ export class ApiError extends Error {
   }
 
   /**
-   * @deprecated use data() instead
+   * @deprecated Use {@link data} instead.
    */
   public get body(): unknown {
     return this._ctx.error

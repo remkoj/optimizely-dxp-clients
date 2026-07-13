@@ -113,7 +113,7 @@ export function isFolder(contentType?: (IntegrationApi.ContentType & { isContrac
  * Test if the provided content type is a system type
  * 
  * @param     contentType     The ContentType to test
- * @returns   `true` if the ContentType is a folder, `false` otherwise
+ * @returns   `true` if the ContentType is a system type, `false` otherwise
  * @see {@link IntegrationApi.ContentType}
  */
 export function isSystemType(contentType?: (IntegrationApi.ContentType & { isContract?: boolean }) | null) : contentType is IntegrationApi.ContentType
@@ -123,13 +123,33 @@ export function isSystemType(contentType?: (IntegrationApi.ContentType & { isCon
   return contentType.source === 'system'
 }
 
+/**
+ * Type guard that returns `true` when `toTest` is a non-empty array.
+ *
+ * @param toTest The value to inspect.
+ * @returns `true` when `toTest` is an `Array` with at least one element.
+ */
 export function isNonEmptyArray<T>(toTest?: Array<T> | null | undefined): toTest is Array<T> {
   return Array.isArray(toTest) && toTest.length > 0;
 }
+
+/**
+ * Type guard that returns `true` when `toTest` is `null`, `undefined`, or an empty array.
+ *
+ * @param toTest The value to inspect.
+ * @returns `true` when `toTest` is `null` or an `Array` with no elements.
+ */
 export function isEmptyArray<T>(toTest?: Array<T> | null | undefined): toTest is Array<T> | null {
   return toTest === null || !Array.isArray(toTest) || toTest.length === 0;
 }
-export function isDefined<T>(toTest?: T | null): toTest is T
+
+/**
+ * Type guard that returns `true` when `toTest` is neither `null` nor `undefined`.
+ *
+ * @param toTest The value to inspect.
+ * @returns `true` when `toTest` is a defined, non-null value of type `T`.
+ */
+export function isDefined<T>(toTest?: T | null | void): toTest is T
 {
   return toTest !== null && toTest !== undefined
 }

@@ -20,28 +20,49 @@ type MergePatchValue<T> =
  * Each property is optional. A property set to `null` signals deletion;
  * a property with a value signals addition or replacement;
  * an absent property means no change.
+ *
+ * Properties in `AtomicKeys` are treated as atomic: when they change, the
+ * entire value from the source is included verbatim rather than being
+ * recursively merge-patched. Use this for dictionary- or record-typed
+ * properties whose individual entries cannot be partially patched
+ * (e.g. `{ [key: string]: SomeObject }`).
+ *
+ * @template T          - The type being patched.
+ * @template AtomicKeys - Keys of `T` whose values are included verbatim.
  */
-export type MergePatch<T extends object> = {
-  [K in keyof T]?: MergePatchValue<T[K]>
+export type MergePatch<T extends object, AtomicKeys extends keyof T = never> = {
+  [K in keyof T]?: K extends AtomicKeys
+    ? (T[K] | null)
+    : MergePatchValue<T[K]>
 }
 
 /**
  * Options for {@link generatePatch}.
  *
- * @template T - The type of the objects being compared.
+ * @template T          - The type of the objects being compared.
+ * @template AtomicKeys - Keys of `T` whose values are always included verbatim;
+ *                        must match the values passed in `atomicFields` at runtime.
  */
-export type PatchOptions<T extends object> = {
+export type PatchOptions<T extends object, AtomicKeys extends keyof T = never> = {
   /** Keys of `T` that should never appear in the generated patch, even if they changed. */
   readonlyFields?: Array<keyof T>
   /** Keys of `T` that must always be included in the generated patch using values from `newValue`. */
   requiredFields?: Array<keyof T>
+  /**
+   * Keys of `T` whose values are always included verbatim when they change,
+   * rather than being recursively merge-patched. Use this for record- or
+   * dictionary-typed properties (e.g. `{ [key: string]: SomeObject }`) and
+   * arrays of objects whose individual entries cannot be partially patched.
+   */
+  atomicFields?: AtomicKeys[]
 }
 
 function normalizeMergePatch<T>(
   value: DiffValue<T>,
   omitKeys: Array<keyof T>,
   requiredKeys: Array<keyof T> = [],
-  requiredSource?: T
+  requiredSource?: T,
+  atomicKeys: Array<keyof T> = []
 ): MergePatchValue<T> {
   if (value === undefined || value === null)
     return null as MergePatchValue<T>
@@ -53,8 +74,14 @@ function normalizeMergePatch<T>(
     return value as MergePatchValue<T>
 
   const output = Object.entries(value).reduce((acc, [ key, entry ]) => {
-    if (!omitKeys.includes(key as keyof T))
-      acc[key] = normalizeMergePatch<T>(entry as DiffValue<T>, omitKeys)
+    if (!omitKeys.includes(key as keyof T)) {
+      if (atomicKeys.includes(key as keyof T) && requiredSource !== undefined) {
+        // Include the full value from newValue verbatim — do not recurse into the diff
+        acc[key] = requiredSource[key as keyof T]
+      } else {
+        acc[key] = normalizeMergePatch<T>(entry as DiffValue<T>, omitKeys)
+      }
+    }
     return acc
   }, {} as MergePatchValue<T>)
 
@@ -122,17 +149,22 @@ function normalizeMergePatch<T>(
  *                           regardless of whether they changed.
  * @param options.requiredFields - Keys that should always appear in the generated patch,
  *                           using values from `newValue`.
+ * @param options.atomicFields  - Keys whose values are always included verbatim when they
+ *                           change, rather than being recursively patched. Use for
+ *                           record- or dictionary-typed properties (e.g.
+ *                           `{ [key: string]: SomeObject }`) and arrays of objects.
  * @returns A {@link MergePatch} object ready to be serialised as an `application/merge-patch+json` body.
  */
-export function generatePatch<T extends object>(
+export function generatePatch<T extends object, AK extends keyof T = never>(
   currentValue: T,
   newValue: T,
-  options: PatchOptions<T> = {}
-): MergePatch<T> {
+  options: PatchOptions<T, AK> = {}
+): MergePatch<T, AK> {
   const requiredKeys: Array<keyof T> = options.requiredFields ?? []
   const omitKeys: Array<keyof T> = (options.readonlyFields ?? []).filter(key => !requiredKeys.includes(key))
+  const atomicKeys: Array<keyof T> = (options.atomicFields ?? []) as Array<keyof T>
   const patch = diff(currentValue, newValue) as DiffValue<T>
-  return normalizeMergePatch<T>(patch, omitKeys, requiredKeys, newValue) as MergePatch<T>
+  return normalizeMergePatch<T>(patch, omitKeys, requiredKeys, newValue, atomicKeys) as MergePatch<T, AK>
 }
 
 /**

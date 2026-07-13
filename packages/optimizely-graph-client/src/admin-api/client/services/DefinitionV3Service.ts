@@ -21,12 +21,14 @@ export class DefinitionV3Service {
      * @param slot The slot of the source _(optional)_
      * - _(empty): old slot_
      * - _**new**: new slot_
+     * @param count
      * @returns SourceInfoMap Ok
      * @throws ApiError
      */
     public getContentV3SourceHandler(
         id?: string,
         slot?: Slot,
+        count?: string,
     ): CancelablePromise<SourceInfoMap> {
         return this.httpRequest.request({
             method: 'GET',
@@ -34,6 +36,7 @@ export class DefinitionV3Service {
             query: {
                 'id': id,
                 'slot': slot,
+                'count': count,
             },
         });
     }

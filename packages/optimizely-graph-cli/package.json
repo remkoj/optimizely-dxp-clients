@@ -12,7 +12,8 @@
     "node": ">=24.0.0 <25.0.0"
   },
   "files": [
-    "./bin"
+    "./bin",
+    "./AGENTS.md"
   ],
   "bin": {
     "opti-graph": "bin/index.js",
@@ -22,6 +23,7 @@
     "watch": "yarn rollup --config rollup.config.js --watch",
     "update-cfg": "node ./script/update-cfg.js",
     "prepare": "node ./script/update-cfg.js && yarn rollup --config rollup.config.js",
+    "recompile": "node ./script/update-cfg.js && yarn rollup --config rollup.config.js",
     "opti-graph": "yarn node bin/index.js"
   },
   "devDependencies": {
@@ -31,7 +33,7 @@
     "@rollup/plugin-typescript": "^12.3.0",
     "@rollup/pluginutils": "^5.4.0",
     "@types/crypto-js": "^4.2.2",
-    "@types/node": "^24.13.2",
+    "@types/node": "^24.13.3",
     "@types/source-map-support": "^0.5.10",
     "@types/yargs": "^17.0.35",
     "rollup": "^4.62.2",

@@ -1,5 +1,4 @@
 import type { CliModule } from '../types.js'
-import type { ApiError } from '@remkoj/optimizely-cms-api'
 import createClient from '../tools/cmsClient.js'
 import chalk from 'chalk'
 import figures from 'figures'
@@ -17,14 +16,6 @@ export const CmsVersionCommand: CliModule = {
     const client = createClient(args)
     if (client.debug)
       process.stdout.write(chalk.yellowBright(`${figures.arrowRight} Reading version information Optimizely CMS\n`))
-    const versionInfo = await client.getInstanceInfo().catch((error: ApiError) => {
-      switch (error.message) {
-        case "fetch failed":
-          throw new Error("Unable to connect to Optimizely CMS, please verify that the CMS URL is correct")
-        default:
-          throw error
-      }
-    })
 
     const info = new Table({
       head: [
@@ -34,15 +25,11 @@ export const CmsVersionCommand: CliModule = {
       colWidths: [30, 60],
       colAligns: ["left", "left"]
     })
-    info.push(["Base URL", versionInfo.baseUrl ?? client.cmsUrl.href])
+    info.push(["Base URL", client.cmsUrl.href])
     info.push(["Client API", client.apiVersion])
-    info.push(["Service API", versionInfo.apiVersion])
-    info.push(["CMS Build", versionInfo.cmsVersion])
-    info.push(["Service Build", versionInfo.serviceVersion])
     info.push(["SDK", CLIInfo.version])
 
     process.stdout.write(info.toString() + "\n")
-    process.stdout.write(chalk.yellowBright(`${figures.arrowRight} Optimizely CMS Status: ${versionInfo.status}\n`))
     process.stdout.write(chalk.green(chalk.bold(figures.tick + " Done")) + "\n")
   }
 }

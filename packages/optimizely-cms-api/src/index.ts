@@ -1,4 +1,5 @@
 export * from './config'
+export type * from './types'
 export * as IntegrationApi from './client/types.gen'
 export { ApiClient, ApiError, ApiClient as CoreClient, type ApiClientStatic, type CmsIntegrationApiClient } from './api-client'
 
@@ -31,7 +32,7 @@ export function createClient(config?: CmsIntegrationApiOptions): CmsIntegrationA
 export function isClientInstance(value?: object): value is CmsIntegrationApiClient {
   if (typeof value !== 'object' || value === null)
     return false
-  return typeof (value as CmsIntegrationApiClient)['getInstanceInfo'] === 'function'
+  return typeof (value as CmsIntegrationApiClient)['getSchemaItemBase'] === 'function'
 }
 
 /**

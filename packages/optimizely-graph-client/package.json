@@ -9,7 +9,8 @@
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "files": [
-    "./dist"
+    "./dist",
+    "./AGENTS.md"
   ],
   "exports": {
     ".": "./dist/index.js",
@@ -51,7 +52,7 @@
   },
   "devDependencies": {
     "@types/crypto-js": "^4.2.2",
-    "@types/node": "^24.13.2",
+    "@types/node": "^24.13.3",
     "openapi-typescript-codegen": "^0.31.0",
     "prop-types": "^15.8.1",
     "scheduler": "^0.27.0",

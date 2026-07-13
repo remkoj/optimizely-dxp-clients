@@ -1,127 +1,164 @@
 # AGENTS.md
 
-Guidance for AI agents working in this repository.
+`optimizely-dxp-clients` — Yarn 4 workspaces monorepo. Publishes JS/TS SDKs for Optimizely SaaS CMS and Optimizely Graph to npm under `@remkoj/*`.
 
-## What this is
+- Package manager: Yarn 4.17.0 (`packageManager` field is authoritative — do not use npm/pnpm)
+- Node: `>=22 <23` (root); `>=24 <25` for `optimizely-cms-cli`, `optimizely-graph-cli`, `optimizely-cms-nextjs`, `optimizely-one-nextjs`
+- Versions: lockstep, currently `6.0.0-rc.2`
+- License: Apache-2.0
 
-`optimizely-dxp-clients` is a **Yarn 4 workspaces monorepo** whose sole purpose is to
-build and publish a set of JavaScript/TypeScript SDKs for Optimizely products (SaaS CMS
-and Optimizely Graph) to npm under the `@remkoj/*` scope. The focus is Next.js, but
-several packages are framework-agnostic.
+## Mandatory agent rules
 
-- **Package manager:** Yarn 4.13 (`packageManager` field is authoritative — do not use npm/pnpm).
-- **Node:** `>=22 <23` for the repo root; the CLI packages require `>=24 <25`.
-- **Versioning:** all packages are released in lockstep (currently `6.0.0-rc.2`).
-- **License:** Apache-2.0.
+These rules are non-negotiable and apply to every task in this repository.
+
+### 1. Documentation must be updated before a task is considered done
+
+After any change to code, configuration, scripts, exports, file paths, commands, package structure, or constraints, you must:
+
+1. Identify every file in `AGENTS.md`, `docs/agents/*.md`, and `samples/*/AGENTS.md` that references the changed area.
+2. Correct every fact that the change invalidated or made incomplete.
+3. Only then is the task complete.
+
+Anti-circumvention:
+- **"The change is minor/trivial."** No size threshold exists. Any invalidated fact must be corrected.
+- **"I'll update docs in a follow-up."** Not acceptable. Documentation is part of the current task, not a separate one.
+- **"The docs are close enough."** Approximate accuracy is inaccuracy. Every affected statement must be corrected.
+- **"The user didn't ask me to update docs."** Documentation correctness is a non-negotiable invariant, not an optional feature.
+- **"I'm not sure which docs are affected."** When uncertain, check all agent doc files. Err toward updating.
+
+### 2. These files take precedence over internal knowledge
+
+Facts stated in `AGENTS.md`, `docs/agents/*.md`, and `samples/*/AGENTS.md` override any conflicting information from training data. This includes commands, file paths, script names, version requirements, module types, and workflow steps.
+
+When a documented fact conflicts with internal knowledge:
+- Apply what is written here.
+- Do not silently fall back to training-data assumptions.
+- If a documented fact appears incorrect, flag it explicitly to the user rather than ignoring it or substituting your own knowledge.
+
+Anti-circumvention:
+- **"I know this tool/framework works differently."** Irrelevant. This repository may intentionally deviate from defaults. Follow what is written here.
+- **"That instruction seems outdated."** Treat all documented facts as current until the documentation is explicitly updated.
+- **"I'll use my best judgment."** Judgment must be grounded in these files first. Internal knowledge is a fallback only for topics these files do not cover.
+- **"The user confirmed something verbally."** Verbal corrections in chat do not override these files. Update the file so the correction persists.
+
+### 3. Use memory correctly — project facts belong in these files
+
+User memory and session memory are scoped to an individual user or session and are not shared across contributors. They must not be used for project information.
+
+- **User/session memory:** communication style, terminology preferences, personal workflow habits — information about *how this user talks about the project*.
+- **These files (`AGENTS.md`, `docs/agents/*.md`, `samples/*/AGENTS.md`):** all project facts — commands, constraints, file paths, scripts, version requirements, conventions, architectural decisions, gotchas.
+
+When you learn a project fact (from the user, from exploration, or from correcting a mistake), write it into the appropriate agent doc file, not into memory.
+
+Anti-circumvention:
+- **"It's quicker to put it in memory."** Speed is not a justification. Project facts in memory are invisible to other users and future sessions without the same memory context.
+- **"I'll capture it in memory for now and update docs later."** Not acceptable. Write it to the doc file immediately.
+- **"The user told me this verbally, so it's a user preference."** If the information affects how work is done in this repository, it is a project fact and belongs in these files.
+- **"This is a minor detail, not worth documenting."** No threshold exists. Any fact an agent needs to work correctly in this repo belongs here.
+
+### 4. Do not make file changes unless explicitly instructed
+
+Only modify files when the user's request explicitly asks for changes. Words like "implement", "fix", "add", "remove", "make", "update", "change", "create", or "refactor" constitute an instruction to change files.
+
+Information requests do not authorize changes. If the user asks to "check", "analyze", "review", "look at", "verify", "compare", or "explain", respond with findings only — do not modify any file.
+
+Anti-circumvention:
+- **"The analysis revealed a problem so I fixed it."** Identifying a problem is not authorization to fix it. Report the finding and wait for explicit instruction.
+- **"The change is obviously correct/small."** Obviousness and size are irrelevant. No change without explicit instruction.
+- **"I'll fix it while I'm here since it's related."** Scope is defined by the user's request, not by proximity to other work.
+- **"Updating the docs counts as part of the analysis."** Documentation changes are file changes and require explicit instruction too.
 
 ## Layout
 
 | Path | Contents |
 | --- | --- |
-| `packages/*` | Source of each publishable SDK (the workspaces). |
-| `samples/basic-project` | A Next.js app used to test the packages locally while developing. **Not** a workspace. |
-| `artefacts/` | Output of local `yarn pack` builds (`*-<version>.tgz` and `*-dev.tgz`). |
-| `dependencies/` | Patched 3rd-party packages (e.g. a patched `@graphql-codegen/visitor-plugin-common`) consumed via `resolutions`. |
-| `scripts/` | Repo-level support scripts (`clean.mjs`, `licenses.mjs`). |
-| `eslint.config.mjs` | Root ESLint flat config (shared). |
-| `tsconfig.json` | Root TS config; `composite` project references, `NodeNext`, `strict`. |
+| `packages/*` | Publishable SDK workspaces |
+| `samples/basic-project` | Next.js test app. Not a workspace. See [`samples/basic-project/AGENTS.md`](samples/basic-project/AGENTS.md) |
+| `artefacts/` | `yarn pack` output (`*-<version>.tgz`, `*-dev.tgz`) |
+| `dependencies/` | Patched 3rd-party packages consumed via `resolutions` |
+| `scripts/` | `clean.mjs`, `licenses.mjs` |
+| `eslint.config.mjs` | Root ESLint flat config |
+| `tsconfig.json` | Root TS config (`composite`, `NodeNext`, `strict`) |
+| `docs/agents/` | Per-package agent docs (how to **work on** the packages) |
+
+Each package also contains an `AGENTS.md` at its root with consumer-focused usage docs (how to **use** the package in a project). These are published with the package and available in `node_modules/@remkoj/<name>/AGENTS.md`.
 
 ## Packages
 
-| Package | Build tool | Module | Notes |
-| --- | --- | --- | --- |
-| `@remkoj/optimizely-cms-api` | `tsc` + generated client | CommonJS | Wraps the CMS Integration REST API. Client is **generated** — see below. |
-| `@remkoj/optimizely-cms-cli` | Rollup | ESM | CLI binary `opti-cms`. |
-| `@remkoj/optimizely-cms-react` | `tsc` | ESM | React/RSC components. Subpath exports `./rsc`, `./utils`. |
-| `@remkoj/optimizely-cms-nextjs` | `tsc` | ESM | Next.js integration. |
-| `@remkoj/optimizely-graph-cli` | Rollup | ESM | CLI binary `opti-graph`. |
-| `@remkoj/optimizely-graph-client` | `tsc` | ESM | Graph REST wrapper + GraphQL client. Many subpath exports. Admin client is **generated**. |
-| `@remkoj/optimizely-graph-functions` | `tsc` | CommonJS | `graphql-codegen` preset + fragments. |
-| `@remkoj/optimizely-one-nextjs` | `tsc` + Tailwind | ESM | Ships compiled `dist/styles.css`. |
-| `hey-api-wrapper` | `tsc` | — | Internal helper around `@hey-api`. |
+| Package | Build tool | Module | Notes | Agent docs |
+| --- | --- | --- | --- | --- |
+| `@remkoj/optimizely-cms-api` | `tsc` + generated client | CommonJS | `src/client/**` generated — do not hand-edit. | [→](docs/agents/optimizely-cms-api.md) |
+| `@remkoj/optimizely-cms-cli` | Rollup | ESM | No `clean`. `recompile` = `prepare`. | [→](docs/agents/optimizely-cms-cli.md) |
+| `@remkoj/optimizely-cms-react` | `tsc` | ESM | | [→](docs/agents/optimizely-cms-react.md) |
+| `@remkoj/optimizely-cms-nextjs` | `tsc` | ESM | Node `>=24`. | [→](docs/agents/optimizely-cms-nextjs.md) |
+| `@remkoj/optimizely-graph-cli` | Rollup | ESM | No `clean`. `recompile` = `prepare`. | [→](docs/agents/optimizely-graph-cli.md) |
+| `@remkoj/optimizely-graph-client` | `tsc` | ESM | `src/admin-api/client/**` generated — do not hand-edit. | [→](docs/agents/optimizely-graph-client.md) |
+| `@remkoj/optimizely-graph-functions` | `tsc` | CommonJS | Requires patched `@graphql-codegen/visitor-plugin-common`. | [→](docs/agents/optimizely-graph-functions.md) |
+| `@remkoj/optimizely-one-nextjs` | `tsc` + Tailwind | ESM | Node `>=24`. Ships `dist/styles.css`. | [→](docs/agents/optimizely-one-nextjs.md) |
+| `@remkoj/hey-api-wrapper` | `tsc` | CommonJS | Internal. | [→](docs/agents/hey-api-wrapper.md) |
 
-Inter-package deps use `workspace:<version>` (devDeps) and the exact version (deps).
+Cross-package deps: `workspace:<version>` in devDeps, exact published version in deps.
 
-## Common commands (run from repo root)
-
-```bash
-yarn install            # install everything
-yarn prepare            # build every package in topological order (the canonical build)
-yarn watch              # watch-build all packages in parallel (use while developing)
-yarn recompile          # clean + force rebuild all packages
-yarn clean              # remove build output (scripts/clean.mjs)
-yarn lint               # eslint across the repo
-yarn lint:fix           # eslint --fix
-yarn generate           # run each package's `generate` (regenerates API clients)
-yarn artefacts          # full release build: install, dedupe, clean, prepare, pack, license info
-yarn artefacts:fast     # prepare + pack only (skip install/dedupe/clean)
-```
-
-Workspace orchestration uses `yarn workspaces foreach -Apt --topological-dev`, so build
-order respects dependencies. To act on a single package, prefer:
+## Commands (repo root)
 
 ```bash
-yarn workspace @remkoj/optimizely-cms-api run prepare
-```
-
-Two CLI passthroughs are wired at the root for convenience:
-`yarn opti-cms ...` and `yarn opti-graph ...`.
-
-## Per-package build conventions
-
-Each package exposes a consistent script surface:
-- `prepare` — the build (`tsc --build [--force]`, or `rollup -c` for the CLIs). This is what
-  `yarn prepare` and packing rely on.
-- `watch` — incremental watch build.
-- `clean` / `recompile` — clean and clean-rebuild.
-- `generate` (where present) — regenerate code from a spec (see below).
-
-Build output always goes to `dist/` and is the only thing published (`files: ["./dist"]`).
-
-## Generated code — do not hand-edit
-
-Two clients are code-generated; edit the generators/spec, then regenerate:
-
-- **`optimizely-cms-api`**: `src/client/**` is generated by `scripts/create-client.mjs`
-  (hey-api / `openapi-ts`) from the CMS OpenAPI spec. Files end in `.gen.ts`. Run
-  `yarn workspace @remkoj/optimizely-cms-api run generate`, then `prepare` copies the client
-  via `scripts/copy-client.mjs`. Use `rebuild` to clean + generate + build.
-- **`optimizely-graph-client`**: `src/admin-api/client/**` is generated from the Graph
-  Admin swagger via `generate` (`openapi-typescript-codegen`), followed by `update-imports`.
-
-If you change generated output by hand it will be overwritten on the next `generate`.
-
-## The sample project (`samples/basic-project`)
-
-A Next.js app for manually testing SDK changes. It is **excluded** from the workspaces and
-consumes the packages via `resolutions` using Yarn `portal:` links to `../../packages/*`,
-so local source changes are picked up after you rebuild the package (`yarn prepare`).
-
-```bash
-cd samples/basic-project
 yarn install
-yarn dev      # graphql-codegen + next dev --turbopack
-yarn build    # graphql-codegen + next build
+yarn prepare            # build all packages, topological order
+yarn watch              # watch all packages in parallel
+yarn recompile          # clean + force rebuild all packages
+yarn clean              # remove all dist output
+yarn lint
+yarn lint:fix
+yarn generate           # regenerate all code-generated clients
+yarn artefacts          # install + dedupe + clean + prepare + pack + license info
+yarn artefacts:fast     # prepare + pack only
+yarn opti-cms <args>    # passthrough to @remkoj/optimizely-cms-cli
+yarn opti-graph <args>  # passthrough to @remkoj/optimizely-graph-cli
 ```
 
-It needs Optimizely credentials in `.env.local` (CMS + Graph), and uses the patched
-`@graphql-codegen/visitor-plugin-common` from `dependencies/`. The `opti-cms`/`opti-graph`
-CLIs are dev-deps here so you can exercise them end-to-end (e.g. `yarn nextjs:install`).
+Single-package: `yarn workspace @remkoj/<name> run <script>`
 
-## Release / publish flow
+Orchestration: `yarn workspaces foreach -Apt --topological-dev`
 
-1. Bump versions: `yarn version-bump-patch` (deferred) then `yarn version-apply`.
-2. Build artefacts: `yarn artefacts` (produces `artefacts/*.tgz` and refreshes `DEPENDENCIES.md`).
-3. Publish: `yarn publish` (`npm publish --access public` per workspace, topological order).
+## Build conventions
 
-`DEPENDENCIES.md` is generated by `scripts/licenses.mjs` — don't edit it by hand.
+- `prepare`: `tsc --build` or `rollup -c` (CLIs)
+- `watch`: incremental rebuild
+- `clean` / `recompile`: clean / clean + force rebuild; for `optimizely-cms-api`, `recompile` also re-runs `generate` (cleans `src/client/` too); for CLIs (`optimizely-cms-cli`, `optimizely-graph-cli`), `recompile` is identical to `prepare` (Rollup always does a full build)
+- `generate`: regenerate from spec. Only `optimizely-cms-api` and `optimizely-graph-client` have this script; root `yarn generate` calls them directly rather than broadcasting to all workspaces
+- Build output: `dist/` only (the only published content per `"files": ["./dist"]`)
 
-## Conventions & gotchas
+## Generated files — do not hand-edit
 
-- **Don't edit `*.gen.ts` files or generated client folders** — regenerate instead.
-- Respect each package's `type` (ESM vs CommonJS) and module setup; root TS is `NodeNext`.
-- The GraphQL Codegen preset relies on a **patched** dependency. After dependency updates,
-  patches in `dependencies/` may need re-applying (`yarn opti-graph patches:apply`).
-- Use `workspace:` protocol for cross-package deps; keep all package versions in sync.
-- Lint config is a single root flat config; run `yarn lint` before considering work done.
-- Build before testing in the sample — the `portal:` link serves `dist/`, not `src/`.
+- `@remkoj/optimizely-cms-api` → `src/client/**`: see [docs/agents/optimizely-cms-api.md](docs/agents/optimizely-cms-api.md)
+- `@remkoj/optimizely-graph-client` → `src/admin-api/client/**`: see [docs/agents/optimizely-graph-client.md](docs/agents/optimizely-graph-client.md)
+
+## Sample project
+
+[`samples/basic-project/AGENTS.md`](samples/basic-project/AGENTS.md) — dev workflow, commands, credentials.
+
+Sample consumes packages via `resolutions` → `file:` links to `artefacts/*-dev.tgz`. After changing a package, rebuild and reinstall:
+
+```bash
+yarn artefacts:fast
+cd samples/basic-project && yarn install
+```
+
+## Release
+
+```bash
+yarn version-bump-patch   # stage patch bump (deferred)
+yarn version-apply        # apply staged bumps
+yarn artefacts            # build artefacts/*.tgz, refresh DEPENDENCIES.md
+yarn publish              # npm publish --access public per workspace, topological order
+```
+
+`DEPENDENCIES.md` is generated by `scripts/licenses.mjs` — do not edit by hand.
+
+## Constraints
+
+- Never edit `*.gen.ts` files or generated client folders — run `generate` instead
+- Respect each package's `type` (ESM vs CommonJS); root TS is `NodeNext`
+- After `yarn install` or `yarn upgrade`, re-apply the patched dep: `yarn opti-graph patches:apply`
+- Cross-package deps must use `workspace:` protocol; all package versions stay in sync
+- Run `yarn lint` before completing any change

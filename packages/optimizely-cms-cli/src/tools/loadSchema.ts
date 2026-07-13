@@ -1,4 +1,4 @@
-import { type CmsIntegrationApiClient as CmsApiClient } from '@remkoj/optimizely-cms-api'
+import { type CmsIntegrationApiClient as CmsApiClient, type OpenAPI } from '@remkoj/optimizely-cms-api'
 import figures from 'figures'
 import createDeepMerge from '@fastify/deepmerge'
 import { SchemaObject } from 'ajv'
@@ -6,19 +6,7 @@ import { Ajv, type AnySchemaObject } from 'ajv'
 import addFormats, { FormatsPlugin } from 'ajv-formats'
 
 type RefSchema = { "$ref": string }
-type BaseSchema = {
-  type: string
-  required?: string[]
-  description?: string
-  title?: string
-  format?: string
-  [x: string]: unknown
-  properties?: {
-    [propName: string]: BaseSchema | RefSchema
-  }
-  allOf?: Array<BaseSchema | RefSchema>
-  enum?: Array<string>
-}
+type BaseSchema = OpenAPI.SchemaObject;
 type TypedSchema = SchemaObject & BaseSchema & {
   definitions?: {
     [defName: string]: BaseSchema
@@ -39,7 +27,7 @@ export async function loadSchema(client: CmsApiClient, schemaName: string | stri
   process.stdout.write(`\n${figures.arrowRight} Constructing schema for ${schemas.join(', ')}\n`)
   for await (const schema of schemas) if (specSchemas[schema]) {
     const definitions = {}
-    const processedSchema = processSchema(specSchemas[schema] as BaseSchema | BaseSchema[], definitions, spec as unknown as TypedSchema)
+    const processedSchema = processSchema(specSchemas[schema], definitions, spec as unknown as TypedSchema)
     const jsonSchema: TypedSchema = {
       //"$schema": "https://json-schema.org/draft-07/schema",
       "$id": new URL(`schema/${schema}`,client.getSchemaItemBase()).href,
@@ -104,7 +92,7 @@ function postProcessDefintions(jsonSchema: TypedSchema): TypedSchema {
  * @param spec 
  * @returns 
  */
-function processSchema(schema: BaseSchema | BaseSchema[], defs: { [name: string]: BaseSchema }, spec: TypedSchema, mergeAllOf: boolean = true): typeof schema extends Array<any> ? (BaseSchema | RefSchema)[] : (BaseSchema | RefSchema) {
+function processSchema(schema: BaseSchema | BaseSchema[], defs: { [name: string]: BaseSchema }, spec: TypedSchema, mergeAllOf: boolean = true): typeof schema extends Array<unknown> ? (BaseSchema | RefSchema)[] : (BaseSchema | RefSchema) {
   if (Array.isArray(schema))
     return schema.map(s => processSchema(s, defs, spec, mergeAllOf)) as ((BaseSchema | RefSchema)[]) & (BaseSchema | RefSchema)
 
@@ -185,7 +173,7 @@ function resolveRefSchema(schema: BaseSchema['properties'][string], spec: TypedS
   return resolveLocalRef(schema['$ref'], spec);
 }
 
-function isLocalRef(ref: any): ref is string {
+function isLocalRef(ref: unknown): ref is string {
   return typeof ref === 'string' && ref.startsWith('#')
 }
 

@@ -12,6 +12,21 @@ exports.withOperations = withOperations;
  * @param Base The {@link ApiClient} subclass to extend.
  * @param Operations Map of hey-api operation functions to bind as methods.
  * @returns A new class combining `Base` with the bound operation methods.
+ *
+ * @example
+ * ```typescript
+ * import * as SdkOps from './client/sdk.gen';
+ * import { createClient } from '@hey-api/client-fetch';
+ *
+ * class MyCmsApiClient extends withOperations(ApiClient, SdkOps) {
+ *   constructor(config: ApiClientConfig, client: ReturnType<typeof createClient>) {
+ *     super(config, client);
+ *   }
+ * }
+ *
+ * const api = new MyCmsApiClient({ debug: true }, createClient({ baseUrl: 'https://cms.example.com' }));
+ * const result = await api.listContent({ query: { pageSize: 10 } });
+ * ```
  */
 function withOperations(Base, Operations) {
     //@ts-expect-error A mixin requires an ...any[] argument, but our concrete class has
@@ -67,12 +82,13 @@ function createIsFunctionValidator(baseType) {
  */
 class ApiClient {
     /**
-     * The configuration of this ApiClient instance, only
-     * available to implementations of the API Client.
+     * Immutable configuration snapshot for this client instance.
+     * Accessible to subclasses only.
      */
     _config;
     /**
-     * Get the network client that is needed to perform operations
+     * The `@hey-api` network client bound to this instance.
+     * Injected into every operation call. Accessible to subclasses only.
      */
     _client;
     /** Whether debug logging is enabled for this client. */
@@ -147,6 +163,7 @@ exports.ApiClient = ApiClient;
  * inspection.
  */
 class ApiError extends Error {
+    /** Raw error context captured from the failed operation: the error payload and the originating HTTP request and response. */
     _ctx;
     /**
      * @param data The operation error context: the error payload plus the HTTP request and response. A string error is used verbatim as the message; otherwise the message is derived from the response status.
@@ -163,7 +180,7 @@ class ApiError extends Error {
         return this._ctx.error;
     }
     /**
-     * @deprecated use data() instead
+     * @deprecated Use {@link data} instead.
      */
     get body() {
         return this._ctx.error;
