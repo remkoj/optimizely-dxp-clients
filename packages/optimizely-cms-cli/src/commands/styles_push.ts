@@ -10,6 +10,7 @@ import figures from 'figures'
 import Table from 'cli-table3'
 import { getStyles } from '../tools/styles.js'
 import { generatePatch, getPatchFields } from '../tools/patch.js'
+import { isDefined } from '../tools/filters.js'
 
 type StylesPushModule = CliModule<{
   excludeTemplates: string[]
@@ -65,24 +66,23 @@ export const StylesPushCommand: StylesPushModule = {
       // Create / Replace the current template
       const newTemplate = await (currentTemplate ? (async () => {
         const patch = generatePatch(currentTemplate, styleDefinition, {
-          readonlyFields: ['key', 'created', 'lastModified', 'createdBy', 'lastModifiedBy']
+          readonlyFields: ['key', 'created', 'lastModified', 'createdBy', 'lastModifiedBy'],
+          atomicFields: ['settings']
         })
         if (!path || Object.entries(patch).length === 0) return currentTemplate
-        // @ts-expect-error There's a mis-match between the logic in the CMS and the contents of the 
-        // OpenAPI Spec file.
         return client.displayTemplatesPatch({ path: { key: styleKey }, body: patch }) 
       })() :
         client.displayTemplatesCreate({ body: styleDefinition })
       )
 
-      const missedFields = generatePatch(newTemplate, currentTemplate, {
+      const missedFields = newTemplate ? generatePatch(newTemplate, currentTemplate, {
         readonlyFields: ['key', 'created', 'lastModified', 'createdBy', 'lastModifiedBy']
-      });
+      }) : undefined;
       if (missedFields && Object.keys(missedFields).length > 0)
         throw new Error(`The Display template ${ styleKey } failed to update properties: ${ getPatchFields(missedFields).join('; ') }`)
 
       return newTemplate
-    })))
+    })));
 
     const styles = new Table({
       head: [
@@ -96,15 +96,19 @@ export const StylesPushCommand: StylesPushModule = {
     })
     results.forEach(result => {
       if (result.status === 'fulfilled') {
-        const tpl = result.value;
-        styles.push([
-          tpl.displayName,
-          tpl.key,
-          tpl.isDefault ? figures.tick : figures.cross,
-          tpl.contentType ? `${tpl.contentType} (C)` : tpl.baseType ? `${tpl.baseType} (B)` : `${tpl.nodeType} (N)`
-        ])
+        if (isDefined(result.value)) {
+          const tpl = result.value;
+          styles.push([
+            tpl.displayName,
+            tpl.key,
+            tpl.isDefault ? figures.tick : figures.cross,
+            tpl.contentType ? `${tpl.contentType} (C)` : tpl.baseType ? `${tpl.baseType} (B)` : `${tpl.nodeType} (N)`
+          ])
+        } else {
+          process.stderr.write(`DisplayTemplate pushed without errors, but no result was returned.\n`)
+        }
       } else {
-        process.stderr.write(`Error processing DisplayTemplate: ${ result.reason }\n`)
+        process.stderr.write(`Error processing DisplayTemplate: ${ result.reason ?? "n" }\n`)
       }
     })
     process.stdout.write(styles.toString() + "\n")
@@ -113,12 +117,12 @@ export const StylesPushCommand: StylesPushModule = {
 }
 export default StylesPushCommand
 
-function tryReadJsonFile<T = any>(filePath: string, debug: boolean = false): T | undefined {
+function tryReadJsonFile<T = unknown>(filePath: string, debug: boolean = false): T | undefined {
   try {
     if (debug)
       process.stdout.write(chalk.gray(`${figures.arrowRight} Reading style definition from ${filePath}\n`))
     return JSON.parse(fs.readFileSync(filePath, { encoding: 'utf-8' }))
-  } catch (e) {
+  } catch {
     process.stderr.write(chalk.redBright(`${chalk.bold(figures.cross)} Error while reading ${filePath}\n`))
   }
   return undefined

@@ -9,7 +9,8 @@
   "main": "./dist/client.js",
   "types": "./dist/client.d.ts",
   "files": [
-    "./dist"
+    "./dist",
+    "./AGENTS.md"
   ],
   "engines": {
     "node": ">=24.0.0 <25.0.0"
@@ -35,18 +36,18 @@
   },
   "devDependencies": {
     "@remkoj/optimizely-graph-client": "workspace:6.0.0-rc.2",
-    "@tailwindcss/cli": "^4.3.1",
-    "@types/node": "^24.13.2",
+    "@tailwindcss/cli": "^4.3.2",
+    "@types/node": "^24.13.3",
     "@types/react": "^19.2.17",
     "@types/react-dom": "19.2.3",
     "@types/uuid": "^11.0.0",
-    "browserslist": "^4.28.4",
-    "next": "^16.2.9",
+    "browserslist": "^4.28.6",
+    "next": "^16.2.10",
     "prop-types": "^15.8.1",
     "react": "^19.2.7",
     "react-dom": "^19.2.7",
     "scheduler": "^0.27.0",
-    "tailwindcss": "^4.3.1",
+    "tailwindcss": "^4.3.2",
     "typescript": "^5.9.3",
     "update-browserslist-db": "^1.2.3"
   },
@@ -59,7 +60,7 @@
     "@fastify/deepmerge": "^3.2.1",
     "@headlessui/react": "^2.2.10",
     "@heroicons/react": "^2.2.0",
-    "@optimizely/react-sdk": "^4.0.0",
+    "@optimizely/react-sdk": "^4.1.0",
     "@remkoj/optimizely-graph-client": "6.0.0-rc.2",
     "deep-object-diff": "^1.1.9",
     "swr": "^2.4.2",

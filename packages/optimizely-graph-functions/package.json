@@ -9,7 +9,8 @@
   "description": "GraphQL Codegen preset for Optimizely Graph",
   "main": "./dist/index.js",
   "files": [
-    "./dist"
+    "./dist",
+    "./AGENTS.md"
   ],
   "bin": {
     "opti-patch": "dist/patch.js"
@@ -53,16 +54,16 @@
     "@graphql-typed-document-node/core": "^3.2.0",
     "@remkoj/optimizely-cms-api": "workspace:6.0.0-rc.2",
     "@remkoj/optimizely-graph-client": "workspace:6.0.0-rc.2",
-    "@types/node": "^24.13.2",
+    "@types/node": "^24.13.3",
     "typescript": "^5.9.3"
   },
   "dependencies": {
-    "@graphql-codegen/add": "^7.0.1",
-    "@graphql-codegen/client-preset": "^6.0.1",
-    "@graphql-codegen/plugin-helpers": "^7.0.1",
-    "@graphql-codegen/typescript": "^6.0.2",
+    "@graphql-codegen/add": "^7.1.0",
+    "@graphql-codegen/client-preset": "^6.1.0",
+    "@graphql-codegen/plugin-helpers": "^7.1.0",
+    "@graphql-codegen/typescript": "^6.1.0",
     "@graphql-codegen/typescript-graphql-request": "^7.1.0",
-    "@graphql-codegen/typescript-operations": "^6.0.5",
+    "@graphql-codegen/typescript-operations": "^6.1.0",
     "@remkoj/optimizely-cms-api": "6.0.0-rc.2",
     "@remkoj/optimizely-graph-client": "6.0.0-rc.2",
     "graphql": "^16.14.2",

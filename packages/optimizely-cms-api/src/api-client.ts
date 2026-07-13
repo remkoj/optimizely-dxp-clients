@@ -1,10 +1,9 @@
 import { withOperations, ApiClient as AbstractApiClient, ApiError } from "@remkoj/hey-api-wrapper";
-import * as Operations from './client/sdk.gen'
+import * as Operations from './client/sdk.gen';
 import { createClient, createConfig } from './client/client';
-import { createClientConfig } from './client-config'
-import { type InstanceApiVersionInfo } from "./types";
+import { createClientConfig } from './client-config';
 import { type CmsIntegrationApiOptions, readEnvConfig } from "./config";
-import buildInfo from "./version.json"
+import buildInfo from "./version.json";
 import type { OpenAPIV3_1 } from "openapi-types";
 
 /**
@@ -51,24 +50,6 @@ class BaseApiClient extends AbstractApiClient<CmsIntegrationApiOptions, ReturnTy
    */
   public get cmsVersion(): string {
     return buildInfo.cms
-  }
-
-  /**
-   * Retrieve the version information 
-   * 
-   * @returns The version information from the running instance
-   */
-  public async getInstanceInfo(): Promise<InstanceApiVersionInfo> {
-    const result = await this._client.get({
-      url: '/info',
-      throwOnError: false
-    })
-    if (this.isDataResponse(result)) {
-      const data = result.data as InstanceApiVersionInfo
-      data.baseUrl = this._client.getConfig().baseUrl;
-      return data;
-    }
-    throw new ApiError(result)
   }
 
   public async getOpenApiSpec(): Promise<OpenAPIV3_1.Document> {

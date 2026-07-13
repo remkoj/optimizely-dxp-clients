@@ -8,7 +8,8 @@
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "files": [
-    "./dist"
+    "./dist",
+    "./AGENTS.md"
   ],
   "devDependencies": {
     "@hey-api/client-fetch": "^0.13.1",
@@ -18,7 +19,7 @@
   },
   "dependencies": {
     "@remkoj/hey-api-wrapper": "6.0.0-rc.2",
-    "@types/node": "^24.13.2",
+    "@types/node": "^24.13.3",
     "dotenv": "^17.4.2",
     "dotenv-expand": "^13.0.0",
     "glob": "^13.0.6",
@@ -31,7 +32,7 @@
     "clean": "rimraf -g ./dist ./src/client ./*.tsbuildinfo",
     "prepare": "tsc --build && yarn node scripts/copy-client.mjs",
     "watch": "tsc --watch",
-    "rebuild": "yarn clean && yarn generate && tsc --build --force",
+    "recompile": "yarn clean && yarn generate && tsc --build --force",
     "generate": "yarn node scripts/create-client.mjs"
   },
   "stableVersion": "5.2.0"

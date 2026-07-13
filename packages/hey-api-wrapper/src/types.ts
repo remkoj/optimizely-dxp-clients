@@ -2,6 +2,8 @@
  * Utility function to extract all functions from a dictionary. This is typically used
  * with the hey-api sdk. 
  * 
+ * @typeparam Operations The hey-api SDK module shape (e.g. `typeof import('./client/sdk.gen')`).
+ *
  * **Example:**
  * ```
  * import * as apiFunctions from './client/sdk.gen';
@@ -26,6 +28,8 @@ type OperationReturnType<Op extends (...args: unknown[]) => unknown> =
  * Convert the extracted SDK functions to the normalized client
  * functions that can be used.
  * 
+ * @typeparam L An {@link OperationsList} — the map of hey-api operation functions to convert.
+ *
  * **Example:**
  * ```
  * import * as apiFunctions from './client/sdk.gen';
@@ -48,8 +52,17 @@ type NonConstructorKeys<T> = ({ [P in keyof T]: T[P] extends new () => object ? 
 type OmitConstructor<TBase extends ClassDefinition> = Pick<TBase, NonConstructorKeys<TBase>>
 
 /**
- * Easily create a derived class defintion from a class with a
- * mixin applied.
+ * Produces the concrete derived-class type that results from applying a mixin
+ * to a base class. The constructor signature matches `TBase`; the instance type
+ * is `InstanceType<TBase> & Mixin`.
+ *
+ * @typeparam TBase The base class being extended (must be constructable).
+ * @typeparam Mixin The mixin object type whose members are merged into the instance.
+ *
+ * **Example:**
+ * ```typescript
+ * type CmsApiClientClass = ClassWithMixin<typeof ApiClient, ApiClientFunctions<CmsOperations>>;
+ * ```
  */
 export type ClassWithMixin<TBase extends ClassDefinition, Mixin> = OmitConstructor<TBase> & {
   new(...args: ConstructorParameters<TBase>): InstanceType<TBase> & Mixin

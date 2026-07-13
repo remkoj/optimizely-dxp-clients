@@ -9,7 +9,8 @@
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "files": [
-    "./dist"
+    "./dist",
+    "./AGENTS.md"
   ],
   "exports": {
     ".": "./dist/index.js",
@@ -29,7 +30,7 @@
   "devDependencies": {
     "@remkoj/optimizely-graph-client": "workspace:6.0.0-rc.2",
     "@types/crypto-js": "^4.2.2",
-    "@types/node": "^24.13.2",
+    "@types/node": "^24.13.3",
     "@types/react": "^19.2.17",
     "@types/react-dom": "^19.2.3",
     "prop-types": "^15.8.1",

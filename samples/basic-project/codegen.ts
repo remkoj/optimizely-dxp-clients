@@ -20,7 +20,11 @@ const config: CodegenConfig = {
   schema: getSchemaInfo(),
   documents: [
     // Add local GraphQL files
-    'src/**/*.graphql',
+    'src/app/**/*.graphql',
+    'src/components/cms/**/*.graphql',
+    'src/components/layout/**/*.graphql',
+    'src/components/shared/**/*.graphql',
+    'src/lib/**/*.graphql'
   ],
   generates: {
     'src/gql/': {
