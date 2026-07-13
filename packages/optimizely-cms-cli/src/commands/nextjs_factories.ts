@@ -36,10 +36,25 @@ export const NextJsFactoryCommand : NextJsModule = {
   builder,
   handler: async (args) => {
     const { components: basePath, force, _config: { debug } } = parseArgs(args)
+  command: "nextjs:factory",
+  describe: "Create the ComponentFactory for a Next.JS / Optimizely Graph structure",
+  builder,
+  handler: async (args) => {
+    const { components: basePath, force, _config: { debug } } = parseArgs(args)
 
     if (debug)
       process.stdout.write(chalk.gray(`${ figures.arrowRight } Start generating component factories\n`))
+    if (debug)
+      process.stdout.write(chalk.gray(`${ figures.arrowRight } Start generating component factories\n`))
 
+    // Get & filter all component files
+    const clientComponents: string[] = []
+    const components = globSync(["./**/*.jsx","./**/*.tsx"], {
+      cwd: basePath
+    }).map(p => p.split(path.sep)).filter(p => {
+      // Get the filename
+      const fileName = p.at(p.length - 1)
+      if (!fileName) return false
     // Get & filter all component files
     const clientComponents: string[] = []
     const components = globSync(["./**/*.jsx","./**/*.tsx"], {
@@ -52,11 +67,20 @@ export const NextJsFactoryCommand : NextJsModule = {
       // Consider components in a file starting with "_" as a partial
       if (fileName.startsWith('_') == true)
         return false
+      // Consider components in a file starting with "_" as a partial
+      if (fileName.startsWith('_') == true)
+        return false
 
       // Consider components in a folder named "partials" as a partial
       if (p.some(folder => folder === 'partials'))
         return false
+      // Consider components in a folder named "partials" as a partial
+      if (p.some(folder => folder === 'partials'))
+        return false
 
+      // Skip the special loader component
+      if (reservedNames.includes(fileName))
+        return false
       // Skip the special loader component
       if (reservedNames.includes(fileName))
         return false
@@ -72,7 +96,21 @@ export const NextJsFactoryCommand : NextJsModule = {
       }
       return true
     });
+      // Check if the file has a default export
+      const fileBuffer = fs.readFileSync(path.join(basePath, p.join(path.sep)))
+      const hasDefaultExport = fileBuffer.includes('export default')
+      if (fileBuffer.includes('use client'))
+        clientComponents.push(p.join(path.sep))
+      if (!hasDefaultExport) {
+        process.stdout.write(chalk.redBright(`${ figures.warning } No default export in ${ p.join(path.sep ) } - ignoring file\n`))
+        return false
+      }
+      return true
+    });
 
+    // Report what we have found
+    if (debug)
+      process.stdout.write(chalk.gray(`${ figures.arrowRight } Identified ${ components.length } components in ${ basePath }\n`))
     // Report what we have found
     if (debug)
       process.stdout.write(chalk.gray(`${ figures.arrowRight } Identified ${ components.length } components in ${ basePath }\n`))
@@ -80,9 +118,13 @@ export const NextJsFactoryCommand : NextJsModule = {
     // Build factory / component structure
     const componentFactoryDefintions = new Map<string, ComponentFactoryDefintion>()
     components.forEach(component => {
-      const componentDir = path.dirname(path.join(...component));
-      const componentFile = path.basename(path.join(...component));
+      const componentDir = path.dirname(path.posix.join(...component));
+      const componentFile = path.basename(path.posix.join(...component));
 
+      // Determine component target
+      const componentKey = getComponentKey(component, basePath)
+      let componentVariant = (component.length > 1 ? component.at(component.length - 1) ?? 'default' : 'default').replace('index','default');
+      componentVariant = path.basename(componentVariant, path.extname(componentVariant));
       // Determine component target
       const componentKey = getComponentKey(component, basePath)
       let componentVariant = (component.length > 1 ? component.at(component.length - 1) ?? 'default' : 'default').replace('index','default');
@@ -92,7 +134,21 @@ export const NextJsFactoryCommand : NextJsModule = {
       const factorySegments = component.length > 2 ? component.slice(0, -2) : [ROOT_FACTORY_KEY];
       const factoryKey = path.posix.join(...factorySegments);
       const factoryFile = path.join(factoryKey, FACTORY_FILE_NAME);
+      // Get factory information
+      const factorySegments = component.length > 2 ? component.slice(0, -2) : [ROOT_FACTORY_KEY];
+      const factoryKey = path.posix.join(...factorySegments);
+      const factoryFile = path.join(factoryKey, FACTORY_FILE_NAME);
 
+      // Check dynamic & suspense
+      const isClientComponent = clientComponents.includes(component.join(path.sep));
+      const useDynamic = [
+        path.join(basePath, componentDir , 'loading.tsx'),
+        path.join(basePath, componentDir , 'loading.jsx')
+      ].some(fs.existsSync);
+      const useSuspense = [
+        path.join(basePath, componentDir , 'suspense.tsx'),
+        path.join(basePath, componentDir , 'suspense.jsx')
+      ].some(fs.existsSync);
       // Check dynamic & suspense
       const isClientComponent = clientComponents.includes(component.join(path.sep));
       const useDynamic = [
@@ -110,9 +166,30 @@ export const NextJsFactoryCommand : NextJsModule = {
         `.${path.posix.sep}${path.posix.relative(factoryKey, componentDir)}${ componentVariant !== 'default' ? path.posix.sep + componentVariant : ''}`;
       const loaderImport = useDynamic ? componentImport + path.posix.sep + 'loading' : undefined;
       const suspenseImport = useSuspense ? componentImport + path.posix.sep + 'suspense' : undefined;
+      // Prepare data
+      const componentImport = component.length == 1 ? 
+        `.${path.posix.sep}${path.basename(component[0], path.extname(component[0]))}` :
+        `.${path.posix.sep}${path.posix.relative(factoryKey, componentDir)}${ componentVariant !== 'default' ? path.posix.sep + componentVariant : ''}`;
+      const loaderImport = useDynamic ? componentImport + path.posix.sep + 'loading' : undefined;
+      const suspenseImport = useSuspense ? componentImport + path.posix.sep + 'suspense' : undefined;
             
       const componentVariablesBase = componentKey + ( componentVariant !== 'default' ? processName(componentVariant) :  '')
+      const componentVariablesBase = componentKey + ( componentVariant !== 'default' ? processName(componentVariant) :  '')
 
+      // Add to the factory
+      const factory : ComponentFactoryDefintion = componentFactoryDefintions.get(factoryKey) || { file: factoryFile, entries: [], subfactories: [] }
+      factory.entries.push({
+        key: componentKey,
+        variant: componentVariant,
+        import: componentImport,
+        variable: componentVariablesBase + 'Component',
+        loaderImport,
+        loaderVariable: useDynamic ? componentVariablesBase + 'Loader' : undefined,
+        suspenseImport,
+        suspenseVariable: useSuspense ? componentVariablesBase + 'Placeholder' : undefined,
+        isClient: isClientComponent
+      });
+      componentFactoryDefintions.set(factoryKey, factory);
       // Add to the factory
       const factory : ComponentFactoryDefintion = componentFactoryDefintions.get(factoryKey) || { file: factoryFile, entries: [], subfactories: [] }
       factory.entries.push({
@@ -144,11 +221,37 @@ export const NextJsFactoryCommand : NextJsModule = {
         }
       })
     })
+      // Add/update parent factories
+      const parentSegements = factoryKey == ROOT_FACTORY_KEY ? factorySegments.slice(0,-1) : [ ROOT_FACTORY_KEY, ...factorySegments.slice(0,-1) ]
+      parentSegements.forEach((_, idx, data) => {
+        const parentFactoryKey = path.posix.join(...data.slice(0, idx+1)) || ROOT_FACTORY_KEY;
+        const childFactoryKey = factorySegments.slice(idx,idx+1).at(0);
+        const parentFactory = componentFactoryDefintions.get(parentFactoryKey) ?? { file: path.join(parentFactoryKey, FACTORY_FILE_NAME), entries: [], subfactories: [] }
+        if (!parentFactory.subfactories.some(x => x.key === childFactoryKey)) {
+          parentFactory.subfactories.push({
+            key: childFactoryKey,
+            import: './'+childFactoryKey,
+            variable: processName(childFactoryKey) + 'Factory'
+          })
+          componentFactoryDefintions.set(parentFactoryKey, parentFactory)
+        }
+      })
+    })
 
     // Report factory file count
     if (debug)
       process.stdout.write(chalk.gray(`${ figures.arrowRight } Finished preparing ${ componentFactoryDefintions.size } factories, start writing\n`))
+    // Report factory file count
+    if (debug)
+      process.stdout.write(chalk.gray(`${ figures.arrowRight } Finished preparing ${ componentFactoryDefintions.size } factories, start writing\n`))
 
+    // Iterate over the factories and create them
+    let updateCounter = 0
+    for (const key of componentFactoryDefintions.keys()) {
+      const factory = componentFactoryDefintions.get(key)
+      const factoryFile = path.normalize(path.join(basePath, factory.file))
+      if (debug)
+        process.stdout.write(chalk.gray(`${ figures.arrowRight } Writing factory ${ key == ROOT_FACTORY_KEY ? "cms" : key } to ${ factoryFile }\n`))
     // Iterate over the factories and create them
     let updateCounter = 0
     for (const key of componentFactoryDefintions.keys()) {
@@ -169,7 +272,23 @@ export const NextJsFactoryCommand : NextJsModule = {
         updateCounter++
       }
     }
+      if (shouldWriteFactory(factoryFile, force, debug)) {
+        if (debug)
+          process.stdout.write(chalk.gray(`${ figures.arrowRight } Generating factory contents for: ${ factoryFile }\n`))
+        const factoryFileContents = generateFactory(factory, key == ROOT_FACTORY_KEY ? "cms" : key)
+        if (debug)
+          process.stdout.write(chalk.gray(`${ figures.arrowRight } Generated factory contents for: ${ factoryFile }\n`))
+        fs.writeFileSync(factoryFile, factoryFileContents)
+        if (debug)
+          process.stdout.write(chalk.gray(`${ figures.arrowRight } Written factory contents for: ${ factoryFile }\n`))
+        updateCounter++
+      }
+    }
 
+    process.stdout.write("\n")
+    process.stdout.write(chalk.bold(chalk.greenBright(`${ figures.tick } Generated/updated ${ updateCounter } factories, of ${ componentFactoryDefintions.size } factories in project.`)))
+    process.stdout.write("\n")
+  }
     process.stdout.write("\n")
     process.stdout.write(chalk.bold(chalk.greenBright(`${ figures.tick } Generated/updated ${ updateCounter } factories, of ${ componentFactoryDefintions.size } factories in project.`)))
     process.stdout.write("\n")
@@ -218,7 +337,15 @@ function shouldWriteFactory(factoryFile: string, force: boolean = false, debug: 
     process.stdout.write(chalk.green(`${ figures.tick } Creating new factory file: ${ factoryFile }\n`))
     return true
   }
+  if (!fs.existsSync(factoryFile)) {
+    process.stdout.write(chalk.green(`${ figures.tick } Creating new factory file: ${ factoryFile }\n`))
+    return true
+  }
     
+  if (force) {
+    process.stdout.write(chalk.yellowBright(`${ figures.warning } [Force Enabled] Overwriting existing factory file: ${ factoryFile }\n`))
+    return true
+  }
   if (force) {
     process.stdout.write(chalk.yellowBright(`${ figures.warning } [Force Enabled] Overwriting existing factory file: ${ factoryFile }\n`))
     return true
@@ -229,7 +356,15 @@ function shouldWriteFactory(factoryFile: string, force: boolean = false, debug: 
     process.stdout.write(chalk.green(`${ figures.tick } Updating existing factory file: ${ factoryFile }\n`))
     return true
   }
+  const b = fs.readFileSync(factoryFile)
+  if (b.includes('@not-modified')) {
+    process.stdout.write(chalk.green(`${ figures.tick } Updating existing factory file: ${ factoryFile }\n`))
+    return true
+  }
 
+  if (debug)
+    process.stdout.write(chalk.gray(`${ figures.arrowRight } Skipping factory as it already exists: ${ factoryFile }\n`))
+  return false
   if (debug)
     process.stdout.write(chalk.gray(`${ figures.arrowRight } Skipping factory as it already exists: ${ factoryFile }\n`))
   return false
@@ -240,12 +375,16 @@ function processName(input: string) : string {
     return "Cms"
   const nameSegements = input.split(/[-\_]/g)
   return nameSegements.map(ucFirst).join('')
+  if (input == ROOT_FACTORY_KEY)
+    return "Cms"
+  const nameSegements = input.split(/[-\_]/g)
+  return nameSegements.map(ucFirst).join('')
 }
 
 function generateFactory(factoryInfo: ComponentFactoryDefintion, factoryKey: string) : string
 {
   // Get the factory name
-  const factoryName = factoryKey.split(path.sep).map(processName).join("") + "Factory"
+  const factoryName = factoryKey.split(path.posix.sep).map(processName).join("") + "Factory"
 
   // Get the components and sub-factories, sorted by key to minimize changes between runs
   const components = [...factoryInfo.entries].sort((a,b) => { return a.key < b.key ? -1 : a.key > b.key ? 1 : 0 })
