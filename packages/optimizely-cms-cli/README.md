@@ -1,7 +1,7 @@
 # Optimizely CMS Command Line Toolkit <!-- omit in toc -->
 
-> [!WARNING]
-> There'll be an update of Optimizely SaaS CMS that is incompatible with all SDK versions prior to 5.1.6. If you don't upgrade, you will see empty pages (main website) and "Component not found" messages (preview).
+> [!CAUTION]
+> **Version 5.4 — CLI scripts not updated for V1 endpoints:** The underlying `@remkoj/optimizely-cms-api` package has been updated to the V1 REST API endpoints as of version 5.4. The CLI commands in this package have **not** been updated to match the new API contract, so **some operations will fail** when used against a CMS instance that only supports the V1 endpoints. Upgrade to **Next.js 16** with the **6.x version** of the SDK, which includes fully updated CLI tooling for the V1 API.
 
 A collection of Command Line tools used to increase productivity when working with the Optimizely CMS from a TypeScript / JavaScript based frontend.
 

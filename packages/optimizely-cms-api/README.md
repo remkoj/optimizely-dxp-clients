@@ -1,7 +1,7 @@
 # Optimizely CMS - Integration API Client <!-- omit in toc -->
 
-> [!WARNING]
-> There'll be an update of Optimizely SaaS CMS that is incompatible with all SDK versions prior to 5.1.6. If you don't upgrade, you will see empty pages (main website) and "Component not found" messages (preview).
+> [!IMPORTANT]
+> **Version 5.4 — V1 API endpoints:** This version has been updated to use the V1 endpoints of the Optimizely CMS REST API. If you are upgrading from an earlier 5.x release, verify that your CMS instance exposes the V1 endpoints before deploying. Consider upgrading to **Next.js 16** with the **6.x version** of this SDK, which fully targets the V1 API and receives ongoing updates.
 
 [![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](./LICENSE)
 ![Static Badge](https://img.shields.io/badge/Optimizely-Content_Management_System-blue?cacheSeconds=7200)
