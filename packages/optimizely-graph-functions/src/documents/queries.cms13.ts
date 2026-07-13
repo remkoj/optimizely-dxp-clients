@@ -32,10 +32,10 @@ export default [
   `query _getContentByPath($path: [String!]!, $locale: [Locales!], $siteId: String, $changeset: String = null, $variation: VariationInput) {
       content: _Content(
         where: {
-          _metadata: {
-            url: { default: { in: $path }, base: { eq: $siteId } }
-            changeset: { eq: $changeset }
-          }
+          _or: [
+              { _metadata: { url: { default: { in: $path }, base: { endsWith: $siteId } }, changeset: { eq: $changeset } } }
+              { _metadata: { url: { hierarchical: { in: $path }, type: { eq: "SIMPLE" }, base: { endsWith: $siteId } }, changeset: { eq: $changeset } } }
+          ]
         }
         locale: $locale
         variation:$variation

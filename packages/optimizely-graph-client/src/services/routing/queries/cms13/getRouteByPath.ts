@@ -19,11 +19,10 @@ export type Result = {
 export const query = gql`query getRouteByPath($path: [String!]!, $domain: String, $changeset: String, $status: String, $variation: VariationInput) {
   getRouteByPath: _Page(
     where: {
-      _metadata: {
-        url: { default: { in: $path }, base: { endsWith: $domain } }
-        changeset: { eq: $changeset }
-        status: { eq: $status }
-      }
+      _or: [
+        { _metadata: { url: { default: { in: $path }, base: { endsWith: $domain } }, changeset: { eq: $changeset }, status: { eq: $status } } }
+        { _metadata: { url: { hierarchical: { in: $path }, type: { eq: "SIMPLE" }, base: { endsWith: $domain } }, changeset: { eq: $changeset }, status: { eq: $status } } }
+      ]
     }
     variation: $variation
     orderBy: { _metadata: { url: { default: ASC } } }

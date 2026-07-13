@@ -70,7 +70,7 @@ export class OptimizelyGraphAdminApi extends BaseOptimizelyGraphAdminApi {
      * 
      * @returns     The OpenAPI spec
      */
-  public getOpenApiSpec() : CancelablePromise<any>
+  public getOpenApiSpec() : CancelablePromise<unknown>
   {
     return this.request.request({
       method: 'GET',
@@ -85,7 +85,7 @@ export class OptimizelyGraphAdminApi extends BaseOptimizelyGraphAdminApi {
  * @param       error   The value to check
  * @returns     'true' when the value is an ApiError, 'false' otherwise
  */
-export function isApiError(error: any) : error is ApiError
+export function isApiError(error: unknown) : error is ApiError
 {
   if (typeof error != 'object' || error == null)
     return false
