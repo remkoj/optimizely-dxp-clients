@@ -3,24 +3,28 @@
 /* tslint:disable */
 /* eslint-disable */
 /**
- * Represents a hyperlink.
+ * Represents a HTML hyperlink with URL, display text, and optional rendering properties.
  */
 export type Link = {
     /**
-     * Gets or sets the URL.
+     * The URL that the link points to.
      */
     url?: string | null;
     /**
-     * Gets or sets where to display the URL in a browsing context.
+     * Specifies how the URL should be displayed in the browsing context (e.g., '_blank' for new window, '_self' for current window).
      */
     target?: string;
     /**
-     * Gets or sets the title of the link.
+     * The title text or tooltip displayed when hovering over the link.
      */
     title?: string;
     /**
-     * Gets or sets the content inside a link.
+     * The visible text or label displayed to users for this link.
      */
     text?: string;
+    /**
+     * Additional attributes associated with the link.
+     */
+    attributes?: Record<string, string>;
 };
 

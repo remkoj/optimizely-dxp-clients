@@ -2,34 +2,18 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
+import type { ContentData } from './ContentData';
 /**
  * Represents a content component.
  */
-export type ContentComponent = {
+export type ContentComponent = (ContentData & {
     /**
-     * An optional display option for the content component.
+     * A reference to the content of this component. Cannot be assigned together with 'contentType' or 'properties'.
      */
-    displayOption?: string | null;
-    /**
-     * An optional group for the personalizable component.
-     */
-    segmentationGroup?: string | null;
-    /**
-     * Specifies the settings for the content component.
-     */
-    segments?: Array<string> | null;
-    /**
-     * The display name of the content component. If Reference is set, the name is automatically set to the name of the referenced content.
-     */
-    name?: string | null;
-    reference?: string;
+    reference?: string | null;
     /**
      * The key of the content type that this is an embedded instance of.
      */
-    contentType?: string | null;
-    /**
-     * Dictionary with all custom properties as specified by associated ContentType
-     */
-    content?: any;
-};
+    contentType?: string;
+});
 

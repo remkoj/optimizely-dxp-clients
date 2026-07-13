@@ -7,7 +7,7 @@
  */
 export type PropertyFormat = {
     /**
-     * The key that identifies this PropertyFormat.
+     * The unique identifier (key) of the resource.
      */
     key?: string;
     /**
@@ -15,17 +15,17 @@ export type PropertyFormat = {
      */
     dataType?: PropertyFormat.dataType;
     /**
-     * The underlying item type used for this PropertyFormat.
+     * The underlying item type used for this property format. Specifies the item type when the dataType is 'array'.
      */
-    itemType?: PropertyFormat.itemType;
+    readonly itemType?: PropertyFormat.itemType;
     /**
-     * The name and identifier of this PropertyFormat.
+     * The display name of this PropertyFormat.
      */
     displayName?: string;
     /**
      * Indicates if this property format has been deleted.
      */
-    readonly deleted?: boolean;
+    readonly isDeleted?: boolean;
     /**
      * A timestamp indicating when this display template was first created.
      */
@@ -56,7 +56,6 @@ export namespace PropertyFormat {
         DATE_TIME = 'dateTime',
         CONTENT_REFERENCE = 'contentReference',
         CONTENT = 'content',
-        BINARY = 'binary',
         LINK = 'link',
         RICH_TEXT = 'richText',
         JSON = 'json',
@@ -64,7 +63,7 @@ export namespace PropertyFormat {
         COMPONENT = 'component',
     }
     /**
-     * The underlying item type used for this PropertyFormat.
+     * The underlying item type used for this property format. Specifies the item type when the dataType is 'array'.
      */
     export enum itemType {
         STRING = 'string',
@@ -75,7 +74,6 @@ export namespace PropertyFormat {
         DATE_TIME = 'dateTime',
         CONTENT_REFERENCE = 'contentReference',
         CONTENT = 'content',
-        BINARY = 'binary',
         LINK = 'link',
         RICH_TEXT = 'richText',
         JSON = 'json',

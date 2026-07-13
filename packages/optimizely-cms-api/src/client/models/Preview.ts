@@ -3,16 +3,16 @@
 /* tslint:disable */
 /* eslint-disable */
 /**
- * Represents a preview URL for a content item.
+ * Represents a preview for a specific application.
  */
 export type Preview = {
     /**
      * The application that this preview URL is associated with.
      */
-    application?: string;
+    readonly application?: string;
     /**
-     * Gets or sets the preview URL (may be relative or absolute).
+     * The preview URL (may be relative or absolute).
      */
-    url?: string;
+    readonly url?: string;
 };
 

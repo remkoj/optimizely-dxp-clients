@@ -7,10 +7,6 @@
  */
 export type CopyContentOptions = {
     /**
-     * Indicates if deleted content could be used as source.
-     */
-    allowDeleted?: boolean;
-    /**
      * Optional key of the container where the copied content should be placed.
      */
     container?: string | null;
@@ -18,9 +14,5 @@ export type CopyContentOptions = {
      * Optional key of the owner where the copied content should be placed.
      */
     owner?: string | null;
-    /**
-     * Indicates if published versions of the content should keep their published status rather than being created as a draft version at the destination.
-     */
-    keepPublishedStatus?: boolean;
 };
 

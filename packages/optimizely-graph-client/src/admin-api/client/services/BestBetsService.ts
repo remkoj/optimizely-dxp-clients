@@ -9,6 +9,7 @@ import type { BaseHttpRequest } from '../core/BaseHttpRequest.js';
 export class BestBetsService {
     constructor(public readonly httpRequest: BaseHttpRequest) {}
     /**
+     * @deprecated
      * Get bestbet collection(s)
      * Get all bestbet collections or get by Id
      * @param id
@@ -30,6 +31,7 @@ export class BestBetsService {
         });
     }
     /**
+     * @deprecated
      * Register a bestbet collection
      * Register a bestbet collection
      * @param requestBody
@@ -47,6 +49,7 @@ export class BestBetsService {
         });
     }
     /**
+     * @deprecated
      * Update a bestbet collection
      * Update bestbet collection by Id
      * @param id
@@ -69,6 +72,7 @@ export class BestBetsService {
         });
     }
     /**
+     * @deprecated
      * Delete a bestbet collection
      * Delete bestbet by Id
      * @param id

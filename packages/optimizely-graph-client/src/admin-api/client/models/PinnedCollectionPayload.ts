@@ -1,0 +1,10 @@
+/* generated using openapi-typescript-codegen -- do not edit */
+/* istanbul ignore file */
+/* tslint:disable */
+/* eslint-disable */
+export type PinnedCollectionPayload = {
+    title: string;
+    key: string;
+    isActive?: boolean;
+};
+

@@ -2,6 +2,7 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
+import type { Response } from '../models/Response.js';
 import type { StopwordsBody } from '../models/StopwordsBody.js';
 import type { SynonymsBody } from '../models/SynonymsBody.js';
 import type { CancelablePromise } from '../core/CancelablePromise.js';
@@ -50,6 +51,30 @@ export class ResourcesService {
             query: {
                 'language_routing': languageRouting,
                 'source_routing': sourceRouting,
+            },
+        });
+    }
+    /**
+     * List synonyms
+     * Get synonyms for a given slot
+     * @param languageRouting
+     * @param sourceRouting
+     * @param synonymSlot
+     * @returns Response Ok
+     * @throws ApiError
+     */
+    public listSynonymHandler(
+        languageRouting?: string,
+        sourceRouting?: string,
+        synonymSlot: 'one' | 'two' = 'one',
+    ): CancelablePromise<Response> {
+        return this.httpRequest.request({
+            method: 'GET',
+            url: '/resources/synonyms',
+            query: {
+                'language_routing': languageRouting,
+                'source_routing': sourceRouting,
+                'synonym_slot': synonymSlot,
             },
         });
     }

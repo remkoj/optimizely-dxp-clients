@@ -2,6 +2,13 @@
   "name": "basic-project",
   "version": "0.1.0",
   "private": true,
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/remkoj/optimizely-dxp-clients.git",
+    "directory": "samples/basic-project"
+  },
+  "bugs": "https://github.com/remkoj/optimizely-dxp-clients/issues",
+  "homepage": "https://github.com/remkoj/optimizely-dxp-clients/tree/main/samples/basic-project",
   "scripts": {
     "dev": "next dev",
     "build": "next build",

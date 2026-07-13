@@ -130,7 +130,7 @@ async function deleteContentItem(client: CmsIntegrationApiClient, key: string, o
     return removedCount
   }
 
-  const deleteResult = await client.content.contentDelete(key, true).then(r => r.key).catch((e: IntegrationApi.ApiError) => {
+  const deleteResult = await client.content.contentDelete(key).then(r => r ? r.key : undefined).catch((e: IntegrationApi.ApiError) => {
     if (e.status == 404)
       return key
     throw e
@@ -155,7 +155,6 @@ async function resetSystemTypes(client: CmsIntegrationApiClient): Promise<number
     if (client.debug)
       process.stdout.write(chalk.gray(`  ${figures.arrowRight} Resetting ${systemType} by removing all attributes\n`))
     const newType: IntegrationApi.ContentType | undefined | null = await client.contentTypes.contentTypesPatch(systemType, {
-      key: systemType,
       properties: {}
     }, true).catch((e: IntegrationApi.ApiError) => e.status == 404 ? undefined : null)
 
@@ -212,7 +211,7 @@ async function getAllTemplates(client: CmsIntegrationApiClient, batchSize: numbe
     }
     throw e
   })
-  const totalItemCount = items.totalItemCount ?? items.items?.length ?? 0
+  const totalItemCount = items.totalCount ?? (items as { totalItemCount?: number}).totalItemCount ?? items.items?.length ?? 0
   const pageSize = items.pageSize ?? items.items?.length ?? 0
   const actualItems = items.items ?? []
   const pageCount = Math.ceil(totalItemCount / pageSize)
@@ -245,7 +244,7 @@ async function getAllTypes(client: CmsIntegrationApiClient, batchSize: number = 
     }
     throw e
   })
-  const totalItemCount = items.totalItemCount ?? items.items?.length ?? 0
+  const totalItemCount = items.totalCount ?? (items as { totalItemCount?: number}).totalItemCount ?? items.items?.length ?? 0
   const pageSize = items.pageSize ?? items.items?.length ?? 0
   const actualItems = items.items ?? []
   const pageCount = Math.ceil(totalItemCount / pageSize)
@@ -267,18 +266,18 @@ async function getAllTypes(client: CmsIntegrationApiClient, batchSize: number = 
   return actualItems
 }
 
-async function getAllAssets(client: CmsIntegrationApiClient, parentKey: string, batchSize: number = 100): Promise<IntegrationApi.ContentMetadata[]> {
+async function getAllAssets(client: CmsIntegrationApiClient, parentKey: string, batchSize: number = 100): Promise<IntegrationApi.ContentNode[]> {
   const items = await client.content.contentListAssets(parentKey, undefined, 0, batchSize).catch((e: IntegrationApi.ApiError) => {
     if (e.status == 404) {
       return {
         items: [],
         totalItemCount: 0,
         pageSize: batchSize,
-      } as IntegrationApi.ContentMetadataPage
+      } as IntegrationApi.ContentNodePage
     }
     throw e
   })
-  const totalItemCount = items.totalItemCount ?? items.items?.length ?? 0
+  const totalItemCount = items.totalCount ?? (items as { totalItemCount?: number}).totalItemCount ?? items.items?.length ?? 0
   const pageSize = items.pageSize ?? items.items?.length ?? 0
   const actualItems = items.items ?? []
   const pageCount = Math.ceil(totalItemCount / pageSize)
@@ -290,7 +289,7 @@ async function getAllAssets(client: CmsIntegrationApiClient, parentKey: string, 
           items: [],
           totalItemCount: 0,
           pageSize: batchSize,
-        } as IntegrationApi.ContentMetadataPage
+        } as IntegrationApi.ContentNodePage
       }
       throw e
     })
@@ -300,18 +299,18 @@ async function getAllAssets(client: CmsIntegrationApiClient, parentKey: string, 
   return actualItems
 }
 
-async function getAllItems(client: CmsIntegrationApiClient, parentKey: string, batchSize: number = 100): Promise<IntegrationApi.ContentMetadata[]> {
+async function getAllItems(client: CmsIntegrationApiClient, parentKey: string, batchSize: number = 100): Promise<IntegrationApi.ContentNode[]> {
   const items = await client.content.contentListItems(parentKey, undefined, 0, batchSize).catch((e: IntegrationApi.ApiError) => {
     if (e.status == 404) {
       return {
         items: [],
         totalItemCount: 0,
         pageSize: batchSize,
-      } as IntegrationApi.ContentMetadataPage
+      } as IntegrationApi.ContentNodePage
     }
     throw e
   })
-  const totalItemCount = items.totalItemCount ?? items.items?.length ?? 0
+  const totalItemCount = items.totalCount ?? (items as { totalItemCount?: number}).totalItemCount ?? items.items?.length ?? 0
   const pageSize = items.pageSize ?? items.items?.length ?? 0
   const actualItems = items.items ?? []
   const pageCount = Math.ceil(totalItemCount / pageSize)
@@ -323,7 +322,7 @@ async function getAllItems(client: CmsIntegrationApiClient, parentKey: string, b
           items: [],
           totalItemCount: 0,
           pageSize: batchSize,
-        } as IntegrationApi.ContentMetadataPage
+        } as IntegrationApi.ContentNodePage
       }
       throw e
     })

@@ -12,7 +12,7 @@ const CMS_PATHS = {
 async function main() {
   loadDotEnvFiles()
   const access_token = await getAuthentication();
-  void await createVersionFile(access_token);
+  void await createVersionFile(access_token).catch(e => console.error("Error while creating version file: ", e));
   void await createSchemaFile(access_token);
 }
 
@@ -49,8 +49,11 @@ async function createVersionFile(token)
         Authorization: token ?? ''
       }
     })
+
     if (!response.ok) {
-        throw new Error(`HTTP Error while reading version: ${ response.status } ${ response.statusText }`)
+      console.error(`HTTP Error while reading version: ${ response.status } ${ response.statusText }`);
+      return;
+      // throw new Error(`HTTP Error while reading version: ${ response.status } ${ response.statusText }`)
     }
     const body = await response.json()
     const versionInfo = {
@@ -109,7 +112,7 @@ async function getAuthentication() {
   const authUrl = buildApiEndpoint(CMS_PATHS.token, true);
   const clientId = process.env.OPTIMIZELY_CMS_CLIENT_ID || '';
   const clientSecret = process.env.OPTIMIZELY_CMS_CLIENT_SECRET || '';
-  const actAs = process.env.OPTIMIZELY_CMS_USER_ID || undefined;
+  const actAs = /* process.env.OPTIMIZELY_CMS_USER_ID ||*/ undefined;
 
   const headers = new Headers()
   headers.append('Authorization', `Basic ${Buffer.from(`${clientId ?? ''}:${clientSecret ?? ''}`).toString('base64')}`);
@@ -121,8 +124,8 @@ async function getAuthentication() {
 
   const body = new URLSearchParams()
   body.append("grant_type", "client_credentials")
-  if (actAs)
-    body.append("act_as", actAs)
+  // if (actAs)
+  //  body.append("act_as", actAs)
 
   const httpResponse = await fetch(authUrl, {
     method: "POST",

@@ -4,57 +4,61 @@
 /* eslint-disable */
 import type { EnumerationValue } from './EnumerationValue';
 /**
- * Describes the list item of a content type property of type 'array'.
+ * Describes the items of a content type property of type 'array'.
  */
 export type ArrayItem = {
     /**
-     * Gets the data type for the list item property.
+     * The fundamental data type for the items in the array (e.g., string, integer, content reference).
      */
-    type?: ArrayItem.type;
+    type: ArrayItem.type;
     /**
-     * The key of the PropertyFormat that this property item is an instance of.
+     * The property format that defines specialized handling and validation for this array item.
      */
-    format?: string | null;
+    format?: string;
     /**
-     * The key of the content type that a property with 'type': 'component' may contain.
+     * The content type that items in the array may contain, when the 'type' is set to 'component'.
      */
-    contentType?: string | null;
+    contentType?: string;
     /**
      * The minimum value that properties of this type should be able to contain. Value type must match the type of the array item.
      */
     minimum?: (number | null | string | null) | null;
     /**
-     * The maximum value that properties of this type should be able to contain. Value type must match the type of the array item.
+     * The maximum value that array items of this type should be able to contain. Value type must match the type of the array item.
      */
     maximum?: (number | null | string | null) | null;
     /**
-     * The minimum string length that list items of this type should be able to contain.
+     * The minimum string length that array items of this type should be able to contain.
      */
     minLength?: number | null;
     /**
-     * The maximum string length that list items of this type should be able to contain.
+     * The maximum string length that array items of this type should be able to contain.
      */
     maxLength?: number | null;
     /**
-     * Regular expression pattern that limits what strings that list items of this type should be able to contain.
+     * Regular expression pattern that limits what strings that array items of this type should be able to contain.
      */
-    pattern?: string | null;
+    pattern?: string;
     /**
-     * A list of possible values that properties of this type should be able to contain.
+     * A predefined list of allowed values for array items of this type. The enumeration values must match the property's data type. Allowed for string, integer, float and date-time property types.
      */
     enum?: Array<EnumerationValue> | null;
     /**
-     * Specifies which content types and base types this property is allowed to contain.
+     * Defines content and base types that array items of this type may contain.
      */
     allowedTypes?: Array<string>;
     /**
-     * Specifies which content types and base types this property cannot contain.
+     * Defines content and base types that array items of this type may not contain.
      */
     restrictedTypes?: Array<string>;
+    /**
+     * Defines editor specific settings for this item. The settings are specific to the item and editor type.
+     */
+    editorSettings?: Record<string, any> | null;
 };
 export namespace ArrayItem {
     /**
-     * Gets the data type for the list item property.
+     * The fundamental data type for the items in the array (e.g., string, integer, content reference).
      */
     export enum type {
         STRING = 'string',
@@ -65,7 +69,6 @@ export namespace ArrayItem {
         DATE_TIME = 'dateTime',
         CONTENT_REFERENCE = 'contentReference',
         CONTENT = 'content',
-        BINARY = 'binary',
         LINK = 'link',
         RICH_TEXT = 'richText',
         JSON = 'json',

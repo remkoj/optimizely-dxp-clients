@@ -11,8 +11,8 @@ export class PropertyFormatsService {
     /**
      * List property formats
      * List all property formats using the provided options.
-     * @param pageIndex
-     * @param pageSize
+     * @param pageIndex Zero based index of the page that should be retrieved.
+     * @param pageSize The maximum items per page that should be retrieved.
      * @returns PropertyFormatPage OK
      * @throws ApiError
      */
@@ -28,7 +28,10 @@ export class PropertyFormatsService {
                 'pageSize': pageSize,
             },
             errors: {
+                401: `Unauthorized`,
                 403: `Forbidden`,
+                429: `Too Many Requests`,
+                500: `Internal Server Error`,
             },
         });
     }
@@ -63,8 +66,11 @@ export class PropertyFormatsService {
             },
             errors: {
                 304: `Not Modified`,
+                401: `Unauthorized`,
                 403: `Forbidden`,
                 404: `Not Found`,
+                429: `Too Many Requests`,
+                500: `Internal Server Error`,
             },
         });
     }

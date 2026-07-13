@@ -8,9 +8,9 @@ import type { BlueprintData } from './BlueprintData';
  */
 export type Blueprint = {
     /**
-     * The key that identifies this blueprint.
+     * The unique identifier (key) of the resource.
      */
-    readonly key?: string;
+    key?: string;
     /**
      * The display name of this blueprint.
      */
@@ -18,12 +18,23 @@ export type Blueprint = {
     /**
      * The content type of this blueprint.
      */
-    readonly contentType?: string;
-    lastModified?: string;
+    contentType: string;
     /**
-     * The username of the user that made the latest modification to this blueprint.
+     * A timestamp indicating when this resource was first created.
+     */
+    readonly created?: string;
+    /**
+     * The name of the user or application that created this resource.
+     */
+    readonly createdBy?: string;
+    /**
+     * Indicates the last time this resource was modified.
+     */
+    readonly lastModified?: string;
+    /**
+     * The name of the user or application that last modified this resource.
      */
     readonly lastModifiedBy?: string;
-    content?: BlueprintData;
+    content: BlueprintData;
 };
 

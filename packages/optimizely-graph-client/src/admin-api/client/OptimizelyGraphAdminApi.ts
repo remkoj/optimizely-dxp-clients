@@ -10,6 +10,7 @@ import { DefinitionV2Service } from './services/DefinitionV2Service.js';
 import { DefinitionV3Service } from './services/DefinitionV3Service.js';
 import { LogsService } from './services/LogsService.js';
 import { OidcService } from './services/OidcService.js';
+import { PinnedResultsService } from './services/PinnedResultsService.js';
 import { QueryGraphQlService } from './services/QueryGraphQlService.js';
 import { ResourcesService } from './services/ResourcesService.js';
 import { WebhooksService } from './services/WebhooksService.js';
@@ -20,6 +21,7 @@ export class OptimizelyGraphAdminApi {
     public readonly definitionV3: DefinitionV3Service;
     public readonly logs: LogsService;
     public readonly oidc: OidcService;
+    public readonly pinnedResults: PinnedResultsService;
     public readonly queryGraphQl: QueryGraphQlService;
     public readonly resources: ResourcesService;
     public readonly webhooks: WebhooksService;
@@ -27,7 +29,7 @@ export class OptimizelyGraphAdminApi {
     constructor(config?: Partial<OpenAPIConfig>, HttpRequest: HttpRequestConstructor = FetchHttpRequest) {
         this.request = new HttpRequest({
             BASE: config?.BASE ?? 'https://prod.cg.optimizely.com',
-            VERSION: config?.VERSION ?? '3.18.0',
+            VERSION: config?.VERSION ?? '3.30.0',
             WITH_CREDENTIALS: config?.WITH_CREDENTIALS ?? false,
             CREDENTIALS: config?.CREDENTIALS ?? 'include',
             TOKEN: config?.TOKEN,
@@ -41,6 +43,7 @@ export class OptimizelyGraphAdminApi {
         this.definitionV3 = new DefinitionV3Service(this.request);
         this.logs = new LogsService(this.request);
         this.oidc = new OidcService(this.request);
+        this.pinnedResults = new PinnedResultsService(this.request);
         this.queryGraphQl = new QueryGraphQlService(this.request);
         this.resources = new ResourcesService(this.request);
         this.webhooks = new WebhooksService(this.request);

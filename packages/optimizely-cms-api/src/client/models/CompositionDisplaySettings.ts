@@ -3,15 +3,15 @@
 /* tslint:disable */
 /* eslint-disable */
 /**
- * Defines display settings for a CompositionNode."/>
+ * Defines display settings for a CompositionNode.
  */
 export type CompositionDisplaySettings = {
     /**
-     * The key for the display template that these settings apply to.
+     * The display template that these settings apply to.
      */
-    readonly displayTemplate: string;
+    displayTemplate: string;
     /**
-     * Gets/sets the display settings for this CompositionNode.
+     * The display settings of this CompositionNode.
      */
     settings?: Record<string, string> | null;
 };

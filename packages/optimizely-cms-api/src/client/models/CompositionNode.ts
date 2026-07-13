@@ -3,43 +3,31 @@
 /* tslint:disable */
 /* eslint-disable */
 import type { CompositionDisplaySettings } from './CompositionDisplaySettings';
+import type { ContentComponent } from './ContentComponent';
 /**
  * Specifies a node in a content composition.
  */
 export type CompositionNode = {
     /**
-     * Specifies the id of this CompositionNode.
+     * Specifies an identifier of this CompositionNode.
      */
-    id?: string | null;
+    id?: string;
     /**
      * The display name of this ContentType.
      */
-    displayName?: string | null;
+    displayName?: string;
     /**
-     * Gets the node type of this CompositionNode.
+     * The node type of this CompositionNode.
      */
-    readonly nodeType?: string;
+    nodeType: string;
     /**
-     * Gets the node layout type of this CompositionNode
+     * The node layout type of this CompositionNode
      */
-    readonly layoutType?: string | null;
+    layoutType?: string;
     displaySettings?: CompositionDisplaySettings;
+    component?: ContentComponent;
     /**
-     * Represents a content component.
-     */
-    component?: {
-        /**
-         * Dictionary with all custom properties as specified by associated ContentType
-         */
-        properties?: any;
-        reference?: string;
-        /**
-         * The key of the content type that this is an embedded instance of.
-         */
-        contentType?: string | null;
-    };
-    /**
-     * Gets the available child nodes for this CompositionNode.
+     * The child nodes for this CompositionNode.
      */
     nodes?: Array<CompositionNode> | null;
 };

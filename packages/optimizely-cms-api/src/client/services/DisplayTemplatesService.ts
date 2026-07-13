@@ -4,6 +4,7 @@
 /* eslint-disable */
 import type { DisplayTemplate } from '../models/DisplayTemplate';
 import type { DisplayTemplatePage } from '../models/DisplayTemplatePage';
+import type { DisplayTemplatePatch } from '../models/DisplayTemplatePatch';
 import type { CancelablePromise } from '../core/CancelablePromise';
 import type { BaseHttpRequest } from '../core/BaseHttpRequest';
 export class DisplayTemplatesService {
@@ -11,8 +12,8 @@ export class DisplayTemplatesService {
     /**
      * List display templates
      * List display templates using the provided parameters.
-     * @param pageIndex
-     * @param pageSize
+     * @param pageIndex Zero based index of the page that should be retrieved.
+     * @param pageSize The maximum items per page that should be retrieved.
      * @returns DisplayTemplatePage OK
      * @throws ApiError
      */
@@ -28,7 +29,10 @@ export class DisplayTemplatesService {
                 'pageSize': pageSize,
             },
             errors: {
+                401: `Unauthorized`,
                 403: `Forbidden`,
+                429: `Too Many Requests`,
+                500: `Internal Server Error`,
             },
         });
     }
@@ -36,20 +40,29 @@ export class DisplayTemplatesService {
      * Create display template
      * Create a new display template.
      * @param requestBody The display template that should be created.
+     * @param prefer Indicates client preference for the response content as per IETF RFC7240. Currently only supports 'return=representation' which can be used to indicate a preference to receive a representation of the resource that has been altered in the response.
      * @returns DisplayTemplate Created
      * @throws ApiError
      */
     public displayTemplatesCreate(
         requestBody: DisplayTemplate,
+        prefer?: Array<string>,
     ): CancelablePromise<DisplayTemplate> {
         return this.httpRequest.request({
             method: 'POST',
             url: '/displaytemplates',
+            headers: {
+                'Prefer': prefer,
+            },
             body: requestBody,
             mediaType: 'application/json',
             errors: {
                 400: `Bad Request`,
+                401: `Unauthorized`,
                 403: `Forbidden`,
+                409: `Conflict`,
+                429: `Too Many Requests`,
+                500: `Internal Server Error`,
             },
         });
     }
@@ -79,8 +92,11 @@ export class DisplayTemplatesService {
             },
             errors: {
                 304: `Not Modified`,
+                401: `Unauthorized`,
                 403: `Forbidden`,
                 404: `Not Found`,
+                429: `Too Many Requests`,
+                500: `Internal Server Error`,
             },
         });
     }
@@ -89,6 +105,7 @@ export class DisplayTemplatesService {
      * Patch an existing display template.
      * @param key The key of the display template to patch.
      * @param requestBody The values of the display template that should be patched formatted according to RFC7396.
+     * @param prefer Indicates client preference for the response content as per IETF RFC7240. Currently only supports 'return=representation' which can be used to indicate a preference to receive a representation of the resource that has been altered in the response.
      * @param ifMatch If provided, the PATCH request will only be considered if the value matches the RFC7232 ETag of the current resource. Weak ETags will always be ignored.
      * @param ifUnmodifiedSince If provided, the PATCH request will only be considered if the resource has not been modified since the provided date. This parameter will be ignored if an 'If-Match' parameter is also provided.
      * @returns DisplayTemplate OK
@@ -96,7 +113,8 @@ export class DisplayTemplatesService {
      */
     public displayTemplatesPatch(
         key: string,
-        requestBody: DisplayTemplate,
+        requestBody: DisplayTemplatePatch,
+        prefer?: Array<string>,
         ifMatch?: string,
         ifUnmodifiedSince?: string,
     ): CancelablePromise<DisplayTemplate> {
@@ -107,6 +125,7 @@ export class DisplayTemplatesService {
                 'key': key,
             },
             headers: {
+                'Prefer': prefer,
                 'If-Match': ifMatch,
                 'If-Unmodified-Since': ifUnmodifiedSince,
             },
@@ -114,9 +133,12 @@ export class DisplayTemplatesService {
             mediaType: 'application/merge-patch+json',
             errors: {
                 400: `Bad Request`,
+                401: `Unauthorized`,
                 403: `Forbidden`,
                 404: `Not Found`,
                 412: `Precondition Failed`,
+                429: `Too Many Requests`,
+                500: `Internal Server Error`,
             },
         });
     }
@@ -124,6 +146,7 @@ export class DisplayTemplatesService {
      * Delete display template
      * Deletes the display template with the provided key.
      * @param key The key of the display template to delete.
+     * @param prefer Indicates client preference for the response content as per IETF RFC7240. Currently only supports 'return=representation' which can be used to indicate a preference to receive a representation of the resource that has been altered in the response.
      * @param ifMatch If provided, the DELETE request will only be considered if the value matches the RFC7232 ETag of the current resource. Weak ETags will always be ignored.
      * @param ifUnmodifiedSince If provided, the DELETE request will only be considered if the resource has not been modified since the provided date. This parameter will be ignored if an 'If-Match' parameter is also provided.
      * @returns DisplayTemplate OK
@@ -131,6 +154,7 @@ export class DisplayTemplatesService {
      */
     public displayTemplatesDelete(
         key: string,
+        prefer?: Array<string>,
         ifMatch?: string,
         ifUnmodifiedSince?: string,
     ): CancelablePromise<DisplayTemplate> {
@@ -141,14 +165,18 @@ export class DisplayTemplatesService {
                 'key': key,
             },
             headers: {
+                'Prefer': prefer,
                 'If-Match': ifMatch,
                 'If-Unmodified-Since': ifUnmodifiedSince,
             },
             errors: {
                 400: `Bad Request`,
+                401: `Unauthorized`,
                 403: `Forbidden`,
                 404: `Not Found`,
                 412: `Precondition Failed`,
+                429: `Too Many Requests`,
+                500: `Internal Server Error`,
             },
         });
     }

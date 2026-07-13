@@ -7,19 +7,19 @@
  */
 export type PropertyGroup = {
     /**
-     * The key that identifies this PropertyGroup.
+     * The unique identifier (key) of the resource.
      */
-    key?: string;
+    key: string;
     /**
      * The display name of this PropertyGroup.
      */
-    displayName?: string;
+    displayName: string;
     /**
-     * A string that is used to indicate the source of this PropertyGroup.
+     * A string that indicates the source of this property group. Can be used to distinguish property groups created by the system from types coming from model classes deployed to the CMS server.
      */
     readonly source?: string;
     /**
-     * An value that is used to when sorting PropertyGroup instances.
+     * A value that is used to when sorting PropertyGroup instances.
      */
     sortOrder?: number;
     /**

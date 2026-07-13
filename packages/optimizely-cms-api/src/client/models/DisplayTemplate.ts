@@ -8,7 +8,7 @@ import type { DisplaySetting } from './DisplaySetting';
  */
 export type DisplayTemplate = {
     /**
-     * The key that identifies this display template.
+     * The unique identifier (key) of the resource.
      */
     key?: string;
     /**
@@ -18,7 +18,7 @@ export type DisplayTemplate = {
     /**
      * The optional node type this display template is valid for.
      */
-    nodeType?: string | null;
+    nodeType?: string;
     /**
      * The optional base type this display template is valid for.
      */
@@ -26,7 +26,7 @@ export type DisplayTemplate = {
     /**
      * The optional key of the content type this display template is valid for.
      */
-    contentType?: string | null;
+    contentType?: string;
     /**
      * If this is the default display template for the associated base type, node type or content type.
      */

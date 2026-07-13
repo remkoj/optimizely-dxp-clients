@@ -4,100 +4,103 @@
 /* eslint-disable */
 import type { ArrayItem } from './ArrayItem';
 import type { EnumerationValue } from './EnumerationValue';
-import type { ImageDescriptor } from './ImageDescriptor';
 /**
- * Describes a property of a ContentType in the CMS.
+ * Defines a single property within a content type, including its data type, validation rules, and editorial metadata.
  */
 export type ContentTypeProperty = {
     /**
-     * Gets the data type for the property.
+     * The fundamental data type of this property (e.g., string, integer, content reference).
      */
-    type?: ContentTypeProperty.type;
+    type: ContentTypeProperty.type;
     /**
-     * The key of the PropertyFormat that this ContentTypeProperty is an instance of.
+     * The property format that defines specialized handling and validation for this property.
      */
-    format?: string | null;
+    format?: string;
     /**
-     * The key of the content type that a property with 'type': 'component' may contain.
+     * The content type key that this property contains when the type is 'component'.
      */
-    contentType?: string | null;
+    contentType?: string;
     /**
-     * The display name of this ContentTypeProperty.
+     * The user-friendly name for this property, displayed in editorial interfaces.
      */
     displayName?: string;
     /**
-     * A description of this ContentTypeProperty.
+     * A description explaining the purpose and usage of this property for content editors.
      */
     description?: string;
     /**
-     * Indicates if a property instance of this type should be localized for each locale
-     * or if values are shared between all locales.
+     * Whether the property value is translated separately for each locale or shared across all locales.
      */
-    localized?: boolean;
+    isLocalized?: boolean;
     /**
-     * Indicates if a property instance of this type must always be assigned a value.
+     * Whether content items must always provide a value for this property before publication.
      */
-    required?: boolean;
+    isRequired?: boolean;
     /**
-     * A reference to the PropertyGroup that this ContentTypeProperty is part of.
-     * If this value is empty, a group may be assigned by the system.
+     * The property group this field belongs to for organizational purposes in the editor. Leave empty to allow automatic grouping.
      */
     group?: string;
     /**
-     * An value that is used to when sorting ContentTypeProperty instances.
+     * The display order of this property within its group (lower numbers appear first).
      */
     sortOrder?: number;
     /**
-     * Indicates how should this property will be indexed in the search engine.
-     * If this value is not explicitly set, the property will be indexed using default indexing setting of the search engine.
+     * Indicates how this property will be indexed in the search engine. If not explicitly set, the property will be indexed using the default indexing setting of the search engine.
      */
     indexingType?: ContentTypeProperty.indexingType;
     /**
-     * The minimum value that properties of this type should be able to contain. Value type must match the type of the property.
+     * Indicates how this property is displayed in the editing interface. If not explicitly set, the property will be available for editing.
+     */
+    displayMode?: ContentTypeProperty.displayMode;
+    /**
+     * The lowest value (inclusive) allowed for numeric or date properties. Type must match the property's data type.
      */
     minimum?: (number | null | string | null) | null;
     /**
-     * The minimum value that properties of this type should be able to contain. Value type must match the type of the property.
+     * The highest value (inclusive) allowed for numeric or date properties. Type must match the property's data type.
      */
     maximum?: (number | null | string | null) | null;
     /**
-     * A list of possible values that properties of this type should be able to contain.
+     * A predefined list of allowed values for this property. The enumeration values must match the property's data type. Allowed for string, integer, float and date-time property types.
      */
     enum?: Array<EnumerationValue> | null;
-    imageDescriptor?: ImageDescriptor;
     /**
-     * The minimum string length that properties of this type should be able to contain.
+     * The minimum character length for string-type properties.
      */
     minLength?: number | null;
     /**
-     * The maximum string length that properties of this type should be able to contain.
+     * The maximum character length for string-type properties.
      */
     maxLength?: number | null;
     /**
-     * Regular expression pattern that limits what value that a string type property should be able to contain.
+     * Regular expression pattern that limits what value that a string type property must match.
      */
-    pattern?: string | null;
+    pattern?: string;
     /**
-     * Optional minimum list length validation.
+     * The minimum number of items allowed in array-type properties.
      */
     minItems?: number | null;
     /**
-     * Optional maximum list length validation.
+     * The maximum number of items allowed in array-type properties.
      */
     maxItems?: number | null;
     /**
-     * Specifies which content types and base types these property items are allowed to contain.
+     * Content types and base types that this property is permitted to contain. Used by properties of content or content reference type.
      */
     allowedTypes?: Array<string>;
     /**
-     * Specifies which content types and base types these property items cannot contain.
+     * Content types and base types that items in this property are forbidden from containing. Used by properties of content or content reference type.
      */
     restrictedTypes?: Array<string>;
+    /**
+     * Defines editor specific settings for this property. Editor settings are specific to the item and editor type.
+     */
+    editorSettings?: Record<string, any> | null;
     items?: ArrayItem;
 };
 export namespace ContentTypeProperty {
     /**
-     * Gets the data type for the property.
+     * The fundamental data type of this property (e.g., string, integer, content reference).
      */
     export enum type {
         STRING = 'string',
@@ -108,7 +111,6 @@ export namespace ContentTypeProperty {
         DATE_TIME = 'dateTime',
         CONTENT_REFERENCE = 'contentReference',
         CONTENT = 'content',
-        BINARY = 'binary',
         LINK = 'link',
         RICH_TEXT = 'richText',
         JSON = 'json',
@@ -116,13 +118,19 @@ export namespace ContentTypeProperty {
         COMPONENT = 'component',
     }
     /**
-     * Indicates how should this property will be indexed in the search engine.
-     * If this value is not explicitly set, the property will be indexed using default indexing setting of the search engine.
+     * Indicates how this property will be indexed in the search engine. If not explicitly set, the property will be indexed using the default indexing setting of the search engine.
      */
     export enum indexingType {
         DISABLED = 'disabled',
         QUERYABLE = 'queryable',
         SEARCHABLE = 'searchable',
+    }
+    /**
+     * Indicates how this property is displayed in the editing interface. If not explicitly set, the property will be available for editing.
+     */
+    export enum displayMode {
+        AVAILABLE = 'available',
+        HIDDEN = 'hidden',
     }
 }
 

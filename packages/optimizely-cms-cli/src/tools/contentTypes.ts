@@ -51,14 +51,16 @@ export async function getContentTypes(client: CmsApiClient, args: ArgumentsCamel
     process.stdout.write(chalk.gray(`${figures.arrowRight} Fetching page 1 of ? (${pageSize} items per page)\n`))
   let resultsPage = await client.contentTypes.contentTypesList(undefined, undefined, 0, pageSize)
   const results: (typeof resultsPage)["items"] = resultsPage.items ?? []
-  let pagesRemaining = Math.ceil(resultsPage.totalItemCount / resultsPage.pageSize) - (resultsPage.pageIndex + 1)
+  let totalCount = (resultsPage.totalCount ?? (resultsPage as { totalItemCount?: number}).totalItemCount) ?? 0;
+  let pagesRemaining = Math.ceil(totalCount / resultsPage.pageSize) - (resultsPage.pageIndex + 1)
 
-  while (pagesRemaining > 0 && results.length < resultsPage.totalItemCount) {
+  while (pagesRemaining > 0 && results.length < totalCount) {
     if (cfg.debug)
-      process.stdout.write(chalk.gray(`${figures.arrowRight} Fetching page ${resultsPage.pageIndex + 2} of ${Math.ceil(resultsPage.totalItemCount / resultsPage.pageSize)} (${resultsPage.pageSize} items per page)\n`))
+      process.stdout.write(chalk.gray(`${figures.arrowRight} Fetching page ${resultsPage.pageIndex + 2} of ${Math.ceil(totalCount / resultsPage.pageSize)} (${resultsPage.pageSize} items per page)\n`))
     resultsPage = await client.contentTypes.contentTypesList(undefined, undefined, resultsPage.pageIndex + 1, resultsPage.pageSize)
     results.push(...resultsPage.items)
-    pagesRemaining = Math.ceil(resultsPage.totalItemCount / resultsPage.pageSize) - (resultsPage.pageIndex + 1)
+    totalCount = (resultsPage.totalCount ?? (resultsPage as { totalItemCount?: number}).totalItemCount) ?? 0;
+    pagesRemaining = Math.ceil(totalCount / resultsPage.pageSize) - (resultsPage.pageIndex + 1)
   }
 
   if (cfg.debug) {

@@ -4,6 +4,7 @@
 /* eslint-disable */
 import type { PropertyGroup } from '../models/PropertyGroup';
 import type { PropertyGroupPage } from '../models/PropertyGroupPage';
+import type { PropertyGroupPatch } from '../models/PropertyGroupPatch';
 import type { CancelablePromise } from '../core/CancelablePromise';
 import type { BaseHttpRequest } from '../core/BaseHttpRequest';
 export class PropertyGroupsService {
@@ -11,8 +12,7 @@ export class PropertyGroupsService {
     /**
      * List property groups
      * List property groups using the provided options.
-     * @param sources Indicates which property groups sources should be listed.
-     * Use 'DEFAULT' to include groups without a specific sources.
+     * @param sources Indicates which property groups sources should be listed. Use 'DEFAULT' to include groups without a specific source.
      * @returns PropertyGroupPage OK
      * @throws ApiError
      */
@@ -26,7 +26,10 @@ export class PropertyGroupsService {
                 'sources': sources,
             },
             errors: {
+                401: `Unauthorized`,
                 403: `Forbidden`,
+                429: `Too Many Requests`,
+                500: `Internal Server Error`,
             },
         });
     }
@@ -34,20 +37,29 @@ export class PropertyGroupsService {
      * Create property group
      * Create a new property group.
      * @param requestBody The property group that should be created.
+     * @param prefer Indicates client preference for the response content as per IETF RFC7240. Currently only supports 'return=representation' which can be used to indicate a preference to receive a representation of the resource that has been altered in the response.
      * @returns PropertyGroup Created
      * @throws ApiError
      */
     public propertyGroupsCreate(
         requestBody: PropertyGroup,
+        prefer?: Array<string>,
     ): CancelablePromise<PropertyGroup> {
         return this.httpRequest.request({
             method: 'POST',
             url: '/propertygroups',
+            headers: {
+                'Prefer': prefer,
+            },
             body: requestBody,
             mediaType: 'application/json',
             errors: {
                 400: `Bad Request`,
+                401: `Unauthorized`,
                 403: `Forbidden`,
+                409: `Conflict`,
+                429: `Too Many Requests`,
+                500: `Internal Server Error`,
             },
         });
     }
@@ -77,8 +89,11 @@ export class PropertyGroupsService {
             },
             errors: {
                 304: `Not Modified`,
+                401: `Unauthorized`,
                 403: `Forbidden`,
                 404: `Not Found`,
+                429: `Too Many Requests`,
+                500: `Internal Server Error`,
             },
         });
     }
@@ -87,6 +102,7 @@ export class PropertyGroupsService {
      * Patch an existing property group.
      * @param key The key of the property group to patch.
      * @param requestBody The values of the property group that should be patched formatted according to RFC7396.
+     * @param prefer Indicates client preference for the response content as per IETF RFC7240. Currently only supports 'return=representation' which can be used to indicate a preference to receive a representation of the resource that has been altered in the response.
      * @param ifMatch If provided, the PATCH request will only be considered if the value matches the RFC7232 ETag of the current resource. Weak ETags will always be ignored.
      * @param ifUnmodifiedSince If provided, the PATCH request will only be considered if the resource has not been modified since the provided date. This parameter will be ignored if an 'If-Match' parameter is also provided.
      * @returns PropertyGroup OK
@@ -94,7 +110,8 @@ export class PropertyGroupsService {
      */
     public propertyGroupsPatch(
         key: string,
-        requestBody: PropertyGroup,
+        requestBody: PropertyGroupPatch,
+        prefer?: Array<string>,
         ifMatch?: string,
         ifUnmodifiedSince?: string,
     ): CancelablePromise<PropertyGroup> {
@@ -105,6 +122,7 @@ export class PropertyGroupsService {
                 'key': key,
             },
             headers: {
+                'Prefer': prefer,
                 'If-Match': ifMatch,
                 'If-Unmodified-Since': ifUnmodifiedSince,
             },
@@ -112,9 +130,12 @@ export class PropertyGroupsService {
             mediaType: 'application/merge-patch+json',
             errors: {
                 400: `Bad Request`,
+                401: `Unauthorized`,
                 403: `Forbidden`,
                 404: `Not Found`,
                 412: `Precondition Failed`,
+                429: `Too Many Requests`,
+                500: `Internal Server Error`,
             },
         });
     }
@@ -122,6 +143,7 @@ export class PropertyGroupsService {
      * Delete property group
      * Deletes the property group with the provided key.
      * @param key The key of the property group to delete.
+     * @param prefer Indicates client preference for the response content as per IETF RFC7240. Currently only supports 'return=representation' which can be used to indicate a preference to receive a representation of the resource that has been altered in the response.
      * @param ifMatch If provided, the DELETE request will only be considered if the value matches the RFC7232 ETag of the current resource. Weak ETags will always be ignored.
      * @param ifUnmodifiedSince If provided, the DELETE request will only be considered if the resource has not been modified since the provided date. This parameter will be ignored if an 'If-Match' parameter is also provided.
      * @returns PropertyGroup OK
@@ -129,6 +151,7 @@ export class PropertyGroupsService {
      */
     public propertyGroupsDelete(
         key: string,
+        prefer?: Array<string>,
         ifMatch?: string,
         ifUnmodifiedSince?: string,
     ): CancelablePromise<PropertyGroup> {
@@ -139,14 +162,18 @@ export class PropertyGroupsService {
                 'key': key,
             },
             headers: {
+                'Prefer': prefer,
                 'If-Match': ifMatch,
                 'If-Unmodified-Since': ifUnmodifiedSince,
             },
             errors: {
                 400: `Bad Request`,
+                401: `Unauthorized`,
                 403: `Forbidden`,
                 404: `Not Found`,
                 412: `Precondition Failed`,
+                429: `Too Many Requests`,
+                500: `Internal Server Error`,
             },
         });
     }

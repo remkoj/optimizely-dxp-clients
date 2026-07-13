@@ -3,6 +3,9 @@
 /* tslint:disable */
 /* eslint-disable */
 import type { ContentType } from './ContentType';
+/**
+ * Represents a single page of items in a paged collection, including paging metadata such as the current page index, page size, and an estimated total item count.
+ */
 export type ContentTypePage = {
     /**
      * The items in this paged collection.
@@ -17,8 +20,8 @@ export type ContentTypePage = {
      */
     readonly pageSize?: number;
     /**
-     * The estimated total number of items in the collection. May be omitted if the total item count is unknown.
+     * The estimated total number of items in the collection. May be omitted if the total count is unknown.
      */
-    readonly totalItemCount?: number;
+    readonly totalCount?: number | null;
 };
 

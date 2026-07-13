@@ -2,12 +2,15 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-import type { ContentMetadata } from './ContentMetadata';
-export type ContentMetadataPage = {
+import type { Application } from './Application';
+/**
+ * Represents a single page of items in a paged collection, including paging metadata such as the current page index, page size, and an estimated total item count.
+ */
+export type ApplicationPage = {
     /**
      * The items in this paged collection.
      */
-    readonly items?: Array<ContentMetadata>;
+    readonly items?: Array<Application>;
     /**
      * The zero-based index of the current page.
      */
@@ -17,8 +20,8 @@ export type ContentMetadataPage = {
      */
     readonly pageSize?: number;
     /**
-     * The estimated total number of items in the collection. May be omitted if the total item count is unknown.
+     * The estimated total number of items in the collection. May be omitted if the total count is unknown.
      */
-    readonly totalItemCount?: number;
+    readonly totalCount?: number | null;
 };
 

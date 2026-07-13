@@ -2,12 +2,15 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-import type { Changeset } from './Changeset';
-export type ChangesetPage = {
+import type { ContentVersion } from './ContentVersion';
+/**
+ * Represents a single page of items in a paged collection, including paging metadata such as the current page index, page size, and an estimated total item count.
+ */
+export type ContentVersionPage = {
     /**
      * The items in this paged collection.
      */
-    readonly items?: Array<Changeset>;
+    readonly items?: Array<ContentVersion>;
     /**
      * The zero-based index of the current page.
      */
@@ -17,8 +20,8 @@ export type ChangesetPage = {
      */
     readonly pageSize?: number;
     /**
-     * The estimated total number of items in the collection. May be omitted if the total item count is unknown.
+     * The estimated total number of items in the collection. May be omitted if the total count is unknown.
      */
-    readonly totalItemCount?: number;
+    readonly totalCount?: number | null;
 };
 

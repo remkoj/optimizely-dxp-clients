@@ -5,7 +5,7 @@
 import type { Preset } from './Preset.js';
 import type { WebhookPayload } from './WebhookPayload.js';
 export type Webhook = (WebhookPayload & {
-    preset: Preset;
+    preset?: Preset;
     id: string;
 });
 

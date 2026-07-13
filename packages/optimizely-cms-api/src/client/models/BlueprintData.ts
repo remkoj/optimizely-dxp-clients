@@ -3,14 +3,11 @@
 /* tslint:disable */
 /* eslint-disable */
 import type { CompositionNode } from './CompositionNode';
+import type { ContentData } from './ContentData';
 /**
  * Represents the data part of a Blueprint.
  */
-export type BlueprintData = {
-    /**
-     * Properties as they are defined by corresponding component or content type.
-     */
-    properties?: Record<string, any>;
+export type BlueprintData = (ContentData & {
     composition?: CompositionNode;
-};
+});
 

@@ -1,10 +1,16 @@
 {
   "name": "@remkoj/optimizely-cms-react",
+  "description": "React and RSC integration library for Optimizely SaaS CMS",
   "license": "Apache-2.0",
-  "version": "5.3.2",
-  "repository": "https://github.com/remkoj/optimizely-dxp-clients.git",
+  "version": "5.4.0",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/remkoj/optimizely-dxp-clients.git",
+    "directory": "packages/optimizely-cms-react"
+  },
+  "bugs": "https://github.com/remkoj/optimizely-dxp-clients/issues",
   "author": "Remko Jantzen <693172+remkoj@users.noreply.github.com>",
-  "homepage": "https://github.com/remkoj/optimizely-dxp-clients/tree/main/packages/optimizely-cms-react",
+  "homepage": "https://github.com/remkoj/optimizely-dxp-clients/blob/main/packages/optimizely-cms-react/README.md",
   "type": "module",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
@@ -27,7 +33,7 @@
     }
   },
   "devDependencies": {
-    "@remkoj/optimizely-graph-client": "workspace:5.3.2",
+    "@remkoj/optimizely-graph-client": "workspace:5.4.0",
     "@types/crypto-js": "^4.2.2",
     "@types/node": "^22.19.3",
     "@types/react": "^18.3.27",
