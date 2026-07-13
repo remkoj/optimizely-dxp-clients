@@ -20,10 +20,12 @@
   },
   "files": [
     "./dist",
+    "./script/postinstall.mjs",
     "./AGENTS.md"
   ],
   "scripts": {
     "update-cfg": "node ./script/update-cfg.js",
+    "postinstall": "node ./script/postinstall.mjs",
     "prepare": "node ./script/update-cfg.js && rollup -c",
     "recompile": "node ./script/update-cfg.js && rollup -c",
     "watch": "rollup -c ./rollup.config.js -w",
