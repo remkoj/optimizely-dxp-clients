@@ -2,7 +2,7 @@
   "name": "@remkoj/optimizely-graph-client",
   "description": "GraphQL client for Optimizely Graph (Content Graph)",
   "license": "Apache-2.0",
-  "version": "6.0.0-rc.2",
+  "version": "6.0.0-rc.3",
   "repository": {
     "type": "git",
     "url": "https://github.com/remkoj/optimizely-dxp-clients.git",

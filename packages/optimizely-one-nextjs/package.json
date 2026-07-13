@@ -2,7 +2,7 @@
   "name": "@remkoj/optimizely-one-nextjs",
   "description": "Optimizely One Next.js integration for ODP, Content Recommendations, and Web Experimentation",
   "license": "Apache-2.0",
-  "version": "6.0.0-rc.2",
+  "version": "6.0.0-rc.3",
   "repository": {
     "type": "git",
     "url": "https://github.com/remkoj/optimizely-dxp-clients.git",
@@ -41,7 +41,7 @@
     }
   },
   "devDependencies": {
-    "@remkoj/optimizely-graph-client": "workspace:6.0.0-rc.2",
+    "@remkoj/optimizely-graph-client": "workspace:6.0.0-rc.3",
     "@tailwindcss/cli": "^4.3.2",
     "@types/node": "^24.13.3",
     "@types/react": "^19.2.17",
@@ -67,7 +67,7 @@
     "@headlessui/react": "^2.2.10",
     "@heroicons/react": "^2.2.0",
     "@optimizely/react-sdk": "^4.1.0",
-    "@remkoj/optimizely-graph-client": "6.0.0-rc.2",
+    "@remkoj/optimizely-graph-client": "6.0.0-rc.3",
     "deep-object-diff": "^1.1.9",
     "swr": "^2.4.2",
     "uuid": "^14.0.1"
