@@ -24,40 +24,82 @@ npm install --save-dev @remkoj/optimizely-graph-functions
 
 ## Usage in `codegen.ts`
 
+The package exposes a full codegen **preset** (not just a plugin). Use it as the `preset` value for your output target. The preset auto-discovers your component GraphQL files and injects the right fragments based on the file-name convention below.
+
 ```typescript
 import type { CodegenConfig } from '@graphql-codegen/cli'
+import getSchemaInfo from '@remkoj/optimizely-graph-client/codegen'
+import OptimizelyGraphPreset, { type PresetOptions } from '@remkoj/optimizely-graph-functions/preset'
 
 const config: CodegenConfig = {
-  schema: [{ [`${process.env.OPTIMIZELY_GRAPH_GATEWAY}/content/v2`]: {
-    headers: { Authorization: `epi-single ${process.env.OPTIMIZELY_GRAPH_SINGLE_KEY}` }
-  }}],
-  documents: ['src/**/*.{ts,tsx,graphql}'],
+  schema: getSchemaInfo(),             // reads env vars automatically
+  documents: ['src/**/*.graphql'],
   generates: {
-    'src/gql/': {
-      preset: 'client',
-      presetConfig: { fragmentMasking: false },
-      plugins: ['@remkoj/optimizely-graph-functions'],
-      config: {
-        // List of Optimizely Graph built-in functions to expose as typed operations
-        functions: ['getContentType', 'getContentByPath', 'getContentById']
-      }
-    }
-  }
+    './gql/': {
+      preset: OptimizelyGraphPreset,
+      presetConfig: {
+        // Allow recursive fragments (requires patched visitor-plugin-common)
+        recursion: true,
+
+        // Map component GraphQL files to the correct base fragment
+        injections: [
+          { into: 'PageData',         pathRegex: 'src\/components\/cms\/.*\.page\.graphql' },
+          { into: 'PageData',         pathRegex: 'src\/components\/cms\/.*\.experience\.graphql' },
+          { into: 'BlockData',        pathRegex: 'src\/components\/cms\/.*\.block\.graphql' },
+          { into: 'BlockData',        pathRegex: 'src\/components\/cms\/.*\.component\.graphql' },
+          { into: 'BlockData',        pathRegex: 'src\/components\/cms\/.*\.section\.graphql' },
+          { into: 'ElementData',      pathRegex: 'src\/components\/cms\/.*\.element\.graphql' },
+          { into: 'IContentListItem', pathRegex: 'src\/components\/cms\/.*\.contentarea\.graphql' },
+        ],
+      } as PresetOptions,
+    },
+  },
 }
 
 export default config
 ```
 
-## Plugin options (`PluginOptions`)
+## GraphQL file naming conventions
+
+Files discovered by `injections.pathRegex` are automatically injected into the named base fragment:
+
+| File suffix | Injected into |
+| --- | --- |
+| `*.page.graphql` | `PageData` |
+| `*.experience.graphql` | `PageData` |
+| `*.block.graphql` | `BlockData` |
+| `*.component.graphql` | `BlockData` |
+| `*.section.graphql` | `BlockData` |
+| `*.element.graphql` | `ElementData` |
+| `*.contentarea.graphql` | `IContentListItem` |
+
+Each file should contain a single named fragment that matches its content type, e.g. `fragment HeroBlockData on HeroBlock { ... }`.
+
+## Preset options (`PresetOptions`)
+
+`PresetOptions` extends `ClientPresetConfig` (from `@graphql-codegen/client-preset`) with:
 
 | Option | Default | Description |
 | --- | --- | --- |
-| `functions` | `['getContentType', 'getContentByPath', 'getContentById']` | Optimizely Graph built-in functions to generate typed wrappers for |
+| `functions` | `['getContentType', 'getContentByPath', 'getContentById']` | Built-in Optimizely Graph functions to generate typed wrappers for |
 | `prettyPrintQuery` | `false` | Format generated query strings |
 | `clientPath` | `"./graphql"` | Path to the generated GraphQL client |
+| `recursion` | `false` | Enable recursive fragment support (requires patched `visitor-plugin-common`) |
+| `injections` | `[]` | Array of `{ into, pathRegex?, nameRegex? }` injection rules |
+| `cleanup` | `true` | Strip injected fragment spreads after processing |
+
+## Loading Optimizely-provided fragments
+
+The loader protocol `opti-cms:/fragments/13` fetches the built-in Optimizely Graph fragments (the preset adds this automatically; you normally do not need to add it manually):
+
+```typescript
+// Only needed when building a custom codegen target that references Optimizely fragments
+{ 'opti-cms:/fragments/13': { loader: '@remkoj/optimizely-graph-functions/loader' } }
+```
 
 ## Constraints
 
 - Requires `@graphql-codegen/cli` and `@graphql-codegen/client-preset` as peer dependencies.
 - Depends on a **patched** `@graphql-codegen/visitor-plugin-common`; after `yarn install`/`upgrade` run `yarn opti-graph patches:apply`.
 - CommonJS module.
+- Use the preset (`./preset`) as the entry point, not the bare plugin, for all new projects.

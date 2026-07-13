@@ -28,6 +28,9 @@ import SchemaVsCodeCommand from './schema_vscode.js'
 // Upgrades
 import MigrateCommand from './migrate.js'
 
+// AI configuration
+import ProjectAiCommand from './project_ai.js'
+
 // Generic
 import CmsVersionCommand from './cms_info.js'
 import CmsResetCommand from './cms_reset.js'
@@ -52,7 +55,8 @@ export const commands: CliModuleList = [
   StylesDeleteCommand,
   TypesPullCommand,
   TypesPushCommand,
-  MigrateCommand
+  MigrateCommand,
+  ProjectAiCommand,
 ]
 
 export default commands

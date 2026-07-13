@@ -10,6 +10,8 @@ npm install --save-dev @remkoj/optimizely-cms-cli
 
 Requires Node `>=24.0.0 <25.0.0`.
 
+After each install or upgrade, a `postinstall` hook automatically runs `opti-cms project:ai` to create or refresh AI assistant configuration files in the project. The hook is silent and never blocks the install.
+
 ## Environment variables
 
 | Variable | Description |
@@ -56,6 +58,7 @@ yarn opti-cms <command> [options]
 | `schema:list` | List all schemas available in the CMS instance |
 | `schema:validate` | Validate `opti-type.json` and `opti-style.json` files |
 | `schema:vscode` | Configure VS Code JSON schema validation for the project |
+| `project:ai` | Create or update AI assistant config files (AGENTS.md, CLAUDE.md, GitHub Copilot, Cursor) so `@remkoj` package docs are available to the model |
 | `style:create` | Create a new Visual Builder style definition |
 | `styles:list` | List Visual Builder style definitions from the CMS |
 | `styles:pull` | Pull Visual Builder style definitions from the CMS |

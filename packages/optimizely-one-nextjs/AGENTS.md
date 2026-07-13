@@ -47,28 +47,84 @@ const config = readConfigFromEnv()
 
 ## API routes
 
-Mount the Optimizely One API handler in `app/api/me/route.ts`:
+Mount the Optimizely One API handler in `app/api/me/[[...path]]/route.ts`.
+The catch-all segment name must match `pathParameterName` (default: `'path'`).
 
 ```typescript
-import { createHandler } from '@remkoj/optimizely-one-nextjs/api'
-export const { GET, POST } = createHandler()
+import { createOptimizelyOneApi } from '@remkoj/optimizely-one-nextjs/api'
+
+const handler = createOptimizelyOneApi()
+
+export const GET = handler
+export const POST = handler
+export const runtime = 'nodejs'
+export const dynamic = 'force-dynamic'
 ```
 
-## Client components
+## Server-side product clients (import from `./api` or `./server`)
+
+`DataPlatform` and `ContentRecs` are available as named exports from both `./api` and `./server`.
 
 ```typescript
-import { OptimizelyOneGadget } from '@remkoj/optimizely-one-nextjs/client'
-// Renders the Optimizely One debug panel (dev/preview only)
+import { DataPlatform, ContentRecs } from '@remkoj/optimizely-one-nextjs/api'
+// or from '@remkoj/optimizely-one-nextjs/server'
+
+// Optimizely Data Platform
+if (DataPlatform.Tools.isEnabled()) {
+  const vuid = DataPlatform.Tools.getVisitorID(cookies())
+  const client = new DataPlatform.Client()
+  const terms = await client.getLastSearchTerms(vuid)
+}
+
+// Content Recommendations
+if (ContentRecs.Tools.isEnabled()) {
+  const visitorId = ContentRecs.Tools.getVisitorID(cookies())
+  const client = new ContentRecs.Client()
+  const topics = await client.getContentTopics(visitorId)
+}
 ```
 
-## Server utilities
+## Client components (import from `./client`)
 
 ```typescript
-import { getEnabledProducts } from '@remkoj/optimizely-one-nextjs/server'
-// Returns which Optimizely One products are enabled based on config
+import {
+  OptimizelyOneProvider,  // context provider — wrap around your root layout body
+  OptimizelyOneGadget,    // debug panel; render only in dev/preview
+  PageActivator,          // fires page-view events on route change
+  ContentRecsDelivery,    // renders personalised content recommendations
+} from '@remkoj/optimizely-one-nextjs/client'
+
+// In root layout:
+<OptimizelyOneProvider>
+  <PageActivator />
+  {children}
+  <OptimizelyOneGadget enabled={enableDemoTools} />
+</OptimizelyOneProvider>
+
+// In a component:
+<ContentRecsDelivery
+  apiKey={deliveryApiKey}
+  count={3}
+  template={ArticleTemplate}
+  className="grid grid-cols-3"
+/>
+```
+
+## Server utilities (import from `./server`)
+
+```typescript
+import { Scripts, OptimizelyOneGadget, EnvTools } from '@remkoj/optimizely-one-nextjs/server'
+
+// Inject required tracking scripts
+<Scripts nonce={nonce} />
+
+// Read environment-controlled feature flags
+const enabled = EnvTools.readValueAsBoolean('OPTIMIZELY_ONE_HELPER', false)
+const key = EnvTools.readValue('GA_TRACKING_ID')
 ```
 
 ## Constraints
 
 - `dist/styles.css` must be imported at the application root; it is not injected automatically.
-- Server utilities are server-only; do not import from client components.
+- Server utilities (`./server`) are server-only; do not import from client components.
+- The API route must be a catch-all (`[[...path]]`) so every sub-path is handled by the same handler.
