@@ -4,6 +4,13 @@
   "description": "A compatibility package that wraps an Hey-API generated SDK into a single client object, providing a more convenient interface for users.",
   "version": "6.0.0-rc.2",
   "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/remkoj/optimizely-dxp-clients.git",
+    "directory": "packages/hey-api-wrapper"
+  },
+  "bugs": "https://github.com/remkoj/optimizely-dxp-clients/issues",
+  "homepage": "https://github.com/remkoj/optimizely-dxp-clients/blob/main/packages/hey-api-wrapper/README.md",
   "type": "commonjs",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",

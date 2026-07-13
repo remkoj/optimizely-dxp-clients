@@ -1,9 +1,14 @@
 {
   "name": "@remkoj/optimizely-graph-cli",
   "description": "CLI Utility to work with Optimizely Graph",
-  "repository": "https://github.com/remkoj/optimizely-dxp-clients.git",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/remkoj/optimizely-dxp-clients.git",
+    "directory": "packages/optimizely-graph-cli"
+  },
+  "bugs": "https://github.com/remkoj/optimizely-dxp-clients/issues",
   "author": "Remko Jantzen <693172+remkoj@users.noreply.github.com>",
-  "homepage": "https://github.com/remkoj/optimizely-dxp-clients",
+  "homepage": "https://github.com/remkoj/optimizely-dxp-clients/blob/main/packages/optimizely-graph-cli/README.md",
   "version": "6.0.0-rc.2",
   "license": "Apache-2.0",
   "type": "module",

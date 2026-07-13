@@ -2,6 +2,13 @@
   "name": "@remkoj/optimizely-cms-cli",
   "description": "CLI Utility to work with Optimizely SaaS CMS.",
   "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/remkoj/optimizely-dxp-clients.git",
+    "directory": "packages/optimizely-cms-cli"
+  },
+  "bugs": "https://github.com/remkoj/optimizely-dxp-clients/issues",
+  "homepage": "https://github.com/remkoj/optimizely-dxp-clients/blob/main/packages/optimizely-cms-cli/README.md",
   "author": "Remko Jantzen <693172+remkoj@users.noreply.github.com>",
   "keywords": [
     "Optimizely CMS",

@@ -2,7 +2,11 @@
   "name": "optimizely-dxp-clients",
   "version": "6.0.0-rc.2",
   "description": "Javascript clients for Optimizely Products",
-  "repository": "https://github.com/remkoj/optimizely-dxp-clients.git",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/remkoj/optimizely-dxp-clients.git"
+  },
+  "bugs": "https://github.com/remkoj/optimizely-dxp-clients/issues",
   "author": "Remko Jantzen <693172+remkoj@users.noreply.github.com>",
   "homepage": "https://github.com/remkoj/optimizely-dxp-clients",
   "license": "Apache-2.0",

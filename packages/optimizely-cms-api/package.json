@@ -5,6 +5,13 @@
   "version": "6.0.0-rc.2",
   "type": "commonjs",
   "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/remkoj/optimizely-dxp-clients.git",
+    "directory": "packages/optimizely-cms-api"
+  },
+  "bugs": "https://github.com/remkoj/optimizely-dxp-clients/issues",
+  "homepage": "https://github.com/remkoj/optimizely-dxp-clients/blob/main/packages/optimizely-cms-api/README.md",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "files": [

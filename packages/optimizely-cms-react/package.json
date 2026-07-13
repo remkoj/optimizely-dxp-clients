@@ -2,9 +2,14 @@
   "name": "@remkoj/optimizely-cms-react",
   "license": "Apache-2.0",
   "version": "6.0.0-rc.2",
-  "repository": "https://github.com/remkoj/optimizely-dxp-clients.git",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/remkoj/optimizely-dxp-clients.git",
+    "directory": "packages/optimizely-cms-react"
+  },
+  "bugs": "https://github.com/remkoj/optimizely-dxp-clients/issues",
   "author": "Remko Jantzen <693172+remkoj@users.noreply.github.com>",
-  "homepage": "https://github.com/remkoj/optimizely-dxp-clients/tree/main/packages/optimizely-cms-react",
+  "homepage": "https://github.com/remkoj/optimizely-dxp-clients/blob/main/packages/optimizely-cms-react/README.md",
   "type": "module",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",

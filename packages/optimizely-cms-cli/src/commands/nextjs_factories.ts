@@ -81,7 +81,7 @@ export const NextJsFactoryCommand : NextJsModule = {
     const componentFactoryDefintions = new Map<string, ComponentFactoryDefintion>()
     components.forEach(component => {
       const componentDir = path.dirname(path.posix.join(...component));
-      const componentFile = path.basename(path.posix.join(...component));
+      // const componentFile = path.basename(path.posix.join(...component));
 
       // Determine component target
       const componentKey = getComponentKey(component, basePath)
@@ -238,7 +238,7 @@ function shouldWriteFactory(factoryFile: string, force: boolean = false, debug: 
 function processName(input: string) : string {
   if (input == ROOT_FACTORY_KEY)
     return "Cms"
-  const nameSegements = input.split(/[-\_]/g)
+  const nameSegements = input.split(/[-_]/g)
   return nameSegements.map(ucFirst).join('')
 }
 
