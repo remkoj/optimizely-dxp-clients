@@ -1,7 +1,7 @@
 import initEnvironment from './context/env.js'
 import createCliApp from './app.js'
 import commands from './commands/index.js'
-import AppInfo from './version.json'
+import AppInfo from './version.json' with { type: 'json' }
 
 // Make sure the environment variables are correctly processed
 initEnvironment()

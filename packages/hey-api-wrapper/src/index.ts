@@ -49,8 +49,8 @@ export function withOperations<TBase extends ApiClientStatic, TOperations extend
       const operationArgs = [...args];
       operationArgs[0] = {
         throwOnError: false,
-        ...args,
-        client: this._client
+        client: this._client,
+        ...args[0]
       }
       
       //@ts-expect-error TypeScript can't check this as TOperations is dynamic

@@ -2,7 +2,7 @@
   "name": "@remkoj/hey-api-wrapper",
   "displayName": "Wrap an Hey-API generated SDK into a single client object",
   "description": "A compatibility package that wraps an Hey-API generated SDK into a single client object, providing a more convenient interface for users.",
-  "version": "6.0.0-rc.3",
+  "version": "6.0.0-rc.4",
   "license": "Apache-2.0",
   "repository": {
     "type": "git",
