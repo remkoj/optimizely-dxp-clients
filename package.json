@@ -57,7 +57,7 @@
     "update:yarn": "yarn set version stable && yarn install && yarn dedupe && yarn run update:sdks",
     "update:all": "yarn run update:yarn && yarn run update:deps && yarn run artefacts",
     "update:license-info": "yarn node ./scripts/licenses.js",
-    "publish": "yarn workspaces foreach -Apt --topological-dev --exclude optimizely-dxp-clients npm publish --access public"
+    "publish": "yarn workspaces foreach -At --topological-dev --exclude optimizely-dxp-clients npm publish --access public"
   },
   "resolutions": {
     "picomatch": "^4"
