@@ -79,7 +79,9 @@ export const NextJsFactoryCommand : NextJsModule = {
             const componentKey = processName(component.length == 1 ? ucFirst(path.basename(component[0], path.extname(component[0]))) : component.at(component.length - 2));
             let componentVariant = (component.length > 1 ? component.at(component.length - 1) ?? 'default' : 'default').replace('index','default');
             componentVariant = path.basename(componentVariant, path.extname(componentVariant));
-            const componentDir = path.dirname(path.join(...component));
+            // Keep this POSIX: it's compared against (and made relative to) factoryKey,
+            // which is built with path.posix, and it ends up inside import specifiers.
+            const componentDir = path.posix.dirname(path.posix.join(...component));
 
             // Get factory information
             const factorySegments = component.length > 2 ? component.slice(0, -2) : [ROOT_FACTORY_KEY];
@@ -202,7 +204,9 @@ function processName(input: string) : string {
 function generateFactory(factoryInfo: ComponentFactoryDefintion, factoryKey: string) : string
 {
   // Get the factory name
-  const factoryName = factoryKey.split(path.sep).map(processName).join("") + "Factory"
+  // factoryKey is built with path.posix, so it must not be split on the platform
+  // separator - on Windows that leaves the "/" inside the generated identifier.
+  const factoryName = factoryKey.split(/[\\/]/).map(processName).join("") + "Factory"
 
   // Get the components and sub-factories, sorted by key to minimize changes between runs
   const components = [...factoryInfo.entries].sort((a,b) => { return a.key < b.key ? -1 : a.key > b.key ? 1 : 0 })
