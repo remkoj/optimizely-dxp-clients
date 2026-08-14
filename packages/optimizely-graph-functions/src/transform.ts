@@ -1,129 +1,131 @@
-import { type Types } from '@graphql-codegen/plugin-helpers'
-import type { TransformOptions } from './types'
-import type { FragmentDefinitionNode, SelectionNode, SelectionSetNode, ASTNode, OperationDefinitionNode, FragmentSpreadNode } from 'graphql'
-import { Kind, visit } from 'graphql'
+import type { Types } from '@graphql-codegen/plugin-helpers'
+import type { PresetOptions } from './types'
+import type { DocumentNode } from 'graphql'
 
-export { cleanFragments } from "./_transform/cleanFragments"
-export { injectComponentDocuments, getComponentDocuments, injectInjectionTargets, getInjectionTargetDocuments } from "./_transform/injectComponentDocuments"
-export { normalizeFragmentNames } from "./_transform/normalizeFragmentNames"
-export { normalizeQueryNames } from "./_transform/normalizeQueryNames"
+// Import the individual transformers
+import { cleanFragments } from "./_transform/cleanFragments"
+import { normalizeFragmentNames } from "./_transform/normalizeFragmentNames"
+import { normalizeQueryNames } from "./_transform/normalizeQueryNames"
+import { performInjections } from "./_transform/performInjections"
+import { cleanFragmentSpreads } from "./_transform/cleanSpreads"
+import { handleDependDirective } from "./_transform/handleDependDirective"
+
+// Import the individual document generators
+import { getComponentDocuments, getInjectionTargetDocuments } from "./_transform/injectComponentDocuments"
+import { getPageDocuments } from "./_transform/injectPageQueries"
+import { getSectionDocuments } from "./_transform/injectSectionQueries"
+
+// Export the helper functions
 export { pickTransformOptions } from "./_transform/options"
-export { injectPageQueries, getPageDocuments } from "./_transform/injectPageQueries"
-export { injectSectionQueries, getSectionDocuments } from "./_transform/injectSectionQueries"
-export { performInjections } from "./_transform/performInjections"
-export { cleanFragmentSpreads } from "./_transform/cleanSpreads"
-export { handleDependDirective } from "./_transform/handleDependDirective"
 
-export type TransformFn<T = any> = (files: Types.DocumentFile[], options: Types.PresetFnArgs<T>) => Promise<Types.DocumentFile[]> | Types.DocumentFile[]
-export async function executeDocumentTransforms<T = any>(files: Types.DocumentFile[], transforms: Array<TransformFn<T>>, options: Types.PresetFnArgs<T>): Promise<Types.DocumentFile[]> {
-  let transformedFiles = files;
-  for (const transform of transforms)
-    transformedFiles = await transform(transformedFiles, options);
-  return transformedFiles;
+/** A single document-transform step: receives the current document set plus preset options and returns the updated set. */
+export type TransformFn<T extends PresetOptions = PresetOptions> = (
+  files: Types.DocumentFile[],
+  schema: DocumentNode,
+  options: T
+) => Promise<Types.DocumentFile[]> | Types.DocumentFile[]
+
+/**
+ * Transforms that exclusively mutate `opti-cms:/` virtual documents.
+ * Applied directly inside `buildGeneratesSection` — before
+ * `@graphql-codegen/client-preset` calls `processSources` — so the renamed
+ * `rawSDL` strings are visible when `gql.ts` keys are captured.
+ */
+export const OptiCmsTransforms: ReadonlyArray<TransformFn<PresetOptions>> = [
+  normalizeFragmentNames, // Promote _-prefixed built-in fragments unless the project overrides them
+  normalizeQueryNames,    // Promote _-prefixed built-in queries unless the project overrides them
+  cleanFragments,         // Remove fragments that target non-existing types
+  cleanFragmentSpreads,   // Remove all fragment spreads that target a fragment that does not exist in the documents
+];
+
+/**
+ * Ordered pipeline of document transforms registered as `documentTransforms`.
+ * These may affect user-authored documents and must run through the standard
+ * CodeGen mechanism so every output file sees the same transformed documents.
+ *
+ * Execution order:
+ * 1. `performInjections`     — insert component fragment spreads adjacent to injection targets
+ * 2. `handleDependDirective` — strip `@depend`-guarded fields whose schema dependency is absent
+ */
+export const CmsTransforms: ReadonlyArray<TransformFn<PresetOptions>> = [
+  performInjections,      // Run injections of component fragments adjacent to placeholder fragments
+  handleDependDirective,  // Remove the "item" field in queries and fragments from the "ContentReference" type if it's not in the schema
+];
+
+const TransformProfilerCategory = 'Transforming documents';
+
+function getTransformerName(transformFn: TransformFn<PresetOptions>): string {
+  return `Optimizely.CMS.${transformFn.name}`;
 }
 
-import { defaultOptions } from "./_transform/options"
-import { getComponentFragments } from "./_transform/performInjections"
+export async function getGeneratedDocuments(): Promise<Types.CustomDocumentLoader[]>
+{
+  const generatedDocuments = await Promise.allSettled([
+    getPageDocuments(),
+    getSectionDocuments(),
+    getComponentDocuments(),
+    getInjectionTargetDocuments()
+  ]);
+  return generatedDocuments.flatMap((item) => item.status === 'fulfilled' ? item.value : []);
+}
 
-export const transform: Types.DocumentTransformFunction<TransformOptions> = async ({ documents: files, config, schema, pluginContext }) => {
-  // Create context
-  const transformConfig: Readonly<Required<TransformOptions>> = { ...defaultOptions, ...config }
-  if (transformConfig.verbose)
-    console.debug(`[ OPTIMIZELY ] Starting Optimizely Graph Query & Fragment transformations`)
-
-  // Process all documents to extract the fragments that must be injected
-  const componentFragments = await getComponentFragments(files, transformConfig);
-
-  // Get the names we actually need to inject into, and return when none are present
-  const intoNames: string[] = Array.from(componentFragments.keys());
-  if (intoNames.length == 0) return files
-  if (config.verbose)
-    intoNames.forEach(intoName => {
-      console.debug(`[ OPTIMIZELY ] Update queries & fragments using the fragment ${intoName} to also use the fragments: ${(componentFragments.get(intoName) ?? []).map(x => x.name).join(',')}`)
-    })
-
-  // Update the documents
-  const transformedFiles = files.map(file => {
-    if (config.verbose)
-      console.debug(`[ OPTIMIZELY ] Processing ${file.location}`)
-
-    const document = file.document ? visit(file.document, {
-      // Replace the fragment occurances
-      SelectionSet: {
-        leave(node, key, parent, path, ancestors) {
-          const parentName = [...ancestors].reverse().filter(isFragmentOrOperation).at(0)?.name?.value
-          const sectionsToAdd = node.selections
-            .map(selection => {
-              if (selection.kind != Kind.FRAGMENT_SPREAD)
-                return undefined
-              const testableName = config.recursion && selection.name.value.startsWith('Recursive') ? selection.name.value.substring(9) : selection.name.value
-              if (config.recursion && config.verbose && testableName != selection.name.value)
-                console.debug(`[ OPTIMIZELY ] Using ${selection.name.value} in ${parentName} as ${testableName} to allow recursion`)
-              return intoNames.includes(testableName) ? testableName : undefined
-            })
-            .filter(isNotNullOrUndefined)
-          if (sectionsToAdd.length == 0) return
-
-          if (config.verbose)
-            console.debug(`[ OPTIMIZELY ] Identified usage of fragment(s) ${sectionsToAdd.join(', ')} in ${parentName}, starting injection procedure`)
-
-
-          const newSelections: SelectionNode[] = [] //.filter(selection => !(selection.kind == Kind.FRAGMENT_SPREAD && intoNames.includes(selection.name.value)))
-          sectionsToAdd.forEach(sectionName => {
-            const addedSelections: FragmentSpreadNode[] = (componentFragments.get(sectionName) ?? []).map(fragment => {
-              if (newSelections.some(selection => selection.kind == Kind.FRAGMENT_SPREAD && selection.name.value == fragment.name)) {
-                if (config.verbose)
-                  console.debug(`[ OPTIMIZELY ] Fragment ${fragment.name} is already adjacent to ${sectionName}`)
-                return undefined
-              }
-              /*if (config.verbose) 
-                  console.debug(`[ OPTIMIZELY ] Adding fragment ${ fragment.name.value } adjacent to ${ sectionName }`)*/
-              return {
-                kind: Kind.FRAGMENT_SPREAD,
-                directives: [],
-                name: {
-                  kind: Kind.NAME,
-                  value: fragment.name
-                }
-              } as FragmentSpreadNode
-            }).filter(isNotNullOrUndefined)
-            if (addedSelections.length > 0) {
-              if (config.verbose)
-                console.log(`[ OPTIMIZELY ] Added fragments ${addedSelections.map(a => a.name.value).join(', ')} adjacent to ${sectionName}`)
-              newSelections.push(...addedSelections)
-            }
-          })
-
-          if (newSelections.length == 0)
-            return
-
-          const newNode: SelectionSetNode = {
-            ...node,
-            selections: [...node.selections, ...newSelections]
+export function configureDocumentTransforms<
+  PresetConfig extends PresetOptions = PresetOptions,
+  PluginConfig = Record<string,unknown>,
+  OptionsType extends Partial<Types.PresetFnArgs<PresetConfig, PluginConfig>> = Types.PresetFnArgs<PresetConfig, PluginConfig>
+>(
+  options: OptionsType
+): Omit<OptionsType, 'documentTransforms'> & Required<Pick<Types.PresetFnArgs<PresetConfig, PluginConfig>, 'documentTransforms'>> {
+  const documentTransforms = options.documentTransforms ?? [];
+  if (documentTransforms.length === 0) {
+    const transforms = CmsTransforms.map((transformFn) => {
+      const transformName = getTransformerName(transformFn);
+      const transformObject: Types.ConfiguredDocumentTransform<PresetConfig> = {
+        name: transformName,
+        transformObject: {
+          transform: ({ documents, schema, config }) => {
+            const cfg = { ...options.presetConfig, ...config }
+            if (cfg.verbose)
+              console.log(`🛠️  [Optimizely] Running document transformer: ${ transformName }`)
+            return options.profiler ?
+              options.profiler.run(async () => {
+                return transformFn(documents, schema, cfg)
+              }, transformName, TransformProfilerCategory) :
+              transformFn(documents, schema, cfg)
           }
-          return newNode
-        }
-      }
-    }) : undefined
+        },
+        config: options.presetConfig
+      };
+      return transformObject as unknown as Types.ConfiguredDocumentTransform<object>;
+    });
 
-    return {
-      ...file,
-      document: document,
-    }
-  })
-
-  if (config.verbose)
-    console.debug(`[ OPTIMIZELY ] Finished transformation procedure`)
-  return transformedFiles
+    documentTransforms.unshift(...transforms);
+  }
+  
+  return {
+    ...options,
+    documentTransforms: documentTransforms
+  };
 }
 
-export default { transform }
-
-function isNotNullOrUndefined<T>(toTest?: T | null) {
-  return toTest !== null && toTest !== undefined
-}
-function isFragmentOrOperation(x: ASTNode | Readonly<ASTNode[]> | undefined | null): x is FragmentDefinitionNode | OperationDefinitionNode {
-  if (Array.isArray(x) || x == undefined || x == null)
-    return false
-  return (x as ASTNode).kind == Kind.FRAGMENT_DEFINITION || (x as ASTNode).kind == Kind.OPERATION_DEFINITION
+/**
+ * Execute an ordered list of `TransformFn` steps against a document set, passing
+ * the result of each step as the input to the next.
+ *
+ * @param files       The initial document set
+ * @param transforms  Ordered array of transform steps to apply
+ * @param options     Preset arguments forwarded to each step
+ * @returns           The fully-transformed document set
+ */
+export async function executeDocumentTransforms<T extends PresetOptions = PresetOptions>(files: Types.DocumentFile[], options: Types.PresetFnArgs<T>): Promise<Types.DocumentFile[]> {
+  let transformedFiles = [...files];
+  const { profiler, presetConfig, schema } = options;
+  
+  for (const transform of [...OptiCmsTransforms, ...CmsTransforms]) {
+    const transformName = getTransformerName(transform);
+    transformedFiles = profiler ?
+      await profiler.run(async () => await transform(transformedFiles, schema, presetConfig), transformName, TransformProfilerCategory) :
+      await transform(transformedFiles, schema, presetConfig);
+  }
+  return transformedFiles;
 }

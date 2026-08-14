@@ -1,11 +1,19 @@
 import type { Types } from '@graphql-codegen/plugin-helpers'
-import { parse } from 'graphql'
 import { DocumentGenerator, VirtualLocation } from '../generator'
 import * as OptiCMS from '../cms'
-import type { PresetOptions } from '../types'
-import { getAllFragments, getAllTypeNames } from "./tools"
 import { isNotNullOrUndefined } from '../utils'
 
+/**
+ * Build the list of custom document loader entries for all CMS-managed component
+ * content types. Each entry points to the `ContentTypeLoader` which generates the
+ * corresponding GraphQL fragment on demand.
+ *
+ * Property-typed component references are also included so their fragments are
+ * available when building parent fragments.
+ *
+ * @param loader  The loader module path passed to the codegen runner. Defaults to the
+ *                built-in `@remkoj/optimizely-graph-functions/contenttype-loader`.
+ */
 export async function getComponentDocuments(loader: string = '@remkoj/optimizely-graph-functions/contenttype-loader')
 {
   const componentTypes = await OptiCMS.getContentTypesList(undefined, (ct) => {
@@ -44,6 +52,13 @@ export async function getComponentDocuments(loader: string = '@remkoj/optimizely
   return documents;
 }
 
+/**
+ * Build the list of custom document loader entries for all known injection targets
+ * (e.g. `PageData`, `BlockData`, `ComponentData`). Each entry produces an empty
+ * placeholder fragment that component fragments are later injected into.
+ *
+ * @param loader  The loader module path. Defaults to the built-in `ContentTypeLoader`.
+ */
 export async function getInjectionTargetDocuments(loader: string = '@remkoj/optimizely-graph-functions/contenttype-loader')
 {
   const documents: Types.CustomDocumentLoader[] = [];
@@ -55,105 +70,3 @@ export async function getInjectionTargetDocuments(loader: string = '@remkoj/opti
   }
   return documents
 }
-
-export async function injectInjectionTargets(files: Types.DocumentFile[], options: Types.PresetFnArgs<PresetOptions>): Promise<Types.DocumentFile[]> {
-  const allFragments = getAllFragments(files)
-  const addedFiles: Types.DocumentFile[] = []
-
-  if (options.presetConfig.verbose)
-    console.log(`✨ [Optimizely] Generating injection target fragments`)
-
-  for (const injectionTarget of VirtualLocation.getInjectionTargets()) {
-    if (!allFragments.some(x => x.fragmentName === injectionTarget)) {
-      const vLoc = `opti-cms:/injectiontarget/${injectionTarget}`
-      const rawSDL = `fragment ${injectionTarget} on _IContent { ...IContentData }`
-      if (options.presetConfig.verbose)
-        console.log(`    - Generated fragment ${injectionTarget} at ${vLoc}`)
-      addedFiles.push({
-        rawSDL,
-        document: parse(rawSDL),
-        location: vLoc,
-        hash: vLoc
-      })
-    }
-  }
-
-  return [...files, ...addedFiles]
-}
-
-/**
- * Check all fragments within the project and ensure that there's at least a fragment for every
- * content type defined in Optimizely CMS. This assumes that when overriding the fragments the
- * project will ensure that the injections are correct.
- * 
- * @param files 
- * @param options 
- * @returns 
- */
-export async function injectComponentDocuments(files: Types.DocumentFile[], options: Types.PresetFnArgs<PresetOptions>): Promise<Types.DocumentFile[]> {
-  const allFragments = getAllFragments(files)
-  const allGraphTypes = getAllTypeNames(options.schema)
-  const addedFiles: Types.DocumentFile[] = []
-
-  if (options.presetConfig.verbose)
-    console.log(`✨ [Optimizely] Generating component fragments that have not been defined by the implementation`)
-
-  const allContentTypes = await OptiCMS.getContentTypes(options.presetConfig.cmsClient, (ct) => {
-    return ct.key && ct.source !== 'graph' ? true : false
-  });
-  const queryGen = new DocumentGenerator(allContentTypes);
-
-  const propTracker: Map<string,string> = new Map()
-
-  for (const [, contentType] of allContentTypes) {
-    // Skip over content types without a key
-    if (!contentType.key)
-      continue
-
-    // Construct the type names expected to be in Graph
-    const graphType = queryGen.getGraphType(contentType)
-    const graphPropertyType = queryGen.getGraphPropertyType(contentType)
-    const fragmentName = queryGen.getDefaultFragmentName(contentType);
-    const propertyFragmentName = queryGen.getDefaultPropertyFragmentName(contentType);
-
-    // Check if the types exist
-    const graphTypeExists = allGraphTypes.includes(graphType)
-    const graphPropertyTypeExists = allGraphTypes.includes(graphPropertyType)
-
-    // Add Component Data Fragment
-    if (graphTypeExists && !allFragments.has(fragmentName)) {
-      const rawSDL = queryGen.buildFragment(contentType, fragmentName, false, propTracker)
-      const vLoc = VirtualLocation.build(contentType)
-      if (rawSDL) {
-        if (options.presetConfig.verbose)
-          console.log(`    - Generated fragment ${fragmentName} for ${contentType.key} at ${vLoc}`)
-        addedFiles.push({
-          rawSDL,
-          document: parse(rawSDL),
-          location: vLoc,
-          hash: vLoc
-        })
-      }
-    }
-
-    // Add Component Property Data Fragment
-    if (graphPropertyTypeExists && contentType.baseType === '_component' && !allFragments.has(propertyFragmentName)) {
-      const rawSDL = queryGen.buildFragment(contentType, propertyFragmentName, true, propTracker)
-      const vLoc = VirtualLocation.build(contentType, { forProperty: true })
-      if (rawSDL) {
-        if (options.presetConfig.verbose)
-          console.log(`    - Generated property fragment ${propertyFragmentName} for ${contentType.key} at ${vLoc}`)
-        addedFiles.push({
-          rawSDL,
-          document: parse(rawSDL),
-          location: vLoc,
-          hash: vLoc
-        })
-      }
-    }
-  }
-
-  return [...files, ...addedFiles]
-}
-
-export default injectComponentDocuments

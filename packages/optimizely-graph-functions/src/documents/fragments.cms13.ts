@@ -83,7 +83,6 @@ export default [
                   ... on CompositionComponentNode {
                     component {
                       ...IContentData
-                      ...BlockData
                       ...ElementData
                     }
                   }
@@ -111,7 +110,8 @@ export default [
     }
   }
 }`,
-  `fragment _SectionCompositionData on _ISection {
+  `
+fragment _SectionCompositionData on _ISection {
   composition {
     ...CompositionNodeData
     nodes {
@@ -125,7 +125,6 @@ export default [
               ... on CompositionComponentNode {
                 component {
                   ...IContentData
-                  ...BlockData
                   ...ElementData
                 }
               }
@@ -147,17 +146,19 @@ export default [
     }
   }
 }`,
-  `fragment _CompositionStructureNode on ICompositionStructureNode {
+  `## @depricated
+fragment _CompositionStructureNode on ICompositionStructureNode {
   nodes {
     ...CompositionNodeData
     ...CompositionStructureNode
     ...CompositionComponentNode
   }
 }`,
-  `fragment _CompositionComponentNode on CompositionComponentNode {
+  `## @depricated
+fragment _CompositionComponentNode on CompositionComponentNode {
   component {
     ...IContentData
-    ...BlockData
+    ...ComponentData
     ...ElementData
     ...FormElementData
   }

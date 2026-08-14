@@ -1,34 +1,37 @@
 import type { Types } from '@graphql-codegen/plugin-helpers'
 import type { FragmentDefinitionNode } from 'graphql'
-import { visit, print } from 'graphql'
+import { visit, print, type DocumentNode } from 'graphql'
 import type { PresetOptions } from '../types'
+import { isOptiCmsURL } from '../generator/virtual-location'
 
 /**
- * Allows the SDK to define fragments starting with an "_", for which:
- * - If a fragment with the same name, without an "_" exists, will be removed
- * - If such a fragment does not exist, it will be renamed to without a "_"
- * 
- * @param files 
- * @param options 
- * @returns 
+ * Allows the SDK to define fragments starting with an `_`, for which:
+ * - If a fragment with the same name, without the `_`, exists, the SDK default is removed.
+ * - If no such override exists, the `_`-prefixed fragment is renamed to drop the prefix.
+ *
+ * This lets the SDK ship default built-in fragments while still allowing projects to
+ * override them by defining a fragment with the same name (without the `_`).
+ *
+ * @param files   The current document set
+ * @param options Preset arguments (verbose flag is read from `options.presetConfig`)
+ * @returns       Updated document set with internal fragment names resolved
  */
-export function normalizeFragmentNames(files: Types.DocumentFile[], options: Types.PresetFnArgs<PresetOptions>): Types.DocumentFile[] {
-  if (options.presetConfig.verbose)
-    console.log(`✨ [Optimizely] Making all internal fragments available, which have not be overridden by the project`)
+export function normalizeFragmentNames(files: Types.DocumentFile[], schema: DocumentNode, options: PresetOptions): Types.DocumentFile[] {
   // Filter & rename fragments
-  const allFragmentNames = files.reduce<string[]>((list, file) => {
+  const allFragmentNames = files.reduce<{fragment: string, location: string|undefined}[]>((list, file) => {
     if (file.document) visit(file.document, {
       FragmentDefinition: {
         enter(node) {
-          list.push(node.name.value)
+          list.push({fragment: node.name.value, location: file.location})
         }
       }
     })
     return list
   }, [])
-  const operations = allFragmentNames.reduce<{ toRename: string[], toRemove: string[] }>((prev, fragmentName) => {
-    if (fragmentName.startsWith('_')) {
-      if (allFragmentNames.includes(fragmentName.substring(1))) {
+  const operations = allFragmentNames.reduce<{ toRename: string[], toRemove: string[] }>((prev, fragment) => {
+    const { fragment: fragmentName, location } = fragment;
+    if (fragmentName.startsWith('_') && isOptiCmsURL(location)) {
+      if (allFragmentNames.find(x => x.fragment === fragmentName.substring(1))) {
         prev.toRemove.push(fragmentName)
       } else {
         prev.toRename.push(fragmentName)
@@ -36,23 +39,24 @@ export function normalizeFragmentNames(files: Types.DocumentFile[], options: Typ
     }
     return prev
   }, { toRename: [], toRemove: [] })
-  if (options.presetConfig.verbose)
-    console.log(`✨ [Optimizely] Identified ${ operations.toRemove.length } fragments to remove (${ operations.toRemove.join(", ") }) and ${ operations.toRename.length } fragments to rename`);
+  
   const filteredFiles: Types.DocumentFile[] = files.map(file => {
+    if (!file.document)
+      return file;
     let isModified = false;
-    const newDocument = file.document ? visit(file.document, {
+    const newDocument = visit(file.document, {
       FragmentDefinition: {
         enter(node) {
           const nodeName = node.name.value
           if (operations.toRemove.includes(nodeName)) {
-            if (options.presetConfig.verbose)
-              console.log(`  ⚠ Removing default fragment ${node.name.value.substring(1)} from the documents as it has been overridden.`)
+            //if (options.verbose)
+            //  console.log(`  ⚠ Removing default fragment ${node.name.value.substring(1)} from the documents as it has been overridden.`)
             isModified = true
             return null
           }
           if (operations.toRename.includes(nodeName)) {
-            if (options.presetConfig.verbose)
-              console.log(`  ⚠ Making default fragment ${node.name.value.substring(1)} available as it has not been overridden.`)
+            //if (options.verbose)
+            //  console.log(`  ⚠ Making default fragment ${node.name.value.substring(1)} available as it has not been overridden.`)
             isModified = true
             return {
               ...node,
@@ -64,12 +68,19 @@ export function normalizeFragmentNames(files: Types.DocumentFile[], options: Typ
           }
         }
       }
-    }) : undefined
+    })
     return isModified ? {
       ...file,
-      rawSDL: newDocument ? print(newDocument) : undefined,
+      rawSDL: print(newDocument),
       document: newDocument
-    } as Types.DocumentFile : file
+    } : file
   })
+
+  if (options.verbose) {
+    console.log(`✅ [Optimizely] Identified ${ operations.toRemove.length } overridden fragments, keeping ${ operations.toRename.length } built-in fragments`);
+    if (operations.toRemove.length > 0)
+      console.log(`                Overridden fragments: ${ operations.toRemove.map(x => x.startsWith('_') ? x.substring(1) : x).join(", ") }`)
+  }
+
   return filteredFiles
 }

@@ -1,14 +1,23 @@
 import type { Types } from '@graphql-codegen/plugin-helpers'
-import { Kind, visit, parse, type DocumentNode } from 'graphql'
+import { Kind, visit, type DocumentNode, type FragmentDefinitionNode, type ASTNode, type OperationDefinitionNode } from 'graphql'
 
+/** An array of `Types.DocumentFile` items representing the full document set being transformed. */
 export type DocumentSet = Types.DocumentFile[]
 
+/** Metadata extracted from a single fragment definition. */
 export type FragmentMetaData = {
   fragmentName: string,
   targetType: string,
   location?: string
 }
 
+/**
+ * A typed array of `FragmentMetaData` items extended with convenience lookup methods:
+ * - `get(fragmentName)` — find by fragment name
+ * - `has(fragmentName)` — check existence by fragment name
+ * - `hasForType(targetType)` — check if any fragment targets the given type
+ * - `forType(targetType)` — filter to fragments targeting the given type
+ */
 export type FragmentMetaDataList = Array<FragmentMetaData> & {
   get(targetType: string): FragmentMetaData | undefined
   has(targetType: string): boolean
@@ -53,12 +62,20 @@ export function getAllFragments(files: DocumentSet): FragmentMetaDataList {
   return createFragmentMetaDataList(fragmentList)
 }
 
+/** Metadata extracted from a single query operation definition. */
 export type QueryMetaData = {
   queryName: string,
   targetTypes: Array<string>,
   location?: string
 }
 
+/**
+ * A typed array of `QueryMetaData` items extended with convenience lookup methods:
+ * - `get(queryName)` — find by query name
+ * - `has(queryName)` — check existence by query name
+ * - `hasForType(targetType)` — check if any query selects the given type
+ * - `forType(targetType)` — filter to queries that select the given type
+ */
 export type QueryMetaDataList = Array<QueryMetaData> & {
   get(queryName: string): QueryMetaData | undefined
   has(queryName: string): boolean
@@ -86,10 +103,10 @@ function createQueryMetaDataList(initialItems?: Array<QueryMetaData>): QueryMeta
 }
 
 /**
- * Retrieve the metadata from all queries that are defined in the provided DocumentSet
- * 
- * @param files 
- * @returns 
+ * Retrieve the metadata from all queries that are defined in the provided `DocumentSet`.
+ *
+ * @param files  The document set to scan
+ * @returns      A `QueryMetaDataList` with all discovered query definitions
  */
 export function getAllQueries(files: DocumentSet): QueryMetaDataList {
   const queryList = files.reduce<Array<QueryMetaData>>((list, file) => {
@@ -115,6 +132,12 @@ export function getAllQueries(files: DocumentSet): QueryMetaDataList {
   return createQueryMetaDataList(queryList)
 }
 
+/**
+ * Collect every object and interface type name declared in the given schema document.
+ *
+ * @param schema  The parsed schema `DocumentNode`
+ * @returns       Flat list of all object and interface type names
+ */
 export function getAllTypeNames(schema: DocumentNode): string[] {
   const names: string[] = [];
   visit(schema, {
@@ -130,4 +153,17 @@ export function getAllTypeNames(schema: DocumentNode): string[] {
     }
   })
   return names
+}
+
+export function isFragmentOrOperation(x: ASTNode | Readonly<ASTNode[]> | undefined | null): x is FragmentDefinitionNode | OperationDefinitionNode {
+  if (x == undefined || x == null)
+    return false
+  if (Array.isArray(x))
+    return x.some((y: ASTNode) => y.kind === Kind.FRAGMENT_DEFINITION || y.kind === Kind.OPERATION_DEFINITION);
+  return (x as ASTNode).kind === Kind.FRAGMENT_DEFINITION || (x as ASTNode).kind === Kind.OPERATION_DEFINITION;
+}
+
+export function flatten<T>(x: T | ReadonlyArray<T> | Array<T> | Array<Readonly<T>> | Readonly<T>): ReadonlyArray<Readonly<T>>
+{
+  return Array.isArray(x) ? x : ([x] as ReadonlyArray<Readonly<T>>);
 }

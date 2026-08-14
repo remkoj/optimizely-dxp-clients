@@ -22,7 +22,7 @@ export const query = gql`query GetAllRoutes($skip: Int = 0, $pageSize: Int = 100
   Content: _Page(
     where: {
       _metadata: {
-        url: { default: { exist: true }, base: { eq: $domain, exist: $mustHaveDomain } }
+        url: { default: { exist: true }, base: { endsWith: $domain, exist: $mustHaveDomain } }
         types: { in: $typeFilter }
         changeset: { eq: $changeset }
         status: { eq: "Published" }

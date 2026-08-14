@@ -19,7 +19,6 @@ export default [
         total
         items: item {
           ...IContentData
-          ...BlockData
           ...PageData
           ...ElementData
           ...ComponentData

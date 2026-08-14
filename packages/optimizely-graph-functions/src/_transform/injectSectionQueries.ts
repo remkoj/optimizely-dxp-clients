@@ -1,11 +1,14 @@
 import type { Types } from '@graphql-codegen/plugin-helpers'
-import { parse } from 'graphql'
-
 import * as OptiCMS from '../cms'
-import type { PresetOptions } from '../types'
-import { getAllFragments, getAllQueries, getAllTypeNames } from './tools'
-import { VirtualLocation, DocumentGenerator } from '../generator'
+import { VirtualLocation } from '../generator'
 
+/**
+ * Build the list of custom document loader entries for all CMS-managed section
+ * content types. Sections get both a get-query and a data fragment entry so
+ * they can be used as standalone pages and as composition nodes.
+ *
+ * @param loader  The loader module path. Defaults to the built-in `ContentTypeLoader`.
+ */
 export async function getSectionDocuments(loader: string = '@remkoj/optimizely-graph-functions/contenttype-loader')
 {
   const sectionTypes = OptiCMS.getContentTypesList(undefined, (ct) => {
@@ -31,77 +34,3 @@ export async function getSectionDocuments(loader: string = '@remkoj/optimizely-g
   }
   return documents;
 }
-
-export async function injectSectionQueries(files: Types.DocumentFile[], options: Types.PresetFnArgs<PresetOptions>): Promise<Types.DocumentFile[]> {
-  if (options.presetConfig.verbose)
-    console.log(`✨ [Optimizely] Generating section queries that have not been defined by the implementation`)
-
-  const existingQueries = getAllQueries(files)
-  const existingFragments = getAllFragments(files)
-  const existingTypes = getAllTypeNames(options.schema)
-
-  const allTypes = OptiCMS.getContentTypes(undefined)
-  const sectionTypes = OptiCMS.getContentTypesList(undefined, (ct) => {
-    if (ct.source == "graph")
-      return false;
-    return ["_section"].includes((ct.baseType || "").toLowerCase());
-  });
-
-  const newFiles: Types.DocumentFile[] = []
-  const queryGen = new DocumentGenerator(await allTypes)
-  for (const sectionContentType of await sectionTypes) {
-    const graphDataType = queryGen.getGraphType(sectionContentType)
-    const queryName = queryGen.getDefaultQueryName(sectionContentType);
-    const fragmentName = queryGen.getDefaultFragmentName(sectionContentType);
-
-    // Check if the type exists in the Schema, if not skip it
-    if (!existingTypes.includes(graphDataType)) {
-      if (options.presetConfig.verbose)
-        console.log(`    - Skipping query generation for ${sectionContentType.key}, the schema does not contain the type ${graphDataType}`)
-      continue
-    }
-
-    // Check if the query has already been defined, if so skip it
-    if (existingQueries.has(queryName)) {
-      if (options.presetConfig.verbose)
-        console.log(`    - Skipping query generation for ${sectionContentType.key}, the project already includes a definition for ${queryName}`)
-
-    // Add Query
-    } else {  
-      const rawSDL = queryGen.buildGetQuery(sectionContentType, queryName)
-      const vLoc = VirtualLocation.build(sectionContentType, { type: 'query' })
-      if (options.presetConfig.verbose)
-        console.log(`    - Generated query for ${sectionContentType.key} at ${vLoc}`)
-
-      newFiles.push({
-        rawSDL,
-        document: parse(rawSDL),
-        location: vLoc,
-        hash: vLoc
-      })
-    }
-
-    if (existingFragments.has(fragmentName)) {
-      if (options.presetConfig.verbose)
-        console.log(`    - Skipping fragment generation for ${sectionContentType.key}, the project already includes a definition for ${fragmentName}`)
-
-    // Add Fragment
-    } else{  
-      const rawSDL = queryGen.buildFragment(sectionContentType)
-      const vLoc = VirtualLocation.build(sectionContentType, { type: 'fragment' })
-      if (options.presetConfig.verbose)
-        console.log(`    - Generated fragment for ${sectionContentType.key} at ${vLoc}`)
-
-      newFiles.push({
-        rawSDL,
-        document: parse(rawSDL),
-        location: vLoc,
-        hash: vLoc
-      })
-    }
-  }
-
-  return [...files, ...newFiles]
-}
-
-export default injectSectionQueries

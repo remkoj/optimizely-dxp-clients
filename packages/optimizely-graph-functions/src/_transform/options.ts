@@ -1,5 +1,6 @@
 import type { TransformOptions } from "../types"
 
+/** Default values applied when `TransformOptions` properties are absent. */
 export const defaultOptions: Readonly<Required<TransformOptions>> = {
   injections: [],
   verbose: false,
@@ -8,6 +9,10 @@ export const defaultOptions: Readonly<Required<TransformOptions>> = {
   cmsClient: {}
 }
 
+/**
+ * Extract `TransformOptions`-relevant properties from a raw options object,
+ * merging them with `defaultOptions`.
+ */
 export function pickTransformOptions(options: Record<string, any>): Readonly<Required<TransformOptions>> {
   return {
     cleanup: options.cleanup ?? true,

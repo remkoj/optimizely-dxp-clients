@@ -3,10 +3,7 @@ import {
   visit,
   print,
   Kind,
-  type FragmentDefinitionNode,
-  type ASTNode,
   type DocumentNode,
-  type OperationDefinitionNode,
   type ArgumentNode,
   type Location,
   FieldNode,
@@ -22,18 +19,9 @@ import type { PresetOptions } from '../types'
  */
 export async function handleDependDirective(
   files: Types.DocumentFile[],
-  options: Types.PresetFnArgs<PresetOptions>
+  schema: DocumentNode,
+  options: PresetOptions
 ): Promise<Types.DocumentFile[]> {
-  // Debug output
-  if (options.presetConfig.verbose)
-    console.log(
-      `✨ [Optimizely] Checking ContentReference to determine if it has an "item" field`
-    )
-
-  // Ouch, this is an old SaaS CMS instance, so we're going to clean this field
-  if (options.presetConfig.verbose)
-    console.log(`✨ [Optimizely] Nope it hasn't removing any reference to it`)
-
   const filteredFiles: Types.DocumentFile[] = files.map((file) => {
     let isModified = false
     const newDocument = file.document ? visit(file.document, {
@@ -42,6 +30,7 @@ export async function handleDependDirective(
           // Check if the field has the `depend` directive
           const dependDirective = node.directives?.find(x => x.name.value === 'depend')
           if (dependDirective) {
+
             // If so read the arguments and validate if the required "on" argument is there
             const args = parseArgs(dependDirective.arguments)
             const dependency = args.get('on')
@@ -54,9 +43,11 @@ export async function handleDependDirective(
               throw new Error(`The "on" parameter of the "@depend" directive must have the form "typeName.fieldName" ${ buildLocString(dependDirective)}`)
 
             // Retrieve the type fields
-            const fields = getObjectFieldNames(options.schema, typeName);
+            const fields = getObjectFieldNames(schema, typeName);
             isModified = true;
             if (!(fields?.includes(fieldName) ?? false)) {
+              if (options.verbose)
+                console.log(`❌ [Optimizely] Removing field ${ node.name.value } due to the ${ fieldName } not being present on ${ typeName }`);
               return null // Remove the item
             } else {
               const newNode : FieldNode = {
@@ -86,6 +77,7 @@ type WithLocation = {
   loc?: Location
 }
 
+/** Build a human-readable source location string from a node's `loc` property for error messages. */
 function buildLocString(node: WithLocation) : string
 {
   if (!node.loc)
@@ -97,7 +89,8 @@ function buildLocString(node: WithLocation) : string
   return `in ${ sourceName } at line ${ startLine }, position ${ startChar }`
 }
 
-function parseArgs(args?: readonly ArgumentNode[]) : Map<string,any>
+/** Parse a directive's arguments into a `Map<name, value>`, converting GraphQL scalar kinds to JS primitives. */
+function parseArgs(args?: readonly ArgumentNode[]) : Map<string,unknown>
 {
   return args?.reduce((out, arg) => {
     const argName = arg.name.value
@@ -115,21 +108,19 @@ function parseArgs(args?: readonly ArgumentNode[]) : Map<string,any>
         throw new Error(`Error parsing directive arguments, encountered unsupported argument kind ${ arg.value.kind } for ${ argName } ${ buildLocString(arg) }`)
     }
     return out
-  }, new Map<string,any>()) ?? new Map<string,any>();
+  }, new Map<string,unknown>()) ?? new Map<string,unknown>();
 }
 
+/** Return all field names declared on the object type named `objectName` in the schema, or `undefined` when the type is absent. */
 function getObjectFieldNames(
   schema: DocumentNode,
   objectName: string
 ): string[] | undefined {
   let currentObjectName: string | undefined
   const objectFields: string[] = []
-  let hasType: boolean = false
   visit(schema, {
     ObjectTypeDefinition: {
       enter(node) {
-        if (node.name.value === objectName)
-          hasType = true;
         currentObjectName = node.name.value
       },
       leave(node) {
@@ -143,22 +134,4 @@ function getObjectFieldNames(
     },
   })
   return objectFields
-}
-
-function isASTNode(node: ASTNode | readonly ASTNode[]) : node is ASTNode
-{
-  return !Array.isArray(node)
-}
-
-function isNotNullOrUndefined<T>(toTest?: T | null) {
-  return toTest !== null && toTest !== undefined
-}
-function isFragmentOrOperation(
-  x: ASTNode | Readonly<ASTNode[]> | undefined | null
-): x is FragmentDefinitionNode | OperationDefinitionNode {
-  if (Array.isArray(x) || x == undefined || x == null) return false
-  return (
-    (x as ASTNode).kind == Kind.FRAGMENT_DEFINITION ||
-    (x as ASTNode).kind == Kind.OPERATION_DEFINITION
-  )
 }

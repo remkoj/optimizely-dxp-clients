@@ -13,7 +13,7 @@ export type LookupResponse = [
   ContentLinkWithLocale,
   string[],
   string,
-  Record<string, any> | null,
+  Record<string, unknown> | null,
 ]
 
 export function getChannelId(client: IOptiGraphClient, channel?: ChannelDefinition | string) {
@@ -26,6 +26,6 @@ export function getChannelId(client: IOptiGraphClient, channel?: ChannelDefiniti
     : channel.getPrimaryDomain().origin
 }
 
-function isString(toTest: any): toTest is string {
+function isString(toTest: unknown): toTest is string {
   return typeof toTest === 'string';
 }

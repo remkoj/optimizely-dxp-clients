@@ -18,29 +18,31 @@
     "@remkoj/optimizely-cms-nextjs": "6.0.0",
     "@remkoj/optimizely-cms-react": "6.0.0",
     "@remkoj/optimizely-graph-client": "6.0.0",
+    "@remkoj/optimizely-one-nextjs": "6.0.0",
     "graphql-request": "^7.4.0",
-    "next": "^16.2.10",
-    "react": "^19.2.7",
-    "react-dom": "^19.2.7"
+    "next": "^16.3.0",
+    "react": "^19.2.8",
+    "react-dom": "^19.2.8"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3.3.6",
     "@graphql-codegen/cli": "7.2.0",
-    "@next/env": "^16.2.10",
+    "@next/env": "^16.3.0",
     "@remkoj/optimizely-cms-cli": "6.0.0",
     "@remkoj/optimizely-graph-cli": "6.0.0",
     "@remkoj/optimizely-graph-functions": "6.0.0",
     "@stylistic/eslint-plugin": "^5.10.0",
+    "@swc-contrib/plugin-graphql-codegen-client-preset": "^0.31.0",
     "@types/node": "^24.13.3",
-    "@types/react": "^19.2.17",
-    "@types/react-dom": "^19.2.3",
+    "@types/react": "^19.2.18",
+    "@types/react-dom": "^19.2.4",
     "eslint": "^9.39.5",
-    "eslint-config-next": "16.2.10",
+    "eslint-config-next": "16.3.0",
     "graphql": "^16.14.2",
     "typescript": "5.9.3"
   },
   "resolutions": {
-    "@graphql-codegen/visitor-plugin-common": "file:../../dependencies/graphql-codegen-visitor-plugin-common-v7.1.0-patched.tgz",
+    "@graphql-codegen/visitor-plugin-common": "file:../../dependencies/graphql-codegen-visitor-plugin-common-v7.2.4-patched.tgz",
     "@remkoj/optimizely-cms-api": "file:../../packages/optimizely-cms-api",
     "@remkoj/optimizely-cms-react": "file:../../packages/optimizely-cms-react",
     "@remkoj/optimizely-cms-nextjs": "file:../../packages/optimizely-cms-nextjs",
@@ -48,7 +50,8 @@
     "@remkoj/optimizely-graph-functions": "file:../../packages/optimizely-graph-functions",
     "@remkoj/optimizely-cms-cli": "file:../../packages/optimizely-cms-cli",
     "@remkoj/optimizely-graph-cli": "file:../../packages/optimizely-graph-cli",
+    "@remkoj/optimizely-one-nextjs": "file:../../packages/optimizely-one-nextjs",
     "@remkoj/hey-api-wrapper": "file:../../packages/hey-api-wrapper"
   },
-  "packageManager": "yarn@4.17.1"
+  "packageManager": "yarn@4.18.0"
 }

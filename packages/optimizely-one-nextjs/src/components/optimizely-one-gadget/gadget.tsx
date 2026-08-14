@@ -52,7 +52,7 @@ const Panels: PanelList = [
         as="div"
         className="oo:text-center oo:inline-block oo:cursor-pointer oo:px-2 oo:py-1 oo:border oo:border-b-0  oo:border-slate-300 oo:rounded-t-md oo:data-selected:bg-blue-500 oo:data-selected:text-white"
       >
-        <IdentificationIcon className="oo:inline-block oo:h-[1.25em] oo:w-[1.25em] oo:mr-[0.25em]" />
+        <IdentificationIcon className="oo:inline-block oo:h-[1em] oo:w-[1em] oo:mr-[0.25em]" />
         Profile
       </Tab>
     ),
@@ -66,7 +66,7 @@ const Panels: PanelList = [
         as="div"
         className="oo:text-center oo:inline-block oo:cursor-pointer oo:px-2 oo:py-1 oo:border oo:border-b-0  oo:border-slate-300 oo:rounded-t-md oo:data-selected:bg-blue-500 oo:data-selected:text-white"
       >
-        <TagIcon className="oo:inline-block oo:h-[1.25em] oo:w-[1.25em] oo:mr-[0.25em]" />
+        <TagIcon className="oo:inline-block oo:h-[1em] oo:w-[1em] oo:mr-[0.25em]" />
         Interests
       </Tab>
     ),
@@ -80,7 +80,7 @@ const Panels: PanelList = [
         as="div"
         className="oo:text-center oo:inline-block oo:cursor-pointer oo:px-2 oo:py-1 oo:border oo:border-b-0  oo:border-slate-300 oo:rounded-t-md oo:data-selected:bg-blue-500 oo:data-selected:text-white"
       >
-        <TrophyIcon className="oo:inline-block oo:h-[1.25em] oo:w-[1.25em] oo:mr-[0.25em]" />
+        <TrophyIcon className="oo:inline-block oo:h-[1em] oo:w-[1em] oo:mr-[0.25em]" />
         Goals
       </Tab>
     ),
@@ -94,7 +94,7 @@ const Panels: PanelList = [
         as="div"
         className="oo:text-center oo:inline-block oo:cursor-pointer oo:px-2 oo:py-1 oo:border oo:border-b-0  oo:border-slate-300 oo:rounded-t-md oo:data-selected:bg-blue-500 oo:data-selected:text-white"
       >
-        <UserGroupIcon className="oo:inline-block oo:h-[1.25em] oo:w-[1.25em] oo:mr-[0.25em]" />
+        <UserGroupIcon className="oo:inline-block oo:h-[1em] oo:w-[1em] oo:mr-[0.25em]" />
         Audiences
       </Tab>
     ),
@@ -108,7 +108,7 @@ const Panels: PanelList = [
         as="div"
         className="oo:text-center oo:inline-block oo:cursor-pointer oo:px-2 oo:py-1 oo:border oo:border-b-0  oo:border-slate-300 oo:rounded-t-md oo:data-selected:bg-blue-500 oo:data-selected:text-white"
       >
-        <RocketLaunchIcon className="oo:inline-block oo:h-[1.25em] oo:w-[1.25em] oo:mr-[0.25em]" />
+        <RocketLaunchIcon className="oo:inline-block oo:h-[1em] oo:w-[1em] oo:mr-[0.25em]" />
         Experiments
       </Tab>
     ),
@@ -122,7 +122,7 @@ const Panels: PanelList = [
         as="div"
         className="oo:text-center oo:inline-block oo:cursor-pointer oo:px-2 oo:py-1 oo:border oo:border-b-0  oo:border-slate-300 oo:rounded-t-md oo:data-selected:bg-blue-500 oo:data-selected:text-white"
       >
-        <FingerPrintIcon className="oo:inline-block oo:h-[1.25em] oo:w-[1.25em] oo:mr-[0.25em]" />
+        <FingerPrintIcon className="oo:inline-block oo:h-[1em] oo:w-[1em] oo:mr-[0.25em]" />
         Identifiers
       </Tab>
     ),
@@ -136,7 +136,7 @@ const Panels: PanelList = [
         as="div"
         className="oo:text-center oo:inline-block oo:cursor-pointer oo:px-2 oo:py-1 oo:border oo:border-b-0  oo:border-slate-300 oo:rounded-t-md oo:data-selected:bg-blue-500 oo:data-selected:text-white"
       >
-        <Square3Stack3DIcon className="oo:inline-block oo:h-[1.25em] oo:w-[1.25em] oo:mr-[0.25em]" />
+        <Square3Stack3DIcon className="oo:inline-block oo:h-[1em] oo:w-[1em] oo:mr-[0.25em]" />
         Graph
       </Tab>
     ),
@@ -230,14 +230,14 @@ export const OptimizelyOneGadget: FunctionComponent<
   if (forceHidden || (!forceShown && !inTestMode)) return <></>
 
   return (
-    <Popover className="oo:md:fixed oo:md:bottom-0 oo:z-[500]">
-      <PopoverButton className="oo:fixed oo:bottom-0 oo:right-0 oo:w-full oo:h-[50px] oo:flex oo:flex-row oo:justify-between oo:border-t oo:border-slate-500 oo:bg-slate-100 oo:text-slate-800 oo:md:w-[350px] oo:md:right-4 oo:md:rounded-t-md oo:md:border-x oo:z-[500] oo:p-[10px] oo:dark:text-slate-800">
+    <Popover className="oo:md:fixed oo:md:bottom-0 oo:z-500 oo:font-sans oo:text-[10px]">
+      <PopoverButton className="oo:fixed oo:bottom-0 oo:right-0 oo:w-full oo:h-[50px] oo:flex oo:flex-row oo:justify-between oo:border-t oo:border-slate-500 oo:bg-slate-100 oo:text-slate-800 oo:md:w-[350px] oo:md:right-4 oo:md:rounded-t-md oo:md:border-x oo:z-[500] oo:p-[10px] oo:dark:text-slate-800 oo:m-0 oo:cursor-pointer oo:border-b-0">
         <OptiLogo className="oo:w-auto oo:h-full" />
         <ChevronUpIcon className="oo:data-open:rotate-180 oo:data-open:transform oo:h-full oo:w-auto oo:inline-block" />
       </PopoverButton>
       <PopoverPanel className="oo:text-[14px] oo:fixed oo:bottom-[50px] oo:right-0 oo:w-full oo:top-0 oo:md:border oo:md:border-slate-300 oo:bg-white oo:md:right-4 oo:md:bottom-[55px] oo:md:w-[800px] oo:z-[501] oo:max-w-full oo:flex oo:flex-col oo:justify-stretch oo:md:h-[350px] oo:md:top-auto oo:md:rounded-md oo:md:shadow-xl oo:md:overflow-hidden oo:text-slate-800 oo:dark:text-slate-800">
-        <div className="oo:text-[18px] oo:border-b oo:border-slate-300 oo:bg-slate-100 oo:text-slate-800 oo:font-bold oo:p-1 oo:flex-none oo:md:p-2">
-          <IdentificationIcon className="oo:inline-block oo:h-[1.5em] oo:w-[1.5em] oo:mr-[0.5em] oo:text-blue-500" />
+        <div className="oo:text-[18px] oo:border-b oo:border-slate-300 oo:bg-slate-100 oo:text-slate-800 oo:font-bold oo:p-1 oo:flex-none oo:md:p-2 oo:m-0">
+          <IdentificationIcon className="oo:inline-block oo:h-[1.0em] oo:w-[1.0em] oo:mr-[0.5em] oo:text-blue-500" />
           My Profile
         </div>
         <TabGroup as={Fragment}>

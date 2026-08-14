@@ -4,6 +4,11 @@ import { getSdk } from './gql/client';
 import { factory } from './components/factory';
 
 /**
+ * The channel identifier to use when loading content.
+ */
+export const channelId = process.env.CHANNEL_ID || undefined;
+
+/**
  * The always readonly, published content client that can be used in locations
  * that do not depend on the current request/authorization, for example custom
  * routes, APIs and Layouts.

@@ -79,11 +79,19 @@ export class PropertyCollisionTracker extends Map<string,string> {
     return typeof(v.propertyName) === 'string' && typeof(v.propertyType) ==='string'
   }
 
+  /**
+   * Overrides `Map.has` to enforce that the tracker is initialised before use.
+   * Throws when `cwd` has not been set.
+   */
   has(key: string): boolean {
     this.ensureReady()
     return super.has(key)
   }
 
+  /**
+   * Overrides `Map.set` to persist the lock file whenever a new or changed entry is written.
+   * Throws when `cwd` has not been set.
+   */
   set(key: string, value: string): this {
     this.ensureReady()
     const cv = super.get(key)
@@ -94,6 +102,10 @@ export class PropertyCollisionTracker extends Map<string,string> {
     return this
   }
 
+  /**
+   * Overrides `Map.get` to enforce that the tracker is initialised before use.
+   * Throws when `cwd` has not been set.
+   */
   get(key: string): string | undefined {
     this.ensureReady()
     return super.get(key)

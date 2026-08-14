@@ -1,8 +1,4 @@
 # Optimizely GraphQL Codegen Plugin  <!-- omit in toc -->
-
-> [!WARNING]
-> There'll be an update of Optimizely SaaS CMS that is incompatible with all SDK versions prior to 5.1.6. If you don't upgrade, you will see empty pages (main website) and "Component not found" messages (preview).
-
 GraphQL Codegen plugin and preset which generate both the GraphQL type definitions and a few convenienece methods for useage with [Optimizely Graph Client](../optimizely-graph-client/README.md).
 
 [Release notes](https://github.com/remkoj/optimizely-dxp-clients/releases)
@@ -42,92 +38,59 @@ yarn opti-graph patches:apply
 Create a codegen.ts within your application root folder (e.g. apps/frontend/codegen.ts within the example site). Within the codegen.ts create the following configuration:
 
 ```typescript
-import type { CodegenConfig  } from '@graphql-codegen/cli'
+import type { CodegenConfig } from '@graphql-codegen/cli'
 import getSchemaInfo from '@remkoj/optimizely-graph-client/codegen'
-import OptimizelyGraphPreset, {type PresetOptions as OptimizelyGraphPresetOptions}  from '@remkoj/optimizely-graph-functions/preset'
+import { OptimizelyGraphPreset } from '@remkoj/optimizely-graph-functions/preset'
 
-// This example assumes the configuration can be read from the environment variables, make sure .env files (if you use them) are processed prior to invoking getSchemaInfo()
-
-// Create the configuration itself
 const config: CodegenConfig = {
-    schema: getSchemaInfo(),
-    documents: [
-        // Add local GQL files
-        'src/**/*.graphql',
-
-        // Add Definitions from components
-        'src/**/!(*.d).{ts,tsx}'
-    ],
-    generates: {
-        './src/gql/': {
-            preset: OptimizelyGraphPreset,
-            presetConfig: {
-                // By default the preset will not support recursive queries, 
-                // however if your content model requires it, you can enable
-                // it here.
-                //
-                // When setting recursion to `true` it requires additional
-                // steps to work
-                recursion: false,
-
-                // The GQL tag to be used to identify inline GraphQL queries
-                gqlTagName: 'gql',
-
-                // Configure the fragments that will be spread into the utility
-                // partial fragments. You can use any fragment here, however 
-                // the system is designed for the following receiving 
-                // fragments:
-                // - PageData => For all page-level components
-                // - BlockData => For everyting that can be rendered as
-                //                individual component
-                // - ElementData => For all element types that are useable
-                //                  within Visual Builder
-                injections: [
-                    {
-                        // Add from all Pages, as .page.graphql file
-                        into: "PageData",
-                        pathRegex: "src\/components\/cms\/.*\.page\.graphql$"
-                    },
-                    {
-                        // Add from all Experiences, as .experience.graphql file
-                        into: "PageData",
-                        pathRegex: "src\/components\/cms\/.*\.experience\.graphql$"
-                    },
-                    {
-                        // Add from all Blocks, as .component.graphql file
-                        into: "BlockData",
-                        pathRegex: "src\/components\/cms\/.*\.component\.graphql$"
-                    },
-                    {
-                        // Add from all Elements, as .element.graphql file
-                        into: "ElementData",
-                        pathRegex: "src\/components\/cms\/.*\.element\.graphql$"
-                    }
-                ],
-            } as OptimizelyGraphPresetOptions
-        }
-    },
-    ignoreNoDocuments: false
+  schema: getSchemaInfo(),
+  documents: [
+    'src/app/**/*.graphql',
+    'src/components/cms/**/*.graphql',
+    'src/app/**/*.(ts|tsx)',
+    'src/components/cms/**/*.(ts|tsx)',
+  ],
+  ignoreNoDocuments: true,
+  allowPartialOutputs: true,
+  generates: {
+    'src/gql/': OptimizelyGraphPreset.createOutputConfig({
+      gqlTagName: 'graphql',
+      recursion: true,
+      injections: [
+        { into: 'PageData',      pathRegex: 'src\/components\/cms\/.*\.page\.graphql$' },
+        { into: 'PageData',      pathRegex: 'src\/components\/cms\/.*\.experience\.graphql$' },
+        { into: 'ComponentData', pathRegex: 'src\/components\/cms\/.*\.block\.graphql$' },
+        { into: 'ComponentData', pathRegex: 'src\/components\/cms\/.*\.component\.graphql$' },
+        { into: 'ComponentData', pathRegex: 'src\/components\/cms\/.*\.section\.graphql$' },
+        { into: 'ElementData',   pathRegex: 'src\/components\/cms\/.*\.element\.graphql$' },
+      ],
+    }),
+  },
 }
 
 export default config
 ```
 
-The presetConfig of the `OptimizelyGraphPreset` is an extension of the configuration for the [Client Preset](https://the-guild.dev/graphql/codegen/plugins/presets/preset-client) of GraphQL Codegen. It adds the following configuration options:
+`OptimizelyGraphPreset.createOutputConfig()` is the recommended API — it wires up document transforms automatically. The options it accepts extend the [Client Preset](https://the-guild.dev/graphql/codegen/plugins/presets/preset-client) configuration with:
 
-| Configuration option | Usage |
-| --- | --- |
-| recursion | Set to `true` to automatically generate recursive queries to iterate down the result.<br><br>The default logic of GraphQL Codegen contains an infite loop when disabling the recursion check. To patch this, a custom resolution must be added to the root `package.json`. This resolution must set the resolution for `@graphql-codegen/visitor-plugin-common` to the patched file [provided within this repository](../../dependencies/graphql-codegen-visitor-plugin-common-v5.6.0-patched.tgz)<br/><br/>A Convenience script: `yarn patch-codegen` is available to apply these transformations automatically |
-| injections | A set of rules to define how individual fragments will be used to construct the master queries. Each rule has the following options: <br/>- `into`:  The name of the Fragment to inject into<br/>- `pathRegex`: The regular expression to be applied ot the file name to see if the fragment should be included with the `into` Fragment<br/>- `nameRegex`: The regular expression to be applied to the name of the Fragment
-| documents | The standard rules for preset specific documents, however there are four standard documents available:<br/>- `opti-cms:/queries/13` (included by default)<br/>- `opti-cms:/queries/12`<br/>- `opti-cms:/fragments/13` (included by default)<br/>- `opti-cms:/fragments/12`<br/>*The defaults are only applied when there's no document starting with `opti-cms:` defined*
-| functions | The list of GraphQL Functions that should be made available in the `functions.ts` file. When specified, this overrides the default list.<br/>*Default value: `['getContentType','getContentByPath','getContentById']`*
-| verbose | Set to `true` to enable debugging output of the preset, loader, plugin and transform |
+| Option | Default | Description |
+| --- | --- | --- |
+| `gqlTagName` | `'gql'` | Tag function used to identify inline GraphQL queries in TypeScript source files |
+| `recursion` | `false` | Enable recursive queries. Requires a patched `@graphql-codegen/visitor-plugin-common`; run `yarn opti-graph patches:apply` after every install or upgrade |
+| `injections` | `[]` | Rules that map GraphQL files or fragment names to injection targets (`into`, `pathRegex`, `nameRegex`). Valid targets: `PageData`, `ComponentData`, `SectionData`, `ElementData`, `SectionElementData`, `FormElementData`, `MediaData`, `BlockData` (deprecated) |
+| `functions` | `['getContentType',` `'getContentByPath',` `'getContentById']` | GraphQL functions to expose in `functions.ts`. Overrides the default list |
+| `prettyPrintQuery` | `false` | Pretty-print the inlined query string inside each generated function |
+| `cleanup` | `true` | Remove injected fragment spreads after processing. Pass `string[]` to remove only specific spreads |
+| `verbose` | `false` | Enable debug output and generate `opti.generated.graphql` showing all built-in and auto-generated queries |
+| `documents` | _(built-in)_ | Standard preset documents. Built-in sources: `opti-cms:/queries/13` and `opti-cms:/fragments/13` (included by default), `opti-cms:/queries/12`, `opti-cms:/fragments/12`. Defaults apply only when no `opti-cms:` document is explicitly defined |
 
 ## 3. GraphQL Document Processing
 ### 3.1. Allow overwriting of built-in fragments & queries
 All fragment and query names injected / generated by this package start with an underscore (for example: `_getContentById`). During the document pre-processing, all these fragments and queries will be processed with this logic:
 - If there's no query or fragment with the name without the leading underscore, it will be renamed. (i.e. `_getContentById` becomes `getContentById`)
 - If a query or fragment with the name without leading underscore does exist, the built-in version with underscore will be removed from the document set.
+
+This renaming happens **before** `@graphql-codegen/client-preset` captures the document strings, so the final (un-prefixed) names are reflected in both `graphql.ts` and `gql.ts`.
 
 This allows a project to overwrite built-in fragments and queries, while still ensuring type-safety.
 
@@ -140,9 +103,9 @@ Dynamically build queries & fragments based upon the `injections` configuration,
 This allows you to tell wich group of fragments you want at a given location and then during GraphQL compilation generate the full queries based upon the current content schema in Optimizely CMS and your project configuration.
 
 ### 3.4. Remove fragments and spreads that target non-existing types
-Depending on the features you have enabled in your CMS, not all types might actually be present in Optimizely Graph. This logic removes these fragments and spreads from the documents. 
+Depending on the features you have enabled in your CMS, not all types might actually be present in Optimizely Graph. This logic removes these fragments and spreads from the `opti-cms:/` virtual documents generated by the preset.
 
-This approach assumes you're using TypeScript, as missing, but required types or fields should cause an error in the TypeScript compilation step of you application. Hence it moves the error from GraphQL Codegen to TypeScript, allowing some of the changes to be handled in the code.
+User-authored files are intentionally left untouched — missing types or fields in hand-written fragments will surface as TypeScript compilation errors, which is the correct feedback loop for project code.
 
 ### 3.5. Dedicated Queries & Fragments
 The preset automatically injects a number of fragments and documents into the generated code. These can be found in their respective document:

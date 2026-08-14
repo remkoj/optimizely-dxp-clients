@@ -74,6 +74,7 @@ export class DocumentGenerator
     return this.getSlugFromKey(graphPropertyType) + "Data"
   }
 
+  /** Convert a raw content type key into a PascalCase slug suitable for use in fragment/query names. */
   private getSlugFromKey(key: string) {
     let newKey = key.startsWith('_') ? ucFirst(key.substring(1)) : key
     if (newKey.includes(":"))
@@ -144,6 +145,15 @@ export class DocumentGenerator
     return query
   }
 
+  /**
+   * Build the GraphQL fragment SDL for the given content type.
+   *
+   * @param contentType     The content type definition
+   * @param fragmentName    Override the default fragment name or provide a transform function
+   * @param forProperty     When `true`, generates the property-variant fragment (appends `Property` to the on-type)
+   * @param propertyTracker Tracks property names across types to detect and resolve naming collisions
+   * @returns               Raw SDL string, or an empty string when `contentType.key` is absent
+   */
   public buildFragment(contentType: IntegrationApi.ContentType, fragmentName?: string | ((defaultName: string) => string), forProperty: boolean = false, propertyTracker: Map<string,string> = new Map()) {
     if (!contentType.key)
       return ''
@@ -193,6 +203,15 @@ export class DocumentGenerator
     }, [] as string[])
   }
 
+  /**
+   * Render a single content type property as a GraphQL field selection string.
+   * Returns `null` for properties that should not be included (disabled indexing,
+   * unsupported format, or component properties without a `contentType` value).
+   *
+   * @param propertyName    The property key as defined in the content type
+   * @param propertyConfig  The property definition from the content type
+   * @param propertyTracker Cross-type collision tracker; aliased output names are stored here
+   */
   protected buildProperty(propertyName: string, propertyConfig?: IntegrationApi.ContentTypeProperty, propertyTracker: Map<string,string> = new Map()): string | null {
     // Skip all disabled properties
     if (propertyConfig?.indexingType === "disabled")
@@ -236,7 +255,7 @@ export class DocumentGenerator
         if (allowAny) {
           ['BlockData','ComponentData'].forEach(x => spreads.add(x));
         } else {
-          const base = pickFrom.length > 0 ? pickFrom : Array.from(this._allContentTypes.keys())
+          const base = pickFrom.length > 0 ? pickFrom : Array.from(this._allContentTypes.keys());
           const filtered = base.filter(x => !restrictBy.includes(x))
           filtered.forEach(typeName => spreads.add(this.getDefaultFragmentName(typeName)));
         }
@@ -281,6 +300,11 @@ export class DocumentGenerator
     }
   }
 
+  /**
+   * Resolve `contentTypeRestriction` to a list of concrete content type keys,
+   * expanding it to include all direct children registered in `_allContentTypes`.
+   * When `_allContentTypes` is empty the restriction key is returned as-is.
+   */
   protected getTypeKeysFor(contentTypeRestriction: string) {
     if (this._allContentTypes.size === 0)
       return contentTypeRestriction;
@@ -294,6 +318,7 @@ export class DocumentGenerator
     // Add children
     this._allContentTypes.forEach(( contentType, contentTypeKey ) => {
       if (contentType.baseType === contentTypeRestriction) {
+        if (['globalcontract','graph'].includes(contentType.source ?? 'n/a')) return;
         const baseRestrictions = this.getTypeKeysFor(contentTypeKey)
         allTypes.push(...baseRestrictions)
       }

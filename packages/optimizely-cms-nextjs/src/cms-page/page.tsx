@@ -29,7 +29,7 @@ import { MetaDataResolver } from '../metadata.js'
 import { urlToPath } from './utils.js'
 import { type GetContentByPathMethod } from './data.js'
 import { createClient } from '../client.js'
-import { getChannelId, LookupResponse } from './_base.js'
+import { getChannelId } from './_base.js'
 import { loadContentByPath as loadContentByPathBase } from './_loadContentByPath.js'
 import { getInfoByPath as getInfoByPathBase } from './_getInfoByPath.js'
 
@@ -43,7 +43,7 @@ export { SystemLocales } from './_base.js'
 export type DefaultCmsPageParams = {
   path?: string[]
 }
-export type DefaultCmsPageSearchParams = {}
+export type DefaultCmsPageSearchParams = Record<string, string | string[] | undefined>
 
 export type DefaultCmsPageProps<
   TParams extends Record<
@@ -357,7 +357,7 @@ export function createPage<
 
       // Fetch the metadata based upon the actual content type and resolve parent
       const metaResolver = new MetaDataResolver(context.client)
-      const [pageMetadata, baseMetadata] = await Promise.all([
+      const [pageMetadata,] = await Promise.all([
         metaResolver.resolve(factory, contentLink, contentType, graphLocale),
         resolvingMetadata,
       ])
@@ -404,8 +404,7 @@ export function createPage<
         )
         return notFound()
       }
-      const [route, contentLink, contentType, graphLocale, contentData] =
-        lookupData
+      const [, contentLink, contentType,, contentData] = lookupData
 
       if (contentLink?.locale) context.setLocale(contentLink.locale as string)
 

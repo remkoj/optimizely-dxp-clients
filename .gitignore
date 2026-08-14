@@ -23,6 +23,7 @@ artefacts/*.tgz
 
 # Exclude local files
 *.local
+*.local.*
 
 # Exclude OS Files
 .DS_Store

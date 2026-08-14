@@ -98,7 +98,7 @@ import {
 <OptimizelyOneProvider>
   <PageActivator />
   {children}
-  <OptimizelyOneGadget enabled={enableDemoTools} />
+  <OptimizelyOneGadget />
 </OptimizelyOneProvider>
 
 // In a component:
@@ -125,6 +125,6 @@ const key = EnvTools.readValue('GA_TRACKING_ID')
 
 ## Constraints
 
-- `dist/styles.css` must be imported at the application root; it is not injected automatically.
+- `dist/styles.css` is imported by the components in the package, if the framework does not support that, it must be imported manually.
 - Server utilities (`./server`) are server-only; do not import from client components.
 - The API route must be a catch-all (`[[...path]]`) so every sub-path is handled by the same handler.

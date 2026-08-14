@@ -5,28 +5,30 @@ import { isNotNullOrUndefined } from './utils'
 import type { PluginOptions } from './types'
 export type { PluginOptions } from './types'
 
-export const DefaultFunctions = ['getContentType', 'getContentByPath', 'getContentById']
+/** The query names exposed as typed functions when the `functions` preset option is not set. */
+export const DefaultFunctions = ['getContentByPath', 'getContentById']
 
-export function pickPluginOptions(options: Record<string, any>): PluginOptions {
+/**
+ * Extract and normalise plugin options from a raw preset config object,
+ * applying defaults for any properties that are absent.
+ *
+ * @param options  Raw preset config (typically `options.presetConfig` from the codegen runner)
+ * @returns        Normalised `PluginOptions`
+ */
+export function pickPluginOptions(options: Record<string, unknown>): PluginOptions {
   return {
     ...(options.config ?? {}),
-    functions: options.functions ?? DefaultFunctions,
-    prettyPrintQuery: options.prettyPrintQuery ?? false,
-    clientPath: options.clientPath ?? "./graphql"
+    functions: (options as PluginOptions).functions ?? DefaultFunctions,
+    prettyPrintQuery: (options as PluginOptions).prettyPrintQuery ?? false,
+    clientPath: (options as PluginOptions).clientPath ?? "./graphql"
   }
 }
 
 /**
- * Validate the plugin configuration
- * 
- * @param schema 
- * @param document 
- * @param config 
- * @param outputFile 
- * @param allPlugins 
- * @param pluginContext 
+ * Validate the plugin configuration before codegen runs.
+ * Throws if `functions` is provided but is not an array of non-empty strings.
  */
-export const validate: PluginValidateFn<PluginOptions> = (schema, document, config, outputFile, allPlugins, pluginContext) => {
+export const validate: PluginValidateFn<PluginOptions> = (schema, document, config) => {
   if (config.functions) {
     if (!Array.isArray(config.functions))
       throw new Error("If provided functions must be an array")
@@ -37,15 +39,11 @@ export const validate: PluginValidateFn<PluginOptions> = (schema, document, conf
 }
 
 /**
- * Actual Plugin logic
- * 
- * @param schema 
- * @param documents 
- * @param config 
- * @param info 
- * @returns 
+ * Generate typed wrapper functions for each named query listed in `config.functions`.
+ * Each function accepts a `GraphQLClient` and typed variables, and returns a typed promise.
+ * Queries are inlined as gql template literals with their transitive fragment dependencies.
  */
-export const plugin: PluginFunction<PluginOptions> = async (schema, documents, config, info) => {
+export const plugin: PluginFunction<PluginOptions> = async (schema, documents, config) => {
   // Read the functions to fully build & extend
   const functions = config.functions || []
   if (functions.length == 0)
@@ -76,7 +74,7 @@ export const EXPORTED_FUNCTIONS = 0;`
       functionBody.push('}')
       return functionBody
 
-    } catch (e: any) {
+    } catch {
       return [`export async function ${fn}() { throw new Error('Function generation error')}`]
     }
   }).flat()
@@ -95,6 +93,15 @@ export const EXPORTED_FUNCTIONS = 0;`
   return { prepend, content: output.join("\n"), append }
 }
 
+/**
+ * Recursively collect all `FragmentDefinitionNode`s transitively required by `definition`.
+ * Already-resolved fragment names are tracked in `availableFragments` to prevent infinite loops.
+ *
+ * @param definition         The operation or fragment whose spreads should be resolved
+ * @param document           The full document to search for fragment definitions
+ * @param availableFragments Names already resolved in an outer recursion level
+ * @returns                  Ordered list of required fragment definitions
+ */
 function resolveSpreads(definition: DefinitionNode, document: DocumentNode, availableFragments: string[] = []): FragmentDefinitionNode[] {
   // Collect the fragment names we need to add
   const spreadNames: string[] = []

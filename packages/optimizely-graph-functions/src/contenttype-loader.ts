@@ -6,17 +6,28 @@ import { PropertyCollisionTracker, DocumentGenerator, VirtualLocation } from './
 
 export * as Tools from './tools'
 
+/** Configuration injected by the codegen runner for each loader invocation. */
 type LoaderConfig = {
   cwd: string,
   pluginContext?: {
-    [key: string]: any;
+    [key: string]: unknown;
   }
 }
 
+/** Signature expected by the graphql-codegen custom document loader protocol. */
 type LoaderFunction = (documentUri: string, config: LoaderConfig) => Promise<Types.DocumentFile | undefined | void>
 
 const collisionTracker: PropertyCollisionTracker = new PropertyCollisionTracker()
 
+/**
+ * Custom graphql-codegen document loader that generates GraphQL fragments and
+ * queries on-the-fly from Optimizely CMS content type definitions.
+ *
+ * The loader understands `opti-cms:/` virtual URIs produced by `VirtualLocation`:
+ * - `opti-cms:/contenttypes/<baseType>/<key>/...`   — generate a fragment
+ * - `opti-cms:/contentquery/<baseType>/<key>`        — generate a get-query
+ * - `opti-cms:/injectiontarget/<name>`               — generate an injection-target fragment
+ */
 const ContentTypeLoader: LoaderFunction = async (documentUri, config) => {
   collisionTracker.cwd = config.cwd;
 

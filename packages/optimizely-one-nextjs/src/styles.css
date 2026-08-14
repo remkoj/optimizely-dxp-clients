@@ -1,2 +1,10 @@
-@import 'tailwindcss' prefix(oo);
+/**
+ * Custom import of tailwind, without reset and with prefix - this ensures that
+ * tailwind styles are not applied to the entire page, but only to the components
+ * that are rendered by the Optimizely One Gadget.
+ */
+@layer theme, base, components, utilities;
+@import "tailwindcss/theme.css" layer(theme) prefix(oo);
+@import "tailwindcss/utilities.css" layer(utilities) prefix(oo) important;
+
 @source "./src/components/optimizely-one-gadget";

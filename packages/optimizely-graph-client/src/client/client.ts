@@ -1,5 +1,5 @@
 import { readEnvironmentVariables, applyConfigDefaults, validateConfig, type OptimizelyGraphConfigInternal, type OptimizelyGraphConfig } from "../config.js"
-import { GraphQLClient, type RequestMiddleware, type Variables } from "graphql-request"
+import { type ClientError, GraphQLClient, type RequestMiddleware, type Variables, type ResponseMiddleware } from "graphql-request"
 import { AuthMode, type RequestMethod, type IOptiGraphClient, type OptiGraphSiteInfo, type IOptiGraphClientFlags, type OptiCmsSchema, type FrontendUser, SchemaVersion } from "./types.js"
 import createHmacFetch, { type FetchAPI } from "../hmac-fetch.js"
 import { base64encode, isError, validateToken, getAuthMode, isValidFrontendUser } from "./utils.js"
@@ -32,6 +32,7 @@ export class ContentGraphClient extends GraphQLClient implements IOptiGraphClien
   private _hmacFetch: FetchAPI | undefined
   private _flags: IOptiGraphClientFlags
   private _customMiddleware: RequestMiddleware<Variables> | undefined
+  private _variableToTags: Map<string,(variableValue?:unknown) => string>
   public get currentOptiCmsSchema(): OptiCmsSchema {
     return this._config.opti_cms_schema
   }
@@ -92,59 +93,22 @@ export class ContentGraphClient extends GraphQLClient implements IOptiGraphClien
       throw new Error("❌ [Optimizely Graph] Invalid ContentGraph configuration")
 
     // Create instance
-    const QUERY_LOG = optiConfig.query_log ?? false
     const serviceUrl = new URL("/content/v2", optiConfig.gateway)
     super(serviceUrl.href, {
       method: "post",
       keepalive: false,
       credentials: "include",
       redirect: "manual",
-      requestMiddleware: async <V extends Variables = Variables>(request: RequestExtendedInit<V>) => {
-        if (this.currentAuthMode == AuthMode.Public && this._flags.nextJsFetchDirectives && request.operationName) {
-          if (!Array.isArray(request.next?.tags)) {
-            if (!request.next)
-              request.next = {};
-            request.next.tags = []
-          }
-          request.next.tags = request.next.tags.filter(x => !x.startsWith('opti-graph-operation-'))
-          request.next.tags.push('opti-graph-operation-' + request.operationName)
-        }
-        if (this._customMiddleware)
-          request = await this._customMiddleware(request) as RequestExtendedInit<V>
+      requestMiddleware: (request) => this._requestMiddleware(request),
+      responseMiddleware: (response) => this._responseMiddleware(response)
+    });
 
-        if (QUERY_LOG) {
-          console.log(`🔎 [Optimizely Graph] [Request URL] ${request.url} [${request.cache}]\n
-🔎 [Optimizely Graph] [Request Headers] ${JSON.stringify(request.headers)}\n
-🔎 [Optimizely Graph] [Request Query] ${request.body}\n
-🔖 [Optimizely Graph] [Request Variables] ${JSON.stringify(request.variables)}`)
-          if (this._flags.nextJsFetchDirectives)
-            console.log(`🔖 [Optimizely Graph] [Request Next.JS] ${JSON.stringify(request.next)}`)
-        }
-        return request
-      },
-      responseMiddleware: response => {
-        if (isError(response)) {
-          console.error(`❌ [Optimizely Graph] [Error] ${response.name} => ${response.message}`, (response as any).response, (response as any).request)
-        } else if (response.errors) {
-          response.errors.forEach(
-            ({ message, locations, path, name, source }) => {
-              const locationList = (locations ?? []).map(loc => {
-                return `[Line: ${loc.line}, Column: ${loc.column}]`
-              }).join("; ")
-              const errorName = name && name != 'undefined' ? ` ${name}` : ""
-              const sourceInfo = source?.body ?? ""
-              const sourceName = source?.name ? ` in ${source.name}` : ""
-              console.error(`❌ [Optimizely Graph] [GraphQL${errorName} error${sourceName}]:\n  Message: ${message}\n  Location: ${locationList}\n  Path: ${path}\n  Query: ${sourceInfo}`)
-            }
-          );
-          throw new Error("[Optimizely Graph] Error received from Optimizely Graph, see console for details")
-        } else if (QUERY_LOG) {
-          console.log(`📦 [Optimizely Graph] [Response Data] ${JSON.stringify(response.data)}`)
-          console.log(`🔖 [Optimizely Graph] [Response Cost] ${JSON.stringify((response.extensions as { cost?: number } | undefined)?.cost || 0)}`)
-        }
-      }
-
-    })
+    // Create initial map
+    this._variableToTags = new Map();
+    this._variableToTags.set('key', (currentKey: unknown) => `key-${ currentKey }`)
+    this._variableToTags.set('domain', (currentKey: unknown) => `channel-${ currentKey }`)
+    this._variableToTags.set('channel', (currentKey: unknown) => `channel-${ currentKey }`)
+    this._variableToTags.set('channelId', (currentKey: unknown) => `channel-${ currentKey }`)
 
     // Set variables
     this._config = optiConfig
@@ -153,6 +117,65 @@ export class ContentGraphClient extends GraphQLClient implements IOptiGraphClien
 
     // Update config
     this.updateRequestConfig()
+  }
+
+  private async _requestMiddleware<V extends Variables = Variables>(request: RequestExtendedInit<V>)
+  {
+    const QUERY_LOG = this._config.query_log ?? false
+    if (this.currentAuthMode == AuthMode.Public && this._flags.nextJsFetchDirectives && request.operationName) {
+      if (!Array.isArray(request.next?.tags)) {
+        if (!request.next)
+          request.next = {};
+        request.next.tags = []
+      }
+      request.next.tags = request.next.tags.filter(x => 
+        !x.startsWith('opti-graph-operation-') &&
+        !x.startsWith('opti-graph-variable-')
+      )
+      request.next.tags.push('opti-graph-operation-' + request.operationName)
+      if (request.variables && typeof(request.variables) === 'object') {
+        Object.getOwnPropertyNames(request.variables).forEach((propName) => {
+          const transform = this._variableToTags.get(propName);
+          if (transform)
+            request.next?.tags?.push('opti-graph-variable-'+transform((request.variables as Record<string,unknown>)[propName]))
+        });
+      }
+    }
+    if (this._customMiddleware)
+      request = await this._customMiddleware(request) as RequestExtendedInit<V>
+
+    if (QUERY_LOG) {
+      console.log(`🔎 [Optimizely Graph] [Request URL] ${request.url} [${request.cache}]\n
+  🔎 [Optimizely Graph] [Request Headers] ${JSON.stringify(request.headers)}\n
+  🔎 [Optimizely Graph] [Request Query] ${getQueryOrRawBody(request)}\n
+  🔖 [Optimizely Graph] [Request Variables] ${JSON.stringify(request.variables,undefined,2)}`)
+      if (this._flags.nextJsFetchDirectives)
+        console.log(`🔖 [Optimizely Graph] [Request Next.JS] ${JSON.stringify(request.next)}`)
+    }
+    return request
+  }
+
+  private _responseMiddleware(response: Parameters<ResponseMiddleware>[0]) {
+    const QUERY_LOG = this._config.query_log ?? false
+    if (isError(response)) {
+      console.error(`❌ [Optimizely Graph] [Error] ${response.name} => ${response.message}`, (response as ClientError).response, (response as ClientError).request)
+    } else if (response.errors) {
+      response.errors.forEach(
+        ({ message, locations, path, name, source }) => {
+          const locationList = (locations ?? []).map(loc => {
+            return `[Line: ${loc.line}, Column: ${loc.column}]`
+          }).join("; ")
+          const errorName = name && name != 'undefined' ? ` ${name}` : ""
+          const sourceInfo = source?.body ?? ""
+          const sourceName = source?.name ? ` in ${source.name}` : ""
+          console.error(`❌ [Optimizely Graph] [GraphQL${errorName} error${sourceName}]:\n  Message: ${message}\n  Location: ${locationList}\n  Path: ${path}\n  Query: ${sourceInfo}`)
+        }
+      );
+      throw new Error("[Optimizely Graph] Error received from Optimizely Graph, see console for details")
+    } else if (QUERY_LOG) {
+      console.log(`📦 [Optimizely Graph] [Response Data] ${JSON.stringify(response.data)}`)
+      console.log(`🔖 [Optimizely Graph] [Response Cost] ${JSON.stringify((response.extensions as { cost?: number } | undefined)?.cost || 0)}`)
+    }
   }
 
   /**
@@ -174,6 +197,7 @@ export class ContentGraphClient extends GraphQLClient implements IOptiGraphClien
     return this
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   public toJSON(key?: string): OptimizelyGraphConfig {
     return {
       single_key: this._config.single_key,
@@ -190,8 +214,14 @@ export class ContentGraphClient extends GraphQLClient implements IOptiGraphClien
     return this
   }
 
+  /**
+   * 
+   * @deprecated  Use `request` instead
+   * @param args 
+   * @returns 
+   */
   public query: RequestMethod = (...args) => {
-    //@ts-expect-error
+    //@ts-expect-error Overload mapping fails
     return this.request(...args)
   }
 
@@ -384,6 +414,19 @@ export class ContentGraphClient extends GraphQLClient implements IOptiGraphClien
   isDebugOrDevelopment() {
     return this.isDebug() || this.isDevelopment()
   }
+}
+
+function getQueryOrRawBody(req: RequestExtendedInit)
+{
+  if (typeof(req.body) === 'string' && req.body.length > 0) {
+    try {
+      const bodyData = JSON.parse(req.body);
+      return bodyData.query ?? req.body;
+    } catch {
+      return req.body;
+    }
+  }
+  return req.body;
 }
 
 export default ContentGraphClient

@@ -1366,6 +1366,10 @@ export type Locale = {
      * The username of the user that last modified this locale.
      */
     readonly lastModifiedBy?: string;
+    /**
+     * A fallback locale that should be used if content is not available in the current locale.
+     */
+    fallback?: string | null;
 };
 
 /**
@@ -1414,6 +1418,10 @@ export type LocalePatch = {
      * The access rights assigned to this locale that defines who can create content in this locale. If no access rights are assigned, everyone will be able to create content in this locale. An empty array means that no user will be allowed to create or change content in this locale.
      */
     accessRights?: Array<SecurityIdentityPatch> | null;
+    /**
+     * A fallback locale that should be used if content is not available in the current locale.
+     */
+    fallback?: string | null;
 };
 
 /**
@@ -1511,6 +1519,10 @@ export type NewContent = {
      * The key that identifies the owner for the content item to be created. Content that is owned by another content is also known as an asset.
      */
     owner?: string;
+    /**
+     * The key of a blueprint to use as a template for the new content item. When provided, the blueprint's composition and properties are used as defaults for the initial version. Explicit values in the request take precedence over blueprint defaults.
+     */
+    blueprint?: string;
     initialVersion: ContentVersion;
 };
 
@@ -2218,6 +2230,10 @@ export type LocaleWritable = {
      * The access rights assigned to this locale that defines who can create content in this locale. If no access rights are assigned, everyone will be able to create content in this locale. An empty array means that no user will be allowed to create or change content in this locale.
      */
     accessRights?: Array<SecurityIdentity> | null;
+    /**
+     * A fallback locale that should be used if content is not available in the current locale.
+     */
+    fallback?: string | null;
 };
 
 /**
@@ -2280,6 +2296,10 @@ export type NewContentWritable = {
      * The key that identifies the owner for the content item to be created. Content that is owned by another content is also known as an asset.
      */
     owner?: string;
+    /**
+     * The key of a blueprint to use as a template for the new content item. When provided, the blueprint's composition and properties are used as defaults for the initial version. Explicit values in the request take precedence over blueprint defaults.
+     */
+    blueprint?: string;
     initialVersion: ContentVersionWritable;
 };
 
