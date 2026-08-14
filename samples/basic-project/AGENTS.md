@@ -13,4 +13,5 @@ The following `@remkoj` packages are installed. Read their `AGENTS.md` for docum
 - [`@remkoj/optimizely-graph-cli`](node_modules/@remkoj/optimizely-graph-cli/AGENTS.md)
 - [`@remkoj/optimizely-graph-client`](node_modules/@remkoj/optimizely-graph-client/AGENTS.md)
 - [`@remkoj/optimizely-graph-functions`](node_modules/@remkoj/optimizely-graph-functions/AGENTS.md)
+- [`@remkoj/optimizely-one-nextjs`](node_modules/@remkoj/optimizely-one-nextjs/AGENTS.md)
 <!-- @remkoj/optimizely-packages:end -->

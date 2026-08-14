@@ -7,6 +7,7 @@ import {
   type FunctionComponent,
   type ComponentType,
   useEffect,
+  Suspense,
 } from 'react'
 import useCookie from '../use-cookie'
 import {
@@ -153,7 +154,7 @@ const Panels: PanelList = [
  * @param       param0      The component properties
  * @returns     The component JSX
  */
-export const OptimizelyOneGadget: FunctionComponent<
+const OptimizelyOneGadgetInner: FunctionComponent<
   OptimizelyOneGadgetProps
 > = ({
   servicePrefix = '/api/me',
@@ -260,10 +261,12 @@ export const OptimizelyOneGadget: FunctionComponent<
               const pnlKey = 'Panel-' + pnlId
               return (
                 <TabPanel key={pnlKey} as="div" className="oo:p-1 oo:md:p-2">
-                  <GadgetPanel
-                    servicePrefix={servicePrefix}
-                    refreshInterval={refreshInterval}
-                  />
+                  <Suspense fallback={<div className="oo:text-center oo:py-4">Loading...</div>}>
+                    <GadgetPanel
+                      servicePrefix={servicePrefix}
+                      refreshInterval={refreshInterval}
+                    />
+                  </Suspense>
                 </TabPanel>
               )
             })}
@@ -271,6 +274,16 @@ export const OptimizelyOneGadget: FunctionComponent<
         </TabGroup>
       </PopoverPanel>
     </Popover>
+  )
+}
+
+export const OptimizelyOneGadget: FunctionComponent<
+  OptimizelyOneGadgetProps
+> = (props) => {
+  return (
+    <Suspense fallback={null}>
+      <OptimizelyOneGadgetInner {...props} />
+    </Suspense>
   )
 }
 
