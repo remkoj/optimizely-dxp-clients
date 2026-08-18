@@ -2,7 +2,7 @@
   "name": "@remkoj/optimizely-graph-client",
   "description": "GraphQL client for Optimizely Graph (Content Graph)",
   "license": "Apache-2.0",
-  "version": "6.0.0-rc.4",
+  "version": "6.0.0-rc.5",
   "repository": {
     "type": "git",
     "url": "https://github.com/remkoj/optimizely-dxp-clients.git",
@@ -78,6 +78,5 @@
     "recompile": "tsc --build --clean && tsc --build --force",
     "generate": "openapi --input https://cg.optimizely.com/app/swagger/swagger.json --output ./src/admin-api/client --name OptimizelyGraphAdminApi && yarn update-imports",
     "update-imports": "node ./scripts/update-imports.mjs"
-  },
-  "stableVersion": "5.2.0"
+  }
 }

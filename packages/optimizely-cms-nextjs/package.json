@@ -2,7 +2,7 @@
   "name": "@remkoj/optimizely-cms-nextjs",
   "description": "Next.JS integration for Optimizely SaaS CMS",
   "license": "Apache-2.0",
-  "version": "6.0.0-rc.4",
+  "version": "6.0.0-rc.5",
   "repository": {
     "type": "git",
     "url": "https://github.com/remkoj/optimizely-dxp-clients.git",
@@ -53,13 +53,13 @@
     }
   },
   "devDependencies": {
-    "@remkoj/optimizely-cms-react": "workspace:6.0.0-rc.4",
-    "@remkoj/optimizely-graph-client": "workspace:6.0.0-rc.4",
+    "@remkoj/optimizely-cms-react": "workspace:6.0.0-rc.5",
+    "@remkoj/optimizely-graph-client": "workspace:6.0.0-rc.5",
     "@types/negotiator": "^0.6.5",
     "@types/node": "^24.13.3",
     "@types/react": "^19.2.18",
     "@types/react-dom": "^19.2.4",
-    "next": "^16.3.0",
+    "next": "^16.3.1",
     "prop-types": "^15.8.1",
     "react": "^19.2.8",
     "react-dom": "^19.2.8",
@@ -68,8 +68,8 @@
   },
   "dependencies": {
     "@formatjs/intl-localematcher": "^0.8.13",
-    "@remkoj/optimizely-cms-react": "6.0.0-rc.4",
-    "@remkoj/optimizely-graph-client": "6.0.0-rc.4",
+    "@remkoj/optimizely-cms-react": "6.0.0-rc.5",
+    "@remkoj/optimizely-graph-client": "6.0.0-rc.5",
     "deepmerge": "^4.3.1",
     "entities": "^8.0.0",
     "graphql": "^16.14.2",
@@ -86,6 +86,5 @@
     "prepare": "yarn tsc --build --force",
     "watch": "yarn tsc --watch",
     "recompile": "yarn tsc --build --clean && yarn tsc --build --force"
-  },
-  "stableVersion": "5.2.0"
+  }
 }

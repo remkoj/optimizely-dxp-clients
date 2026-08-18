@@ -19,14 +19,41 @@ import { isDebug, isDevelopment } from '../rsc-utilities.js'
 
 export * from './types.js'
 
+/**
+ * Constructor arguments for `ServerContext`
+ */
 export type ServerContextArgs = {
+  /**
+   * The component factory, or dictionary of components, to use for resolving templates
+   */
   factory?: ComponentFactory | ComponentTypeDictionary
+
+  /**
+   * The Optimizely Graph client to use for loading content, defaults to a new client
+   * created from the environment configuration
+   */
   client?: IOptiGraphClient
+
+  /**
+   * The locale to render content in
+   */
   locale?: string
+
+  /**
+   * The rendering mode to start the context in, defaults to `'public'`
+   */
   mode?: RenderMode
+
+  /**
+   * The content item that is currently being edited, if any
+   */
   editableContent?: ContentLink
 }
 
+/**
+ * Default, server-side, implementation of `GenericContext`. Instantiate once
+ * per request and pass it down to CMS components as `ctx`.
+ */
 export class ServerContext implements GenericContext {
   private _mode: RenderMode
   private _locale: string | undefined
@@ -86,6 +113,12 @@ export class ServerContext implements GenericContext {
     this._editable = editableContent
   }
 
+  /**
+   * Update the rendering mode of this context
+   *
+   * @param   mode    The new rendering mode
+   * @returns This context, to allow chaining
+   */
   public setMode(mode: 'edit' | 'preview' | 'public'): ServerContext {
     if (this._mode != mode) {
       if (this.isDebug)
@@ -97,6 +130,12 @@ export class ServerContext implements GenericContext {
     return this
   }
 
+  /**
+   * Update the locale used by this context
+   *
+   * @param   locale  The new locale
+   * @returns This context, to allow chaining
+   */
   public setLocale(locale: string): ServerContext {
     if (this._locale != locale) {
       if (this.isDebug)
@@ -107,6 +146,12 @@ export class ServerContext implements GenericContext {
     }
     return this
   }
+  /**
+   * Update the Optimizely Graph client used by this context
+   *
+   * @param   client    The new client, or a function that receives the current
+   *                    client and returns the new one
+   */
   public setOptimizelyGraphClient(
     client:
       | IOptiGraphClient
@@ -123,6 +168,12 @@ export class ServerContext implements GenericContext {
           ? client
           : undefined
   }
+  /**
+   * Update the component factory used by this context
+   *
+   * @param   factory   The new factory, or a function that receives the current
+   *                    factory and returns the new one
+   */
   public setComponentFactory(
     factory:
       | ComponentFactory
@@ -136,6 +187,11 @@ export class ServerContext implements GenericContext {
       throw new Error('Unsetting the context factory is not allowed!')
     this._factory = newFactory
   }
+  /**
+   * Update the content item that is currently being edited
+   *
+   * @param   link    The content link of the item being edited
+   */
   public setEditableContentId(link: GenericContext['editableContent']) {
     if (this.isDebug)
       console.log(
@@ -143,23 +199,23 @@ export class ServerContext implements GenericContext {
       )
     this._editable = link
   }
+  /**
+   * Update whether the content item currently being edited is an experience
+   *
+   * @param   isExperience  Whether the edited content item is an experience
+   */
   public setEditableContentIsExperience(isExperience: boolean) {
     this._editableIsExperience = isExperience
   }
 
   //private _hasWarned: boolean = false;
-  public toJSON(key?: string): TransferrableContext {
-    /*if (this.isDebugOrDevelopment) {
-      if (!this._hasWarned || this.isDebug) {
-        console.warn(
-          '🦺 [ServerContext] Converting Context to JSON, this is typically a side effect of the context being passed between Server & Client components', key
-        )
-        this._hasWarned = true
-      }
-      if (this.isDebug)
-        console.trace()
-    }*/
-
+  /**
+   * Convert this context into its transferrable (serializable) form, so it can
+   * cross the React Server/Client boundary
+   *
+   * @returns The transferrable context
+   */
+  public toJSON(): TransferrableContext {
     return {
       client: this.client?.toJSON(),
       inEditMode: this.inEditMode,
@@ -200,9 +256,7 @@ export const getServerContext = () => {
  * @param       currentCtx    The current context to apply to the server context
  * @returns     The updated shared server context
  */
-export function updateSharedServerContext(
-  currentCtx: GenericContext
-): ServerContext {
+export function updateSharedServerContext(): ServerContext {
   throw new Error(
     '🦺 [ServerContext] getServerContext has been removed, due to potential leakage across requests'
   )

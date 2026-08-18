@@ -47,6 +47,9 @@ export class DefaultComponentFactory implements ComponentFactory {
     if (initialComponents) this.registerAll(initialComponents)
   }
 
+  /**
+   * @inheritDoc
+   */
   public register(
     type: ComponentTypeHandle,
     component: ComponentType,
@@ -60,10 +63,16 @@ export class DefaultComponentFactory implements ComponentFactory {
     this.registry.set(registryKey, { type: registryKey, component, useSuspense, loader, variant })
   }
 
+  /**
+   * @inheritDoc
+   */
   public registerAll(components: ComponentTypeDictionary): void {
     components.forEach(c => this.register(c.type, c.component, c.useSuspense, c.loader, c.variant))
   }
 
+  /**
+   * @inheritDoc
+   */
   public has(type: ComponentTypeHandle, variant: string = 'default'): boolean {
     const registryKey = this.processComponentTypeHandle(type, variant)
     if (this.dbg) 
@@ -71,6 +80,9 @@ export class DefaultComponentFactory implements ComponentFactory {
     return this.registry.has(registryKey)
   }
 
+  /**
+   * @inheritDoc
+   */
   public resolve(type: ComponentTypeHandle, variant: string = 'default'): undefined | ComponentType {
     const registryKey = this.processComponentTypeHandle(type, variant)
 
@@ -87,7 +99,7 @@ export class DefaultComponentFactory implements ComponentFactory {
     // We need to wrap the component in a Supense
     const EntryComponent = entry.component
     const EntryLoader = entry.loader
-    function Suspended(props: Record<string, any>) {
+    function Suspended(props: object) {
       return (
         <Suspense fallback={EntryLoader && <EntryLoader {...props} />}>
           <EntryComponent {...props} />
@@ -97,12 +109,18 @@ export class DefaultComponentFactory implements ComponentFactory {
     return Suspended
   }
 
+  /**
+   * @inheritDoc
+   */
   public extract(): ComponentTypeDictionary {
     return Array.from(this.registry.entries()).map(([key, entry]) => {
       return { ...entry, type: key }
     })
   }
 
+  /**
+   * @inheritDoc
+   */
   public remove(type: ComponentTypeHandle) {
     const registryKey = this.processComponentTypeHandle(type)
     if (this.dbg)

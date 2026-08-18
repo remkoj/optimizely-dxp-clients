@@ -1,11 +1,11 @@
-/**
- * The version of the current Optimizely DXP React SDK
- */
-import buildInfo from "./version.json" with { type: "json" }
-export const Version = buildInfo.version
-
 // Export library
+/**
+ * Error classes thrown by the Optimizely DXP React SDK
+ */
 export * as Errors from './errors.js'
+/**
+ * General purpose utility functions used throughout the Optimizely DXP React SDK
+ */
 export * as Utils from './utilities.js'
 export * from './types.js'
 export * from './factory/index.js'

@@ -15,15 +15,15 @@ export * from './components/rich-text/utils.js'
  * to prevent these properties to be passed to client components. It will also
  * remove all properties where the name starts with a `_`.
  * 
- * @param     toFilter  The object to filter the 
- * @returns   W
+ * @param     toFilter  The object to filter the CmsComponent props from
+ * @returns   The filtered object, without CmsComponent props and without properties starting with `_`
  */
-export function filterCmsComponentProps<T extends object>(toFilter: T): Omit<T, keyof CmsComponentProps<any>> {
-  const _CmsComponentProps: Array<keyof CmsComponentProps<any>> = ['children', 'contentLink', 'ctx', 'data', 'editProps', 'inEditMode', 'layoutProps']
-  function shouldKeep(currentPropName: keyof T): currentPropName is keyof Omit<T, keyof CmsComponentProps<any>> {
+export function filterCmsComponentProps<T extends object>(toFilter: T): Omit<T, keyof CmsComponentProps<object>> {
+  const _CmsComponentProps: Array<keyof CmsComponentProps<object>> = ['children', 'contentLink', 'ctx', 'data', 'editProps', 'inEditMode', 'layoutProps']
+  function shouldKeep(currentPropName: keyof T): currentPropName is keyof Omit<T, keyof CmsComponentProps<object>> {
     if (typeof currentPropName === 'string' && currentPropName.startsWith('_'))
       return false
-    if (_CmsComponentProps.includes(currentPropName as keyof CmsComponentProps<any>))
+    if (_CmsComponentProps.includes(currentPropName as keyof CmsComponentProps<object>))
       return false
     return true
   }
@@ -31,24 +31,37 @@ export function filterCmsComponentProps<T extends object>(toFilter: T): Omit<T, 
     if (shouldKeep(currentPropName))
       newProps[currentPropName] = toFilter[currentPropName];
     return newProps
-  }, {} as Omit<T, keyof CmsComponentProps<any>>)
+  }, {} as Omit<T, keyof CmsComponentProps<object>>)
 }
 
 /**
+ * Type guard to test whether a value is a string with a length greater than zero.
  * 
- * 
- * @param     toTest 
- * @returns 
+ * @param     toTest    The value to test
+ * @returns   `true` when `toTest` is a non-empty string
  */
-export function isNonEmptyString(toTest: any): toTest is string {
+export function isNonEmptyString(toTest: unknown): toTest is string {
   return typeof (toTest) == 'string' && toTest.length > 0
 }
 
+/**
+ * Type guard to test whether a value is neither `null` nor `undefined`.
+ * 
+ * @param     toTest    The value to test
+ * @returns   `true` when `toTest` is neither `null` nor `undefined`
+ */
 export function isNotNullOrUndefined<T>(toTest?: T | null): toTest is T {
   return !(toTest == null || toTest == undefined)
 }
 
-export function isContentType(toTest: any): toTest is ContentType {
+/**
+ * Type guard to test whether a value is a valid ContentType, i.e. an array of
+ * non-empty strings.
+ * 
+ * @param     toTest    The value to test
+ * @returns   `true` when `toTest` is a `ContentType`
+ */
+export function isContentType(toTest: unknown): toTest is ContentType {
   if (!Array.isArray(toTest))
     return false
 
@@ -62,7 +75,7 @@ export function isContentType(toTest: any): toTest is ContentType {
  * 
  * @param       toNormalize         The Content Type value to process
  * @param       stripContent        When set to true, the global base type "Content" will be removed as well
- * @returns 
+ * @returns     The normalized ContentType, or `undefined` if nothing remains after normalization
  */
 export function normalizeContentType(toNormalize: (string | null)[] | string | null | undefined, stripContent: boolean = false): ContentType | undefined {
   if (!toNormalize)
@@ -81,9 +94,9 @@ export function normalizeContentType(toNormalize: (string | null)[] | string | n
  *  - Removing the global base type "Content"
  *  - Ensuring that in the remaining type the least specific type is equal to the provided prefix
  * 
- * @param       contentType 
- * @param       prefix 
- * @returns 
+ * @param       contentType     The Content Type value to process
+ * @param       prefix          The least specific type that the result must start with
+ * @returns     The normalized ContentType, always starting with `prefix`
  */
 export function normalizeAndPrefixContentType(contentType: Array<string | null> | string | null | undefined, prefix: string): ContentType {
   if (!contentType)
@@ -124,6 +137,13 @@ export function resolveComponentType(factory: ComponentFactory, type: ContentTyp
   return undefined
 }
 
+/**
+ * Type guard to test whether a CmsComponent exposes a `getDataQuery` method, i.e.
+ * whether it declares its data requirements using a GraphQL query.
+ * 
+ * @param     toTest    The CmsComponent to test
+ * @returns   `true` when `toTest` implements `CmsComponentWithQuery`
+ */
 export function isCmsComponentWithDataQuery<T = DocumentNode>(toTest?: BaseCmsComponent<T>): toTest is CmsComponentWithQuery<T> {
   const toTestType = typeof (toTest)
   if ((toTestType == 'function' || toTestType == 'object') && toTest != null) {
@@ -132,6 +152,13 @@ export function isCmsComponentWithDataQuery<T = DocumentNode>(toTest?: BaseCmsCo
   return false
 }
 
+/**
+ * Type guard to test whether a CmsComponent exposes a `getDataFragment` method, i.e.
+ * whether it declares its data requirements using a GraphQL fragment.
+ * 
+ * @param     toTest    The CmsComponent to test
+ * @returns   `true` when `toTest` implements `CmsComponentWithFragment`
+ */
 export function isCmsComponentWithFragment<T = DocumentNode>(toTest?: BaseCmsComponent<T>): toTest is CmsComponentWithFragment<T> {
   const toTestType = typeof (toTest)
   if ((toTestType == 'function' || toTestType == 'object') && toTest != null)
@@ -139,8 +166,15 @@ export function isCmsComponentWithFragment<T = DocumentNode>(toTest?: BaseCmsCom
   return false
 }
 
-export function validatesFragment<T extends ComponentType<any>>(toTest?: T): toTest is T & Pick<Required<WithGqlFragment<T, any>>, "validateFragment"> {
-  type ToTestFor = T & Pick<Required<WithGqlFragment<T, any>>, "validateFragment">
+/**
+ * Type guard to test whether a component exposes a `validateFragment` method, used
+ * to validate that the received GraphQL fragment data matches expectations.
+ * 
+ * @param     toTest    The component to test
+ * @returns   `true` when `toTest` implements `validateFragment`
+ */
+export function validatesFragment<T = object>(toTest?: unknown): toTest is ComponentType<T> & Pick<Required<WithGqlFragment<T, object>>, "validateFragment"> {
+  type ToTestFor = ComponentType<T> & Pick<Required<WithGqlFragment<T, object>>, "validateFragment">
   const toTestType = typeof (toTest)
   if ((toTestType == 'function' || toTestType == 'object') && toTest != null)
     return (toTest as ToTestFor).validateFragment && typeof ((toTest as ToTestFor).validateFragment) == 'function' ? true : false
@@ -198,10 +232,25 @@ export function ifNonEmptyString<T = string>(inputValue?: string | null, transfo
   return inputValue && typeof (inputValue) == 'string' && inputValue.length > 0 ? transformer(inputValue) : undefined
 }
 
-export function toUniqueValues<R extends any>(value: R, index: number, array: Array<R>): value is R {
+/**
+ * Array filter predicate to reduce an array to its unique values, intended for use
+ * with `Array.prototype.filter`.
+ * 
+ * @param     value     The current value being tested
+ * @param     index     The index of the current value within `array`
+ * @param     array     The array being filtered
+ * @returns   `true` when `value` is the first occurrence of that value within `array`
+ */
+export function toUniqueValues<R>(value: R, index: number, array: Array<R>): value is R {
   return array.indexOf(value) == index
 }
 
+/**
+ * Trim a string value, passing through `null` and `undefined` unchanged.
+ * 
+ * @param     valueToTrim   The value to trim
+ * @returns   The trimmed string, or the original `null`/`undefined` value
+ */
 export function trim<T extends string | null | undefined>(valueToTrim: T): T {
   if (typeof (valueToTrim) == 'string')
     return valueToTrim.trim() as T
@@ -212,8 +261,8 @@ export function trim<T extends string | null | undefined>(valueToTrim: T): T {
  * Extract the identifier needed for the edit HTML properties from the contentLink. This will ensure 
  * that inline content links don't output an identifier.
  * 
- * @param contentLink 
- * @returns 
+ * @param     contentLink   The content link to extract the identifier from
+ * @returns   The content key to use for edit HTML properties, or `undefined` if not applicable
  */
 export function getContentEditId(contentLink?: ContentLink | InlineContentLink | null): string | undefined {
   if (!contentLink?.key || contentLink.key.length == 0)
@@ -245,9 +294,9 @@ export function getRandomKey(prefix: string = "rnd"): string {
  * Parse the provided string to determine if it's a valid positive (i.e. larger then 0) number,
  * return the number if it is, `undefined` or the `defaultValue` otherwise. 
  * 
- * @param     value 
- * @param     defaultValue 
- * @returns   
+ * @param     value         The string to parse
+ * @param     defaultValue  The value to return when `value` is not a valid positive number
+ * @returns   The parsed positive number, or `defaultValue` otherwise
  */
 export function tryParsePositiveInt(value: string | undefined | null, defaultValue?: number) {
   try {

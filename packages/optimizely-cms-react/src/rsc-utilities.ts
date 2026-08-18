@@ -1,3 +1,9 @@
+/**
+ * Check whether debug logging has been enabled through the `OPTIMIZELY_DEBUG`
+ * or `DXP_DEBUG` environment variables.
+ *
+ * @returns   `true` when debug logging is enabled
+ */
 export function isDebug() : boolean
 {
   try {
@@ -8,6 +14,11 @@ export function isDebug() : boolean
   }
 }
 
+/**
+ * Check whether the application is running with `NODE_ENV` set to `development`.
+ *
+ * @returns   `true` when running in development mode
+ */
 export function isDevelopment() : boolean
 {
   try {

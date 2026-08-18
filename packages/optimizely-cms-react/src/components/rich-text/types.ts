@@ -1,7 +1,7 @@
-import type { ComponentType as ReactComponentType, FunctionComponent } from "react";
+import type { FunctionComponent } from "react";
 import type { ComponentFactory } from "../../factory/types.js";
 import type { PropsWithOptionalContext, PropsWithContext } from "../../context/types.js";
-import type { ElementType, ElementProps, ElementWithChildrenType } from "../type-utils.js";
+import type { ElementProps, ElementWithChildrenType } from "../type-utils.js";
 
 //#region Type defintions
 export type RichTextProps<ET extends ElementWithChildrenType> = {
@@ -55,6 +55,9 @@ export type RichTextProps<ET extends ElementWithChildrenType> = {
 
 //export type _RichTextComponent = ReactComponentType<PropsWithOptionalContext<RichTextProps>>
 
+/**
+ * The public surface of the RichText component
+ */
 export type RichTextComponent = <ET extends ElementWithChildrenType>(props: PropsWithOptionalContext<RichTextProps<ET>>) => ReturnType<FunctionComponent>
 export type RichTextImplProps<ET extends ElementWithChildrenType> = PropsWithContext<RichTextProps<ET> & Omit<ElementProps<ET>, keyof RichTextProps<ET>>>
 
@@ -65,7 +68,7 @@ export type RichTextElementProps = Readonly<{
   idPrefix: string
 }>
 
-export type Node = {}
+export type Node = object
 
 /**
  * Structured HTML node type for text data

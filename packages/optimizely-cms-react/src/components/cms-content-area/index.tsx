@@ -106,16 +106,17 @@ export const CmsContentArea: CmsContentAreaBaseComponent = <
         )
 
       // Buld wrapper configuration
-      const contentAreaItemContainerProps: any = {
+      const displayOption : string | undefined = Utils.isNonEmptyString(item.displayOption) ? item.displayOption : undefined;
+      const contentAreaItemContainerProps: Record<string, unknown> = {
         'data-epi-block-id':
           inEditMode && fieldName
             ? Utils.getContentEditId(contentLink)
             : undefined,
-        'data-displayoption': item.displayOption || undefined,
+        'data-displayoption': displayOption,
         'data-tag': item.tag || undefined,
         'data-component': contentType?.at(0),
         ...Utils.filterCmsComponentProps(contentItemElementProps),
-        className: `opti-content-area-item opti-content-area-item-${idx}${contentAreaItemClassName ? ' ' + contentAreaItemClassName : ''} ${classMapper ? classMapper(item.displayOption ?? 'default', contentType ?? null, idx) : ''}`,
+        className: `opti-content-area-item opti-content-area-item-${idx}${contentAreaItemClassName ? ' ' + contentAreaItemClassName : ''} ${classMapper ? classMapper(displayOption ?? 'default', contentType ?? null, idx) : ''}`,
       }
       const contentAraeItemContent: JSX.Element = useSuspense ? (
         <Suspense fallback={fallback}>
@@ -159,7 +160,7 @@ export const CmsContentArea: CmsContentAreaBaseComponent = <
   if (noContentAreaContainer) return <>{componentData}</>
 
   // Build container element
-  const contentAreaContainerProps: any = {
+  const contentAreaContainerProps: Record<string, unknown> = {
     className:
       `opti-content-area ${Array.isArray(additionalProps.className) ? additionalProps.className.join(' ') : (additionalProps.className ?? '')}`.trim(),
     'data-epi-edit': inEditMode && fieldName ? fieldName : undefined,

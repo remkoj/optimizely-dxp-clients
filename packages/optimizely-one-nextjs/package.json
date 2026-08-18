@@ -2,7 +2,7 @@
   "name": "@remkoj/optimizely-one-nextjs",
   "description": "Optimizely One Next.js integration for ODP, Content Recommendations, and Web Experimentation",
   "license": "Apache-2.0",
-  "version": "6.0.0-rc.4",
+  "version": "6.0.0-rc.5",
   "repository": {
     "type": "git",
     "url": "https://github.com/remkoj/optimizely-dxp-clients.git",
@@ -41,14 +41,14 @@
     }
   },
   "devDependencies": {
-    "@remkoj/optimizely-graph-client": "workspace:6.0.0-rc.4",
+    "@remkoj/optimizely-graph-client": "workspace:6.0.0-rc.5",
     "@tailwindcss/cli": "^4.3.3",
     "@types/node": "^24.13.3",
     "@types/react": "^19.2.18",
     "@types/react-dom": "^19.2.4",
     "@types/uuid": "^11.0.0",
     "browserslist": "^4.28.8",
-    "next": "^16.3.0",
+    "next": "^16.3.1",
     "prop-types": "^15.8.1",
     "react": "^19.2.8",
     "react-dom": "^19.2.8",
@@ -67,7 +67,7 @@
     "@headlessui/react": "^2.2.10",
     "@heroicons/react": "^2.2.0",
     "@optimizely/react-sdk": "^4.1.0",
-    "@remkoj/optimizely-graph-client": "6.0.0-rc.4",
+    "@remkoj/optimizely-graph-client": "6.0.0-rc.5",
     "deep-object-diff": "^1.1.9",
     "swr": "^2.5.1",
     "uuid": "^14.0.1"
@@ -79,6 +79,5 @@
     "watch-styles": "tailwindcss -i ./src/styles.css -o ./dist/styles.css --minify --watch",
     "tailwind": "tailwindcss -i ./src/styles.css -o ./dist/styles.css --minify",
     "recompile": "tsc --build --clean && tsc --build --force"
-  },
-  "stableVersion": "5.2.0"
+  }
 }

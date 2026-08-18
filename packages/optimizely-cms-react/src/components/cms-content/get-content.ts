@@ -7,7 +7,7 @@ import { validatesFragment, contentLinkToRequestVariables, isCmsComponentWithFra
 
 import { getComponentLabel } from './resolve-component.js';
 
-export function getContent<NDL extends boolean = false>(client: IOptiGraphClient | undefined, contentLink: InlineContentLink | ContentLink | undefined, Component: CmsComponent<any> | undefined, fragmentData: Record<string, any> | undefined | null, noDataLoad?: NDL): NDL extends true ? Record<string, any> : Promise<Record<string, any>> {
+export function getContent<NDL extends boolean = false>(client: IOptiGraphClient | undefined, contentLink: InlineContentLink | ContentLink | undefined, Component: CmsComponent<unknown> | undefined, fragmentData: Record<string, unknown> | undefined | null, noDataLoad?: NDL): NDL extends true ? Record<string, unknown> : Promise<Record<string, unknown>> {
   const debug = client?.debug ?? false
   const componentLabel: string = getComponentLabel(Component as ComponentType)
 
@@ -27,7 +27,7 @@ export function getContent<NDL extends boolean = false>(client: IOptiGraphClient
 
       // Default mode, use fragment
     } else {
-      return (noDataLoad ? fragmentData : Promise.resolve(fragmentData)) as NDL extends true ? Record<string, any> : Promise<Record<string, any>>
+      return (noDataLoad ? fragmentData : Promise.resolve(fragmentData)) as NDL extends true ? Record<string, unknown> : Promise<Record<string, unknown>>
     }
   }
 
@@ -35,18 +35,18 @@ export function getContent<NDL extends boolean = false>(client: IOptiGraphClient
   if (isInlineContentLink(contentLink)) {
     if (debug)
       console.warn(`🟠 [CmsContent][getContent] No data present for inline content item, this may cause errors if your component expects certain fields to be present`)
-    return (noDataLoad ? fragmentData ?? {} : Promise.resolve(fragmentData ?? {})) as NDL extends true ? Record<string, any> : Promise<Record<string, any>>
+    return (noDataLoad ? fragmentData ?? {} : Promise.resolve(fragmentData ?? {})) as NDL extends true ? Record<string, unknown> : Promise<Record<string, unknown>>
   }
 
-  // Stop before running any Async operation if we're not loading data
+  // Stop before running unknown Async operation if we're not loading data
   if (noDataLoad)
-    return (noDataLoad ? {} : Promise.resolve({})) as NDL extends true ? Record<string, any> : Promise<Record<string, any>>
+    return (noDataLoad ? {} : Promise.resolve({})) as NDL extends true ? Record<string, unknown> : Promise<Record<string, unknown>>
 
   // If we don't have a valid link, stop here
   if (!isContentLink(contentLink)) {
     if (debug)
       console.warn(`🟠 [CmsContent][getContent] Unable to load data for "${componentLabel}" without a valid content link`)
-    return Promise.resolve({})
+    return Promise.resolve({}) as NDL extends true ? Record<string, unknown> : Promise<Record<string, unknown>>
   }
 
   // Return immediately when there's no client
@@ -55,18 +55,19 @@ export function getContent<NDL extends boolean = false>(client: IOptiGraphClient
     throw new Error(`Data loading for "${componentLabel}" requires a GraphQL Client`)
   }
 
-  if (isCmsComponentWithDataQuery<any>(Component))
-    return getComponentDataFromQuery<Record<string, any>>(Component, contentLink, client)
+  if (isCmsComponentWithDataQuery(Component))
+    return getComponentDataFromQuery(Component, contentLink, client) as NDL extends true ? Record<string, unknown> : Promise<Record<string, unknown>>
 
-  if (isCmsComponentWithFragment<any>(Component))
-    return getComponentDataFromFragment<any>(Component, contentLink, client).then(data => (data || {}) as Record<string, any>)
+  if (isCmsComponentWithFragment(Component)) {
+    return getComponentDataFromFragment(Component, contentLink, client).then(data => (data || {}) as Record<string,unknown>) as NDL extends true ? Record<string, unknown> : Promise<Record<string, unknown>>
+  }
 
-  return Promise.resolve({})
+  return Promise.resolve({}) as NDL extends true ? Record<string, unknown> : Promise<Record<string, unknown>>
 }
 
 export default getContent
 
-async function getComponentDataFromQuery<T extends Record<string, any>>(Component: CmsComponentWithQuery<T, Record<string, any>>, contentLink: ContentLink | undefined, client: IOptiGraphClient): Promise<ProcessQueryResponse<T>> {
+async function getComponentDataFromQuery<T>(Component: CmsComponentWithQuery<T>, contentLink: ContentLink | undefined, client: IOptiGraphClient): Promise<ProcessQueryResponse<T>> {
   const gqlQuery = Component.getDataQuery()
   const gqlVariables = contentLinkToRequestVariables(contentLink as ContentLink, client)
 
@@ -78,11 +79,11 @@ async function getComponentDataFromQuery<T extends Record<string, any>>(Componen
     const responseItem = responseData.data?.item as NonNullable<NonNullable<Required<GetDataQueryResponseTemplate>["data"]>["item"]>
 
     // Transform CMS 12 results
-    if (client.currentOptiCmsSchema == OptiCmsSchema.CMS12 && responseItem._locale?.name) {
+    if (client.currentOptiCmsSchema == OptiCmsSchema.CMS12 && hasCms12LocaleName(responseItem)) {
       const metadata = responseItem._metadata ?? {}
       metadata.locale = responseItem._locale?.name
       responseItem._metadata = metadata
-      delete responseItem._locale
+      delete (responseItem as { _locale?: unknown })._locale
     }
     return responseItem as ProcessQueryResponse<T>
   }
@@ -91,14 +92,18 @@ async function getComponentDataFromQuery<T extends Record<string, any>>(Componen
   return responseData as ProcessQueryResponse<T>
 }
 
-function isTemplatedResponse(responseData: Record<string, any>): responseData is GetDataQueryResponseTemplate {
+function hasCms12LocaleName(toTest: object): toTest is { _locale: { name: string }, _metadata?: Record<string,unknown>} {
+  return toTest && typeof(toTest) === 'object' && typeof((toTest as { _locale: { name: string }})._locale?.name) === 'string'
+}
+
+function isTemplatedResponse(responseData: unknown): responseData is GetDataQueryResponseTemplate {
   if (!responseData || typeof (responseData) !== 'object')
     return false;
   const responseKey = (responseData as GetDataQueryResponseTemplate)?.data?.item?._metadata?.key
   return typeof (responseKey) === 'string' && responseKey.length > 0
 }
 
-async function getComponentDataFromFragment<T extends any = any>(Component: CmsComponentWithFragment<T, Record<string, any>>, contentLink: ContentLink, client: IOptiGraphClient) {
+async function getComponentDataFromFragment<T>(Component: CmsComponentWithFragment<T, Record<string, unknown>>, contentLink: ContentLink, client: IOptiGraphClient) {
   // Build the Query and variables
   type FragmentQueryResponse = { contentById: { total: number, items: Array<{ _metadata: { key: string, version: number | string, locale?: string }, _locale?: { name: string } } & T> } }
   const [name, fragment] = Component.getDataFragment()
@@ -106,7 +111,7 @@ async function getComponentDataFromFragment<T extends any = any>(Component: CmsC
   const gqlVariables = contentLinkToRequestVariables(contentLink as ContentLink, client)
 
   // Run the Query
-  const fragmentResponse = await client.request<FragmentQueryResponse, any>(gqlQuery, gqlVariables)
+  const fragmentResponse = await client.request<FragmentQueryResponse, object>(gqlQuery, gqlVariables)
 
   // Check the result count
   const totalItems = fragmentResponse.contentById.total || 0

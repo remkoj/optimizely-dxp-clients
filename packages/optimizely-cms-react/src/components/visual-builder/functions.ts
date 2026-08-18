@@ -1,6 +1,7 @@
 import { isContentType, isNotNullOrUndefined } from '../../utilities.js'
 import { isContentLink, ContentLinkWithLocale, isInlineContentLink } from '@remkoj/optimizely-graph-client'
-import type { CompositionNode, LeafPropsFactory, CompositionComponentNode, NodePropsFactory, CompositionStructureNode } from './types.js'
+import type { CompositionNode, LeafPropsFactory, CompositionComponentNode, NodePropsFactory, CompositionStructureNode, CompositionComponent } from './types.js'
+import type { LayoutProps } from '../cms-styles/index.js';
 
 /**
  * Test if the Node within VisualBuilder is an Element
@@ -9,7 +10,7 @@ import type { CompositionNode, LeafPropsFactory, CompositionComponentNode, NodeP
  * @param           node        The Node to test
  * @returns         `true` if the Node is an element, `false` otherwise.
  */
-export function isElementNode(node: CompositionNode<Record<string, any>>): node is CompositionComponentNode<Record<string, any>> {
+export function isElementNode(node: CompositionNode): node is CompositionComponentNode {
   return isComponentNode(node)
 }
 
@@ -19,17 +20,31 @@ export function isElementNode(node: CompositionNode<Record<string, any>>): node 
  * @param           node        The Node to test
  * @returns         `true` if the Node is an element, `false` otherwise.
  */
-export function isComponentNode(node: CompositionNode<Record<string, any>>): node is CompositionComponentNode<Record<string, any>> {
+export function isComponentNode(node: CompositionNode): node is CompositionComponentNode {
   return node.layoutType == "component"
 }
 
-export function isComponentNodeOfType<ET extends Record<string, any>>(node: CompositionNode<Record<string, any>>, test: (data: Record<string, any>) => data is ET): node is CompositionComponentNode<ET> {
+/**
+ * Test if the Node within VisualBuilder is a Component of a specific type
+ * 
+ * @param           node        The Node to test
+ * @param           test        Type guard used to validate the component data
+ * @returns         `true` if the Node is a component matching `test`, `false` otherwise.
+ */
+export function isComponentNodeOfType<ET extends Required<CompositionNode>['component']>(node: CompositionNode, test: (data: CompositionNode['component']) => data is ET): node is CompositionComponentNode<ET> {
   if (!isComponentNode(node))
     return false
   return test(node.component)
 }
 
-export function isStructureNode(node: CompositionNode<Record<string, any>>): node is CompositionStructureNode {
+/**
+ * Test if the Node within VisualBuilder is a structure node (e.g. experience,
+ * section, row or column), as opposed to a component node.
+ * 
+ * @param           node        The Node to test
+ * @returns         `true` if the Node is a structure node, `false` otherwise.
+ */
+export function isStructureNode(node: CompositionNode): node is CompositionStructureNode {
   return !isComponentNode(node)
 }
 
@@ -40,7 +55,7 @@ export function isStructureNode(node: CompositionNode<Record<string, any>>): nod
  * @returns     `true` when the value is a Visual Builder node, `false` 
  *              otherwise
  */
-export function isNode(toTest: any): toTest is CompositionNode {
+export function isNode(toTest: unknown): toTest is CompositionNode {
   if (typeof (toTest) != 'object' || toTest == null)
     return false
 
@@ -51,7 +66,7 @@ export function isNode(toTest: any): toTest is CompositionNode {
   return hasValidName && hasValidType
 }
 
-export const defaultPropsFactory: LeafPropsFactory = <ET extends Record<string, any>, LT = string>(node: CompositionComponentNode<ET>) => {
+export const defaultPropsFactory: LeafPropsFactory = <ET extends CompositionComponent, LT = string>(node: CompositionComponentNode<ET>) => {
   const contentType = node.component?._metadata?.types
   if (!isContentType(contentType))
     throw new Error("Invalid content type: " + JSON.stringify(contentType))
@@ -59,23 +74,23 @@ export const defaultPropsFactory: LeafPropsFactory = <ET extends Record<string, 
   const contentLink: Partial<ContentLinkWithLocale<LT>> = {
     key: node.component?._metadata?.key || node.key || undefined,
     version: node.component?._metadata?.version,
-    locale: node.component?._metadata?.locale,
+    locale: node.component?._metadata?.locale as LT|undefined,
     isInline: node.component?._metadata?.key ? false : true
   }
   if (!(isContentLink(contentLink) || isInlineContentLink(contentLink)))
     throw new Error("Invalid content link: " + JSON.stringify(contentLink))
 
-  const layoutData = {
-    type: node.type,
+  const layoutData: LayoutProps = {
+    type: node.type ?? 'unknown',
     layoutType: node.layoutType,
-    template: node.template,
-    settings: node.settings,
+    template: node.template ?? null,
+    settings: node.settings?.map(x => x ? { key: x.key, value: x.value.toString() } : undefined)?.filter(isNotNullOrUndefined) ?? [],
   }
 
   return [contentLink, contentType, node.key || undefined, node.component, layoutData]
 }
 
-export const defaultNodePropsFactory: NodePropsFactory = <ET extends Record<string, any>, LT = string>(node: CompositionStructureNode) => {
+export const defaultNodePropsFactory: NodePropsFactory = <ET extends CompositionComponent, LT = string>(node: CompositionStructureNode) => {
   const componentMainName = node.type ? ( node.layoutType === 'experience' ? node.type+"Node" : node.type) : undefined
   const componentTypes = [
     componentMainName ? [componentMainName] : undefined,
@@ -84,12 +99,12 @@ export const defaultNodePropsFactory: NodePropsFactory = <ET extends Record<stri
     ['Node']
   ].filter(isNotNullOrUndefined);
   const contentLink: ContentLinkWithLocale<LT> = { key: node.key ?? '', isInline: true }
-  const componentData: ET = { __name: node.name, ...node.component } as unknown as ET
-  const layoutData = {
-    type: node.type,
+  const componentData: ET = { __name: node.name, ...node.component } as ET
+  const layoutData: LayoutProps = {
+    type: node.type ?? 'unknown',
     layoutType: node.layoutType,
-    template: node.template,
-    settings: node.settings
+    template: node.template ?? null,
+    settings: node.settings?.map(x => x ? { key: x.key, value: x.value.toString() } : undefined)?.filter(isNotNullOrUndefined) ?? [],
   }
 
   if (!(isContentLink(contentLink) || isInlineContentLink(contentLink)))

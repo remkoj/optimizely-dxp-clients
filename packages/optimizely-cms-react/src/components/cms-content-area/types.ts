@@ -4,6 +4,10 @@ import type { PropsWithCmsContent } from "../cms-content/types.js"
 import type { ContentType } from "../../types.js"
 import type { ElementChildrenProps, ElementProps, ElementType, PropTypeIfPropExists, MayBeArray, TypeIfPropExists, ReservedKeys } from '../type-utils.js'
 
+/**
+ * The shape of a single item within a Content Area, as received from
+ * Optimizely Graph
+ */
 export type ContentAreaItemDefinition = {
   __typename?: string | null
   _type?: string | null
@@ -19,7 +23,7 @@ export type ContentAreaItemDefinition = {
       default?: string | null
     } | null
   } | null
-} & Record<string, any>
+} & Record<string, unknown>
 
 export type ValidContentAreaItemDefinition = {
   __typename?: string | null
@@ -36,7 +40,7 @@ export type ValidContentAreaItemDefinition = {
       default?: string | null
     } | null
   }
-} & Record<string, any>
+} & Record<string, unknown>
 
 export type ItemsProperty<T extends ElementType> = "children" extends ElementChildrenProps<T> ? {
   /**
@@ -180,9 +184,17 @@ export type CmsContentAreaProps<T extends ElementType, CT extends ElementType> =
   CmsContentAreaCoreProps &
   CmsContentAreaWrapperProps<T, CT>
 
+/**
+ * Computes the CSS class(es) to apply to a Content Area item wrapper, based
+ * upon its display option, content type and position within the content area.
+ */
 export type CmsContentAreaClassMapper = (displayOption: string, contentType: ContentType | null, index: number) => string
 
 export type BaseCmsContentAreaProps<T extends ElementType, CT extends ElementType> = PropsWithCmsContent<PropsWithContext<CmsContentAreaProps<T, CT>>>
 
 export type CmsContentAreaBaseComponent = <T extends ElementType, CT extends ElementType>(props: BaseCmsContentAreaProps<T, CT>) => ReactNode
+
+/**
+ * The public surface of the CmsContentArea component
+ */
 export type CmsContentAreaComponent = <T extends ElementType, CT extends ElementType>(props: CmsContentAreaProps<T, CT>) => ReactNode

@@ -44,18 +44,17 @@ export function resolveComponent(
   // Make sure that we normalize the input from graph into a string array
   const myContentType = Utils.normalizeContentType(contentType, false);
 
-  // Validate that we have a value to ask the factory a component for
+  // Validate that we have a value to ask the factory a component for, if not,
+  // return a component that will just render its' children and log a warning to
+  // the console.
   if (!myContentType || myContentType.length == 0) {
-    if (isDebug)
-      console.error(
-        `🔴 [CmsContent][resolveComponent] The content type ${JSON.stringify(contentType)}, with prefix ${JSON.stringify(prefix)} yielded an empty normalized type`
-      )
-    throw new Error(
-      `The content type ${JSON.stringify(contentType)}, with prefix ${JSON.stringify(prefix)} yielded an empty normalized type`
-    )
+    const errorMessage = contentType ?
+      `The content type ${JSON.stringify(contentType)} yielded an empty normalized type` :
+      'Unable to resolve a component for an empty content type';
+    return createErrorComponent(errorMessage, false, 'EmptyContentType');
   }
-
-  // Resolve component
+  
+  // Resolve component if - and only if - the type is set
   const Component = Utils.resolveComponentType(
     factory,
     myContentType,
@@ -65,52 +64,62 @@ export function resolveComponent(
   // Handle component not found in factory
   if (!Component) {
     const contentTypeDisplay = Array.isArray(myContentType)
-      ? myContentType.join('/')
-      : myContentType
-    if (isDebug)
-      console.warn(
-        `🟠 [CmsContent] Component of type "${contentTypeDisplay}" not resolved by factory`
-      )
-    if (isDebug || inEditMode) {
-      const ErrorComponent: ComponentMissingComponent = ({
-        children,
-        contentLink,
-      }) => (
-        <>
-          <div className="opti-error">
-            Component of type "{contentTypeDisplay}" not resolved by factory for{' '}
-            {contentLink?.key ?? ''} version {contentLink?.version ?? ''}
-          </div>
-          {children}
-        </>
-      )
-      ErrorComponent.displayName = 'Opti::ComponentMissing'
-      return ErrorComponent
-    }
-    const ErrorComponent: ComponentMissingComponent = (props) => props.children
-    ErrorComponent.displayName = 'Opti::ComponentMissing'
-    return ErrorComponent
+      ? myContentType.filter(Utils.isNonEmptyString).join('/')
+      : (myContentType as string | undefined)
+
+    // Build the error message
+    const errorMessage = `Component of type "${contentTypeDisplay}" not found in factory`;
+
+    // Return the error component, which will render the children and log a warning to
+    // the console.
+    return createErrorComponent(errorMessage, isDebug || inEditMode, 'ComponentNotFound');
   }
 
-  // Return the component
-  /*if (isDebug)
-    console.log(
-      '⚪ [CmsContent] Rendering item using component:',
-      getComponentLabel(Component as ComponentType)
-    )*/
   return Component
 }
 
 export default resolveComponent
 
+/**
+ * Create a component that will render its' children and log a warning to the console
+ * about the missing component. When `showMessage` is true, it will also render the 
+ * message in the UI.
+ * 
+ * @param message     The message to display in the console and optionally in the UI
+ * @param showMessage Whether to show the message in the UI or not
+ * @param reason      The reason for the missing component, either "EmptyContentType" 
+ *                    or "ComponentNotFound"
+ * @returns           The error component that will render its' children and optionally
+ *                    the error message
+ */
+const createErrorComponent = (
+  message: string,
+  showMessage?: boolean,
+  reason: ComponentMissingComponent['reason'] = 'ComponentNotFound'
+): ComponentMissingComponent => {
+  const ErrorComponent: ComponentMissingComponent = ({ children, contentLink }) => {
+    console.warn(`🟠 [CmsContent][resolveComponent] ${ reason }: ${ message } for content item ${ JSON.stringify(contentLink) }`);
+    return showMessage && message ? (
+      <>
+        <div className="opti-error">{ message } for content item { contentLink?.key || 'undefined' }, version { contentLink?.version || 'published or primary draft' }</div>
+        {children}
+      </>
+    ) : children;
+  }
+  ErrorComponent.displayName = 'Opti::ComponentMissing';
+  ErrorComponent.reason = reason;
+  return ErrorComponent;
+}
+
 export type ComponentMissingComponent = FunctionComponent<
   PropsWithChildren<{ contentLink?: ContentLink }>
 > & {
   displayName: 'Opti::ComponentMissing'
+  reason: "EmptyContentType" | "ComponentNotFound"
 }
 
 export function isComponentMissingComponent(
-  toTest: ComponentType<any> | null | undefined
+  toTest: unknown
 ): toTest is ComponentMissingComponent {
-  return toTest?.displayName == 'Opti::ComponentMissing'
+  return (toTest as ComponentMissingComponent | undefined)?.displayName === 'Opti::ComponentMissing'
 }
