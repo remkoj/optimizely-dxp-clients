@@ -134,8 +134,6 @@ export async function* getAllContentTypes(client: CmsApiClient, debug: boolean =
       } as IntegrationApi.ContentTypePage
     });
 
-    console.log(resultsPage)
-
     // Calculate fields for next page
     //@ts-expect-error  There's a difference between the SaaS & PaaS API, hence we're ignoring the next line
     totalItemCount = resultsPage.totalItemCount ?? resultsPage.totalCount ?? 0;
