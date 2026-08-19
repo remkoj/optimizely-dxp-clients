@@ -15,7 +15,7 @@ export async function getAccessToken(config?: CmsIntegrationApiOptions) : Promis
 {
     const options = config ?? getCmsIntegrationApiConfigFromEnvironment()
     let authUrl = options.cmsVersion === OptiCmsVersion.CMS12 ? (() => {
-      let u = new URL(`${ OpenAPI.BASE }/oauth/token`, options.base).href;
+      let u = new URL('oauth/token', options.base.href.replace(/\/*$/, '/')).href;
       return u.replace('preview2', 'preview1');
     })() : new URL('oauth/token', options.base.href.replace(/\/*$/, '/')).href;
     const headers = new Headers()
