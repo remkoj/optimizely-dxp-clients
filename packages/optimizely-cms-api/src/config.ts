@@ -28,24 +28,16 @@ export function getCmsIntegrationApiConfigFromEnvironment() : CmsIntegrationApiO
     try {
         const cmsUrlAdjusted = cmsUrl.includes("://") ? cmsUrl : 'https://'+cmsUrl
 
-        // Determine the API endpoint URL
-        let apiEndpoint: string
+        // Determine the API base URL
         if (cmsApiUrl) {
-            // User explicitly set the API URL
-            apiEndpoint = cmsApiUrl.includes("://") ? cmsApiUrl : 'https://'+cmsApiUrl
+            // User explicitly set the API URL - honour it verbatim, including any path prefix
+            const apiUrlAdjusted = cmsApiUrl.includes("://") ? cmsApiUrl : 'https://' + cmsApiUrl
+            baseUrl = new URL(apiUrlAdjusted.replace(/\/+$/, ''))
         } else {
-            // Try to auto-detect API gateway from CMS URL
-            const detectedApiGateway = extractApiGateway(cmsUrlAdjusted)
-            if (detectedApiGateway) {
-                apiEndpoint = detectedApiGateway
-            } else {
-                // Custom domain or non-SaaS: use the CMS URL as-is
-                apiEndpoint = cmsUrlAdjusted
-            }
+            // Try to auto-detect the API gateway from the CMS URL, falling back to the CMS URL as-is
+            const apiEndpoint = extractApiGateway(cmsUrlAdjusted) ?? cmsUrlAdjusted
+            baseUrl = new URL(new URL(OpenAPI.BASE).pathname, apiEndpoint)
         }
-
-        const apiPath = new URL(OpenAPI.BASE).pathname
-        baseUrl = new URL(apiPath, apiEndpoint)
         if (cmsVersion == OptiCmsVersion.CMS12)
             baseUrl.pathname = baseUrl.pathname.replace('preview2', 'preview1')
     } catch (e) {
