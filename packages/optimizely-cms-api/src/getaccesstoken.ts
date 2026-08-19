@@ -1,4 +1,4 @@
-import { type CmsIntegrationApiOptions, readEnvConfig } from "./config";
+import { DEFAULT_API_BASEURL, getAuthBaseUrl, resolveApiBaseUrl, type CmsIntegrationApiOptions, readEnvConfig } from "./config";
 
 type TokenResponse = { access_token: string, expires_in: number, token_type: string }
 type ErrorResponse = { error: string, error_description: string }
@@ -10,7 +10,13 @@ function isErrorResponse(response: AuthResponse): response is ErrorResponse {
 
 export async function getAccessToken(config?: CmsIntegrationApiOptions, baseUrl?: string): Promise<string> {
   const options = config ?? readEnvConfig()
-  const authUrl = new URL(`oauth/token`, baseUrl ?? options.base ?? 'https://api.cms.optimizely.com/').href
+  // Resolve against the API base rather than the CMS frontend URL, which never
+  // serves the token endpoint. An explicit baseUrl is taken as-is, so callers
+  // that already resolved it (client-config) keep full control.
+  const authOrigin = baseUrl
+    ? new URL(baseUrl.replace(/\/*$/, '/'))
+    : getAuthBaseUrl(resolveApiBaseUrl(options) ?? DEFAULT_API_BASEURL)
+  const authUrl = new URL(`oauth/token`, authOrigin).href
   const headers = new Headers()
 
   if (!options.clientId || !options.clientSecret) {

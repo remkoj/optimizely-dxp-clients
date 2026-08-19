@@ -2,7 +2,7 @@ import { withOperations, ApiClient as AbstractApiClient, ApiError } from "@remko
 import * as Operations from './client/sdk.gen';
 import { createClient, createConfig } from './client/client';
 import { createClientConfig } from './client-config';
-import { type CmsIntegrationApiOptions, readEnvConfig } from "./config";
+import { DEFAULT_API_BASEURL, type CmsIntegrationApiOptions, readEnvConfig } from "./config";
 import buildInfo from "./version.json";
 import type { OpenAPIV3_1 } from "openapi-types";
 
@@ -13,7 +13,7 @@ class BaseApiClient extends AbstractApiClient<CmsIntegrationApiOptions, ReturnTy
   public constructor(config?: CmsIntegrationApiOptions) {
     const apiConfig = config ?? readEnvConfig();
     const apiClient = createClient(createClientConfig(createConfig({
-      baseUrl: 'https://api.cms.optimizely.com/v1',
+      baseUrl: DEFAULT_API_BASEURL.href,
     }), config));
     super(apiConfig, apiClient);
   }

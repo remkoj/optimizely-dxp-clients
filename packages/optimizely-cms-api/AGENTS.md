@@ -15,9 +15,30 @@ npm install @remkoj/optimizely-cms-api
 | `OPTIMIZELY_CMS_URL` | yes | CMS instance URL, e.g. `https://<tenant>.cms.optimizely.com` |
 | `OPTIMIZELY_CMS_CLIENT_ID` | yes | OAuth client ID |
 | `OPTIMIZELY_CMS_CLIENT_SECRET` | yes | OAuth client secret |
-| `OPTIMIZELY_CMS_API_BASEURL` | no | Override the API base URL |
+| `OPTIMIZELY_CMS_API_BASEURL` | no | Override the auto-detected API base URL. Rarely needed — see below |
 | `OPTIMIZELY_CMS_USER_ID` | no | Impersonate a specific user (`actAs`) |
 | `OPTIMIZELY_DEBUG` | no | Set to `"1"` to enable request/response logging |
+
+## API URL resolution
+
+The API base URL is resolved in this order, whether the configuration comes from environment
+variables (`readPartialEnvConfig()`), from CLI arguments, or from an object passed to
+`createClient()`:
+
+1. `OPTIMIZELY_CMS_API_BASEURL` (or `apiBaseUrl`) is set → used verbatim, including any path prefix.
+2. The CMS URL is a SaaS CMS host (`<tenant>.cms<env>.optimizely.com`) → the matching managed
+   gateway, `https://api.cms<env>.optimizely.com/v1`. The environment suffix carries over, the
+   tenant does not.
+3. The CMS URL is any other host (self-hosted) → `<cms url>/_cms/v1`.
+4. Neither is set → `https://api.cms.optimizely.com/v1`.
+
+So a tester on `OPTIMIZELY_CMS_URL=https://app-xyz.cmstest.optimizely.com` reaches
+`https://api.cmstest.optimizely.com/v1` without further configuration. Only set
+`OPTIMIZELY_CMS_API_BASEURL` when the gateway cannot be derived from the CMS URL.
+
+The OAuth token endpoint follows the same split: managed gateways serve it from the host root
+(`https://api.cms<env>.optimizely.com/oauth/token`), self-hosted instances from
+`<cms url>/_cms/v1/oauth/token`.
 
 ## Creating a client
 
