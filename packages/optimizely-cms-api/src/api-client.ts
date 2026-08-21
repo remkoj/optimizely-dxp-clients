@@ -18,13 +18,14 @@ export class ApiClient extends CmsIntegrationApiClient
     public constructor (config?: CmsIntegrationApiOptions)
     {
         const options = config ?? getCmsIntegrationApiConfigFromEnvironment()
-        let base = OpenAPI.BASE;
+        let base = options.base.toString();
         let version = OpenAPI.VERSION;
         if (options.cmsVersion == OptiCmsVersion.CMS12) {
-          base = options.base.toString();
           version = 'preview1';
           if (options.debug)
-            console.info(`🚧 Switched to CMS 12 compatibility mode. Overridden Base URL ${base}, version: ${ version }`);
+            console.info(`🚧 CMS 12 compatibility mode. Base URL ${base}, version: ${ version }`);
+        } else if (options.debug) {
+          console.info(`🚀 CMS 13 mode. Base URL ${base}, version: ${ version }`);
         }
         let access_token : string | undefined = undefined
         super({
