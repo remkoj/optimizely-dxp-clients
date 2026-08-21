@@ -1,6 +1,6 @@
 import type { CreateClientConfig } from './client/client.gen';
 import type { ClientOptions, Config, Auth } from './client/client';
-import { readPartialEnvConfig, type CmsIntegrationApiOptions } from "./config"
+import { getAuthBaseUrl, readPartialEnvConfig, resolveApiBaseUrl, type CmsIntegrationApiOptions } from "./config"
 import { getAccessToken } from "./getaccesstoken"
 
 type CreateConfig<T extends ClientOptions = ClientOptions> = (config?: Config<ClientOptions & T>, apiConfig?: CmsIntegrationApiOptions) => Config<Required<ClientOptions> & T>
@@ -18,7 +18,7 @@ type CreateConfig<T extends ClientOptions = ClientOptions> = (config?: Config<Cl
  */
 export const createClientConfig: CreateConfig = (config, apiConfig) => {
   const envConfig = apiConfig || readPartialEnvConfig();
-  const baseUrl = envConfig.apiBaseUrl?.href ?? config?.baseUrl;
+  const baseUrl = resolveApiBaseUrl(envConfig)?.href ?? config?.baseUrl;
 
   // If we don't have a valid base URL just return the config as given
   if (!baseUrl)
@@ -27,9 +27,7 @@ export const createClientConfig: CreateConfig = (config, apiConfig) => {
   if (envConfig.debug)
     console.log(`⚪ [CMS API] Creating API-Client for ${baseUrl} as ${envConfig.actAs ?? envConfig.clientId}\n`)
 
-  const authBaseUrl = ((new URL(baseUrl)).hostname.includes('cms.optimizely.com') ?
-    new URL('/', baseUrl) :
-    new URL('/_cms/v1/', baseUrl)).href;
+  const authBaseUrl = getAuthBaseUrl(baseUrl).href;
 
   if (envConfig.debug)
     console.log(`⚪ [CMS API] Creating API-Client for ${baseUrl}\n`)

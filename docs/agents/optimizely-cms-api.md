@@ -23,6 +23,30 @@
 
 `clean` removes `src/client/` in addition to `dist/`; after `clean`, run `generate` before `prepare`.
 
+## API URL resolution
+
+`src/config.ts` owns all API endpoint resolution — `DEFAULT_API_BASEURL`, `extractApiGateway()`
+(CMS frontend host → managed gateway), `resolveApiBaseUrl()` (config → API base) and
+`getAuthBaseUrl()` (API base → OAuth token base). See
+[the package AGENTS.md](../../packages/optimizely-cms-api/AGENTS.md) for the resolution order.
+
+Consequences for changes in this area:
+
+- Resolve through `resolveApiBaseUrl()`, never by reading `config.apiBaseUrl` directly. Config does
+  not only arrive from environment variables: the CLI builds it from `--cms_url` in
+  `packages/optimizely-cms-cli/src/tools/parseArgs.ts`, and callers pass it to `createClient()`.
+  Those paths supply `base` but no `apiBaseUrl`, so a derivation that lives only in
+  `readPartialEnvConfig()` silently leaves them on the production gateway.
+- Do not hardcode `https://api.cms.optimizely.com` elsewhere. `src/api-client.ts` and
+  `src/getaccesstoken.ts` both import `DEFAULT_API_BASEURL`, and `src/client-config.ts` imports
+  `getAuthBaseUrl` rather than re-deriving the token endpoint.
+- The `api.cms<env>.optimizely.com` hostname pattern appears twice in `src/config.ts` — once in
+  `extractApiGateway()` (producing it) and once in `isManagedApiGateway()` (recognising it). They
+  must stay in sync, otherwise an environment resolves to the right API base but the wrong token
+  endpoint.
+- `OPTIMIZELY_CMS_API_URL` in `scripts/create-client.mjs` is unrelated: it is build-time only, and
+  points at the gateway used to fetch the OpenAPI spec for code generation.
+
 ```bash
 yarn workspace @remkoj/optimizely-cms-api run rebuild
 ```
