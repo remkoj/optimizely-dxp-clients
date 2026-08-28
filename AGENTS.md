@@ -2,7 +2,7 @@
 
 `optimizely-dxp-clients` — Yarn 4 workspaces monorepo. Publishes JS/TS SDKs for Optimizely SaaS CMS and Optimizely Graph to npm under `@remkoj/*`.
 
-- Package manager: Yarn 4.17.0 (`packageManager` field is authoritative — do not use npm/pnpm)
+- Package manager: Yarn 4.18.0 (`packageManager` field is authoritative — do not use npm/pnpm)
 - Node: `>=24 <25` for the whole workspace (root `engines.node`; also pinned per-package in
   `optimizely-cms-cli`, `optimizely-graph-cli`, `optimizely-cms-nextjs`, `optimizely-one-nextjs`)
 - Versions: lockstep, currently `6.0.0-rc.2`
@@ -68,6 +68,32 @@ Anti-circumvention:
 - **"The change is obviously correct/small."** Obviousness and size are irrelevant. No change without explicit instruction.
 - **"I'll fix it while I'm here since it's related."** Scope is defined by the user's request, not by proximity to other work.
 - **"Updating the docs counts as part of the analysis."** Documentation changes are file changes and require explicit instruction too.
+
+### 5. Maintain correct JSDoc for touched files
+
+Whenever you touch a file, ensure all exported symbols in that file have accurate JSDoc that matches the current implementation and types.
+
+- Exported functions must document all parameters and return value (`@param`, `@returns`).
+- Exported types, interfaces, classes, and relevant exported members must have correct, up-to-date documentation.
+- If a change invalidates existing JSDoc, update it in the same task before considering the work complete.
+
+Anti-circumvention:
+- **"I only changed one line."** Any touched file must leave exported JSDoc accurate.
+- **"Types are self-explanatory."** Type information does not replace required JSDoc.
+- **"I'll document it later."** Not acceptable; JSDoc updates are part of the same change.
+- **"Only new exports need docs."** Existing exports in touched files must remain correct too.
+
+### 6. Keep developer README.md files in sync
+
+`README.md` files are developer documentation and must be kept in sync with the codebase.
+
+Whenever behavior, setup, commands, scripts, package structure, exports, constraints, workflows, examples, or troubleshooting guidance changes—or when drift is detected—you must update affected README.md files in the same task.
+
+Anti-circumvention:
+- **"README is optional for this change."** If developer-facing facts changed, README updates are required.
+- **"The docs are mostly correct."** Approximate correctness is not sufficient; fix stale or contradictory content.
+- **"I'll update README in a follow-up PR."** Not acceptable; keep docs and code aligned in one task.
+- **"Only root README matters."** Update every affected README.md file (root, package, sample, or other scope as applicable).
 
 ## Layout
 
@@ -144,6 +170,8 @@ Sample consumes packages via `resolutions` → `file:` links to `artefacts/*-dev
 yarn artefacts:fast
 cd samples/basic-project && yarn install
 ```
+
+CLI tools may only be executed from within the `samples/basic-project` scope.
 
 ## Release
 

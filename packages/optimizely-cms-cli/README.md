@@ -39,11 +39,11 @@ npx @remkoj/optimizely-cms-cli
 # Execution through Yarn DLX, latest version
 yarn dlx @remkoj/optimizely-cms-cli
 
-# Execution through NPX, explicit version 5.1.1
-npx @remkoj/optimizely-cms-cli@5.1.1
+# Execution through NPX, explicit version
+npx @remkoj/optimizely-cms-cli@latest
 
-# Execution through Yarn DLX, explicit version 5.1.1
-yarn dlx @remkoj/optimizely-cms-cli@5.1.1
+# Execution through Yarn DLX, explicit version
+yarn dlx @remkoj/optimizely-cms-cli@latest
 ```
 
 ## 2. General usage and parameters
@@ -85,6 +85,7 @@ All commands also support the [global parameters](#21-global-parameters).
 | Command | Description | Usage |
 | --- | --- | --- |
 | `project:migrate` | Automate the directory naming convention update | `yarn opti-cms project:migrate` |
+| `project:ai` | Create or update AI assistant config files (AGENTS.md, CLAUDE.md, GitHub Copilot, Cursor) | `yarn opti-cms project:ai` |
 
 ### `nextjs:*`
 | Command | Description | Usage |
@@ -155,6 +156,19 @@ yarn opti-cms project:migrate [options]
 | `--types` | `-t` | Yes | `[]` | Include only selected content types |
 | `--all` | `-a` | Yes | `false` | Include unsupported base types |
 | `--force` | `-f` | Yes | `false` | Overwrite generated files where applicable |
+
+### `project:ai`
+Description: Create or update `AGENTS.md`, `CLAUDE.md`, `.github/copilot-instructions.md` and `.cursor/rules/optimizely-packages.mdc` so installed `@remkoj` package documentation (their `AGENTS.md`) is available to AI coding assistants. Runs automatically after install/upgrade via a `postinstall` hook.
+
+Usage:
+```bash
+yarn opti-cms project:ai [options]
+```
+
+| Parameter | Alias | Optional | Default | Usage |
+| --- | --- | --- | --- | --- |
+| `--force` | `-f` | Yes | `false` | Overwrite existing files entirely instead of merging into existing content |
+| `--tools` | `-t` | Yes | `['agents','claude','copilot','cursor']` | Limit which AI tools to configure |
 
 ### `nextjs:components`
 Description: Generate React component stubs for selected content types.
@@ -418,6 +432,43 @@ yarn opti-cms types:push [options]
 ## 4. Detailed command descriptions
 ### 4.1. Generate React Component Factory
 This is a companion method to the ComponentFactory / DefaultComponentFactory implementation within [@remkoj/optimizely-cms-react](https://www.npmjs.com/package/@remkoj/optimizely-cms-react) that is used to resolve content types within Optimizely CMS into React Components. This method will create the needed files to easily construct the factory from the components in the frontend.
+
+It scans the components folder recursively and builds one `ComponentTypeDictionary` per directory,
+nesting them into sub-factories that are all combined into a single root factory (`index.ts`,
+exported as `CmsFactory`) that you pass to `factory.registerAll(...)`.
+
+#### What gets included<!-- omit in toc -->
+A `.tsx`/`.jsx` file is picked up as a component only if it has a `export default`. These are always
+skipped, even if they have a default export:
+- Files whose name starts with `_` (e.g. `_layout.tsx`) — treated as partials
+- Any file inside a folder named `partials`
+- `loading.tsx`/`loading.jsx` and `suspense.tsx`/`suspense.jsx` — reserved, see below
+
+#### Content type key & variants<!-- omit in toc -->
+The dictionary entry's `type` is normally read from the `key` field of the sibling
+`*.opti-type.json` file; if that file is missing, the PascalCase folder (or file) name is used
+instead. A single content type can have multiple components — e.g. `default.tsx` and
+`compact.tsx` next to each other — each becomes its own dictionary entry sharing the same `type`
+but a different `variant` (derived from the filename; `index` is treated as `default`).
+
+#### Client components<!-- omit in toc -->
+Any file containing `"use client"` is automatically detected and wrapped in Next.js's
+[`dynamic()`](https://nextjs.org/docs/app/guides/lazy-loading), so client components can still be
+referenced directly from the (server-rendered) factory without extra configuration.
+
+#### Lazy loading & Suspense placeholders<!-- omit in toc -->
+Two optional sibling files change how a component is loaded:
+- `loading.tsx`/`loading.jsx` wraps the component in `next/dynamic({ loading: <LoadingComponent> })`,
+  Next.js's own lazy-loading fallback.
+- `suspense.tsx`/`suspense.jsx` sets `useSuspense: true` and `loader: <SuspensePlaceholder>` on the
+  dictionary entry, which `@remkoj/optimizely-cms-react` uses as a React Suspense fallback while
+  content for that component resolves. This is independent of, and can be combined with, the
+  `next/dynamic` loading above.
+
+#### Re-running the command<!-- omit in toc -->
+Generated factory files start with a `// @not-modified` marker comment. As long as that comment is
+present, re-running `nextjs:factory` freely regenerates the file. If you hand-edit a factory and
+remove the comment, later runs leave it alone unless you pass `--force`/`-f`.
 
 #### Usage & example<!-- omit in toc -->
 Command: `nextjs:factory`

@@ -1,4 +1,4 @@
-import { PropsWithChildren, type ReactNode } from 'react'
+import { PropsWithChildren, type ReactNode, type ElementType as ReactElementType } from 'react'
 import { GenericContext, PropsWithContext } from '../../context/types.js'
 import type {
   ElementType,
@@ -144,6 +144,9 @@ export const CmsEditable: CmsEditableBaseComponent = <CT extends ElementType>({
   currentContent,
   ...props
 }: PropsWithContext<CmsEditableProps<CT>>) => {
+  // Narrow render target to avoid TS2590 from expanding CT over a huge union at JSX spread sites
+  const RenderElement = (as || 'div') as ReactElementType
+
   const {
     inEditMode,
     isDebugOrDevelopment,
@@ -155,7 +158,6 @@ export const CmsEditable: CmsEditableBaseComponent = <CT extends ElementType>({
     isDebugOrDevelopment: true,
     editableContentIsExperience: false,
   }
-  const DefaultElement = as || 'div'
   const addEditProps = inEditMode
     ? currentContent
       ? editableContent?.key === currentContent.key
@@ -164,7 +166,7 @@ export const CmsEditable: CmsEditableBaseComponent = <CT extends ElementType>({
 
   if (!addEditProps) {
     // console.log('⚠ [CmsEditable] Not adding edit props, either not in edit mode or currentContent does not match editableContent', props)
-    return children ? <DefaultElement {...props}>{children}</DefaultElement> : <DefaultElement {...props} />
+    return children ? <RenderElement {...props}>{children}</RenderElement> : <RenderElement {...props} />
   }
 
   if (isDebugOrDevelopment && inEditMode && !cmsFieldName && !cmsId) {
@@ -208,14 +210,14 @@ export const CmsEditable: CmsEditableBaseComponent = <CT extends ElementType>({
       ...props,
     }
 
-  if (typeof DefaultElement !== 'string') {
-    console.log(`⚠ [CmsEditable] Rendering a custom component, forwarding context to ${DefaultElement.name}`, forwardCtx);
+  if (typeof RenderElement !== 'string') {
+    console.log(`⚠ [CmsEditable] Rendering a custom component, forwarding context to ${RenderElement.name}`, forwardCtx);
     if (forwardCtx === true) itemProps['ctx'] = ctx
     if (typeof forwardCtx === 'string' && forwardCtx.length > 0)
       itemProps[forwardCtx] = ctx
   }
 
-  return <DefaultElement {...itemProps}>{children}</DefaultElement>
+  return <RenderElement {...itemProps}>{children}</RenderElement>
 }
 
 export default CmsEditable

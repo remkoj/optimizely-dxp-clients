@@ -15,7 +15,7 @@ export function createCmsClient(args: Parameters<CliModule['handler']>[0] | CmsI
     ...cfg
   })
   if (cfg.debug)
-    process.stdout.write(chalk.gray(`${figures.arrowRight} Connecting to ${client.cmsUrl} as ${cfg.actAs ?? cfg.clientId}\n`))
+    process.stdout.write(chalk.gray(`${figures.arrowRight} Connecting to ${client.cmsUrl} as ${cfg.clientId}\n`))
   return client
 }
 

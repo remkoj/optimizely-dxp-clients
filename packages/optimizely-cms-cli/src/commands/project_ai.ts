@@ -79,8 +79,8 @@ export const ProjectAiCommand: ProjectAiModule = {
     }
 
     if (tools.includes('copilot')) {
-      process.stdout.write(`\n${figures.arrowRight} Updating GitHub Copilot instruction files\n`)
-      await updateCopilotInstructions(projectPath, packages)
+      process.stdout.write(`\n${figures.arrowRight} Writing GitHub Copilot instructions\n`)
+      await updateCopilotInstructions(projectPath, force)
     }
 
     if (tools.includes('cursor')) {
@@ -230,44 +230,41 @@ async function writeNewFileOnly(
 }
 
 /**
- * Writes one `.vscode/instructions/remkoj-<name>.instructions.md` file per package,
- * each containing a `#file:` reference to the package's AGENTS.md in node_modules.
- * VS Code Copilot resolves `#file:` references at query time, so content stays
- * current after a package upgrade without re-running this command.
+ * Writes `.github/copilot-instructions.md`, referencing the project's
+ * `AGENTS.md` — GitHub Copilot loads this file automatically, so the
+ * per-package details already merged into `AGENTS.md` reach the model
+ * without a separate instruction file per package.
  *
- * Also removes the deprecated `github.copilot.chat.codeGeneration.instructions`
- * key from `.vscode/settings.json` if it was written by a previous run.
+ * Also removes the per-package `remkoj-*.instructions.md` files left behind
+ * by older versions of this command in `.github/instructions` and the legacy
+ * `.vscode/instructions` location, and the deprecated
+ * `github.copilot.chat.codeGeneration.instructions` key from
+ * `.vscode/settings.json` if it was written by a previous run.
  */
-async function updateCopilotInstructions(
-  projectPath: string,
-  packages: Array<{ name: string; agentsPath: string }>,
-): Promise<void> {
-  const instructionsDir = path.join(projectPath, '.vscode', 'instructions')
-  await ensureDir(instructionsDir)
+async function updateCopilotInstructions(projectPath: string, force: boolean): Promise<void> {
+  const githubDir = path.join(projectPath, '.github')
+  await ensureDir(githubDir)
 
-  // Remove stale remkoj instruction files from previous runs
+  await writeNewFileOnly(
+    path.join(githubDir, 'copilot-instructions.md'),
+    `# GitHub Copilot Instructions\n\nSee [AGENTS.md](../AGENTS.md) for guidance on working with the Optimizely DXP packages in this project.\n`,
+    force,
+    projectPath,
+  )
+
+  // Remove stale per-package instruction files from previous versions of this command
   const FILE_PREFIX = 'remkoj-'
-  try {
-    const existing = await fs.readdir(instructionsDir)
-    for (const f of existing) {
-      if (f.startsWith(FILE_PREFIX) && f.endsWith('.instructions.md')) {
-        await fs.unlink(path.join(instructionsDir, f))
+  for (const dir of [path.join(githubDir, 'instructions'), path.join(projectPath, '.vscode', 'instructions')]) {
+    try {
+      const existing = await fs.readdir(dir)
+      for (const f of existing) {
+        if (f.startsWith(FILE_PREFIX) && f.endsWith('.instructions.md')) {
+          await fs.unlink(path.join(dir, f))
+        }
       }
+    } catch {
+      // Directory unreadable — ignore
     }
-  } catch {
-    // Directory unreadable — ignore
-  }
-
-  // Write one instruction file per package using a #file: reference
-  for (const pkg of packages) {
-    const safeName = pkg.name.replace('@remkoj/', '')
-    const filePath = path.join(instructionsDir, `${FILE_PREFIX}${safeName}.instructions.md`)
-    const ref = path.relative(projectPath, pkg.agentsPath).replace(/\\/g, '/')
-    const content = `---\napplyTo: "**"\n---\n\n#file:${ref}\n`
-    await fs.writeFile(filePath, content, 'utf-8')
-    process.stdout.write(
-      `  ${chalk.greenBright(figures.tick)} Wrote ${path.relative(projectPath, filePath)}\n`,
-    )
   }
 
   // Clean up the deprecated settings key written by previous versions of this command

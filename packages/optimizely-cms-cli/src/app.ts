@@ -28,7 +28,7 @@ export function createOptiCmsApp(scriptName: string, version?: string, epilogue?
     .option("cms_url", { alias: "cu", description: "Optimizely CMS URL", string: true, type: "string", demandOption: isDemanded(config.base), default: config.base, coerce: (val) => val ? new URL(val) : undefined })
     .option("client_id", { alias: "ci", description: "API Client ID", string: true, type: "string", demandOption: isDemanded(config.clientId), default: config.clientId })
     .option('client_secret', { alias: "cs", description: "API Client Secrent", string: true, type: "string", demandOption: isDemanded(config.clientSecret), default: config.clientSecret })
-    .option('user_id', { alias: "u", description: "Impersonate user id", string: true, type: "string", demandOption: false, default: config.actAs })
+    .option('api_base_url', { alias: 'au', description: "CMS API URL", string: true, type: "string", demandOption: isDemanded(config.apiBaseUrl), default: config.apiBaseUrl, coerce: (val) => val ? new URL(val) : undefined })
     .option('verbose', { description: "Enable logging", boolean: true, type: 'boolean', demandOption: false, default: config.debug })
     .group(['path', 'components'], "Frontend:")
     .group(['cms_url', 'client_id', 'client_secret', 'user_id'], "Optimizely CMS Instance:")
@@ -49,7 +49,7 @@ export function createOptiCmsApp(scriptName: string, version?: string, epilogue?
 
 export default createOptiCmsApp
 
-function isDemanded(value: any) {
+function isDemanded(value: unknown) {
   if (value == undefined || value == null)
     return true
   switch (typeof (value)) {

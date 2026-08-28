@@ -66,3 +66,36 @@ yarn opti-cms <command> [options]
 | `styles:delete` | Remove Visual Builder style definitions from the CMS |
 | `types:pull` | Pull content type definition files into the project |
 | `types:push` | Push content type definitions into the CMS (create/replace) |
+
+## `nextjs:factory` — Component Factory generation
+
+Scans the components folder (`--components`/`-c`) recursively for `.tsx`/`.jsx` files and generates
+one `ComponentTypeDictionary` (from `@remkoj/optimizely-cms-react`) per directory, culminating in a
+root `index.ts` (`CmsFactory`) that is passed to `factory.registerAll(...)`.
+
+**File discovery** — a file is included only if it has a `export default`; these are always skipped:
+- Files whose name starts with `_` (partials)
+- Files inside a folder named `partials`
+- `loading.tsx`/`.jsx` and `suspense.tsx`/`.jsx` (reserved — see below)
+
+**Content type key & variant** — the dictionary `type` is read from the `key` in a sibling
+`*.opti-type.json`; if none is found it falls back to the PascalCase folder/file name. Multiple
+files in the same content-type folder (e.g. `default.tsx`, `compact.tsx`) become separate dictionary
+entries sharing the same `type` but a different `variant` (the filename; `index` → `default`).
+
+**Client components** — a file containing `"use client"` is automatically wrapped in `next/dynamic()`
+so it can still be referenced from the (server-rendered) factory.
+
+**Lazy loading** — a sibling `loading.tsx`/`.jsx` next to a component wraps it in
+`next/dynamic({ loading: <LoadingComponent> })` (Next.js lazy-loading).
+
+**Suspense placeholders** — a sibling `suspense.tsx`/`.jsx` sets `useSuspense: true` and
+`loader: <SuspensePlaceholder>` on the dictionary entry, consumed by `@remkoj/optimizely-cms-react`'s
+rendering pipeline — independent from, and combinable with, the `next/dynamic` loading above.
+
+**Nested factories** — every subdirectory gets its own factory file; parent factories import and
+spread (`...someFactory`) their child factories, all the way up to the root factory.
+
+**Regeneration guard** — generated files start with a `// @not-modified` marker comment. Once that
+comment is removed (e.g. because a developer hand-edited the file), subsequent runs skip it unless
+`--force`/`-f` is passed.

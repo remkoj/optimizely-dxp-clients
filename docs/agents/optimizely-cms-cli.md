@@ -72,9 +72,9 @@ Scans `node_modules/@remkoj` for installed packages that ship an `AGENTS.md` and
 | --- | --- |
 | `AGENTS.md` | Created on first run; subsequent runs replace the `<!-- @remkoj/optimizely-packages:start/end -->` section in-place |
 | `CLAUDE.md` | Created if absent; skipped if present unless `--force` is passed |
-| `.vscode/instructions/remkoj-<name>.instructions.md` | One file per package; each contains a `#file:` reference to `node_modules/@remkoj/<name>/AGENTS.md`. VS Code Copilot resolves `#file:` references at query time. Stale files from previous runs are removed automatically. |
+| `.github/copilot-instructions.md` | Created if absent; skipped if present unless `--force` is passed. Points at the project's `AGENTS.md`, which GitHub Copilot loads automatically — no separate per-package instruction file is needed. |
 | `.cursor/rules/optimizely-packages.mdc` | Always (re)written — contains a markdown link list referencing each package's AGENTS.md |
 
-The command also removes the deprecated `github.copilot.chat.codeGeneration.instructions` key from `.vscode/settings.json` if it was written by an older run.
+The command also removes stale `remkoj-*.instructions.md` files left behind by older versions of this command in `.github/instructions` and the legacy `.vscode/instructions` location, and the deprecated `github.copilot.chat.codeGeneration.instructions` key from `.vscode/settings.json` if it was written by an older run.
 
 Options: `--force` / `-f` (replace files entirely), `--tools` / `-t` (limit outputs to `agents`, `claude`, `copilot`, `cursor`).
