@@ -1,9 +1,11 @@
 import type { ComponentType as ReactComponentType, ExoticComponent as ReactExoticComponent, JSX } from "react"
 
 /**
- * Basic Component Type descriptor for the Component Factory
+ * Basic Component Type descriptor for the Component Factory. Using `any` here is
+ * intentional.
  */
-export type ComponentType = (ReactComponentType<any>) | (ReactExoticComponent<any>) | (keyof JSX.IntrinsicElements)
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export type ComponentType = ReactComponentType<any> | ReactExoticComponent<any> | (keyof JSX.IntrinsicElements)
 
 /**
  * 

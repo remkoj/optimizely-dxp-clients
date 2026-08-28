@@ -84,7 +84,7 @@ export const defaultPropsFactory: LeafPropsFactory = <ET extends CompositionComp
     type: node.type ?? 'unknown',
     layoutType: node.layoutType,
     template: node.template ?? null,
-    settings: node.settings?.map(x => x ? { key: x.key, value: x.value.toString() } : undefined)?.filter(isNotNullOrUndefined) ?? [],
+    settings: node.settings?.map(x => x && isNotNullOrUndefined(x.value) ? { key: x.key, value: x.value?.toString() } : undefined)?.filter(isNotNullOrUndefined) ?? [],
   }
 
   return [contentLink, contentType, node.key || undefined, node.component, layoutData]
@@ -104,7 +104,7 @@ export const defaultNodePropsFactory: NodePropsFactory = <ET extends Composition
     type: node.type ?? 'unknown',
     layoutType: node.layoutType,
     template: node.template ?? null,
-    settings: node.settings?.map(x => x ? { key: x.key, value: x.value.toString() } : undefined)?.filter(isNotNullOrUndefined) ?? [],
+    settings: node.settings?.map(x => x && isNotNullOrUndefined(x.value) ? { key: x.key, value: x.value?.toString() } : undefined)?.filter(isNotNullOrUndefined) ?? [],
   }
 
   if (!(isContentLink(contentLink) || isInlineContentLink(contentLink)))

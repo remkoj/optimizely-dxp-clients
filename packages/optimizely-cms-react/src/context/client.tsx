@@ -13,240 +13,147 @@ import {
   isOptiGraphClient,
   isOptiGraphConfig,
   createClient,
-  type OptimizelyGraphConfig,
   type IOptiGraphClient,
+  type ContentLink,
 } from '@remkoj/optimizely-graph-client'
-import { type GenericContext, type TransferrableContext } from './types.js'
-import {
-  getFactory,
-  type ComponentTypeDictionary,
-  type ComponentFactory,
-  DefaultComponentFactory,
-} from '../factory/index.js'
-import { UndefinedComponentFactory } from '../factory/undef.js'
-import { isTransferrableContext } from './shared.js'
+import type { GenericContext, TransferrableContext } from './types.js'
+import type { RenderMode } from '../context/types.js'
+import { type ComponentTypeDictionary, type ComponentFactory, DefaultComponentFactory } from '../factory/index.js'
+import { isGenericContext, isTransferrableContext } from './shared.js'
 
-export const enum OptimizelyCmsMode {
-  default = 'default',
-  edit = 'edit',
-  preview = 'preview',
-}
-
-export interface ClientContext extends GenericContext {
+export interface IClientContext extends GenericContext {
   setLocale: Dispatch<SetStateAction<string | undefined>>
-  setMode: Dispatch<SetStateAction<OptimizelyCmsMode>>
+  setMode: Dispatch<SetStateAction<RenderMode>>
   setEditableContentIsExperience: Dispatch<SetStateAction<boolean>>
+  setEditableContent: Dispatch<SetStateAction<ContentLink | null>>
 }
 
-export class ClientContextInstance implements GenericContext {
-  readonly client?: IOptiGraphClient | undefined
-  readonly factory: ComponentFactory
-  readonly locale?: string | undefined
-  readonly inEditMode: boolean
-  readonly inPreviewMode: boolean
-  readonly isDevelopment: boolean
-  readonly isDebug: boolean
-  readonly isDebugOrDevelopment: boolean
+export class ClientContext implements IClientContext {
+  private _client?: IOptiGraphClient;
+  private _factory: ComponentFactory;
+  private _locale?: string | undefined;
+  private _inEditMode: boolean = false;
+  private _inPreviewMode: boolean = false;
+  private _isDevelopment: boolean = false;
+  private _isDebug: boolean = false;
+  private _isDebugOrDevelopment: boolean = false;
+  private _editableContent: ContentLink | null = null;
+  private _editableContentIsExperience: boolean = false;
+
+  public get client() { return this._client; }
+  public get factory() { return this._factory; }
+  public get locale() { return this._locale; }
+  public get inEditMode() { return this._inEditMode; }
+  public get inPreviewMode() { return this._inPreviewMode; }
+  public get isDevelopment() { return this._isDevelopment; }
+  public get isDebug() { return this._isDebug; }
+  public get isDebugOrDevelopment() { return this._isDebugOrDevelopment; }
+  public get editableContent() { return this._editableContent; }
+  public get editableContentIsExperience() { return this._editableContentIsExperience; }  
 
   public constructor(
-    cfg: TransferrableContext,
-    components: ComponentTypeDictionary
+    cfg?: TransferrableContext | GenericContext | null,
+    components: ComponentTypeDictionary = []
   ) {
-    this.client = isOptiGraphClient(cfg.client)
-      ? cfg.client
-      : isOptiGraphConfig(cfg.client)
-        ? createClient(cfg.client)
+    this._client = isOptiGraphClient(cfg?.client)
+      ? cfg?.client
+      : isOptiGraphConfig(cfg?.client)
+        ? createClient(cfg?.client)
         : createClient()
-    this.factory = new DefaultComponentFactory(components)
-    this.inEditMode = cfg.inEditMode
-    this.inPreviewMode = cfg.inPreviewMode
-    this.isDebug = cfg.isDebug
-    this.isDebugOrDevelopment = cfg.isDebugOrDevelopment
-    this.isDevelopment = cfg.isDevelopment
+    this._factory = new DefaultComponentFactory(components)
+    this._inEditMode = cfg?.inEditMode ?? false
+    this._inPreviewMode = cfg?.inPreviewMode ?? false
+    this._isDebug = cfg?.isDebug ?? false
+    this._isDevelopment = cfg?.isDevelopment ?? false
+    this._isDebugOrDevelopment = cfg?.isDebugOrDevelopment ?? (this._isDebug || this._isDevelopment)
+  }
+  setLocale: Dispatch<SetStateAction<string | undefined>> = (locale) => { 
+    const newLocale = typeof locale === 'function' ? locale(this._locale) : locale;
+    this._locale = newLocale;
+  }
+  setMode: Dispatch<SetStateAction<RenderMode>> = (mode) => { 
+    const newMode = typeof mode === 'function' ?
+      mode(this._inEditMode ? 'edit' : this._inPreviewMode ? 'preview' : 'public') :
+      mode;
+    this._inEditMode = newMode === 'edit';
+    this._inPreviewMode = newMode === 'preview'; 
+  }
+  setEditableContent: Dispatch<SetStateAction<ContentLink | null>> = (editableContent) => { 
+    const newEditableContent = typeof editableContent === 'function' ?
+      editableContent(this._editableContent) :
+      editableContent;
+    this._editableContent = newEditableContent;
+  }
+  setEditableContentIsExperience: Dispatch<SetStateAction<boolean>> = (editableContentIsExperience) => { 
+    const newEditableContentIsExperience = typeof editableContentIsExperience === 'function' ?
+      editableContentIsExperience(this._editableContentIsExperience) :
+      editableContentIsExperience;
+    this._editableContentIsExperience = newEditableContentIsExperience;
   }
 }
 
-const _clientContext = createContext<ClientContext>({
-  factory: new UndefinedComponentFactory(),
-  inEditMode: false,
-  inPreviewMode: false,
-  isDebug: false,
-  isDebugOrDevelopment: false,
-  isDevelopment: false,
-  editableContentIsExperience: false,
-  setLocale: () => {
-    throw new Error('Not implemented')
-  },
-  setMode: () => {
-    throw new Error('Not implemented')
-  },
-  setEditableContentIsExperience: () => {
-    throw new Error('Not implemented')
-  },
+export function ensureContext(
+  context: TransferrableContext|GenericContext,
+  components: ComponentTypeDictionary = []
+): GenericContext {
+  if (isTransferrableContext(context))
+    return new ClientContext(context, components)
+  if (isGenericContext(context))
+    return context;
+  throw new Error('Unable to restore from serialized data')
+}
+
+interface ClientReactContext {
+  /**
+   * The component dictionary that is currently available for frontend loading and
+   * rendering. It is not intended to be used directly, but rather through the 
+   * `GenericContext` interface that is handed to components through the `ctx` property.
+   * 
+   * @access private
+   */
+  readonly components: ComponentTypeDictionary
+
+  /**
+   * A setter function to update the component dictionary. It is not intended to be used 
+   * directly, but serve as fall-back when you need to load components after the initial
+   * population of the context (not recommended).
+   */
+  readonly setComponents: Dispatch<SetStateAction<ComponentTypeDictionary>>
+
+  /**
+   * Custom data that needs to be transferred between client side components, this
+   * is not used by the library. It is provided to allow for an implementation to
+   * store and share data between components, without the need to create a custom
+   * context.
+   */
+  readonly data?: Map<string, unknown>
+  readonly setData?: Dispatch<SetStateAction<Map<string, unknown>>>
+}
+
+const _clientContext = createContext<ClientReactContext>({
+  components: [],
+  setComponents: () => { throw new Error('No Optimizely CMS context provided. Please wrap your application in an <OptimizelyCms> component.') },
+  data: new Map(),
+  setData: () => { throw new Error('No Optimizely CMS context provided. Please wrap your application in an <OptimizelyCms> component.') },
 })
 _clientContext.displayName = 'Optimizely CMS Provider'
 
 export type OptimizelyCmsProps = {
-  /**
-   * The Optimizely Graph Client to use, provide either an instance of the
-   * client, or the configuration used to create the instance. In case you
-   * provide no parameters, the Client will try to infer the configuration
-   * from the environment variables.
-   */
-  client?: null | OptimizelyGraphConfig | IOptiGraphClient
-
-  /**
-   * The authentication token to use for the Optimizely Graph Client. This
-   * token will be applied to the client after it has been resolved from the
-   * `client` property. If not provided the current authentication data of
-   * the client will not be affected.
-   */
-  clientToken?: string
-
-  /**
-   * Marker to indicate if the debug mode should be activated. If not provided
-   * it will be read from the Optimizely Graph Client, inferred by the `client`
-   * property.
-   */
-  isDebug?: boolean
-
-  /**
-   * Marker to indicate if the development mode should be activated. If not
-   * provided, it will be read from the `process.env.NODE_ENV` variable. If
-   * this variable is not set it assumes it to be "production".
-   */
-  isDevelopment?: boolean
-
-  /**
-   * The default mode to initialize the context with, after initialization the
-   * current mode will be state managed using `useState`.
-   */
-  initialMode?: OptimizelyCmsMode
-} & (
-  | {
-    /**
-       * The component factory to be used to resolve content within the scope
-       * of this provider.
-       */
-    factory: ComponentFactory
-
-    /**
-       * The defaults components to apply when there's no factory provided. If a
-       * factory is provided, these components will not be added to the factory.
-       */
-    initialComponents?: never
-  }
-  | {
-    /**
-       * The component factory to be used to resolve content within the scope
-       * of this provider.
-       */
-    factory?: never
-
-    /**
-       * The defaults components to apply when there's no factory provided. If a
-       * factory is provided, these components will not be added to the factory.
-       */
-    initialComponents: ComponentTypeDictionary
-  }
-)
+  initialComponents?: ComponentTypeDictionary
+}
 
 export const OptimizelyCms: FunctionComponent<
   PropsWithChildren<OptimizelyCmsProps>
-> = ({
-  factory,
-  client,
-  clientToken,
-  children,
-  isDebug,
-  isDevelopment,
-  initialMode = OptimizelyCmsMode.default,
-  initialComponents = [],
-}) => {
-  const CtxProvider = _clientContext.Provider
-
-  //#region React State
-  const [locale, setLocale] = useState<string>()
-  const [mode, setMode] = useState<OptimizelyCmsMode>(initialMode)
-  const [editableContentIsExperience, setEditableContentIsExperience] =
-    useState<boolean>(false)
-  //#endregion
-
-  //#region Memoized Optimizely Graph Client
-  const graphClient = useMemo(() => {
-    const gc = isOptiGraphClient(client)
-      ? client
-      : createClient(isOptiGraphConfig(client) ? client : undefined)
-    if (clientToken) gc.updateAuthentication(clientToken)
-    return gc
-  }, [client, clientToken])
-  //#endregion
-
-  //#region Memoized Debug and Development flags
-  const isDev = useMemo(
-    () =>
-      isDevelopment == undefined
-        ? getNodeEnv() == 'development'
-        : isDevelopment,
-    [isDevelopment]
+> = ({ children, initialComponents }) => {
+  const [components, setComponents] = useState<ComponentTypeDictionary>(
+    initialComponents || []
   )
-  const isDbg = useMemo(
-    () => (isDebug == undefined ? graphClient.debug : isDebug),
-    [isDebug, graphClient]
-  )
-  //#endregion
+  const [data, setData] = useState<Map<string, unknown>>(new Map())
 
-  //#region Memoized Component Factory
-  const ctxFactory = useMemo(() => {
-    if (factory) return factory
-    const newFactory = getFactory()
-    newFactory.registerAll(initialComponents)
-    return newFactory
-  }, [factory])
-  //#endregion
-
-  const ctxValue: ClientContext = {
-    client: graphClient,
-    factory: ctxFactory,
-    isDebug: isDbg,
-    isDevelopment: isDev,
-    isDebugOrDevelopment: isDbg || isDev,
-    inEditMode: mode == OptimizelyCmsMode.edit,
-    inPreviewMode: mode == OptimizelyCmsMode.preview,
-    locale,
-    get editableContentIsExperience() {
-      return editableContentIsExperience
-    },
-    set editableContentIsExperience(newValue: boolean) {
-      setEditableContentIsExperience(newValue)
-    },
-    setLocale,
-    setMode,
-    setEditableContentIsExperience,
-  }
-
-  return <CtxProvider value={ctxValue}>{children}</CtxProvider>
+  const ctxValue = useMemo(() => ({ components, setComponents, data, setData }), [components, setComponents, data, setData])
+  return <_clientContext.Provider value={ctxValue}>{children}</_clientContext.Provider>
 }
 
 export const useOptimizelyCms = () => {
   return useContext(_clientContext)
-}
-
-export function fromTransferrableContext(
-  serialized: TransferrableContext,
-  components: ComponentTypeDictionary
-): GenericContext {
-  if (!isTransferrableContext(serialized))
-    throw new Error('Unable to restore from serialized data')
-  return new ClientContextInstance(serialized, components)
-}
-
-function getNodeEnv(): string {
-  let env: string | undefined
-  try {
-    env = process.env.NODE_ENV
-  } catch {
-    // Ignored on purpose
-  }
-  return env || 'production'
 }

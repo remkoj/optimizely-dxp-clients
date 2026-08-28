@@ -6,7 +6,7 @@ import type { PropsWithChildren, JSX } from "react"
  * representing a HTML Element (e.g. "div", "a", etc...), this value can be used
  * as first argument of React.createElement()
  */
-export type ElementType = (React.ComponentType<any>) | (React.ExoticComponent<any>) | (keyof JSX.IntrinsicElements)
+export type ElementType = React.ComponentType | React.ExoticComponent | (keyof JSX.IntrinsicElements)
 /**
  * Define an element as a React Component, React ExoticComponent or string name
  * representing a HTML Element (e.g. "div", "a", etc...), this value can be used

@@ -98,16 +98,6 @@ export type CmsEditableProps<FT extends ElementType> = PropsWithChildren<
     forceBlockId?: boolean
 
     /**
-     * Reserved compatibility flag.
-     *
-     * This property is currently accepted for API compatibility but is not used by the
-     * current implementation.
-     * 
-     * @deprecated This property is preserved for historical use and should not be used in new code.
-     */
-    forceId?: boolean
-
-    /**
      * Content identity check used to conditionally output field-level edit markers.
      *
      * When provided, field attributes are added only if
@@ -115,17 +105,6 @@ export type CmsEditableProps<FT extends ElementType> = PropsWithChildren<
      * This condition affects field-level markers, not `cmsId` output.
      */
     currentContent?: ContentLink
-
-    /**
-     * Override edit rendering mode.
-     *
-     * - `"floating"`: floating editor UI.
-     * - `"inline"`: inline editor UI.
-     * - `null`/`undefined`: default behavior via `data-epi-edit`.
-     * 
-     * @deprecated The `editType` property is deprecated and should not be used in new code. Future versions may remove support for this property.
-     */
-    editType?: 'floating' | 'inline' | null
   } & Omit<
     ElementProps<FT>,
     | 'as'
@@ -134,9 +113,7 @@ export type CmsEditableProps<FT extends ElementType> = PropsWithChildren<
     | 'ctx'
     | 'forwardCtx'
     | 'forceBlockId'
-    | 'forceId'
     | 'currentContent'
-    | 'editType'
   >
 >
 
@@ -163,19 +140,15 @@ export const CmsEditable: CmsEditableBaseComponent = <CT extends ElementType>({
   cmsId = null,
   cmsFieldName = null,
   children,
-  key,
   forceBlockId = false,
-  forceId = true,
   currentContent,
-  editType = null,
   ...props
 }: PropsWithContext<CmsEditableProps<CT>>) => {
   const {
     inEditMode,
     isDebugOrDevelopment,
     isDebug,
-    editableContent,
-    editableContentIsExperience,
+    editableContent
   } = ctx || {
     inEditMode: false,
     isDebug: true,
@@ -183,6 +156,16 @@ export const CmsEditable: CmsEditableBaseComponent = <CT extends ElementType>({
     editableContentIsExperience: false,
   }
   const DefaultElement = as || 'div'
+  const addEditProps = inEditMode
+    ? currentContent
+      ? editableContent?.key === currentContent.key
+      : true
+    : false
+
+  if (!addEditProps) {
+    // console.log('⚠ [CmsEditable] Not adding edit props, either not in edit mode or currentContent does not match editableContent', props)
+    return children ? <DefaultElement {...props}>{children}</DefaultElement> : <DefaultElement {...props} />
+  }
 
   if (isDebugOrDevelopment && inEditMode && !cmsFieldName && !cmsId) {
     console.warn(
@@ -193,18 +176,10 @@ export const CmsEditable: CmsEditableBaseComponent = <CT extends ElementType>({
     }
   }
 
-  const addEditProps = inEditMode
-    ? currentContent
-      ? editableContent?.key === currentContent.key
-      : true
-    : false
-
   // If we're rendering for an experience, we don't need to inject property names, as the
   // experience editor only deals with property ids - injecting property names will cause
   // it to outline incorrect items.
-  const dataEpiPropertyName = false && editableContentIsExperience
-    ? undefined
-    : (cmsFieldName ?? undefined)
+  const propertyName = cmsFieldName ?? undefined
 
   const showBlockId = forceBlockId || (cmsId && editableContent?.key ?
     editableContent.key !== cmsId :
@@ -213,7 +188,7 @@ export const CmsEditable: CmsEditableBaseComponent = <CT extends ElementType>({
     editableContent.key !== cmsId :
     true));
 
-  const itemProps: Record<string, any> = addEditProps
+  const itemProps: Record<string, unknown> = addEditProps
     ? {
       ...props,
       // We assume GUIDs are represented as 32 char long strings, all other values are IDs
@@ -221,17 +196,20 @@ export const CmsEditable: CmsEditableBaseComponent = <CT extends ElementType>({
       // We assume GUIDs are represented as 32 char long strings
       'data-epi-content-id': showContentId ? cmsId : undefined,
       // We pass through the property name if provided
-      'data-epi-property-name': editType ? dataEpiPropertyName : undefined,
+      'data-epi-edit': propertyName,
       // We pass through the property name if provided
-      'data-epi-edit': editType ? undefined : dataEpiPropertyName,
+      // 'data-epi-property-name': editType ? dataEpiPropertyName : undefined,
+      // We pass through the property name if provided
+      // 'data-epi-edit': editType ? undefined : dataEpiPropertyName,
       // Configure the rendition of the property editor
-      'data-epi-property-edittype': editType ?? undefined,
+      // 'data-epi-property-edittype': editType ?? undefined,
     }
     : {
       ...props,
     }
 
   if (typeof DefaultElement !== 'string') {
+    console.log(`⚠ [CmsEditable] Rendering a custom component, forwarding context to ${DefaultElement.name}`, forwardCtx);
     if (forwardCtx === true) itemProps['ctx'] = ctx
     if (typeof forwardCtx === 'string' && forwardCtx.length > 0)
       itemProps[forwardCtx] = ctx

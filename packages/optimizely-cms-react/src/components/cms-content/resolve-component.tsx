@@ -10,7 +10,7 @@ import {
 import { type ContentLink } from '@remkoj/optimizely-graph-client'
 
 export function getComponentLabel(componentInstance?: ComponentType | null) {
-  if (!componentInstance) return 'n/a'
+  if (!Utils.isNotNullOrUndefined(componentInstance)) return 'n/a'
   if (componentInstance.displayName) return componentInstance.displayName
   if (typeof componentInstance == 'function' && componentInstance.name)
     return componentInstance.name

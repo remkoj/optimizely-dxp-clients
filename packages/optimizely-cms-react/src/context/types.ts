@@ -1,5 +1,6 @@
-import { type IOptiGraphClient, type OptimizelyGraphConfig, type ContentLink } from "@remkoj/optimizely-graph-client"
-import { type ComponentFactory } from "../factory/types.js"
+import type { IOptiGraphClient, OptimizelyGraphConfig, ContentLink } from "@remkoj/optimizely-graph-client"
+import type { ComponentFactory } from "../factory/types.js"
+import { ComponentType } from "react"
 
 /**
  * The mode in which content is currently being rendered
@@ -59,7 +60,7 @@ export interface GenericContext {
   /**
    * Whether the content item being edited is an experience
    */
-  editableContentIsExperience?: boolean
+  readonly editableContentIsExperience?: boolean
 }
 
 /**
@@ -90,3 +91,9 @@ export type PropsWithOptionalContext<P = object> = P & {
    */
   ctx?: GenericContext
 }
+
+export type PropsWithCrossBoundaryContext<P = object> = P & {
+  ctx?: GenericContext | TransferrableContext | null
+}
+
+export type WithContextFunction = <P = object>(component: ComponentType<PropsWithContext<P>>) => ComponentType<PropsWithCrossBoundaryContext<P>>

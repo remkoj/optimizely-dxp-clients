@@ -4,6 +4,7 @@ import {
   isOptiGraphClient,
   type IOptiGraphClient,
   type ContentLink,
+  isOptiGraphConfig,
 } from '@remkoj/optimizely-graph-client'
 import {
   type GenericContext,
@@ -103,7 +104,7 @@ export class ServerContext implements GenericContext {
     locale,
     mode,
     editableContent,
-  }: ServerContextArgs) {
+  }: ServerContextArgs = {}) {
     this._factory = Array.isArray(factory)
       ? new DefaultComponentFactory(factory)
       : factory || new DefaultComponentFactory()
@@ -225,6 +226,29 @@ export class ServerContext implements GenericContext {
       isDevelopment: this.isDevelopment,
       locale: this.locale,
     }
+  }
+
+  public static fromTransferrableContext(
+    context: TransferrableContext,
+    components: ComponentTypeDictionary = []
+  ): ServerContext {
+    const serverCtx = new ServerContext({
+      client: isOptiGraphClient(context.client)
+        ? context.client
+        : isOptiGraphConfig(context.client)
+          ? createClient(context.client)
+          : createClient(),
+      factory: components,
+      locale: context.locale,
+      mode: context.inEditMode
+        ? 'edit'
+        : context.inPreviewMode
+          ? 'preview'
+          : 'public',
+    });
+    serverCtx.setEditableContentIsExperience(context.editableContentIsExperience ?? false);
+    serverCtx.setEditableContentId(context.editableContent ?? null);
+    return serverCtx;
   }
 }
 

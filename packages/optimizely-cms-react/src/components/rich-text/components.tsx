@@ -7,6 +7,12 @@ import { decodeHTML } from 'entities'
 // Global constants
 const reservedProps = ['url', 'class', 'children', 'type', 'internal', 'base']
 
+type HtmlComponentProps<E extends keyof JSX.IntrinsicElements> = PropsWithOptionalContext<
+  PropsWithChildren<
+    JSX.IntrinsicElements[E] & { node: TypedNode }
+  >
+>
+
 //#region HTML Components
 /**
  * Create a React Component to render an element within a Rich-Text area.
@@ -29,14 +35,15 @@ export function createHtmlComponent<E extends keyof JSX.IntrinsicElements>(
   defaultProps?: JSX.IntrinsicElements[E] & Record<string, string>
 ) {
   const HtmlElement = element as string
-  const component = ({
+  const component: FunctionComponent<HtmlComponentProps<E>> = ({
     children,
     node,
+
+    // We need to destructure the `ctx` property to avoid passing it down to the HTML element
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     ctx,
     ...props
-  }: PropsWithOptionalContext<
-    PropsWithChildren<JSX.IntrinsicElements[E] & { node: TypedNode }>
-  >) => {
+  }) => {
     const nodeProps: Record<string, string | number | boolean> = {}
     const renderProps = Object.getOwnPropertyNames(node) as Array<
       keyof TypedNode

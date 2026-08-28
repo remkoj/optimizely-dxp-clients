@@ -11,7 +11,7 @@ import type {
   ContentAreaItemDefinition,
   ValidContentAreaItemDefinition,
 } from './types.js'
-import { Suspense, type JSX } from 'react'
+import { Suspense, type JSX, type ComponentProps } from 'react'
 
 //#region Export Type definitions
 export type {
@@ -67,7 +67,7 @@ export const CmsContentArea: CmsContentAreaBaseComponent = <
 
       // Read element wrapper configuration
       const {
-        as: ContentAreaItemContainer = 'div',
+        as: ContentAreaItemContainer = 'div' as I,
         itemsProperty: childrenTarget = 'children',
         noWrapper: noContentAreaItemContainer = false,
         className: rawContentAreaItemClassName,
@@ -147,13 +147,10 @@ export const CmsContentArea: CmsContentAreaBaseComponent = <
       else
         contentAreaItemContainerProps[childrenTarget] = contentAraeItemContent
 
-      return (
-        <ContentAreaItemContainer
-          key={contentAreaItemKey}
-          {...contentAreaItemContainerProps}
-        >
-          {contentAreaItemContainerChildren}
-        </ContentAreaItemContainer>
+      // @ts-expect-error We don't know the element type ahead of time, but it *should* be an element that allows children....
+      return (<ContentAreaItemContainer key={contentAreaItemKey} {...(contentAreaItemContainerProps as ComponentProps<I>)}>
+        {contentAreaItemContainerChildren}
+      </ContentAreaItemContainer>
       )
     })
 

@@ -41,7 +41,7 @@ export function filterCmsComponentProps<T extends object>(toFilter: T): Omit<T, 
  * @returns   `true` when `toTest` is a non-empty string
  */
 export function isNonEmptyString(toTest: unknown): toTest is string {
-  return typeof (toTest) == 'string' && toTest.length > 0
+  return typeof (toTest) === 'string' && toTest.length > 0
 }
 
 /**
@@ -51,7 +51,17 @@ export function isNonEmptyString(toTest: unknown): toTest is string {
  * @returns   `true` when `toTest` is neither `null` nor `undefined`
  */
 export function isNotNullOrUndefined<T>(toTest?: T | null): toTest is T {
-  return !(toTest == null || toTest == undefined)
+  return !(toTest === null || toTest === undefined)
+}
+
+/**
+ * Type guard to test whether a value is either `null` or `undefined`.
+ * 
+ * @param     toTest    The value to test
+ * @returns   `true` when `toTest` is either `null` or `undefined`
+ */
+export function isNullOrUndefined(toTest?: unknown): toTest is null|undefined {
+  return toTest === null || toTest === undefined;
 }
 
 /**

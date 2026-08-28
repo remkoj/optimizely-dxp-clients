@@ -20,14 +20,14 @@
     "@remkoj/optimizely-graph-client": "6.0.0",
     "@remkoj/optimizely-one-nextjs": "6.0.0",
     "graphql-request": "^7.4.0",
-    "next": "^16.3.0",
+    "next": "^16.3.1",
     "react": "^19.2.8",
     "react-dom": "^19.2.8"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3.3.6",
     "@graphql-codegen/cli": "7.2.0",
-    "@next/env": "^16.3.0",
+    "@next/env": "^16.3.1",
     "@remkoj/optimizely-cms-cli": "6.0.0",
     "@remkoj/optimizely-graph-cli": "6.0.0",
     "@remkoj/optimizely-graph-functions": "6.0.0",
@@ -37,7 +37,7 @@
     "@types/react": "^19.2.18",
     "@types/react-dom": "^19.2.4",
     "eslint": "^9.39.5",
-    "eslint-config-next": "16.3.0",
+    "eslint-config-next": "16.3.1",
     "graphql": "^16.14.2",
     "typescript": "5.9.3"
   },

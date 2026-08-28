@@ -1,11 +1,15 @@
 'use server'
-import { type ReactNode, type ComponentType } from 'react'
-import {
-  type PropsWithContext,
-  type PropsWithOptionalContext,
+import 'server-only'
+import type { ComponentType, FunctionComponent } from 'react'
+import type {
+  PropsWithCrossBoundaryContext,
+  PropsWithContext,
+  WithContextFunction
 } from '../context/types.js'
-import { getServerContext } from '../context/rsc.js'
-import { cmsContentAware } from './cms-content/utils.js'
+import { isTransferrableContext, isGenericContext } from '../context/shared.js'
+import { ServerContext } from '../context/rsc.js'
+import { withCmsContent } from './cms-content/utils.js'
+import { isNullOrUndefined } from '../utilities.js'
 
 import {
   CmsContentArea as BaseContentArea,
@@ -29,38 +33,31 @@ import {
   type RichTextComponent,
 } from './rich-text/index.js'
 
-/**
- *  Fallback while RSC hasn't been moved from Canary to Main
- */
-type ReactServerComponentType<P = any> =
-  | ComponentType<P>
-  | ((props: P) => Promise<ReactNode>)
 
-/**
- * Wrapper function to turn context dependant components into easy to use
- * server components
- *
- * @param       component       The component where the `ctx` parameter must be fulfilled
- * @returns     The component, without CTX parameter
- */
-function serverContextAware<P extends PropsWithContext>(
-  component: ReactServerComponentType<P>
-): ComponentType<PropsWithOptionalContext<Omit<P, 'ctx'>>> {
-  const BaseComponent = component as ComponentType<P>
-
-  const ServerContextInjector: ComponentType<
-    PropsWithOptionalContext<Omit<P, 'ctx'>>
-  > = ({ ctx, ...props }) => {
-    if (!ctx)
+const withContext: WithContextFunction = <
+  P = object
+>(component: ComponentType<PropsWithContext<P>>) => {
+  const BaseComponent = component;
+  const ServerContextInjector: FunctionComponent<PropsWithCrossBoundaryContext<P>> = ({ ctx, ...props }) => {
+    if (isGenericContext(ctx))
+      return <BaseComponent { ...(props as P) } ctx={ctx} />
+    else if (isTransferrableContext(ctx)) {
+      const context = ServerContext.fromTransferrableContext(ctx)
+      return <BaseComponent { ...(props as P) } ctx={context} />
+    } else if (isNullOrUndefined(ctx)) {
+      const context = new ServerContext()
+      return <BaseComponent { ...(props as P) } ctx={context} />
+    } else {
       console.error(
-        `🔴 [ServerContextAware] Context for context aware component ${BaseComponent.displayName ?? BaseComponent.name ?? '[ANONYMOUS]'} is not defined!`
+        `🔴 [RSC][withContext] Context for context aware component ${BaseComponent.displayName ?? BaseComponent.name ?? '[ANONYMOUS]'} is invalid!`
       )
-    const cmpCtx = ctx || getServerContext()
-    const componentProps = { ...props, ctx: cmpCtx } as P
-    return <BaseComponent {...componentProps} />
+      throw new Error(
+        `RSC withContext: Context for context aware component ${BaseComponent.displayName ?? BaseComponent.name ?? '[ANONYMOUS]'} is invalid!`
+      )
+    }
   }
   ServerContextInjector.displayName = 'Server Context Injector'
-  return ServerContextInjector
+  return ServerContextInjector;
 }
 
 /**
@@ -114,7 +111,7 @@ function serverContextAware<P extends PropsWithContext>(
  * @remarks
  * For a full prop reference, see `CmsEditableProps`.
  */
-export const CmsEditable = serverContextAware(
+export const CmsEditable = withContext(
   BaseEditable
 ) as CmsEditableComponent
 export type { CmsEditableComponent, CmsEditableProps } from './cms-editable/index.js'
@@ -172,7 +169,7 @@ export type { CmsEditableComponent, CmsEditableProps } from './cms-editable/inde
  * @remarks
  * For a full prop reference, see `CmsContentProps`.
  */
-export const CmsContent = serverContextAware(
+export const CmsContent = withContext(
   BaseCmsContent as unknown as CmsContentBaseComponent
 ) as CmsContentComponent
 export type { CmsContentComponent, CmsContentProps } from './cms-content/rsc.js'
@@ -232,8 +229,8 @@ export type { CmsContentComponent, CmsContentProps } from './cms-content/rsc.js'
  * @remarks
  * For a full prop reference, see `CmsContentAreaProps`.
  */
-export const CmsContentArea = cmsContentAware(
-  serverContextAware(BaseContentArea),
+export const CmsContentArea = withCmsContent(
+  withContext(BaseContentArea),
   CmsContent
 ) as CmsContentAreaComponent
 export type {
@@ -248,12 +245,12 @@ export type {
  * Context to infer the connection to Optimizely Graph and component
  * dictionary.
  */
-export const OptimizelyComposition = cmsContentAware(
-  serverContextAware(BaseOptimizelyComposition),
+export const OptimizelyComposition = withCmsContent(
+  withContext(BaseOptimizelyComposition),
   CmsContent
 ) as OptimizelyCompositionComponent
 
 /**
  * Client side renderer for Rich Text
  */
-export const RichText = serverContextAware(BaseRichText) as RichTextComponent
+export const RichText = withContext(BaseRichText) as RichTextComponent
