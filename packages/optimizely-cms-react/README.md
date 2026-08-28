@@ -1,8 +1,5 @@
 # Optimizely SaaS CMS React Components
 
-> [!WARNING]
-> There'll be an update of Optimizely SaaS CMS that is incompatible with all SDK versions prior to 5.1.6. If you don't upgrade, you will see empty pages (main website) and "Component not found" messages (preview).
-
 This package provides two main entry points, depending on your build environment:
 - `@remkoj/optimizely-cms-react` This export contains the library, whith React components that use a client side context
 - `@remkoj/optimizely-cms-react/rsc` This export contains the library, whith React components that use a server side context
