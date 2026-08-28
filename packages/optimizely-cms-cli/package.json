@@ -9,7 +9,7 @@
   "bugs": "https://github.com/remkoj/optimizely-dxp-clients/issues",
   "homepage": "https://github.com/remkoj/optimizely-dxp-clients/blob/main/packages/optimizely-cms-cli/README.md",
   "type": "module",
-  "version": "5.4.0",
+  "version": "5.4.1",
   "bin": {
     "opti-cms": "./dist/index.js"
   },
@@ -25,7 +25,7 @@
     "opti-cms": "node ./dist/index.js"
   },
   "devDependencies": {
-    "@remkoj/optimizely-cms-api": "workspace:5.4.0",
+    "@remkoj/optimizely-cms-api": "workspace:5.4.1",
     "@rollup/plugin-json": "^6.1.0",
     "@rollup/plugin-typescript": "^12.3.0",
     "@types/node": "^22.19.3",
@@ -35,7 +35,7 @@
     "typescript": "^5.9.3"
   },
   "peerDependencies": {
-    "@remkoj/optimizely-cms-api": "^5.4.0",
+    "@remkoj/optimizely-cms-api": "^5.4.1",
     "@types/node": "*"
   },
   "dependencies": {
