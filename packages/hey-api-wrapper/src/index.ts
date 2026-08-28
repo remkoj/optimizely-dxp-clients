@@ -178,7 +178,7 @@ export abstract class ApiClient<
    * @param toTest The value to inspect.
    * @returns `true` when `toTest` is an error response.
    */
-  protected isErrorResponse(toTest?: unknown): toTest is { error: unknown; request: Request; response: Response; }
+  public isErrorResponse(toTest?: unknown): toTest is { error: unknown; request: Request; response: Response; }
   {
     if (!this.isObject(toTest))
       return false;
@@ -192,7 +192,7 @@ export abstract class ApiClient<
    * @param toTest The value to inspect.
    * @returns `true` when `toTest` is a data response.
    */
-  protected isDataResponse<RT = unknown>(toTest?: unknown): toTest is { data: RT & {}; request: Request; response: Response; }
+  public isDataResponse<RT = unknown>(toTest?: unknown): toTest is { data: RT & {}; request: Request; response: Response; }
   {
     if (!this.isObject(toTest))
       return false;
@@ -244,12 +244,12 @@ export class ApiError extends Error {
   }
 
   /** The HTTP request that produced the error. */
-  public get request(): unknown {
+  public get request(): Request | undefined {
     return this._ctx.request
   }
 
   /** The HTTP response that produced the error. */
-  public get response(): unknown {
+  public get response(): Response | undefined {
     return this._ctx.response
   }
 

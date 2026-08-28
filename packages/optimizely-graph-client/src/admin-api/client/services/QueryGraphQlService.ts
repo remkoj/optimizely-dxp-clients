@@ -16,6 +16,7 @@ export class QueryGraphQlService {
      * @param operationName
      * @param variables
      * @param sources
+     * @param lite
      * @returns GraphQLResponse Returns query result
      * @throws ApiError
      */
@@ -25,6 +26,7 @@ export class QueryGraphQlService {
         operationName?: string,
         variables?: string,
         sources?: string,
+        lite?: string,
     ): CancelablePromise<GraphQLResponse> {
         return this.httpRequest.request({
             method: 'GET',
@@ -35,6 +37,7 @@ export class QueryGraphQlService {
                 'operationName': operationName,
                 'variables': variables,
                 'sources': sources,
+                'lite': lite,
             },
         });
     }
@@ -42,12 +45,14 @@ export class QueryGraphQlService {
      * Execute graphql query
      * Retrieve content respect to graphql query
      * @param sources
+     * @param lite
      * @param requestBody
      * @returns GraphQLResponse Returns query result
      * @throws ApiError
      */
     public postGraphQlv2Handler(
         sources?: string,
+        lite?: string,
         requestBody?: GraphQLRequest,
     ): CancelablePromise<GraphQLResponse> {
         return this.httpRequest.request({
@@ -55,6 +60,7 @@ export class QueryGraphQlService {
             url: '/content/v2',
             query: {
                 'sources': sources,
+                'lite': lite,
             },
             body: requestBody,
             mediaType: 'application/json',

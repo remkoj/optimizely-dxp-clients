@@ -1,5 +1,9 @@
-const DEFAULT_API_HOST = 'https://api.cms.optimizely.com/'
-const API_VERSION_PATH = 'v1'
+import buildInfo from './version.json'
+
+// Keep the client on the API gateway it was generated against; see scripts/create-client.mjs
+const DEFAULT_API_HOST = buildInfo.baseUrl
+// Keep the client on the API version it was generated against; see scripts/create-client.mjs
+const API_VERSION_PATH = buildInfo.api
 
 /**
  * The API Base URL used when neither a CMS URL nor an explicit override has
@@ -24,11 +28,6 @@ export type CmsIntegrationApiOptions = {
    */
   clientSecret?: string
   /**
-   * The username to impersonate, using the special "actAs"
-   * field supported by Optimizely CMS
-   */
-  actAs?: string
-  /**
    * Flag to enable debugging output
    */
   debug?: boolean
@@ -52,7 +51,6 @@ export function readPartialEnvConfig(): CmsIntegrationApiOptions {
   const cmsUrl = getOptional('OPTIMIZELY_CMS_URL')
   const clientId = getOptional('OPTIMIZELY_CMS_CLIENT_ID')
   const clientSecret = getOptional('OPTIMIZELY_CMS_CLIENT_SECRET')
-  const actAs = getOptional('OPTIMIZELY_CMS_USER_ID')
   const debug = getOptional('OPTIMIZELY_DEBUG', "0") == "1"
 
   // Determine the CMS URL, if set by the config
@@ -66,8 +64,7 @@ export function readPartialEnvConfig(): CmsIntegrationApiOptions {
   }
 
   // Determine the API Base path; an explicit override wins, otherwise it is
-  // derived from the CMS URL so that non-production tenants (e.g. cmstest)
-  // don't silently end up talking to the production gateway.
+  // derived from the CMS URL.
   let apiBase: URL | undefined;
   try {
     apiBase = resolveApiBaseUrl({ base, apiBaseUrl: apiBaseUrl ? new URL(apiBaseUrl) : undefined })
@@ -82,7 +79,6 @@ export function readPartialEnvConfig(): CmsIntegrationApiOptions {
     base,
     clientId,
     clientSecret,
-    actAs,
     debug,
     apiBaseUrl: apiBase
   }
@@ -110,22 +106,20 @@ export function readEnvConfig(): Omit<CmsIntegrationApiOptions, ClientCredential
 }
 
 /**
- * Derives the Optimizely managed API gateway from a CMS frontend URL.
+ * Derives the Optimizely managed production API gateway from a CMS frontend URL.
  *
- * The gateway lives on a sibling host that carries the environment suffix but
- * not the tenant, so `app-xyz.cmstest.optimizely.com` maps to
- * `api.cmstest.optimizely.com` and `app-xyz.cms.optimizely.com` maps to
- * `api.cms.optimizely.com`.
+ * Non-production environments are not inferred; set `OPTIMIZELY_CMS_API_BASEURL`
+ * (or `apiBaseUrl`) explicitly for those.
  *
  * @param cmsUrl - The CMS frontend URL.
- * @returns The API gateway origin, or `undefined` when the URL is not a
- * recognised Optimizely SaaS CMS host (i.e. a self-hosted instance).
+ * @returns The API gateway origin, or `undefined` when the URL is not the
+ * production Optimizely SaaS CMS host (i.e. a self-hosted or non-production instance).
  */
 function extractApiGateway(cmsUrl: URL): URL | undefined {
-  const saasMatch = cmsUrl.hostname.match(/^[^.]+\.cms([^.]*)\.optimizely\.com$/)
-  if (!saasMatch)
-    return undefined
-  return new URL(`https://api.cms${saasMatch[1] ?? ''}.optimizely.com/`)
+  const suffix = '.cms.optimizely.com'
+  const tenant = cmsUrl.hostname.slice(0, -suffix.length)
+  const isProductionSaasHost = cmsUrl.hostname.endsWith(suffix) && tenant.length > 0
+  return isProductionSaasHost ? new URL('https://api.cms.optimizely.com/') : undefined
 }
 
 /**
@@ -153,19 +147,25 @@ export function resolveApiBaseUrl(config: Pick<CmsIntegrationApiOptions, 'base' 
 /**
  * Determines whether a URL points at an Optimizely managed API gateway.
  *
+ * Only reached for explicitly configured base URLs (production is matched
+ * beforehand by a plain equality check), so a regex here is not a hot path.
+ *
  * @param url - The API base URL to inspect.
- * @returns `true` for `api.cms<env>.optimizely.com` hosts.
+ * @returns `true` for the `api.cms.optimizely.com` host, or an explicitly
+ * configured `api.cms<env>.optimizely.com` non-production gateway host.
  */
 function isManagedApiGateway(url: URL): boolean {
-  return /^api\.cms[^.]*\.optimizely\.com$/.test(url.hostname)
+  return url.hostname === 'api.cms.optimizely.com' || /^api\.cms[^.]+\.optimizely\.com$/.test(url.hostname)
 }
 
 /**
  * Resolves the base URL that serves the OAuth token endpoint.
  *
- * A managed gateway serves it from the host root, a self-hosted instance from
- * the `/_cms/v1/` path. The returned URL always carries a trailing slash, so
- * resolving `oauth/token` against it appends rather than replaces.
+ * A managed gateway (production, or an explicitly configured non-production
+ * `api.cms<env>.optimizely.com`) serves it from the host root; a self-hosted
+ * instance from the `/_cms/v1/` path. The returned URL always carries a
+ * trailing slash, so resolving `oauth/token` against it appends rather than
+ * replaces.
  *
  * @param apiBaseUrl - The resolved API base URL.
  * @returns The base URL for the authentication endpoint.
@@ -183,17 +183,4 @@ function getOptional<DT extends string | undefined>(variable: string, defaultVal
     return defaultValue as DT extends string ? string : undefined
   return envValue
 }
-/*function getMandatory(variable: string): string {
-  const envValue = process.env[variable]
-  if (!envValue)
-    throw new Error(`The environment variable ${variable} is missing or empty`)
-  return envValue
-}
-function getSelection<T>(envVarName: string, allowedValues: T[], defaultValue: T): T {
-  const rawValue = getOptional(envVarName, defaultValue as string)
-  if (!rawValue)
-    return defaultValue
-  if (allowedValues.some(av => av == rawValue))
-    return rawValue as T
-  return defaultValue
-}*/
+

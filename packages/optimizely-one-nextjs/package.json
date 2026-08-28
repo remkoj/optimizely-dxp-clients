@@ -45,10 +45,10 @@
     "@tailwindcss/cli": "^4.3.3",
     "@types/node": "^24.13.3",
     "@types/react": "^19.2.18",
-    "@types/react-dom": "^19.2.4",
+    "@types/react-dom": "^19.2.5",
     "@types/uuid": "^11.0.0",
     "browserslist": "^4.28.8",
-    "next": "^16.3.1",
+    "next": "^16.3.3",
     "prop-types": "^15.8.1",
     "react": "^19.2.8",
     "react-dom": "^19.2.8",
@@ -70,7 +70,7 @@
     "@remkoj/optimizely-graph-client": "6.0.0-rc.5",
     "deep-object-diff": "^1.1.9",
     "swr": "^2.5.1",
-    "uuid": "^14.0.1"
+    "uuid": "^14.0.2"
   },
   "scripts": {
     "clean": "tsc --build --clean",

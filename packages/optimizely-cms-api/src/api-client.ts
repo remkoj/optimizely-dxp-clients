@@ -7,9 +7,16 @@ import buildInfo from "./version.json";
 import type { OpenAPIV3_1 } from "openapi-types";
 
 /**
- * Base implementation of the ApiClient wrapper for the Optimizely CMS Rest API
+ * Base implementation of the ApiClient wrapper for the Optimizely CMS Rest API.
+ * Operation methods (e.g. `listContent`) are mixed in via {@link withOperations}
+ * below; this class only owns configuration/base-URL resolution and the
+ * version/schema helpers.
  */
 class BaseApiClient extends AbstractApiClient<CmsIntegrationApiOptions, ReturnType<typeof createClient>> {
+  /**
+   * @param config Optional client configuration. When omitted, configuration
+   * is read from environment variables via {@link readEnvConfig}.
+   */
   public constructor(config?: CmsIntegrationApiOptions) {
     const apiConfig = config ?? readEnvConfig();
     const apiClient = createClient(createClientConfig(createConfig({
@@ -47,11 +54,19 @@ class BaseApiClient extends AbstractApiClient<CmsIntegrationApiOptions, ReturnTy
 
   /**
    * The CMS version for which this client was build
+   * 
+   * @deprecated  No longer exposed by API v1 and newer
    */
   public get cmsVersion(): string {
     return buildInfo.cms
   }
 
+  /**
+   * Fetches the OpenAPI specification document served by the connected CMS instance.
+   *
+   * @returns The parsed OpenAPI v3.1 document.
+   * @throws {ApiError} When the CMS returns an error response.
+   */
   public async getOpenApiSpec(): Promise<OpenAPIV3_1.Document> {
     const result = await this._client.get<OpenAPIV3_1.Document>({
       url: '/docs/content-openapi.json',
@@ -62,6 +77,12 @@ class BaseApiClient extends AbstractApiClient<CmsIntegrationApiOptions, ReturnTy
     throw new ApiError(result)
   }
 
+  /**
+   * The base URL schema/content item locations are resolved against, always
+   * carrying a trailing slash so relative references append rather than replace.
+   *
+   * @returns The base URL, or `undefined` when the client has no configured base URL.
+   */
   public getSchemaItemBase(): URL | undefined {
     let baseUrl = this._client.getConfig().baseUrl
     if (typeof (baseUrl) === 'string' && !baseUrl.endsWith('/'))
@@ -71,7 +92,17 @@ class BaseApiClient extends AbstractApiClient<CmsIntegrationApiOptions, ReturnTy
 }
 
 export { ApiError } from "@remkoj/hey-api-wrapper";
+
+/**
+ * The concrete CMS Integration API client class: {@link BaseApiClient} extended
+ * with one method per generated CMS API operation (see `./client/sdk.gen`).
+ */
 export const ApiClient = withOperations(BaseApiClient, Operations);
+
+/** The static (constructor) side of {@link ApiClient}. */
 export type ApiClientStatic = typeof ApiClient;
+
+/** An instance of {@link ApiClient}, as returned by `createClient()`. */
 export type CmsIntegrationApiClient = InstanceType<typeof ApiClient>;
+
 export default ApiClient;

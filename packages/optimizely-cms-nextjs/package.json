@@ -58,8 +58,8 @@
     "@types/negotiator": "^0.6.5",
     "@types/node": "^24.13.3",
     "@types/react": "^19.2.18",
-    "@types/react-dom": "^19.2.4",
-    "next": "^16.3.1",
+    "@types/react-dom": "^19.2.5",
+    "next": "^16.3.3",
     "prop-types": "^15.8.1",
     "react": "^19.2.8",
     "react-dom": "^19.2.8",
@@ -74,7 +74,7 @@
     "entities": "^8.0.0",
     "graphql": "^16.14.2",
     "graphql-request": "^7.4.0",
-    "negotiator": "^1.0.0"
+    "negotiator": "^1.1.0"
   },
   "peerDependencies": {
     "next": "^16",

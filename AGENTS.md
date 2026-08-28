@@ -3,7 +3,8 @@
 `optimizely-dxp-clients` — Yarn 4 workspaces monorepo. Publishes JS/TS SDKs for Optimizely SaaS CMS and Optimizely Graph to npm under `@remkoj/*`.
 
 - Package manager: Yarn 4.17.0 (`packageManager` field is authoritative — do not use npm/pnpm)
-- Node: `>=22 <23` (root); `>=24 <25` for `optimizely-cms-cli`, `optimizely-graph-cli`, `optimizely-cms-nextjs`, `optimizely-one-nextjs`
+- Node: `>=24 <25` for the whole workspace (root `engines.node`; also pinned per-package in
+  `optimizely-cms-cli`, `optimizely-graph-cli`, `optimizely-cms-nextjs`, `optimizely-one-nextjs`)
 - Versions: lockstep, currently `6.0.0-rc.2`
 - License: Apache-2.0
 

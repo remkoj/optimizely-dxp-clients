@@ -49,12 +49,12 @@ export class DefinitionV3Service {
      * - _**src1**:  only src1_
      * @param mode Delete mode
      *
-     * | mode         | description             | types       | data        |
-     * | --           | --                      | --          | --          |
-     * | _(empty)_    | _delete types and data_ | _(delete)_  | _(delete)_  |
-     * | _**types**_  | _delete only types_     | _(delete)_  |             |
-     * | _**data**_   | _delete only data_      |             | _(delete)_  |
-     * | _**reset**_  | _reset data_            | _(delete)_  | _(reset)_   |
+     * | mode         | description             | types       | data        | locales                       |
+     * | --           | --                      | --          | --          | --                            |
+     * | _(empty)_    | _delete types and data_ | _(delete)_  | _(delete)_  | _(delete all)_                |
+     * | _**types**_  | _delete only types_     | _(delete)_  |             |                               |
+     * | _**data**_   | _delete only data_      |             | _(delete)_  | _(delete all)_                |
+     * | _**reset**_  | _reset data_            | _(delete)_  | _(delete)_  | _(delete all except NEUTRAL)_ |
      * @param slot The slot of the source _(optional)_
      * - _(empty): old slot_
      * - _**new**: new slot_

@@ -68,7 +68,7 @@
     "crypto-js": "^4.2.0",
     "graphql": "^16.14.2",
     "graphql-request": "^7.4.0",
-    "uuid": "^14.0.1"
+    "uuid": "^14.0.2"
   },
   "scripts": {
     "clean": "tsc --build --clean",

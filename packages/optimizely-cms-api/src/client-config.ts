@@ -25,7 +25,7 @@ export const createClientConfig: CreateConfig = (config, apiConfig) => {
     return { ...config }
 
   if (envConfig.debug)
-    console.log(`⚪ [CMS API] Creating API-Client for ${baseUrl} as ${envConfig.actAs ?? envConfig.clientId}\n`)
+    console.log(`⚪ [CMS API] Creating API-Client for ${baseUrl} as ${envConfig.clientId}\n`)
 
   const authBaseUrl = getAuthBaseUrl(baseUrl).href;
 

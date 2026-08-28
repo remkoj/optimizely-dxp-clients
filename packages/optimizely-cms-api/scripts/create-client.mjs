@@ -184,15 +184,19 @@ async function createVersionFile(token) {
 
 /**
  * Determines the API/service/CMS version information. For `preview` API
- * versions the live `docs/info` endpoint is queried; otherwise the configured
- * `OPTIMIZELY_API_VERSION` is reported and service/CMS are `'unknown'`.
+ * versions the live `docs/info` endpoint is queried; otherwise the resolved
+ * {@link getApiVersion} is reported and service/CMS are `'unknown'`. The
+ * resolved {@link getApiBaseUrl} is always included, so the generated client
+ * can be traced back to the gateway it was built against.
  *
  * @param {string} [token] Authorization header value; obtained via {@link getAccessToken} when omitted.
- * @returns {Promise<{api: string, service: string, cms: string}>} The version descriptor.
+ * @returns {Promise<{api: string, service: string, cms: string, baseUrl: string}>} The version descriptor.
  * @throws {Error} When the info endpoint returns a non-OK response.
  */
 async function getVersionInfo(token) {
-  if (process.env.OPTIMIZELY_API_VERSION?.includes('preview')) {
+  const apiVersion = getApiVersion();
+  const baseUrl = getApiBaseUrl();
+  if (apiVersion.includes('preview')) {
     const infoEndpoint = buildApiEndpoint(CMS_PATHS.info);
     const accessToken = token || await getAccessToken();
     console.log(` - Reading CMS version information from: ${infoEndpoint}`);
@@ -213,12 +217,14 @@ async function getVersionInfo(token) {
       api: body.apiVersion,
       service: body.serviceVersion?.split('+')[0],
       cms: body.cmsVersion?.split('+')[0],
+      baseUrl,
     }
   } else  {
     return {
-      api: process.env.OPTIMIZELY_API_VERSION || 'unknown',
+      api: apiVersion,
       service: 'unknown',
       cms: 'unknown',
+      baseUrl,
     }
   }
 }
@@ -252,8 +258,34 @@ function loadDotEnvFiles() {
 }
 
 /**
- * Constructs an absolute CMS API URL from `OPTIMIZELY_CMS_API_URL` and, unless
- * omitted, the `OPTIMIZELY_API_VERSION` prefix.
+ * Resolves the API version segment used both to fetch the OpenAPI spec and to
+ * record it in `src/version.json`, so the generated client always ends up
+ * pinned to the version it was actually generated against.
+ *
+ * @returns {string} The `OPTIMIZELY_API_VERSION` value, or `'v1'` when unset.
+ */
+function getApiVersion() {
+  return process.env.OPTIMIZELY_API_VERSION || 'v1';
+}
+
+/**
+ * Resolves the API base URL used both to fetch the OpenAPI spec and to record
+ * in `src/version.json` — the same variable `src/config.ts` resolves at
+ * runtime, so `generate` targets whichever gateway the generated client will
+ * talk to. Always carries a trailing slash so relative paths append rather
+ * than replace.
+ *
+ * @returns {string} The `OPTIMIZELY_CMS_API_BASEURL` value, or the production
+ * gateway when unset.
+ */
+function getApiBaseUrl() {
+  const rawBaseUrl = process.env.OPTIMIZELY_CMS_API_BASEURL || 'https://api.cms.optimizely.com/';
+  return rawBaseUrl.endsWith('/') ? rawBaseUrl : `${rawBaseUrl}/`;
+}
+
+/**
+ * Constructs an absolute CMS API URL from {@link getApiBaseUrl} and, unless
+ * omitted, the {@link getApiVersion} prefix.
  *
  * @param {string} [path] Path relative to the API base (and version) URL.
  * @param {boolean} [omitVersion] When true, the version prefix is left off (e.g. for the token endpoint).
@@ -261,11 +293,9 @@ function loadDotEnvFiles() {
  * @throws {Error} When the resulting URL is invalid.
  */
 function buildApiEndpoint(path = '', omitVersion = false) {
-  const cmsURL = process.env.OPTIMIZELY_CMS_API_URL || 'https://api.cms.optimizely.com/';
-  const cmsVersion = process.env.OPTIMIZELY_API_VERSION || 'preview3';
-  const requestPath = omitVersion ? path : `${cmsVersion}/${path}`;
+  const requestPath = omitVersion ? path : `${getApiVersion()}/${path}`;
   try {
-    return new URL(requestPath, cmsURL)
+    return new URL(requestPath, getApiBaseUrl())
   } catch (e) {
     throw new Error(
       'Unable to construct the Optimizely CMS endpoint URL, please check your environment configuration',

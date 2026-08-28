@@ -30,6 +30,10 @@
 `getAuthBaseUrl()` (API base → OAuth token base). See
 [the package AGENTS.md](../../packages/optimizely-cms-api/AGENTS.md) for the resolution order.
 
+`API_VERSION_PATH` (the `v1` segment in every resolved API base) is read from `buildInfo.api` in
+`src/version.json`, not a hardcoded literal, so the client always calls the version it was
+generated against — see the `generate` step below.
+
 Consequences for changes in this area:
 
 - Resolve through `resolveApiBaseUrl()`, never by reading `config.apiBaseUrl` directly. Config does
@@ -40,12 +44,29 @@ Consequences for changes in this area:
 - Do not hardcode `https://api.cms.optimizely.com` elsewhere. `src/api-client.ts` and
   `src/getaccesstoken.ts` both import `DEFAULT_API_BASEURL`, and `src/client-config.ts` imports
   `getAuthBaseUrl` rather than re-deriving the token endpoint.
-- The `api.cms<env>.optimizely.com` hostname pattern appears twice in `src/config.ts` — once in
-  `extractApiGateway()` (producing it) and once in `isManagedApiGateway()` (recognising it). They
-  must stay in sync, otherwise an environment resolves to the right API base but the wrong token
-  endpoint.
-- `OPTIMIZELY_CMS_API_URL` in `scripts/create-client.mjs` is unrelated: it is build-time only, and
-  points at the gateway used to fetch the OpenAPI spec for code generation.
+- `extractApiGateway()` (producing the API base from a CMS URL) only recognises the exact
+  production host `<tenant>.cms.optimizely.com`; non-production tenants (e.g. `cmstest`,
+  `cmspreprod`) are never inferred and fall through to the self-hosted `_cms/v1` path unless
+  `OPTIMIZELY_CMS_API_BASEURL` is set explicitly.
+- `isManagedApiGateway()` (used by `getAuthBaseUrl()` to pick the token endpoint) is intentionally
+  broader: besides the exact production host it also matches an explicitly configured
+  `api.cms<env>.optimizely.com` non-production gateway via regex, so a manually set
+  `OPTIMIZELY_CMS_API_BASEURL` for a non-production environment still resolves the token endpoint
+  from the host root instead of `_cms/v1`. The regex only runs after the fast equality check fails,
+  so the production path stays a cheap string comparison.
+- `scripts/create-client.mjs` reads the same `OPTIMIZELY_CMS_API_BASEURL` as `src/config.ts` to
+  fetch the OpenAPI spec at `generate` time, so pointing a non-production gateway at build time
+  uses the identical variable a consuming app sets at runtime.
+- `getApiVersion()` in `scripts/create-client.mjs` (`OPTIMIZELY_API_VERSION`, defaulting to
+  `v1`) is the single source for the version path segment: it is used both to fetch the spec
+  and, via `getVersionInfo()`, written into `src/version.json` as `buildInfo.api`. `src/config.ts`
+  reads that same field for `API_VERSION_PATH`, so changing one without regenerating the other
+  breaks the client — never hardcode the version segment separately in either place.
+- `getApiBaseUrl()` in `scripts/create-client.mjs` mirrors `getApiVersion()`: it is the single
+  source for the resolved `OPTIMIZELY_CMS_API_BASEURL`, used both to fetch the spec and written
+  into `src/version.json` as `buildInfo.baseUrl`. `src/api-client.ts` exposes it via the
+  `apiBuildBaseUrl` getter, so consumers can tell which gateway a published client was generated
+  against without inspecting `version.json` directly.
 
 ```bash
 yarn workspace @remkoj/optimizely-cms-api run rebuild

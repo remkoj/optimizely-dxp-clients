@@ -13,5 +13,6 @@ export type WebhookPayload = {
     request: Request;
     topics?: Array<string>;
     filters?: (Array<Partial_Record_string_OperationMap__> | Partial_Record_string_OperationMap__);
+    data?: Array<string>;
 };
 

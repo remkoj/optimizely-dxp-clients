@@ -12,11 +12,10 @@ npm install @remkoj/optimizely-cms-api
 
 | Variable | Required | Description |
 | --- | --- | --- |
-| `OPTIMIZELY_CMS_URL` | yes | CMS instance URL, e.g. `https://<tenant>.cms.optimizely.com` |
+| `OPTIMIZELY_CMS_URL` | no | CMS instance URL, e.g. `https://<tenant>.cms.optimizely.com` |
 | `OPTIMIZELY_CMS_CLIENT_ID` | yes | OAuth client ID |
 | `OPTIMIZELY_CMS_CLIENT_SECRET` | yes | OAuth client secret |
-| `OPTIMIZELY_CMS_API_BASEURL` | no | Override the auto-detected API base URL. Rarely needed — see below |
-| `OPTIMIZELY_CMS_USER_ID` | no | Impersonate a specific user (`actAs`) |
+| `OPTIMIZELY_CMS_API_BASEURL` | no | Override the auto-detected API base URL. Required for non-production environments — see below |
 | `OPTIMIZELY_DEBUG` | no | Set to `"1"` to enable request/response logging |
 
 ## API URL resolution
@@ -26,19 +25,22 @@ variables (`readPartialEnvConfig()`), from CLI arguments, or from an object pass
 `createClient()`:
 
 1. `OPTIMIZELY_CMS_API_BASEURL` (or `apiBaseUrl`) is set → used verbatim, including any path prefix.
-2. The CMS URL is a SaaS CMS host (`<tenant>.cms<env>.optimizely.com`) → the matching managed
-   gateway, `https://api.cms<env>.optimizely.com/v1`. The environment suffix carries over, the
-   tenant does not.
-3. The CMS URL is any other host (self-hosted) → `<cms url>/_cms/v1`.
-4. Neither is set → `https://api.cms.optimizely.com/v1`.
+2. The CMS URL is the production SaaS CMS host (`<tenant>.cms.optimizely.com`) → the managed
+   gateway, `https://api.cms.optimizely.com/<version>`.
+3. The CMS URL is any other host (self-hosted, or a non-production tenant such as
+   `cmstest`/`cmspreprod`) → `<cms url>/_cms/<version>`.
+4. Neither is set → `https://api.cms.optimizely.com/<version>`.
 
-So a tester on `OPTIMIZELY_CMS_URL=https://app-xyz.cmstest.optimizely.com` reaches
-`https://api.cmstest.optimizely.com/v1` without further configuration. Only set
-`OPTIMIZELY_CMS_API_BASEURL` when the gateway cannot be derived from the CMS URL.
+`<version>` is the API version this published client was generated against (currently `v1`) — it
+is read from the package's build info, not a value you configure.
 
-The OAuth token endpoint follows the same split: managed gateways serve it from the host root
-(`https://api.cms<env>.optimizely.com/oauth/token`), self-hosted instances from
-`<cms url>/_cms/v1/oauth/token`.
+Non-production environments are never inferred from the CMS URL. Set `OPTIMIZELY_CMS_API_BASEURL`
+explicitly to reach a non-production gateway (e.g. `https://api.cmstest.optimizely.com/v1`).
+
+The OAuth token endpoint follows the same split: a managed gateway (production, or an explicitly
+configured non-production `api.cms<env>.optimizely.com`) serves it from the host root
+(`https://api.cms.optimizely.com/oauth/token`), everything else (self-hosted) from
+`<base url>/_cms/<version>/oauth/token`.
 
 ## Creating a client
 

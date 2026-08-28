@@ -1,5 +1,6 @@
 {
     "api": "v1",
     "service": "unknown",
-    "cms": "unknown"
+    "cms": "unknown",
+    "baseUrl": "https://api.cms.optimizely.com/"
 }
