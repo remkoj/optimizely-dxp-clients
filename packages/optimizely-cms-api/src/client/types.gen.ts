@@ -5,7 +5,7 @@ export type ClientOptions = {
 };
 
 /**
- * Represents a CMS application (website or remote website).
+ * A CMS application (website or remote website).
  */
 export type Application = {
     /**
@@ -13,12 +13,15 @@ export type Application = {
      */
     key?: string;
     /**
-     * The display name of this Application.
+     * The display name of this application.
      */
     displayName: string;
-    type: ApplicationType;
     /**
-     * A string that is used to indicate the source of this Application.
+     * The type of this application.
+     */
+    type: string;
+    /**
+     * A string that is used to indicate the source of this application.
      */
     readonly source?: string;
     /**
@@ -34,9 +37,9 @@ export type Application = {
      */
     useApplicationSpecificAssets?: boolean;
     /**
-     * Returns the root for application-specific assets, if UseApplicationSpecificAssets is true.
+     * Returns the root for application-specific assets, if 'useApplicationSpecificAssets' is true.
      */
-    readonly assetsRoot?: string | null;
+    readonly assetsRoot?: null | string;
     /**
      * The hosts assigned to this application.
      */
@@ -70,53 +73,51 @@ export type Application = {
 };
 
 /**
- * Represents a host entry for an Application.
+ * A host entry for an application.
  */
 export type ApplicationHost = {
     /**
      * The DNS host name or IP address and optional port of this host.
      */
     authority: string;
-    type?: ApplicationHostType;
+    /**
+     * The type of this host.
+     */
+    type?: string;
     /**
      * The locale associated with this host.
      */
     locale?: string;
-    preferredUrlScheme?: UrlScheme;
+    /**
+     * The preferred URL scheme to be used when accessing this host. Will be used by the CMS when generating links to this host.
+     */
+    preferredUrlScheme?: string;
 };
 
 /**
- * Represents a host entry for an Application.
+ * A host entry for an application.
  */
 export type ApplicationHostPatch = {
     /**
      * The DNS host name or IP address and optional port of this host.
      */
-    authority?: string | null;
-    type?: ApplicationHostTypePatch;
+    authority?: null | string;
+    /**
+     * The type of this host.
+     */
+    type?: null | string;
     /**
      * The locale associated with this host.
      */
-    locale?: string | null;
-    preferredUrlScheme?: UrlSchemePatch;
+    locale?: null | string;
+    /**
+     * The preferred URL scheme to be used when accessing this host. Will be used by the CMS when generating links to this host.
+     */
+    preferredUrlScheme?: null | string;
 };
 
 /**
- * Represents the type of an ApplicationHost.
- */
-export type ApplicationHostType = {
-    [key: string]: never;
-};
-
-/**
- * Represents the type of an ApplicationHost.
- */
-export type ApplicationHostTypePatch = {
-    [key: string]: never;
-};
-
-/**
- * Represents a single page of items in a paged collection, including paging metadata such as the current page index, page size, and an estimated total item count.
+ * A single page of items in a paged collection, including paging metadata such as the current page index, page size, and an estimated total item count.
  */
 export type ApplicationPage = {
     /**
@@ -134,58 +135,43 @@ export type ApplicationPage = {
     /**
      * The estimated total number of items in the collection. May be omitted if the total count is unknown.
      */
-    readonly totalCount?: number | null;
+    readonly totalCount?: null | number;
 };
 
 /**
- * Represents a CMS application (website or remote website).
+ * A CMS application (website or remote website).
  */
 export type ApplicationPatch = {
     /**
-     * The display name of this Application.
+     * The display name of this application.
      */
-    displayName?: string | null;
-    type?: ApplicationTypePatch;
+    displayName?: null | string;
     /**
      * A reference to the entry point (start page) content for this application.
      */
-    entryPoint?: string | null;
+    entryPoint?: null | string;
     /**
      * Whether this is the default application.
      */
-    isDefault?: boolean | null;
+    isDefault?: null | boolean;
     /**
      * Whether this application uses a dedicated assets folder.
      */
-    useApplicationSpecificAssets?: boolean | null;
+    useApplicationSpecificAssets?: null | boolean;
     /**
      * The hosts assigned to this application.
      */
-    hosts?: Array<ApplicationHostPatch> | null;
+    hosts?: null | Array<ApplicationHostPatch>;
     /**
      * Whether to use preview tokens for this application. Only applicable when the type is 'website'.
      */
-    usePreviewTokens?: boolean | null;
+    usePreviewTokens?: null | boolean;
     /**
      * A dictionary of preview URL formats keyed by content type base or content type key. Only applicable when the type is 'website'.
      */
-    previewUrlFormats?: {
+    previewUrlFormats?: null | {
         [key: string]: string;
-    } | null;
-};
-
-/**
- * Represents the type of an Application.
- */
-export type ApplicationType = {
-    [key: string]: never;
-};
-
-/**
- * Represents the type of an Application.
- */
-export type ApplicationTypePatch = {
-    [key: string]: never;
+    };
 };
 
 /**
@@ -195,7 +181,7 @@ export type ApprovalDecisionOptions = {
     /**
      * An optional comment to include with the approval decision. May be required depending on the approval definition configuration.
      */
-    comment?: string | null;
+    comment?: null | string;
     /**
      * Indicates if the approval should be forced, bypassing the normal approval flow. Requires 'admin' access rights.
      */
@@ -203,13 +189,13 @@ export type ApprovalDecisionOptions = {
 };
 
 /**
- * Describes the items of a content type property of type 'array'.
+ * The item definition for a content type property of type 'array'.
  */
 export type ArrayItem = {
     /**
      * The fundamental data type for the items in the array (e.g., string, integer, content reference).
      */
-    type: 'string' | 'url' | 'boolean' | 'integer' | 'float' | 'dateTime' | 'contentReference' | 'content' | 'link' | 'richText' | 'json' | 'component';
+    type: string;
     /**
      * The property format that defines specialized handling and validation for this array item.
      */
@@ -221,19 +207,19 @@ export type ArrayItem = {
     /**
      * The minimum value that properties of this type should be able to contain. Value type must match the type of the array item.
      */
-    minimum?: number | null | number | string | Date;
+    minimum?: number | number | string | Date | null;
     /**
      * The maximum value that array items of this type should be able to contain. Value type must match the type of the array item.
      */
-    maximum?: number | null | number | string | Date;
+    maximum?: number | number | string | Date | null;
     /**
      * The minimum string length that array items of this type should be able to contain.
      */
-    minLength?: number | null;
+    minLength?: null | number;
     /**
      * The maximum string length that array items of this type should be able to contain.
      */
-    maxLength?: number | null;
+    maxLength?: null | number;
     /**
      * Regular expression pattern that limits what strings that array items of this type should be able to contain.
      */
@@ -241,7 +227,7 @@ export type ArrayItem = {
     /**
      * A predefined list of allowed values for array items of this type. The enumeration values must match the property's data type. Allowed for string, integer, float and date-time property types.
      */
-    enum?: Array<EnumerationValue> | null;
+    enum?: null | Array<EnumerationValue>;
     /**
      * Defines content and base types that array items of this type may contain.
      */
@@ -253,13 +239,13 @@ export type ArrayItem = {
     /**
      * Defines editor specific settings for this item. The settings are specific to the item and editor type.
      */
-    editorSettings?: {
+    editorSettings?: null | {
         [key: string]: unknown;
-    } | null;
+    };
 };
 
 /**
- * Represents a blueprint of a content item.
+ * A blueprint of a content item.
  */
 export type Blueprint = {
     /**
@@ -290,25 +276,31 @@ export type Blueprint = {
      * The name of the user or application that last modified this resource.
      */
     readonly lastModifiedBy?: string;
+    /**
+     * The content structure of this blueprint.
+     */
     content: BlueprintData;
 };
 
 /**
- * Represents the data part of a Blueprint.
+ * The data part of a blueprint.
  */
 export type BlueprintData = ContentData & {
+    /**
+     * The composition structure of this blueprint, if any. Only relevant for blueprints of experiences and sections.
+     */
     composition?: CompositionNode;
 };
 
 /**
- * Represents the data part of a Blueprint.
+ * The data part of a blueprint.
  */
 export type BlueprintDataPatch = ContentDataPatch & {
     composition?: CompositionNodePatch;
 };
 
 /**
- * Represents a single page of items in a paged collection, including paging metadata such as the current page index, page size, and an estimated total item count.
+ * A single page of items in a paged collection, including paging metadata such as the current page index, page size, and an estimated total item count.
  */
 export type BlueprintPage = {
     /**
@@ -326,22 +318,58 @@ export type BlueprintPage = {
     /**
      * The estimated total number of items in the collection. May be omitted if the total count is unknown.
      */
-    readonly totalCount?: number | null;
+    readonly totalCount?: null | number;
 };
 
 /**
- * Represents a blueprint of a content item.
+ * A blueprint of a content item.
  */
 export type BlueprintPatch = {
     /**
      * The display name of this blueprint.
      */
-    displayName?: string | null;
+    displayName?: null | string;
     content?: BlueprintDataPatch;
 };
 
 /**
- * Defines display settings for a CompositionNode.
+ * Configures the built-in composition (the "canvas") of an experience or section content type. Only applicable to content types with base type `_experience` or `_section`.
+ */
+export type CompositionConfiguration = {
+    /**
+     * The layout type to use for the built-in composition (e.g. `outline` or `grid`). When empty, the default layout for the base type is used.
+     */
+    format?: string;
+    /**
+     * Content types and base types that the built-in composition is permitted to contain.
+     */
+    allowedTypes?: Array<string>;
+    /**
+     * Content types and base types that the built-in composition is forbidden from containing.
+     */
+    restrictedTypes?: Array<string>;
+};
+
+/**
+ * Configures the built-in composition (the "canvas") of an experience or section content type. Only applicable to content types with base type `_experience` or `_section`.
+ */
+export type CompositionConfigurationPatch = {
+    /**
+     * The layout type to use for the built-in composition (e.g. `outline` or `grid`). When empty, the default layout for the base type is used.
+     */
+    format?: null | string;
+    /**
+     * Content types and base types that the built-in composition is permitted to contain.
+     */
+    allowedTypes?: null | Array<string>;
+    /**
+     * Content types and base types that the built-in composition is forbidden from containing.
+     */
+    restrictedTypes?: null | Array<string>;
+};
+
+/**
+ * Display settings for a composition node.
  */
 export type CompositionDisplaySettings = {
     /**
@@ -349,87 +377,93 @@ export type CompositionDisplaySettings = {
      */
     displayTemplate: string;
     /**
-     * The display settings of this CompositionNode.
+     * The display settings of this composition node.
      */
-    settings?: {
+    settings?: null | {
         [key: string]: string;
-    } | null;
+    };
 };
 
 /**
- * Defines display settings for a CompositionNode.
+ * Display settings for a composition node.
  */
 export type CompositionDisplaySettingsPatch = {
     /**
      * The display template that these settings apply to.
      */
-    displayTemplate?: string | null;
+    displayTemplate?: null | string;
     /**
-     * The display settings of this CompositionNode.
+     * The display settings of this composition node.
      */
-    settings?: {
+    settings?: null | {
         [key: string]: string;
-    } | null;
+    };
 };
 
 /**
- * Specifies a node in a content composition.
+ * A node in a content composition.
  */
 export type CompositionNode = {
     /**
-     * Specifies an identifier of this CompositionNode.
+     * Specifies an identifier of this composition node.
      */
     id?: string;
     /**
-     * The display name of this ContentType.
+     * The display name of this composition node.
      */
     displayName?: string;
     /**
-     * The node type of this CompositionNode.
+     * The node type of this composition node.
      */
     nodeType: string;
     /**
-     * The node layout type of this CompositionNode
+     * The node layout type of this composition node
      */
     layoutType?: string;
+    /**
+     * Optional display settings for the composition node.
+     */
     displaySettings?: CompositionDisplaySettings;
+    /**
+     * Specifies the associated content for this composition node, if any.
+     */
     component?: ContentComponent;
     /**
-     * The child nodes for this CompositionNode.
+     * The child nodes for this composition node.
      */
-    nodes?: Array<CompositionNode> | null;
+    nodes?: null | Array<CompositionNode>;
 };
 
 /**
- * Specifies a node in a content composition.
+ * A node in a content composition.
  */
 export type CompositionNodePatch = {
     /**
-     * Specifies an identifier of this CompositionNode.
+     * Specifies an identifier of this composition node.
      */
-    id?: string | null;
+    id?: null | string;
     /**
-     * The display name of this ContentType.
+     * The display name of this composition node.
      */
-    displayName?: string | null;
+    displayName?: null | string;
     /**
-     * The node type of this CompositionNode.
+     * The node type of this composition node.
      */
-    nodeType?: string | null;
+    nodeType?: null | string;
     /**
-     * The node layout type of this CompositionNode
+     * The node layout type of this composition node
      */
-    layoutType?: string | null;
+    layoutType?: null | string;
     displaySettings?: CompositionDisplaySettingsPatch;
     component?: ContentComponentPatch;
     /**
-     * The child nodes for this CompositionNode.
+     * The child nodes for this composition node.
      */
-    nodes?: Array<CompositionNodePatch> | null;
+    nodes?: null | Array<CompositionNodePatch>;
 };
 
 /**
- * Associates a content item with another source content item, establishing a relationship defined by a content type binding. Used for linking managed content to external or reference content.
+ * An association between a content item and a source content item, defined by a content type binding. Used for linking managed content with external or reference content.
  */
 export type ContentBinding = {
     /**
@@ -443,27 +477,27 @@ export type ContentBinding = {
 };
 
 /**
- * Associates a content item with another source content item, establishing a relationship defined by a content type binding. Used for linking managed content to external or reference content.
+ * An association between a content item and a source content item, defined by a content type binding. Used for linking managed content with external or reference content.
  */
 export type ContentBindingPatch = {
     /**
      * The binding definition key that controls how the source content item is linked and accessed.
      */
-    contentTypeBinding?: string | null;
+    contentTypeBinding?: null | string;
     /**
      * The reference to the source content item that is being bound. This cannot be empty.
      */
-    source?: string | null;
+    source?: null | string;
 };
 
 /**
- * Represents a content component.
+ * A content component.
  */
 export type ContentComponent = ContentData & {
     /**
      * A reference to the content of this component. Cannot be assigned together with 'contentType' or 'properties'.
      */
-    reference?: string | null;
+    reference?: null | string;
     /**
      * The key of the content type that this is an embedded instance of.
      */
@@ -471,23 +505,26 @@ export type ContentComponent = ContentData & {
 };
 
 /**
- * Represents a content component.
+ * A content component.
  */
 export type ContentComponentPatch = ContentDataPatch & {
     /**
      * A reference to the content of this component. Cannot be assigned together with 'contentType' or 'properties'.
      */
-    reference?: string | null;
+    reference?: null | string;
     /**
      * The key of the content type that this is an embedded instance of.
      */
-    contentType?: string | null;
+    contentType?: null | string;
 };
 
 /**
- * Base structure for content data. Contains properties defined by the content type and optional bindings to source content. Property values must conform to the types defined in the associated ContentType definition.
+ * Content property values conforming to the content type, with an optional binding to source content.
  */
 export type ContentData = {
+    /**
+     * Optional binding to another content item.
+     */
     binding?: ContentBinding;
     /**
      * Properties as they are defined by corresponding component or content type.
@@ -498,20 +535,20 @@ export type ContentData = {
 };
 
 /**
- * Base structure for content data. Contains properties defined by the content type and optional bindings to source content. Property values must conform to the types defined in the associated ContentType definition.
+ * Content property values conforming to the content type, with an optional binding to source content.
  */
 export type ContentDataPatch = {
     binding?: ContentBindingPatch;
     /**
      * Properties as they are defined by corresponding component or content type.
      */
-    properties?: {
+    properties?: null | {
         [key: string]: PropertyData;
-    } | null;
+    };
 };
 
 /**
- * Metadata about a content item in the content hierarchy, including ownership, localization, and audit information. This represents the structural information without the actual property values.
+ * Metadata about a content item in the content hierarchy — ownership, localization, and audit information — but not its property values.
  */
 export type ContentNode = {
     /**
@@ -557,7 +594,7 @@ export type ContentNode = {
     /**
      * If populated, the date and time when this content was deleted.
      */
-    readonly deleted?: Date | null;
+    readonly deleted?: null | Date;
     /**
      * The username of the user who deleted this content. Only populated if the content is deleted.
      */
@@ -565,7 +602,7 @@ export type ContentNode = {
 };
 
 /**
- * Represents a single page of items in a paged collection, including paging metadata such as the current page index, page size, and an estimated total item count.
+ * A single page of items in a paged collection, including paging metadata such as the current page index, page size, and an estimated total item count.
  */
 export type ContentNodePage = {
     /**
@@ -583,25 +620,25 @@ export type ContentNodePage = {
     /**
      * The estimated total number of items in the collection. May be omitted if the total count is unknown.
      */
-    readonly totalCount?: number | null;
+    readonly totalCount?: null | number;
 };
 
 /**
- * Metadata about a content item in the content hierarchy, including ownership, localization, and audit information. This represents the structural information without the actual property values.
+ * Metadata about a content item in the content hierarchy — ownership, localization, and audit information — but not its property values.
  */
 export type ContentNodePatch = {
     /**
      * The content item that contains this item in the hierarchy.
      */
-    container?: string | null;
+    container?: null | string;
     /**
      * The content item that owns this item. Content that is owned by another content is also known as an asset. Cannot be combined with container.
      */
-    owner?: string | null;
+    owner?: null | string;
 };
 
 /**
- * Describes a content source used within CMS.
+ * A content source used within the CMS.
  */
 export type ContentSource = {
     /**
@@ -613,7 +650,7 @@ export type ContentSource = {
      */
     type: string;
     /**
-     * The key of the source that this ContentSource relates to.
+     * The key of the source that this content source relates to.
      */
     sourceKey: string;
     /**
@@ -621,7 +658,7 @@ export type ContentSource = {
      */
     sourceType: string;
     /**
-     * The display name of this ContentSource.
+     * The display name of this content source.
      */
     displayName: string;
     /**
@@ -643,12 +680,15 @@ export type ContentSource = {
     /**
      * Represents the base of the corresponding content type.
      */
-    baseType: '_page' | '_component' | '_media' | '_image' | '_video' | '_folder' | '_experience' | '_section' | '_element';
+    baseType: string;
+    /**
+     * Specifies which properties to include and the mappings for them.
+     */
     propertyMappings: PropertyMappings;
 };
 
 /**
- * Represents a single page of items in a paged collection, including paging metadata such as the current page index, page size, and an estimated total item count.
+ * A single page of items in a paged collection, including paging metadata such as the current page index, page size, and an estimated total item count.
  */
 export type ContentSourcePage = {
     /**
@@ -666,38 +706,38 @@ export type ContentSourcePage = {
     /**
      * The estimated total number of items in the collection. May be omitted if the total count is unknown.
      */
-    readonly totalCount?: number | null;
+    readonly totalCount?: null | number;
 };
 
 /**
- * Describes a content source used within CMS.
+ * A content source used within the CMS.
  */
 export type ContentSourcePatch = {
     /**
      * Specifies the type of source. For example 'graph' for a GraphQL content source.
      */
-    type?: string | null;
+    type?: null | string;
     /**
-     * The key of the source that this ContentSource relates to.
+     * The key of the source that this content source relates to.
      */
-    sourceKey?: string | null;
+    sourceKey?: null | string;
     /**
      * Specifies the source type of this source.
      */
-    sourceType?: string | null;
+    sourceType?: null | string;
     /**
-     * The display name of this ContentSource.
+     * The display name of this content source.
      */
-    displayName?: string | null;
+    displayName?: null | string;
     /**
      * Represents the base of the corresponding content type.
      */
-    baseType?: '_page' | '_component' | '_media' | '_image' | '_video' | '_folder' | '_experience' | '_section' | '_element';
+    baseType?: null | string;
     propertyMappings?: PropertyMappingsPatch;
 };
 
 /**
- * Represents a content type definition.
+ * A content type definition.
  */
 export type ContentType = {
     /**
@@ -705,19 +745,19 @@ export type ContentType = {
      */
     key?: string;
     /**
-     * The display name of this ContentType.
+     * The display name of this content type.
      */
     displayName: string;
     /**
-     * A description of this ContentType.
+     * A description of this content type.
      */
     description?: string;
     /**
-     * The base type of this ContentType. Ignored for contracts; required for all other content types.
+     * The base type of this content type. Ignored for contracts; required for all other content types.
      */
-    baseType?: string | null;
+    baseType?: null | string;
     /**
-     * Specifies if the ContentType is a contract type.
+     * Specifies if the content type is a contract type.
      */
     isContract?: boolean;
     /**
@@ -725,7 +765,7 @@ export type ContentType = {
      */
     readonly source?: string;
     /**
-     * A value that is used to when sorting ContentType instances.
+     * A value that is used when sorting content type instances.
      */
     sortOrder?: number;
     /**
@@ -739,7 +779,11 @@ export type ContentType = {
     /**
      * Provides a set of composition behaviors specifying how this content type can be used within compositions. Currently this can only be assigned when baseType is 'component'.
      */
-    compositionBehaviors?: Array<'sectionEnabled' | 'elementEnabled' | 'formsElementEnabled'>;
+    compositionBehaviors?: Array<string>;
+    /**
+     * Configures the built-in composition (the "canvas") for experience and section content types. Only applicable when BaseType is `_experience` or `_section`.
+     */
+    composition?: CompositionConfiguration;
     /**
      * Provides a set of contract content types that this content type is bound to.
      */
@@ -761,7 +805,7 @@ export type ContentType = {
      */
     readonly lastModifiedBy?: string;
     /**
-     * Dictionary with all custom properties of this ContentType.
+     * Dictionary with all custom properties of this content type.
      */
     properties?: {
         [key: string]: ContentTypeProperty;
@@ -769,11 +813,11 @@ export type ContentType = {
     /**
      * The access rights assigned to this content type that defines who can create content of this type. If no access rights are assigned, everyone will be able to create content of this type. An empty array means that no new content of this type can be created.
      */
-    accessRights?: Array<SecurityIdentity> | null;
+    accessRights?: null | Array<SecurityIdentity>;
 };
 
 /**
- * Defines the binding between two content types.
+ * A binding between two content types.
  */
 export type ContentTypeBinding = {
     /**
@@ -813,7 +857,7 @@ export type ContentTypeBinding = {
 };
 
 /**
- * Represents a single page of items in a paged collection, including paging metadata such as the current page index, page size, and an estimated total item count.
+ * A single page of items in a paged collection, including paging metadata such as the current page index, page size, and an estimated total item count.
  */
 export type ContentTypeBindingPage = {
     /**
@@ -831,31 +875,31 @@ export type ContentTypeBindingPage = {
     /**
      * The estimated total number of items in the collection. May be omitted if the total count is unknown.
      */
-    readonly totalCount?: number | null;
+    readonly totalCount?: null | number;
 };
 
 /**
- * Defines the binding between two content types.
+ * A binding between two content types.
  */
 export type ContentTypeBindingPatch = {
     /**
      * Specifies the key of the content type that this binding is from.
      */
-    from?: string | null;
+    from?: null | string;
     /**
      * Specifies the key of the content type that this binding is to.
      */
-    to?: string | null;
+    to?: null | string;
     /**
      * Object map with all property mappings for this content type binding. The field name represents the path that the property should bind to.
      */
-    propertyMappings?: {
+    propertyMappings?: null | {
         [key: string]: PropertyMapping;
-    } | null;
+    };
 };
 
 /**
- * Represents a single page of items in a paged collection, including paging metadata such as the current page index, page size, and an estimated total item count.
+ * A single page of items in a paged collection, including paging metadata such as the current page index, page size, and an estimated total item count.
  */
 export type ContentTypePage = {
     /**
@@ -873,61 +917,62 @@ export type ContentTypePage = {
     /**
      * The estimated total number of items in the collection. May be omitted if the total count is unknown.
      */
-    readonly totalCount?: number | null;
+    readonly totalCount?: null | number;
 };
 
 /**
- * Represents a content type definition.
+ * A content type definition.
  */
 export type ContentTypePatch = {
     /**
-     * The display name of this ContentType.
+     * The display name of this content type.
      */
-    displayName?: string | null;
+    displayName?: null | string;
     /**
-     * A description of this ContentType.
+     * A description of this content type.
      */
-    description?: string | null;
+    description?: null | string;
     /**
-     * A value that is used to when sorting ContentType instances.
+     * A value that is used when sorting content type instances.
      */
-    sortOrder?: number | null;
+    sortOrder?: null | number;
     /**
      * Provides a set of content types that can be created in containers of this type
      */
-    mayContainTypes?: Array<string> | null;
+    mayContainTypes?: null | Array<string>;
     /**
      * Provides a set of media file extensions that this content type can handle.
      */
-    mediaFileExtensions?: Array<string> | null;
+    mediaFileExtensions?: null | Array<string>;
     /**
      * Provides a set of composition behaviors specifying how this content type can be used within compositions. Currently this can only be assigned when baseType is 'component'.
      */
-    compositionBehaviors?: Array<'sectionEnabled' | 'elementEnabled' | 'formsElementEnabled'> | null;
+    compositionBehaviors?: null | Array<string>;
+    composition?: CompositionConfigurationPatch;
     /**
      * Provides a set of contract content types that this content type is bound to.
      */
-    contracts?: Array<string> | null;
+    contracts?: null | Array<string>;
     /**
-     * Dictionary with all custom properties of this ContentType.
+     * Dictionary with all custom properties of this content type.
      */
-    properties?: {
+    properties?: null | {
         [key: string]: ContentTypeProperty;
-    } | null;
+    };
     /**
      * The access rights assigned to this content type that defines who can create content of this type. If no access rights are assigned, everyone will be able to create content of this type. An empty array means that no new content of this type can be created.
      */
-    accessRights?: Array<SecurityIdentityPatch> | null;
+    accessRights?: null | Array<SecurityIdentityPatch>;
 };
 
 /**
- * Defines a single property within a content type, including its data type, validation rules, and editorial metadata.
+ * A single property of a content type, including its data type, validation rules, and editorial metadata.
  */
 export type ContentTypeProperty = {
     /**
      * The fundamental data type of this property (e.g., string, integer, content reference).
      */
-    type: 'string' | 'url' | 'boolean' | 'integer' | 'float' | 'dateTime' | 'contentReference' | 'content' | 'link' | 'richText' | 'json' | 'array' | 'component';
+    type: string;
     /**
      * The property format that defines specialized handling and validation for this property.
      */
@@ -963,31 +1008,31 @@ export type ContentTypeProperty = {
     /**
      * Indicates how this property will be indexed in the search engine. If not explicitly set, the property will be indexed using the default indexing setting of the search engine.
      */
-    indexingType?: 'disabled' | 'queryable' | 'searchable';
+    indexingType?: string;
     /**
      * Indicates how this property is displayed in the editing interface. If not explicitly set, the property will be available for editing.
      */
-    displayMode?: 'available' | 'hidden';
+    displayMode?: string;
     /**
      * The lowest value (inclusive) allowed for numeric or date properties. Type must match the property's data type.
      */
-    minimum?: number | null | number | string | Date;
+    minimum?: number | number | string | Date | null;
     /**
      * The highest value (inclusive) allowed for numeric or date properties. Type must match the property's data type.
      */
-    maximum?: number | null | number | string | Date;
+    maximum?: number | number | string | Date | null;
     /**
      * A predefined list of allowed values for this property. The enumeration values must match the property's data type. Allowed for string, integer, float and date-time property types.
      */
-    enum?: Array<EnumerationValue> | null;
+    enum?: null | Array<EnumerationValue>;
     /**
      * The minimum character length for string-type properties.
      */
-    minLength?: number | null;
+    minLength?: null | number;
     /**
      * The maximum character length for string-type properties.
      */
-    maxLength?: number | null;
+    maxLength?: null | number;
     /**
      * Regular expression pattern that limits what value that a string type property must match.
      */
@@ -995,11 +1040,11 @@ export type ContentTypeProperty = {
     /**
      * The minimum number of items allowed in array-type properties.
      */
-    minItems?: number | null;
+    minItems?: null | number;
     /**
      * The maximum number of items allowed in array-type properties.
      */
-    maxItems?: number | null;
+    maxItems?: null | number;
     /**
      * Content types and base types that this property is permitted to contain. Used by properties of content or content reference type.
      */
@@ -1011,14 +1056,17 @@ export type ContentTypeProperty = {
     /**
      * Defines editor specific settings for this property. Editor settings are specific to the item and editor type.
      */
-    editorSettings?: {
+    editorSettings?: null | {
         [key: string]: unknown;
-    } | null;
+    };
+    /**
+     * Defines information and restrictions about the items in an array property.
+     */
     items?: ArrayItem;
 };
 
 /**
- * Represents a version of a content item.
+ * A version of a content item.
  */
 export type ContentVersion = ContentData & {
     /**
@@ -1048,19 +1096,19 @@ export type ContentVersion = ContentData & {
     /**
      * Indicates a time when this content was published or should be published.
      */
-    published?: Date | null;
+    published?: null | Date;
     /**
      * Indicates a time when this content expired or should expire.
      */
-    expired?: Date | null;
+    expired?: null | Date;
     /**
      * The status of this content version.
      */
-    readonly status?: 'draft' | 'ready' | 'published' | 'previous' | 'scheduled' | 'rejected' | 'inReview';
+    readonly status?: string;
     /**
      * The timestamp when a scheduled version will be published. Only present when status is 'scheduled'.
      */
-    readonly delayPublishUntil?: Date | null;
+    readonly delayPublishUntil?: null | Date;
     /**
      * A string that represents the segment that should be used when routing or generating routes to the current content instance. This value will always be null when content is based on a non-routable content type.
      */
@@ -1071,12 +1119,18 @@ export type ContentVersion = ContentData & {
     simpleRoute?: string;
     readonly lastModified?: Date;
     readonly lastModifiedBy?: string;
+    /**
+     * The composition structure of this content version, if any. Only relevant for experiences and sections.
+     */
     composition?: CompositionNode;
+    /**
+     * Media data attached to this content version.
+     */
     media?: MediaData;
 };
 
 /**
- * Represents a single page of items in a paged collection, including paging metadata such as the current page index, page size, and an estimated total item count.
+ * A single page of items in a paged collection, including paging metadata such as the current page index, page size, and an estimated total item count.
  */
 export type ContentVersionPage = {
     /**
@@ -1094,33 +1148,33 @@ export type ContentVersionPage = {
     /**
      * The estimated total number of items in the collection. May be omitted if the total count is unknown.
      */
-    readonly totalCount?: number | null;
+    readonly totalCount?: null | number;
 };
 
 /**
- * Represents a version of a content item.
+ * A version of a content item.
  */
 export type ContentVersionPatch = ContentDataPatch & {
     /**
      * The display name of this content version.
      */
-    displayName?: string | null;
+    displayName?: null | string;
     /**
      * Indicates a time when this content was published or should be published.
      */
-    published?: Date | null;
+    published?: null | Date;
     /**
      * Indicates a time when this content expired or should expire.
      */
-    expired?: Date | null;
+    expired?: null | Date;
     /**
      * A string that represents the segment that should be used when routing or generating routes to the current content instance. This value will always be null when content is based on a non-routable content type.
      */
-    routeSegment?: string | null;
+    routeSegment?: null | string;
     /**
      * A simple route (shortcut URL) used to access pages and experiences.
      */
-    simpleRoute?: string | null;
+    simpleRoute?: null | string;
     composition?: CompositionNodePatch;
     media?: MediaDataPatch;
 };
@@ -1132,15 +1186,15 @@ export type CopyContentOptions = {
     /**
      * Optional key of the container where the copied content should be placed.
      */
-    container?: string | null;
+    container?: null | string;
     /**
      * Optional key of the owner where the copied content should be placed.
      */
-    owner?: string | null;
+    owner?: null | string;
 };
 
 /**
- * Describes a setting for a display template.
+ * A setting for a display template.
  */
 export type DisplaySetting = {
     /**
@@ -1164,7 +1218,7 @@ export type DisplaySetting = {
 };
 
 /**
- * Describes a setting for a display template.
+ * A selectable choice for a display setting.
  */
 export type DisplaySettingChoice = {
     /**
@@ -1178,7 +1232,7 @@ export type DisplaySettingChoice = {
 };
 
 /**
- * Describes a display template that can be assigned to content.
+ * A display template that can be assigned to content.
  */
 export type DisplayTemplate = {
     /**
@@ -1196,7 +1250,7 @@ export type DisplayTemplate = {
     /**
      * The optional base type this display template is valid for.
      */
-    baseType?: string | null;
+    baseType?: null | string;
     /**
      * The optional key of the content type this display template is valid for.
      */
@@ -1230,7 +1284,7 @@ export type DisplayTemplate = {
 };
 
 /**
- * Represents a single page of items in a paged collection, including paging metadata such as the current page index, page size, and an estimated total item count.
+ * A single page of items in a paged collection, including paging metadata such as the current page index, page size, and an estimated total item count.
  */
 export type DisplayTemplatePage = {
     /**
@@ -1248,49 +1302,49 @@ export type DisplayTemplatePage = {
     /**
      * The estimated total number of items in the collection. May be omitted if the total count is unknown.
      */
-    readonly totalCount?: number | null;
+    readonly totalCount?: null | number;
 };
 
 /**
- * Describes a display template that can be assigned to content.
+ * A display template that can be assigned to content.
  */
 export type DisplayTemplatePatch = {
     /**
      * The display name of this display template.
      */
-    displayName?: string | null;
+    displayName?: null | string;
     /**
      * The optional node type this display template is valid for.
      */
-    nodeType?: string | null;
+    nodeType?: null | string;
     /**
      * The optional base type this display template is valid for.
      */
-    baseType?: string | null;
+    baseType?: null | string;
     /**
      * The optional key of the content type this display template is valid for.
      */
-    contentType?: string | null;
+    contentType?: null | string;
     /**
      * If this is the default display template for the associated base type, node type or content type.
      */
-    isDefault?: boolean | null;
+    isDefault?: null | boolean;
     /**
      * The available settings for this display template.
      */
-    settings?: {
+    settings?: null | {
         [key: string]: DisplaySetting;
-    } | null;
+    };
 };
 
 /**
- * Describes one value in an enumeration of possible values.
+ * A single value in an enumeration of possible values.
  */
 export type EnumerationValue = {
     /**
      * The defined enumeration value. Value type must match the property type.
      */
-    value: number | null | number | string | Date;
+    value: number | number | string | Date | null;
     /**
      * The display name of the enumeration value.
      */
@@ -1298,13 +1352,13 @@ export type EnumerationValue = {
 };
 
 /**
- * Represents a HTML hyperlink with URL, display text, and optional rendering properties.
+ * An HTML hyperlink with URL, display text, and optional rendering properties.
  */
 export type Link = {
     /**
      * The URL that the link points to.
      */
-    url?: string | null;
+    url?: null | string;
     /**
      * Specifies how the URL should be displayed in the browsing context (e.g., '_blank' for new window, '_self' for current window).
      */
@@ -1326,7 +1380,7 @@ export type Link = {
 };
 
 /**
- * Represents a locale that can be used for content.
+ * A locale that can be used for content.
  */
 export type Locale = {
     /**
@@ -1352,7 +1406,7 @@ export type Locale = {
     /**
      * The access rights assigned to this locale that defines who can create content in this locale. If no access rights are assigned, everyone will be able to create content in this locale. An empty array means that no user will be allowed to create or change content in this locale.
      */
-    accessRights?: Array<SecurityIdentity> | null;
+    accessRights?: null | Array<SecurityIdentity>;
     /**
      * A timestamp indicating when this locale was first created.
      */
@@ -1369,11 +1423,11 @@ export type Locale = {
     /**
      * A fallback locale that should be used if content is not available in the current locale.
      */
-    fallback?: string | null;
+    fallback?: null | string;
 };
 
 /**
- * Represents a single page of items in a paged collection, including paging metadata such as the current page index, page size, and an estimated total item count.
+ * A single page of items in a paged collection, including paging metadata such as the current page index, page size, and an estimated total item count.
  */
 export type LocalePage = {
     /**
@@ -1391,59 +1445,59 @@ export type LocalePage = {
     /**
      * The estimated total number of items in the collection. May be omitted if the total count is unknown.
      */
-    readonly totalCount?: number | null;
+    readonly totalCount?: null | number;
 };
 
 /**
- * Represents a locale that can be used for content.
+ * A locale that can be used for content.
  */
 export type LocalePatch = {
     /**
      * The display name of this locale.
      */
-    displayName?: string | null;
+    displayName?: null | string;
     /**
      * Indicates whether this locale is enabled and can be used to create content.
      */
-    isEnabled?: boolean | null;
+    isEnabled?: null | boolean;
     /**
      * A string that represents the segment that should be used when routing or generate routes to the current locale
      */
-    routeSegment?: string | null;
+    routeSegment?: null | string;
     /**
      * A value that is used when sorting locales.
      */
-    sortOrder?: number | null;
+    sortOrder?: null | number;
     /**
      * The access rights assigned to this locale that defines who can create content in this locale. If no access rights are assigned, everyone will be able to create content in this locale. An empty array means that no user will be allowed to create or change content in this locale.
      */
-    accessRights?: Array<SecurityIdentityPatch> | null;
+    accessRights?: null | Array<SecurityIdentityPatch>;
     /**
      * A fallback locale that should be used if content is not available in the current locale.
      */
-    fallback?: string | null;
+    fallback?: null | string;
 };
 
 /**
- * Manifest that describes CMS definitions.
+ * A set of content model definitions (content types, property groups, display templates, and locales).
  */
 export type Manifest = {
     /**
      * List of locales that are part of this manifest.
      */
-    locales?: Array<Locale> | null;
+    locales?: null | Array<Locale>;
     /**
      * List of content type property groups that are part of this manifest.
      */
-    propertyGroups?: Array<PropertyGroup> | null;
+    propertyGroups?: null | Array<PropertyGroup>;
     /**
      * List of content types that are part of this manifest.
      */
-    contentTypes?: Array<ContentType> | null;
+    contentTypes?: null | Array<ContentType>;
     /**
      * List of display templates that are part of this manifest.
      */
-    displayTemplates?: Array<DisplayTemplate> | null;
+    displayTemplates?: null | Array<DisplayTemplate>;
     /**
      * A timestamp indicating the last time an item included in this manifest was modified.
      */
@@ -1451,7 +1505,7 @@ export type Manifest = {
 };
 
 /**
- * Describes a message from a manifest importing operation.
+ * A message from a manifest import operation.
  */
 export type ManifestImportMessage = {
     /**
@@ -1465,7 +1519,7 @@ export type ManifestImportMessage = {
     /**
      * The identifier of the resource that was the reason for this message to be created.
      */
-    resource?: string | null;
+    resource?: null | string;
 };
 
 /**
@@ -1483,7 +1537,7 @@ export type ManifestImportResult = {
 };
 
 /**
- * Represents media data attached to a content item.
+ * Media data attached to a content item.
  */
 export type MediaData = {
     /**
@@ -1493,14 +1547,14 @@ export type MediaData = {
 };
 
 /**
- * Represents media data attached to a content item.
+ * Media data attached to a content item.
  */
 export type MediaDataPatch = {
     [key: string]: never;
 };
 
 /**
- * Represents a new content and the initial data required to create it.
+ * New content and the initial data required to create it.
  */
 export type NewContent = {
     /**
@@ -1523,18 +1577,24 @@ export type NewContent = {
      * The key of a blueprint to use as a template for the new content item. When provided, the blueprint's composition and properties are used as defaults for the initial version. Explicit values in the request take precedence over blueprint defaults.
      */
     blueprint?: string;
+    /**
+     * The initial version of the content that should be created.
+     */
     initialVersion: ContentVersion;
 };
 
 /**
- * Represents the result of creating a new content item.
+ * The result of creating a new content item.
  */
 export type NewContentNode = ContentNode & {
+    /**
+     * The initial version of the content that was created.
+     */
     initialVersion?: ContentVersion;
 };
 
 /**
- * Represents a preview for a specific application.
+ * A preview for a specific application.
  */
 export type Preview = {
     /**
@@ -1548,7 +1608,7 @@ export type Preview = {
 };
 
 /**
- * Represents a single page of items in a paged collection, including paging metadata such as the current page index, page size, and an estimated total item count.
+ * A single page of items in a paged collection, including paging metadata such as the current page index, page size, and an estimated total item count.
  */
 export type PreviewPage = {
     /**
@@ -1566,38 +1626,38 @@ export type PreviewPage = {
     /**
      * The estimated total number of items in the collection. May be omitted if the total count is unknown.
      */
-    readonly totalCount?: number | null;
+    readonly totalCount?: null | number;
 };
 
 export type ProblemDetails = {
     /**
      * A URI reference that identifies the problem type.
      */
-    type?: string | null;
+    type?: null | string;
     /**
      * A short, human-readable summary of the problem type.
      */
-    title?: string | null;
+    title?: null | string;
     /**
      * The HTTP status code generated by the origin server for this occurrence of the problem.
      */
-    status?: number | null;
+    status?: null | number;
     /**
      * A human-readable explanation specific to this occurrence of the problem.
      */
-    detail?: string | null;
+    detail?: null | string;
     /**
      * A URI reference that identifies the specific occurrence of the problem. It may or may not yield further information if dereferenced.
      */
-    instance?: string | null;
+    instance?: null | string;
     /**
      * Error code that identifies the problem type.
      */
-    code?: string | null;
+    code?: null | string;
     /**
      * An array of error details with more detailed information about the problem.
      */
-    errors?: Array<{
+    errors?: null | Array<{
         /**
          * A granular explanation of one specific error related to a field, header or query parameter.
          */
@@ -1605,13 +1665,13 @@ export type ProblemDetails = {
         /**
          * A string that may provide a hint to which field that was the source of the error.
          */
-        field?: string | null;
-    }> | null;
+        field?: null | string;
+    }>;
     [key: string]: unknown;
 };
 
 /**
- * A single property value for a content item. The value's type and format are determined by the property definition in the content type schema.
+ * A single property value of a content item. The value's type and format are determined by the property definition in the content type schema.
  */
 export type PropertyData = {
     /**
@@ -1625,7 +1685,7 @@ export type PropertyData = {
 };
 
 /**
- * Represent the definition of semantic property formats for content items.
+ * A semantic property format available to content type properties.
  */
 export type PropertyFormat = {
     /**
@@ -1633,15 +1693,15 @@ export type PropertyFormat = {
      */
     key?: string;
     /**
-     * The underlying data type used for this PropertyFormat.
+     * The underlying data type used for this property format.
      */
-    dataType?: 'string' | 'url' | 'boolean' | 'integer' | 'float' | 'dateTime' | 'contentReference' | 'content' | 'link' | 'richText' | 'json' | 'array' | 'component';
+    dataType?: string;
     /**
      * The underlying item type used for this property format. Specifies the item type when the dataType is 'array'.
      */
-    readonly itemType?: 'string' | 'url' | 'boolean' | 'integer' | 'float' | 'dateTime' | 'contentReference' | 'content' | 'link' | 'richText' | 'json' | 'array' | 'component';
+    readonly itemType?: string;
     /**
-     * The display name of this PropertyFormat.
+     * The display name of this property format.
      */
     displayName?: string;
     /**
@@ -1667,7 +1727,7 @@ export type PropertyFormat = {
 };
 
 /**
- * Represents a single page of items in a paged collection, including paging metadata such as the current page index, page size, and an estimated total item count.
+ * A single page of items in a paged collection, including paging metadata such as the current page index, page size, and an estimated total item count.
  */
 export type PropertyFormatPage = {
     /**
@@ -1685,11 +1745,11 @@ export type PropertyFormatPage = {
     /**
      * The estimated total number of items in the collection. May be omitted if the total count is unknown.
      */
-    readonly totalCount?: number | null;
+    readonly totalCount?: null | number;
 };
 
 /**
- * Describes a property group of a ContentType in the CMS.
+ * A property group of a content type.
  */
 export type PropertyGroup = {
     /**
@@ -1697,7 +1757,7 @@ export type PropertyGroup = {
      */
     key: string;
     /**
-     * The display name of this PropertyGroup.
+     * The display name of this property group.
      */
     displayName: string;
     /**
@@ -1705,7 +1765,7 @@ export type PropertyGroup = {
      */
     readonly source?: string;
     /**
-     * A value that is used to when sorting PropertyGroup instances.
+     * A value that is used when sorting property group instances.
      */
     sortOrder?: number;
     /**
@@ -1724,7 +1784,7 @@ export type PropertyGroup = {
 };
 
 /**
- * Represents a single page of items in a paged collection, including paging metadata such as the current page index, page size, and an estimated total item count.
+ * A single page of items in a paged collection, including paging metadata such as the current page index, page size, and an estimated total item count.
  */
 export type PropertyGroupPage = {
     /**
@@ -1742,25 +1802,25 @@ export type PropertyGroupPage = {
     /**
      * The estimated total number of items in the collection. May be omitted if the total count is unknown.
      */
-    readonly totalCount?: number | null;
+    readonly totalCount?: null | number;
 };
 
 /**
- * Describes a property group of a ContentType in the CMS.
+ * A property group of a content type.
  */
 export type PropertyGroupPatch = {
     /**
-     * The display name of this PropertyGroup.
+     * The display name of this property group.
      */
-    displayName?: string | null;
+    displayName?: null | string;
     /**
-     * A value that is used to when sorting PropertyGroup instances.
+     * A value that is used when sorting property group instances.
      */
-    sortOrder?: number | null;
+    sortOrder?: null | number;
 };
 
 /**
- * Specifies the binding for a property.
+ * The mapping of a single content type property to a source property.
  */
 export type PropertyMapping = {
     /**
@@ -1774,7 +1834,7 @@ export type PropertyMapping = {
 };
 
 /**
- *  Represents a mapping between a property in an external source and its corresponding property in the CMS. Used to define how external properties are mapped to CMS property identifiers and names.
+ * A mapping between a property in an external source and its corresponding property in the CMS.
  */
 export type PropertyMappings = {
     /**
@@ -1788,21 +1848,21 @@ export type PropertyMappings = {
     /**
      * Specifies the format of the source identifier key.
      */
-    keyFormat?: string | null;
+    keyFormat?: null | string;
 };
 
 /**
- *  Represents a mapping between a property in an external source and its corresponding property in the CMS. Used to define how external properties are mapped to CMS property identifiers and names.
+ * A mapping between a property in an external source and its corresponding property in the CMS.
  */
 export type PropertyMappingsPatch = {
     /**
      * The key to use for the item in cms. Required if the SourceType is not of type '_Item'.
      */
-    displayName?: string | null;
+    displayName?: null | string;
     /**
      * Specifies the format of the source identifier key.
      */
-    keyFormat?: string | null;
+    keyFormat?: null | string;
 };
 
 /**
@@ -1812,7 +1872,7 @@ export type PublishContentOptions = {
     /**
      * Gets or sets the date and time at which the content should be published, sets the version into 'scheduled' state if a future date is specified.
      */
-    delayUntil?: Date | null;
+    delayUntil?: null | Date;
     /**
      * Indicates if validations such as approvals and required properties should be bypassed, requires 'admin' access rights.
      */
@@ -1826,7 +1886,7 @@ export type ReadyContentOptions = {
     /**
      * An optional comment to include when starting the approval process. May be required depending on the approval definition configuration.
      */
-    comment?: string | null;
+    comment?: null | string;
 };
 
 /**
@@ -1836,11 +1896,11 @@ export type RichText = {
     /**
      * A HTML representation of the rich text content. May be null to indicate no content.
      */
-    html?: string | null;
+    html?: null | string;
 };
 
 /**
- * Identifies a user, role or application that can be assigned access associated with a resource.
+ * A user, role, or application that can be granted access to a resource.
  */
 export type SecurityIdentity = {
     /**
@@ -1850,39 +1910,25 @@ export type SecurityIdentity = {
     /**
      * The type of the security entity that this identifier references. Will default to 'role' if not specified.
      */
-    type?: 'user' | 'role' | 'application';
+    type?: string;
 };
 
 /**
- * Identifies a user, role or application that can be assigned access associated with a resource.
+ * A user, role, or application that can be granted access to a resource.
  */
 export type SecurityIdentityPatch = {
     /**
      * The unique name of the user, role or application that this identifier references.
      */
-    name?: string | null;
+    name?: null | string;
     /**
      * The type of the security entity that this identifier references. Will default to 'role' if not specified.
      */
-    type?: 'user' | 'role' | 'application';
+    type?: null | string;
 };
 
 /**
- * Specifies the preferred URL scheme to be used when accessing a host.
- */
-export type UrlScheme = {
-    [key: string]: never;
-};
-
-/**
- * Specifies the preferred URL scheme to be used when accessing a host.
- */
-export type UrlSchemePatch = {
-    [key: string]: never;
-};
-
-/**
- * Represents a CMS application (website or remote website).
+ * A CMS application (website or remote website).
  */
 export type ApplicationWritable = {
     /**
@@ -1890,10 +1936,13 @@ export type ApplicationWritable = {
      */
     key?: string;
     /**
-     * The display name of this Application.
+     * The display name of this application.
      */
     displayName: string;
-    type: ApplicationType;
+    /**
+     * The type of this application.
+     */
+    type: string;
     /**
      * A reference to the entry point (start page) content for this application.
      */
@@ -1923,14 +1972,14 @@ export type ApplicationWritable = {
 };
 
 /**
- * Represents a single page of items in a paged collection, including paging metadata such as the current page index, page size, and an estimated total item count.
+ * A single page of items in a paged collection, including paging metadata such as the current page index, page size, and an estimated total item count.
  */
 export type ApplicationPageWritable = {
     [key: string]: never;
 };
 
 /**
- * Represents a blueprint of a content item.
+ * A blueprint of a content item.
  */
 export type BlueprintWritable = {
     /**
@@ -1945,18 +1994,21 @@ export type BlueprintWritable = {
      * The content type of this blueprint.
      */
     contentType: string;
+    /**
+     * The content structure of this blueprint.
+     */
     content: BlueprintData;
 };
 
 /**
- * Represents a single page of items in a paged collection, including paging metadata such as the current page index, page size, and an estimated total item count.
+ * A single page of items in a paged collection, including paging metadata such as the current page index, page size, and an estimated total item count.
  */
 export type BlueprintPageWritable = {
     [key: string]: never;
 };
 
 /**
- * Metadata about a content item in the content hierarchy, including ownership, localization, and audit information. This represents the structural information without the actual property values.
+ * Metadata about a content item in the content hierarchy — ownership, localization, and audit information — but not its property values.
  */
 export type ContentNodeWritable = {
     /**
@@ -1974,14 +2026,14 @@ export type ContentNodeWritable = {
 };
 
 /**
- * Represents a single page of items in a paged collection, including paging metadata such as the current page index, page size, and an estimated total item count.
+ * A single page of items in a paged collection, including paging metadata such as the current page index, page size, and an estimated total item count.
  */
 export type ContentNodePageWritable = {
     [key: string]: never;
 };
 
 /**
- * Describes a content source used within CMS.
+ * A content source used within the CMS.
  */
 export type ContentSourceWritable = {
     /**
@@ -1993,7 +2045,7 @@ export type ContentSourceWritable = {
      */
     type: string;
     /**
-     * The key of the source that this ContentSource relates to.
+     * The key of the source that this content source relates to.
      */
     sourceKey: string;
     /**
@@ -2001,25 +2053,28 @@ export type ContentSourceWritable = {
      */
     sourceType: string;
     /**
-     * The display name of this ContentSource.
+     * The display name of this content source.
      */
     displayName: string;
     /**
      * Represents the base of the corresponding content type.
      */
-    baseType: '_page' | '_component' | '_media' | '_image' | '_video' | '_folder' | '_experience' | '_section' | '_element';
+    baseType: string;
+    /**
+     * Specifies which properties to include and the mappings for them.
+     */
     propertyMappings: PropertyMappings;
 };
 
 /**
- * Represents a single page of items in a paged collection, including paging metadata such as the current page index, page size, and an estimated total item count.
+ * A single page of items in a paged collection, including paging metadata such as the current page index, page size, and an estimated total item count.
  */
 export type ContentSourcePageWritable = {
     [key: string]: never;
 };
 
 /**
- * Represents a content type definition.
+ * A content type definition.
  */
 export type ContentTypeWritable = {
     /**
@@ -2027,23 +2082,23 @@ export type ContentTypeWritable = {
      */
     key?: string;
     /**
-     * The display name of this ContentType.
+     * The display name of this content type.
      */
     displayName: string;
     /**
-     * A description of this ContentType.
+     * A description of this content type.
      */
     description?: string;
     /**
-     * The base type of this ContentType. Ignored for contracts; required for all other content types.
+     * The base type of this content type. Ignored for contracts; required for all other content types.
      */
-    baseType?: string | null;
+    baseType?: null | string;
     /**
-     * Specifies if the ContentType is a contract type.
+     * Specifies if the content type is a contract type.
      */
     isContract?: boolean;
     /**
-     * A value that is used to when sorting ContentType instances.
+     * A value that is used when sorting content type instances.
      */
     sortOrder?: number;
     /**
@@ -2057,13 +2112,17 @@ export type ContentTypeWritable = {
     /**
      * Provides a set of composition behaviors specifying how this content type can be used within compositions. Currently this can only be assigned when baseType is 'component'.
      */
-    compositionBehaviors?: Array<'sectionEnabled' | 'elementEnabled' | 'formsElementEnabled'>;
+    compositionBehaviors?: Array<string>;
+    /**
+     * Configures the built-in composition (the "canvas") for experience and section content types. Only applicable when BaseType is `_experience` or `_section`.
+     */
+    composition?: CompositionConfiguration;
     /**
      * Provides a set of contract content types that this content type is bound to.
      */
     contracts?: Array<string>;
     /**
-     * Dictionary with all custom properties of this ContentType.
+     * Dictionary with all custom properties of this content type.
      */
     properties?: {
         [key: string]: ContentTypeProperty;
@@ -2071,11 +2130,11 @@ export type ContentTypeWritable = {
     /**
      * The access rights assigned to this content type that defines who can create content of this type. If no access rights are assigned, everyone will be able to create content of this type. An empty array means that no new content of this type can be created.
      */
-    accessRights?: Array<SecurityIdentity> | null;
+    accessRights?: null | Array<SecurityIdentity>;
 };
 
 /**
- * Defines the binding between two content types.
+ * A binding between two content types.
  */
 export type ContentTypeBindingWritable = {
     /**
@@ -2099,21 +2158,21 @@ export type ContentTypeBindingWritable = {
 };
 
 /**
- * Represents a single page of items in a paged collection, including paging metadata such as the current page index, page size, and an estimated total item count.
+ * A single page of items in a paged collection, including paging metadata such as the current page index, page size, and an estimated total item count.
  */
 export type ContentTypeBindingPageWritable = {
     [key: string]: never;
 };
 
 /**
- * Represents a single page of items in a paged collection, including paging metadata such as the current page index, page size, and an estimated total item count.
+ * A single page of items in a paged collection, including paging metadata such as the current page index, page size, and an estimated total item count.
  */
 export type ContentTypePageWritable = {
     [key: string]: never;
 };
 
 /**
- * Represents a version of a content item.
+ * A version of a content item.
  */
 export type ContentVersionWritable = ContentData & {
     /**
@@ -2135,11 +2194,11 @@ export type ContentVersionWritable = ContentData & {
     /**
      * Indicates a time when this content was published or should be published.
      */
-    published?: Date | null;
+    published?: null | Date;
     /**
      * Indicates a time when this content expired or should expire.
      */
-    expired?: Date | null;
+    expired?: null | Date;
     /**
      * A string that represents the segment that should be used when routing or generating routes to the current content instance. This value will always be null when content is based on a non-routable content type.
      */
@@ -2148,19 +2207,25 @@ export type ContentVersionWritable = ContentData & {
      * A simple route (shortcut URL) used to access pages and experiences.
      */
     simpleRoute?: string;
+    /**
+     * The composition structure of this content version, if any. Only relevant for experiences and sections.
+     */
     composition?: CompositionNode;
+    /**
+     * Media data attached to this content version.
+     */
     media?: MediaData;
 };
 
 /**
- * Represents a single page of items in a paged collection, including paging metadata such as the current page index, page size, and an estimated total item count.
+ * A single page of items in a paged collection, including paging metadata such as the current page index, page size, and an estimated total item count.
  */
 export type ContentVersionPageWritable = {
     [key: string]: never;
 };
 
 /**
- * Describes a display template that can be assigned to content.
+ * A display template that can be assigned to content.
  */
 export type DisplayTemplateWritable = {
     /**
@@ -2178,7 +2243,7 @@ export type DisplayTemplateWritable = {
     /**
      * The optional base type this display template is valid for.
      */
-    baseType?: string | null;
+    baseType?: null | string;
     /**
      * The optional key of the content type this display template is valid for.
      */
@@ -2196,14 +2261,14 @@ export type DisplayTemplateWritable = {
 };
 
 /**
- * Represents a single page of items in a paged collection, including paging metadata such as the current page index, page size, and an estimated total item count.
+ * A single page of items in a paged collection, including paging metadata such as the current page index, page size, and an estimated total item count.
  */
 export type DisplayTemplatePageWritable = {
     [key: string]: never;
 };
 
 /**
- * Represents a locale that can be used for content.
+ * A locale that can be used for content.
  */
 export type LocaleWritable = {
     /**
@@ -2229,40 +2294,40 @@ export type LocaleWritable = {
     /**
      * The access rights assigned to this locale that defines who can create content in this locale. If no access rights are assigned, everyone will be able to create content in this locale. An empty array means that no user will be allowed to create or change content in this locale.
      */
-    accessRights?: Array<SecurityIdentity> | null;
+    accessRights?: null | Array<SecurityIdentity>;
     /**
      * A fallback locale that should be used if content is not available in the current locale.
      */
-    fallback?: string | null;
+    fallback?: null | string;
 };
 
 /**
- * Represents a single page of items in a paged collection, including paging metadata such as the current page index, page size, and an estimated total item count.
+ * A single page of items in a paged collection, including paging metadata such as the current page index, page size, and an estimated total item count.
  */
 export type LocalePageWritable = {
     [key: string]: never;
 };
 
 /**
- * Manifest that describes CMS definitions.
+ * A set of content model definitions (content types, property groups, display templates, and locales).
  */
 export type ManifestWritable = {
     /**
      * List of locales that are part of this manifest.
      */
-    locales?: Array<LocaleWritable> | null;
+    locales?: null | Array<LocaleWritable>;
     /**
      * List of content type property groups that are part of this manifest.
      */
-    propertyGroups?: Array<PropertyGroupWritable> | null;
+    propertyGroups?: null | Array<PropertyGroupWritable>;
     /**
      * List of content types that are part of this manifest.
      */
-    contentTypes?: Array<ContentTypeWritable> | null;
+    contentTypes?: null | Array<ContentTypeWritable>;
     /**
      * List of display templates that are part of this manifest.
      */
-    displayTemplates?: Array<DisplayTemplateWritable> | null;
+    displayTemplates?: null | Array<DisplayTemplateWritable>;
     /**
      * A timestamp indicating the last time an item included in this manifest was modified.
      */
@@ -2277,7 +2342,7 @@ export type ManifestImportResultWritable = {
 };
 
 /**
- * Represents a new content and the initial data required to create it.
+ * New content and the initial data required to create it.
  */
 export type NewContentWritable = {
     /**
@@ -2300,18 +2365,24 @@ export type NewContentWritable = {
      * The key of a blueprint to use as a template for the new content item. When provided, the blueprint's composition and properties are used as defaults for the initial version. Explicit values in the request take precedence over blueprint defaults.
      */
     blueprint?: string;
+    /**
+     * The initial version of the content that should be created.
+     */
     initialVersion: ContentVersionWritable;
 };
 
 /**
- * Represents the result of creating a new content item.
+ * The result of creating a new content item.
  */
 export type NewContentNodeWritable = ContentNodeWritable & {
+    /**
+     * The initial version of the content that was created.
+     */
     initialVersion?: ContentVersionWritable;
 };
 
 /**
- * Represent the definition of semantic property formats for content items.
+ * A semantic property format available to content type properties.
  */
 export type PropertyFormatWritable = {
     /**
@@ -2319,24 +2390,24 @@ export type PropertyFormatWritable = {
      */
     key?: string;
     /**
-     * The underlying data type used for this PropertyFormat.
+     * The underlying data type used for this property format.
      */
-    dataType?: 'string' | 'url' | 'boolean' | 'integer' | 'float' | 'dateTime' | 'contentReference' | 'content' | 'link' | 'richText' | 'json' | 'array' | 'component';
+    dataType?: string;
     /**
-     * The display name of this PropertyFormat.
+     * The display name of this property format.
      */
     displayName?: string;
 };
 
 /**
- * Represents a single page of items in a paged collection, including paging metadata such as the current page index, page size, and an estimated total item count.
+ * A single page of items in a paged collection, including paging metadata such as the current page index, page size, and an estimated total item count.
  */
 export type PropertyFormatPageWritable = {
     [key: string]: never;
 };
 
 /**
- * Describes a property group of a ContentType in the CMS.
+ * A property group of a content type.
  */
 export type PropertyGroupWritable = {
     /**
@@ -2344,17 +2415,17 @@ export type PropertyGroupWritable = {
      */
     key: string;
     /**
-     * The display name of this PropertyGroup.
+     * The display name of this property group.
      */
     displayName: string;
     /**
-     * A value that is used to when sorting PropertyGroup instances.
+     * A value that is used when sorting property group instances.
      */
     sortOrder?: number;
 };
 
 /**
- * Represents a single page of items in a paged collection, including paging metadata such as the current page index, page size, and an estimated total item count.
+ * A single page of items in a paged collection, including paging metadata such as the current page index, page size, and an estimated total item count.
  */
 export type PropertyGroupPageWritable = {
     [key: string]: never;
@@ -2414,7 +2485,7 @@ export type ApplicationsListError = ApplicationsListErrors[keyof ApplicationsLis
 
 export type ApplicationsListResponses = {
     /**
-     * OK
+     * A single page of items in a paged collection, including paging metadata such as the current page index, page size, and an estimated total item count.
      */
     200: ApplicationPage;
 };
@@ -2423,7 +2494,7 @@ export type ApplicationsListResponse = ApplicationsListResponses[keyof Applicati
 
 export type ApplicationsCreateData = {
     /**
-     * The application that should be created.
+     * A CMS application (website or remote website).
      */
     body: ApplicationWritable;
     headers?: {
@@ -2468,7 +2539,7 @@ export type ApplicationsCreateError = ApplicationsCreateErrors[keyof Application
 
 export type ApplicationsCreateResponses = {
     /**
-     * Created
+     * A CMS application (website or remote website).
      */
     201: Application;
 };
@@ -2536,7 +2607,7 @@ export type ApplicationsDeleteError = ApplicationsDeleteErrors[keyof Application
 
 export type ApplicationsDeleteResponses = {
     /**
-     * OK
+     * A CMS application (website or remote website).
      */
     200: Application;
     /**
@@ -2596,7 +2667,7 @@ export type ApplicationsGetError = ApplicationsGetErrors[keyof ApplicationsGetEr
 
 export type ApplicationsGetResponses = {
     /**
-     * OK
+     * A CMS application (website or remote website).
      */
     200: Application;
 };
@@ -2667,7 +2738,7 @@ export type ApplicationsPatchError = ApplicationsPatchErrors[keyof ApplicationsP
 
 export type ApplicationsPatchResponses = {
     /**
-     * OK
+     * A CMS application (website or remote website).
      */
     200: Application;
     /**
@@ -2717,7 +2788,7 @@ export type BlueprintsListError = BlueprintsListErrors[keyof BlueprintsListError
 
 export type BlueprintsListResponses = {
     /**
-     * OK
+     * A single page of items in a paged collection, including paging metadata such as the current page index, page size, and an estimated total item count.
      */
     200: BlueprintPage;
 };
@@ -2726,7 +2797,7 @@ export type BlueprintsListResponse = BlueprintsListResponses[keyof BlueprintsLis
 
 export type BlueprintsCreateData = {
     /**
-     * The blueprint that should be created.
+     * A blueprint of a content item.
      */
     body: BlueprintWritable;
     headers?: {
@@ -2771,7 +2842,7 @@ export type BlueprintsCreateError = BlueprintsCreateErrors[keyof BlueprintsCreat
 
 export type BlueprintsCreateResponses = {
     /**
-     * Created
+     * A blueprint of a content item.
      */
     201: Blueprint;
 };
@@ -2839,7 +2910,7 @@ export type BlueprintsDeleteError = BlueprintsDeleteErrors[keyof BlueprintsDelet
 
 export type BlueprintsDeleteResponses = {
     /**
-     * OK
+     * A blueprint of a content item.
      */
     200: Blueprint;
     /**
@@ -2899,7 +2970,7 @@ export type BlueprintsGetError = BlueprintsGetErrors[keyof BlueprintsGetErrors];
 
 export type BlueprintsGetResponses = {
     /**
-     * OK
+     * A blueprint of a content item.
      */
     200: Blueprint;
 };
@@ -2970,7 +3041,7 @@ export type BlueprintsPatchError = BlueprintsPatchErrors[keyof BlueprintsPatchEr
 
 export type BlueprintsPatchResponses = {
     /**
-     * OK
+     * A blueprint of a content item.
      */
     200: Blueprint;
     /**
@@ -2983,7 +3054,7 @@ export type BlueprintsPatchResponse = BlueprintsPatchResponses[keyof BlueprintsP
 
 export type ContentCreateData = {
     /**
-     * The content item that should be created.
+     * New content and the initial data required to create it.
      */
     body: NewContentWritable;
     headers?: {
@@ -3032,7 +3103,7 @@ export type ContentCreateError = ContentCreateErrors[keyof ContentCreateErrors];
 
 export type ContentCreateResponses = {
     /**
-     * Created
+     * The result of creating a new content item.
      */
     201: NewContentNode;
 };
@@ -3041,7 +3112,7 @@ export type ContentCreateResponse = ContentCreateResponses[keyof ContentCreateRe
 
 export type ContentCopyData = {
     /**
-     * Optional instructions for how to copy content.
+     * Options for copying content.
      */
     body?: CopyContentOptions;
     headers?: {
@@ -3095,7 +3166,7 @@ export type ContentCopyError = ContentCopyErrors[keyof ContentCopyErrors];
 
 export type ContentCopyResponses = {
     /**
-     * Created
+     * Metadata about a content item in the content hierarchy — ownership, localization, and audit information — but not its property values.
      */
     201: ContentNode;
 };
@@ -3151,7 +3222,7 @@ export type ContentUndeleteError = ContentUndeleteErrors[keyof ContentUndeleteEr
 
 export type ContentUndeleteResponses = {
     /**
-     * OK
+     * Metadata about a content item in the content hierarchy — ownership, localization, and audit information — but not its property values.
      */
     200: ContentNode;
     /**
@@ -3227,7 +3298,7 @@ export type ContentDeleteError = ContentDeleteErrors[keyof ContentDeleteErrors];
 
 export type ContentDeleteResponses = {
     /**
-     * OK
+     * Metadata about a content item in the content hierarchy — ownership, localization, and audit information — but not its property values.
      */
     200: ContentNode;
     /**
@@ -3291,7 +3362,7 @@ export type ContentGetNodeError = ContentGetNodeErrors[keyof ContentGetNodeError
 
 export type ContentGetNodeResponses = {
     /**
-     * OK
+     * Metadata about a content item in the content hierarchy — ownership, localization, and audit information — but not its property values.
      */
     200: ContentNode;
 };
@@ -3362,7 +3433,7 @@ export type ContentPatchNodeError = ContentPatchNodeErrors[keyof ContentPatchNod
 
 export type ContentPatchNodeResponses = {
     /**
-     * OK
+     * Metadata about a content item in the content hierarchy — ownership, localization, and audit information — but not its property values.
      */
     200: ContentNode;
     /**
@@ -3425,7 +3496,7 @@ export type ContentListAssetsError = ContentListAssetsErrors[keyof ContentListAs
 
 export type ContentListAssetsResponses = {
     /**
-     * OK
+     * A single page of items in a paged collection, including paging metadata such as the current page index, page size, and an estimated total item count.
      */
     200: ContentNodePage;
 };
@@ -3484,7 +3555,7 @@ export type ContentListItemsError = ContentListItemsErrors[keyof ContentListItem
 
 export type ContentListItemsResponses = {
     /**
-     * OK
+     * A single page of items in a paged collection, including paging metadata such as the current page index, page size, and an estimated total item count.
      */
     200: ContentNodePage;
 };
@@ -3544,7 +3615,7 @@ export type ContentDeleteLocaleError = ContentDeleteLocaleErrors[keyof ContentDe
 
 export type ContentDeleteLocaleResponses = {
     /**
-     * OK
+     * A version of a content item.
      */
     200: ContentVersion;
     /**
@@ -3607,7 +3678,7 @@ export type ContentListLocaleVersionsError = ContentListLocaleVersionsErrors[key
 
 export type ContentListLocaleVersionsResponses = {
     /**
-     * OK
+     * A single page of items in a paged collection, including paging metadata such as the current page index, page size, and an estimated total item count.
      */
     200: ContentVersionPage;
 };
@@ -3662,7 +3733,7 @@ export type ContentGetPathError = ContentGetPathErrors[keyof ContentGetPathError
 
 export type ContentGetPathResponses = {
     /**
-     * OK
+     * A single page of items in a paged collection, including paging metadata such as the current page index, page size, and an estimated total item count.
      */
     200: ContentNodePage;
 };
@@ -3685,7 +3756,7 @@ export type ContentListVersionsData = {
         /**
          * Optional list of status values that versions must have one of to be included.
          */
-        statuses?: Array<'draft' | 'ready' | 'published' | 'previous' | 'scheduled' | 'rejected' | 'inReview'>;
+        statuses?: Array<string>;
         /**
          * Zero based index of the page that should be retrieved.
          */
@@ -3725,7 +3796,7 @@ export type ContentListVersionsError = ContentListVersionsErrors[keyof ContentLi
 
 export type ContentListVersionsResponses = {
     /**
-     * OK
+     * A single page of items in a paged collection, including paging metadata such as the current page index, page size, and an estimated total item count.
      */
     200: ContentVersionPage;
 };
@@ -3734,7 +3805,7 @@ export type ContentListVersionsResponse = ContentListVersionsResponses[keyof Con
 
 export type ContentCreateVersionData = {
     /**
-     * The content version that should be created.
+     * A version of a content item.
      */
     body: ContentVersionWritable;
     headers?: {
@@ -3792,7 +3863,7 @@ export type ContentCreateVersionError = ContentCreateVersionErrors[keyof Content
 
 export type ContentCreateVersionResponses = {
     /**
-     * Created
+     * A version of a content item.
      */
     201: ContentVersion;
 };
@@ -3801,7 +3872,7 @@ export type ContentCreateVersionResponse = ContentCreateVersionResponses[keyof C
 
 export type ContentApproveData = {
     /**
-     * Options for the approval decision. Use 'force' to bypass the normal approval flow (requires admin access).
+     * Options for approving or rejecting a content version.
      */
     body?: ApprovalDecisionOptions;
     headers?: {
@@ -3867,7 +3938,7 @@ export type ContentApproveError = ContentApproveErrors[keyof ContentApproveError
 
 export type ContentApproveResponses = {
     /**
-     * OK
+     * A version of a content item.
      */
     200: ContentVersion;
     /**
@@ -3943,7 +4014,7 @@ export type ContentDraftError = ContentDraftErrors[keyof ContentDraftErrors];
 
 export type ContentDraftResponses = {
     /**
-     * OK
+     * A version of a content item.
      */
     200: ContentVersion;
     /**
@@ -3956,7 +4027,7 @@ export type ContentDraftResponse = ContentDraftResponses[keyof ContentDraftRespo
 
 export type ContentPublishData = {
     /**
-     * Optional instructions for how to publish content.
+     * Options for publishing a content version.
      */
     body?: PublishContentOptions;
     headers?: {
@@ -4022,7 +4093,7 @@ export type ContentPublishError = ContentPublishErrors[keyof ContentPublishError
 
 export type ContentPublishResponses = {
     /**
-     * OK
+     * A version of a content item.
      */
     200: ContentVersion;
     /**
@@ -4035,7 +4106,7 @@ export type ContentPublishResponse = ContentPublishResponses[keyof ContentPublis
 
 export type ContentReadyData = {
     /**
-     * Optional instructions such as a comment for the approval.
+     * Options for transitioning a content version to ready status.
      */
     body?: ReadyContentOptions;
     headers?: {
@@ -4101,7 +4172,7 @@ export type ContentReadyError = ContentReadyErrors[keyof ContentReadyErrors];
 
 export type ContentReadyResponses = {
     /**
-     * OK
+     * A version of a content item.
      */
     200: ContentVersion;
     /**
@@ -4114,7 +4185,7 @@ export type ContentReadyResponse = ContentReadyResponses[keyof ContentReadyRespo
 
 export type ContentRejectData = {
     /**
-     * Options for the rejection decision. Use 'force' to bypass the normal approval flow (requires admin access).
+     * Options for approving or rejecting a content version.
      */
     body?: ApprovalDecisionOptions;
     headers?: {
@@ -4180,7 +4251,7 @@ export type ContentRejectError = ContentRejectErrors[keyof ContentRejectErrors];
 
 export type ContentRejectResponses = {
     /**
-     * OK
+     * A version of a content item.
      */
     200: ContentVersion;
     /**
@@ -4256,7 +4327,7 @@ export type ContentDeleteVersionError = ContentDeleteVersionErrors[keyof Content
 
 export type ContentDeleteVersionResponses = {
     /**
-     * OK
+     * A version of a content item.
      */
     200: ContentVersion;
     /**
@@ -4314,7 +4385,7 @@ export type ContentGetVersionError = ContentGetVersionErrors[keyof ContentGetVer
 
 export type ContentGetVersionResponses = {
     /**
-     * OK
+     * A version of a content item.
      */
     200: ContentVersion;
 };
@@ -4393,7 +4464,7 @@ export type ContentPatchVersionError = ContentPatchVersionErrors[keyof ContentPa
 
 export type ContentPatchVersionResponses = {
     /**
-     * OK
+     * A version of a content item.
      */
     200: ContentVersion;
     /**
@@ -4504,7 +4575,7 @@ export type ContentGetPreviewsError = ContentGetPreviewsErrors[keyof ContentGetP
 
 export type ContentGetPreviewsResponses = {
     /**
-     * OK
+     * A single page of items in a paged collection, including paging metadata such as the current page index, page size, and an estimated total item count.
      */
     200: PreviewPage;
 };
@@ -4522,7 +4593,7 @@ export type ContentListAllVersionsData = {
         /**
          * Optional list of status values that versions must have one of to be included.
          */
-        statuses?: Array<'draft' | 'ready' | 'published' | 'previous' | 'scheduled' | 'rejected' | 'inReview'>;
+        statuses?: Array<string>;
         /**
          * Zero based index of the page that should be retrieved.
          */
@@ -4558,7 +4629,7 @@ export type ContentListAllVersionsError = ContentListAllVersionsErrors[keyof Con
 
 export type ContentListAllVersionsResponses = {
     /**
-     * OK
+     * A single page of items in a paged collection, including paging metadata such as the current page index, page size, and an estimated total item count.
      */
     200: ContentVersionPage;
 };
@@ -4604,7 +4675,7 @@ export type ContentSourcesListError = ContentSourcesListErrors[keyof ContentSour
 
 export type ContentSourcesListResponses = {
     /**
-     * OK
+     * A single page of items in a paged collection, including paging metadata such as the current page index, page size, and an estimated total item count.
      */
     200: ContentSourcePage;
 };
@@ -4613,7 +4684,7 @@ export type ContentSourcesListResponse = ContentSourcesListResponses[keyof Conte
 
 export type ContentSourcesCreateData = {
     /**
-     * The contentsource that should be created.
+     * A content source used within the CMS.
      */
     body: ContentSourceWritable;
     headers?: {
@@ -4662,7 +4733,7 @@ export type ContentSourcesCreateError = ContentSourcesCreateErrors[keyof Content
 
 export type ContentSourcesCreateResponses = {
     /**
-     * Created
+     * A content source used within the CMS.
      */
     201: ContentSource;
 };
@@ -4730,7 +4801,7 @@ export type ContentSourcesDeleteError = ContentSourcesDeleteErrors[keyof Content
 
 export type ContentSourcesDeleteResponses = {
     /**
-     * OK
+     * A content source used within the CMS.
      */
     200: ContentSource;
     /**
@@ -4790,7 +4861,7 @@ export type ContentSourcesGetError = ContentSourcesGetErrors[keyof ContentSource
 
 export type ContentSourcesGetResponses = {
     /**
-     * OK
+     * A content source used within the CMS.
      */
     200: ContentSource;
 };
@@ -4865,7 +4936,7 @@ export type ContentSourcesPatchError = ContentSourcesPatchErrors[keyof ContentSo
 
 export type ContentSourcesPatchResponses = {
     /**
-     * OK
+     * A content source used within the CMS.
      */
     200: ContentSource;
     /**
@@ -4915,7 +4986,7 @@ export type ContentTypeBindingsListError = ContentTypeBindingsListErrors[keyof C
 
 export type ContentTypeBindingsListResponses = {
     /**
-     * OK
+     * A single page of items in a paged collection, including paging metadata such as the current page index, page size, and an estimated total item count.
      */
     200: ContentTypeBindingPage;
 };
@@ -4924,7 +4995,7 @@ export type ContentTypeBindingsListResponse = ContentTypeBindingsListResponses[k
 
 export type ContentTypeBindingsCreateData = {
     /**
-     * The contenttypebinding that should be created.
+     * A binding between two content types.
      */
     body: ContentTypeBindingWritable;
     headers?: {
@@ -4969,7 +5040,7 @@ export type ContentTypeBindingsCreateError = ContentTypeBindingsCreateErrors[key
 
 export type ContentTypeBindingsCreateResponses = {
     /**
-     * Created
+     * A binding between two content types.
      */
     201: ContentTypeBinding;
 };
@@ -5037,7 +5108,7 @@ export type ContentTypeBindingsDeleteError = ContentTypeBindingsDeleteErrors[key
 
 export type ContentTypeBindingsDeleteResponses = {
     /**
-     * OK
+     * A binding between two content types.
      */
     200: ContentTypeBinding;
     /**
@@ -5097,7 +5168,7 @@ export type ContentTypeBindingsGetError = ContentTypeBindingsGetErrors[keyof Con
 
 export type ContentTypeBindingsGetResponses = {
     /**
-     * OK
+     * A binding between two content types.
      */
     200: ContentTypeBinding;
 };
@@ -5168,7 +5239,7 @@ export type ContentTypeBindingsPatchError = ContentTypeBindingsPatchErrors[keyof
 
 export type ContentTypeBindingsPatchResponses = {
     /**
-     * OK
+     * A binding between two content types.
      */
     200: ContentTypeBinding;
     /**
@@ -5226,7 +5297,7 @@ export type ContentTypesListError = ContentTypesListErrors[keyof ContentTypesLis
 
 export type ContentTypesListResponses = {
     /**
-     * OK
+     * A single page of items in a paged collection, including paging metadata such as the current page index, page size, and an estimated total item count.
      */
     200: ContentTypePage;
 };
@@ -5235,7 +5306,7 @@ export type ContentTypesListResponse = ContentTypesListResponses[keyof ContentTy
 
 export type ContentTypesCreateData = {
     /**
-     * The content type that should be created.
+     * A content type definition.
      */
     body: ContentTypeWritable;
     headers?: {
@@ -5280,7 +5351,7 @@ export type ContentTypesCreateError = ContentTypesCreateErrors[keyof ContentType
 
 export type ContentTypesCreateResponses = {
     /**
-     * Created
+     * A content type definition.
      */
     201: ContentType;
 };
@@ -5348,7 +5419,7 @@ export type ContentTypesDeleteError = ContentTypesDeleteErrors[keyof ContentType
 
 export type ContentTypesDeleteResponses = {
     /**
-     * OK
+     * A content type definition.
      */
     200: ContentType;
     /**
@@ -5408,7 +5479,7 @@ export type ContentTypesGetError = ContentTypesGetErrors[keyof ContentTypesGetEr
 
 export type ContentTypesGetResponses = {
     /**
-     * OK
+     * A content type definition.
      */
     200: ContentType;
 };
@@ -5483,7 +5554,7 @@ export type ContentTypesPatchError = ContentTypesPatchErrors[keyof ContentTypesP
 
 export type ContentTypesPatchResponses = {
     /**
-     * OK
+     * A content type definition.
      */
     200: ContentType;
     /**
@@ -5533,7 +5604,7 @@ export type DisplayTemplatesListError = DisplayTemplatesListErrors[keyof Display
 
 export type DisplayTemplatesListResponses = {
     /**
-     * OK
+     * A single page of items in a paged collection, including paging metadata such as the current page index, page size, and an estimated total item count.
      */
     200: DisplayTemplatePage;
 };
@@ -5542,7 +5613,7 @@ export type DisplayTemplatesListResponse = DisplayTemplatesListResponses[keyof D
 
 export type DisplayTemplatesCreateData = {
     /**
-     * The display template that should be created.
+     * A display template that can be assigned to content.
      */
     body: DisplayTemplateWritable;
     headers?: {
@@ -5587,7 +5658,7 @@ export type DisplayTemplatesCreateError = DisplayTemplatesCreateErrors[keyof Dis
 
 export type DisplayTemplatesCreateResponses = {
     /**
-     * Created
+     * A display template that can be assigned to content.
      */
     201: DisplayTemplate;
 };
@@ -5655,7 +5726,7 @@ export type DisplayTemplatesDeleteError = DisplayTemplatesDeleteErrors[keyof Dis
 
 export type DisplayTemplatesDeleteResponses = {
     /**
-     * OK
+     * A display template that can be assigned to content.
      */
     200: DisplayTemplate;
     /**
@@ -5715,7 +5786,7 @@ export type DisplayTemplatesGetError = DisplayTemplatesGetErrors[keyof DisplayTe
 
 export type DisplayTemplatesGetResponses = {
     /**
-     * OK
+     * A display template that can be assigned to content.
      */
     200: DisplayTemplate;
 };
@@ -5786,7 +5857,7 @@ export type DisplayTemplatesPatchError = DisplayTemplatesPatchErrors[keyof Displ
 
 export type DisplayTemplatesPatchResponses = {
     /**
-     * OK
+     * A display template that can be assigned to content.
      */
     200: DisplayTemplate;
     /**
@@ -5836,7 +5907,7 @@ export type LocalesListError = LocalesListErrors[keyof LocalesListErrors];
 
 export type LocalesListResponses = {
     /**
-     * OK
+     * A single page of items in a paged collection, including paging metadata such as the current page index, page size, and an estimated total item count.
      */
     200: LocalePage;
 };
@@ -5845,7 +5916,7 @@ export type LocalesListResponse = LocalesListResponses[keyof LocalesListResponse
 
 export type LocalesCreateData = {
     /**
-     * The locale that should be created.
+     * A locale that can be used for content.
      */
     body: LocaleWritable;
     headers?: {
@@ -5890,7 +5961,7 @@ export type LocalesCreateError = LocalesCreateErrors[keyof LocalesCreateErrors];
 
 export type LocalesCreateResponses = {
     /**
-     * Created
+     * A locale that can be used for content.
      */
     201: Locale;
 };
@@ -5958,7 +6029,7 @@ export type LocalesDeleteError = LocalesDeleteErrors[keyof LocalesDeleteErrors];
 
 export type LocalesDeleteResponses = {
     /**
-     * OK
+     * A locale that can be used for content.
      */
     200: Locale;
     /**
@@ -6018,7 +6089,7 @@ export type LocalesGetError = LocalesGetErrors[keyof LocalesGetErrors];
 
 export type LocalesGetResponses = {
     /**
-     * OK
+     * A locale that can be used for content.
      */
     200: Locale;
 };
@@ -6089,7 +6160,7 @@ export type LocalesPatchError = LocalesPatchErrors[keyof LocalesPatchErrors];
 
 export type LocalesPatchResponses = {
     /**
-     * OK
+     * A locale that can be used for content.
      */
     200: Locale;
     /**
@@ -6107,7 +6178,7 @@ export type ManifestExportData = {
         /**
          * The sections that should be included in the manifest export. If not provided, all sections will be included.
          */
-        sections?: Array<'locales' | 'contentTypes' | 'propertyGroups' | 'displayTemplates'>;
+        sections?: Array<string>;
         /**
          * Indicates if read-only resources should be included in the manifest export.
          */
@@ -6139,7 +6210,7 @@ export type ManifestExportError = ManifestExportErrors[keyof ManifestExportError
 
 export type ManifestExportResponses = {
     /**
-     * OK
+     * A set of content model definitions (content types, property groups, display templates, and locales).
      */
     200: Manifest;
 };
@@ -6148,7 +6219,7 @@ export type ManifestExportResponse = ManifestExportResponses[keyof ManifestExpor
 
 export type ManifestImportData = {
     /**
-     * The manifest that should be imported.
+     * A set of content model definitions (content types, property groups, display templates, and locales).
      */
     body: ManifestWritable;
     headers?: {
@@ -6193,7 +6264,7 @@ export type ManifestImportError = ManifestImportErrors[keyof ManifestImportError
 
 export type ManifestImportResponses = {
     /**
-     * OK
+     * The result of a manifest import operation.
      */
     200: ManifestImportResult;
     /**
@@ -6243,7 +6314,7 @@ export type PropertyFormatsListError = PropertyFormatsListErrors[keyof PropertyF
 
 export type PropertyFormatsListResponses = {
     /**
-     * OK
+     * A single page of items in a paged collection, including paging metadata such as the current page index, page size, and an estimated total item count.
      */
     200: PropertyFormatPage;
 };
@@ -6304,7 +6375,7 @@ export type PropertyFormatsGetError = PropertyFormatsGetErrors[keyof PropertyFor
 
 export type PropertyFormatsGetResponses = {
     /**
-     * OK
+     * A semantic property format available to content type properties.
      */
     200: PropertyFormat;
 };
@@ -6346,7 +6417,7 @@ export type PropertyGroupsListError = PropertyGroupsListErrors[keyof PropertyGro
 
 export type PropertyGroupsListResponses = {
     /**
-     * OK
+     * A single page of items in a paged collection, including paging metadata such as the current page index, page size, and an estimated total item count.
      */
     200: PropertyGroupPage;
 };
@@ -6355,7 +6426,7 @@ export type PropertyGroupsListResponse = PropertyGroupsListResponses[keyof Prope
 
 export type PropertyGroupsCreateData = {
     /**
-     * The property group that should be created.
+     * A property group of a content type.
      */
     body: PropertyGroupWritable;
     headers?: {
@@ -6400,7 +6471,7 @@ export type PropertyGroupsCreateError = PropertyGroupsCreateErrors[keyof Propert
 
 export type PropertyGroupsCreateResponses = {
     /**
-     * Created
+     * A property group of a content type.
      */
     201: PropertyGroup;
 };
@@ -6468,7 +6539,7 @@ export type PropertyGroupsDeleteError = PropertyGroupsDeleteErrors[keyof Propert
 
 export type PropertyGroupsDeleteResponses = {
     /**
-     * OK
+     * A property group of a content type.
      */
     200: PropertyGroup;
     /**
@@ -6528,7 +6599,7 @@ export type PropertyGroupsGetError = PropertyGroupsGetErrors[keyof PropertyGroup
 
 export type PropertyGroupsGetResponses = {
     /**
-     * OK
+     * A property group of a content type.
      */
     200: PropertyGroup;
 };
@@ -6599,7 +6670,7 @@ export type PropertyGroupsPatchError = PropertyGroupsPatchErrors[keyof PropertyG
 
 export type PropertyGroupsPatchResponses = {
     /**
-     * OK
+     * A property group of a content type.
      */
     200: PropertyGroup;
     /**
