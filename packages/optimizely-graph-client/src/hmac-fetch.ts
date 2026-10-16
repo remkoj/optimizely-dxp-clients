@@ -29,7 +29,9 @@ export function createHmacFetch(appKey: string, secret: string) : FetchAPI
       }).catch(e => {
         try {
           reader.releaseLock()
-        } catch {}
+        } catch {
+          // The stream may already have released its reader lock.
+        }
         reject(e)
       })
     })

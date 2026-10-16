@@ -219,7 +219,7 @@ export function createPublishApi(options?: Partial<PublishApiOptions>): PublishA
   }
 
   function getItemIds(hookData: PublishHookData): Array<{ key: string, locale: string }> {
-    let items: Array<{ key: string, locale: string }> = []
+    let items: Array<{ key: string, locale: string }>
     switch (hookData.type.subject) {
       case "doc":
         items = [hookData.data.docId]

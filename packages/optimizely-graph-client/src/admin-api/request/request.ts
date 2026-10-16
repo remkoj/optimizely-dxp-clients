@@ -80,7 +80,7 @@ const getUrl = (config: OpenAPIConfig, options: ApiRequestOptions): string => {
   const path = options.url
     .replace('{api-version}', config.VERSION)
     .replace(/{(.*?)}/g, (substring: string, group: string) => {
-      if (options.path?.hasOwnProperty(group)) {
+      if (options.path && Object.prototype.hasOwnProperty.call(options.path, group)) {
         return encoder(String(options.path[group]));
       }
       return substring;

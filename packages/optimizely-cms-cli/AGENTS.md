@@ -1,5 +1,8 @@
 # @remkoj/optimizely-cms-cli — usage
 
+> [!WARNING]
+> This package is obsolete. Use Optimizely's official [`@optimizely/cms-sdk`](https://www.npmjs.com/package/@optimizely/cms-sdk) and [`@optimizely/cms-cli`](https://www.npmjs.com/package/@optimizely/cms-cli) packages instead.
+
 CLI tool for Optimizely SaaS CMS. Provides the `opti-cms` binary.
 
 ## Install

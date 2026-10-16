@@ -35,10 +35,8 @@ export function createLayout(
   options?: Partial<CreateLayoutOptions>
 ): CmsPageLayout {
   const {
-    defaultLocale,
     getMetaDataByPath,
     client: clientFactory,
-    channel,
   }: CreateLayoutOptions = {
     ...defaultCreateLayoutOptions,
     ...options,

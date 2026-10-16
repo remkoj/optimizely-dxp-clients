@@ -66,7 +66,9 @@ export class OptimizelyCms12Client implements OptimizelyCmsRoutingApi {
     return this.convertResponse(resultSet.Content.items[0])
   }
   async getRouteById(client: GraphQLClient, contentId: string, locale: string, version: string | number): Promise<undefined | Route> {
-    const [id, workId] = this.parseIdString(contentId)
+    const [id, parsedWorkId] = this.parseIdString(contentId)
+    const requestedWorkId = Number.parseInt(String(version), 10)
+    const workId = Number.isNaN(requestedWorkId) ? parsedWorkId : requestedWorkId
     const variables: GetRouteById.Variables = {
       id,
       workId,
@@ -90,30 +92,19 @@ export class OptimizelyCms12Client implements OptimizelyCmsRoutingApi {
     return undefined
   }
   async getRouteByLink(client: GraphQLClient, contentLink: AnyContentLink): Promise<undefined | Route> {
+    void client
+    void contentLink
     throw new Error("Not supported on CMS 12")
   }
 
   protected parseIdString(id: string): [number, number | null] {
-    let cId: number = -1
-    let workId: number | null = null
-    if (id.indexOf("_") > 0) {
-      [cId, workId] = id.split("_").map(x => {
-        try {
-          return Number.parseInt(x, 10)
-        } catch {
-          return -1
-        }
-      })
-      if (workId < 0)
-        workId = null
-    } else {
-      try {
-        cId = Number.parseInt(id, 10)
-      } catch {
-        cId = -1
-      }
-    }
-    return [cId, workId]
+    const [rawId, rawWorkId] = id.split("_", 2)
+    const parsedId = Number.parseInt(rawId, 10)
+    const parsedWorkId = rawWorkId === undefined ? Number.NaN : Number.parseInt(rawWorkId, 10)
+    return [
+      Number.isNaN(parsedId) ? -1 : parsedId,
+      Number.isNaN(parsedWorkId) || parsedWorkId < 0 ? null : parsedWorkId,
+    ]
   }
 
   protected convertResponse(item: GetAllRoutes.Route): Route {

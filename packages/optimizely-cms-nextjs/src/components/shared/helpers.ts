@@ -98,7 +98,7 @@ export function linkItemDataToHref(linkItemData: LinkItemData, base?: string) : 
 {
   if (!linkItemData.url)
     return '#'
-  return linkDataToHref(linkItemData.url)
+  return linkDataToHref(linkItemData.url, base)
 }
 
 export function linkDataToHref(linkData: LinkData, base?: string) : string {

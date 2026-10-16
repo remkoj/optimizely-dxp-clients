@@ -14,8 +14,8 @@ export const MigrateCommand: MigrateModule = {
   command: "project:migrate",
   describe: "Automate the directory naming convention update",
   builder,
-  async handler(args, opts) {
-    const { components: componentsPath, _config: { debug } } = parseArgs(args);
+  async handler(args) {
+    const { components: componentsPath } = parseArgs(args);
     const files = await glob(['*/**/*'], { cwd: componentsPath })
     const operations: Array<{ from: string, to: string }> = [];
     for (const file of files) {

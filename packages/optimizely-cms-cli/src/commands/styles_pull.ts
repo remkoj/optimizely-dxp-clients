@@ -44,7 +44,8 @@ export const StylesPullCommand: StylesPullModule = {
       }
         
       // Write template to disk
-      void await createDisplayTemplateHelper(displayTemplateGroup, groupIdentifier, force, cfg.debug);
+      if (definitions)
+        void await createDisplayTemplateHelper(displayTemplateGroup, groupIdentifier, force, cfg.debug);
     }
     
     process.stdout.write(chalk.green(chalk.bold(figures.tick + ` Created/updated style definitions for ${updatedTemplates.join(', ')}`)) + "\n")

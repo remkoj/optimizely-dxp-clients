@@ -131,7 +131,7 @@ export function createEditPageComponent<LocaleType = string>(
       const Layout = isPage ? PageLayout : EmptyPageLayout
       const output = (
         <>
-          {/* @ts-expect-error */}
+          {/* @ts-expect-error Next.js Script's src typing does not accept the resolved URL value. */}
           <Script src={ injectorUrl } strategy="afterInteractive"/>
           <Layout locale={contentLink?.locale ?? ''} ctx={context}>
             <OnPageEdit refreshTimeout={refreshTimeout}>

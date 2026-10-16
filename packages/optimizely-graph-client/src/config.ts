@@ -149,7 +149,7 @@ function getMandatory(envVarName: string): string {
   let value: string | undefined = undefined
   try {
     value = process.env[envVarName]
-  } catch (e) {
+  } catch {
     // Ignore on purpose
   }
   if (value == null || value == undefined || value.trim() == "")
@@ -161,7 +161,7 @@ function getMandatory(envVarName: string): string {
 function getOptional(envVarName: string, defaultValue?: string | (() => string | undefined) | undefined): string | undefined {
   try {
     return getMandatory(envVarName)
-  } catch (e) {
+  } catch {
     if (typeof (defaultValue) == 'function')
       return defaultValue()
     return defaultValue

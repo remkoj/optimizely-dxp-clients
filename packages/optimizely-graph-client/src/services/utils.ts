@@ -185,7 +185,7 @@ export function normalizeContentLinkWithLocale<LT = string>(toNormalize: Nullabl
 function generateUniqueKey(prefix: string = "inline::") {
   try {
     return prefix + crypto.randomUUID().replaceAll('-', '')
-  } catch (e) {
+  } catch {
     console.warn("💥 Crypto library unavailable, expect key collisions")
     return prefix + 'default'
   }

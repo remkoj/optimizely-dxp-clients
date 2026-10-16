@@ -1,5 +1,8 @@
 # @remkoj/optimizely-graph-functions — usage
 
+> [!WARNING]
+> This package is obsolete. Use Optimizely's official [`@optimizely/cms-sdk`](https://www.npmjs.com/package/@optimizely/cms-sdk) and [`@optimizely/cms-cli`](https://www.npmjs.com/package/@optimizely/cms-cli) packages instead.
+
 `graphql-codegen` preset and plugin for Optimizely Graph. Generates typed GraphQL
 operations and fragments for querying Optimizely Content Graph.
 

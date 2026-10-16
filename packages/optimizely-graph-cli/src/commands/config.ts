@@ -31,7 +31,7 @@ export const createSiteConfigModule: CliModule<CreateSiteConfigProps> = {
     process.stdout.write(`${chalk.yellow(chalk.bold(figures.arrowRight))} Generating configuration file for website with domain: ${chalk.yellow(siteHost)}\n`)
     const channelRepo = new ChannelRepository(cgConfig)
 
-    let channel: Readonly<ChannelDefinition> | null = null;
+    let channel: Readonly<ChannelDefinition> | null;
     try {
       channel = await channelRepo.getByDomain(siteHost, false)
     } catch (e) {

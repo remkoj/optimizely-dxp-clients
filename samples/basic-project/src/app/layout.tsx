@@ -1,6 +1,5 @@
 import type { Metadata } from 'next'
 import { CmsContent } from '@remkoj/optimizely-cms-react/rsc'
-import { OptimizelyOneProvider, OptimizelyOneGadget, PageActivator } from '@remkoj/optimizely-one-nextjs/client'
 import { publishedContext as ctx } from '@/api'
 import Link from 'next/link'
 
@@ -19,16 +18,12 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body>
-        <OptimizelyOneProvider>
-          <PageActivator />
-          <header style={{ borderBottom: '2px solid #000', minHeight: '25px', marginBottom: '5px' }}>
-            <Link href='/'>
-              <CmsContent contentLink={{key: '7950541bb6a84d049784cb6f46262c12'}} variant='header' ctx={ctx} />
-            </Link>
-          </header>
-          {children}
-          <OptimizelyOneGadget />
-        </OptimizelyOneProvider>
+        <header style={{ borderBottom: '2px solid #000', minHeight: '25px', marginBottom: '5px' }}>
+          <Link href='/'>
+            <CmsContent contentLink={{key: '7950541bb6a84d049784cb6f46262c12'}} variant='header' ctx={ctx} />
+          </Link>
+        </header>
+        {children}
       </body>
     </html>
   )

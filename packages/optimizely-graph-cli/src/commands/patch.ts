@@ -62,7 +62,7 @@ export const patchPackagesModule: CliModule<PatchPackagesProps> = {
     process.stdout.write(`${figures.arrowRight} Storing patched packages at: ${packagesDir}\n`)
 
     process.stdout.write(`${figures.arrowRight} Downloading list of available patch files from GitHub\n`)
-    const availablePackages = await fetch("https://api.github.com/repos/remkoj/optimizely-dxp-clients/contents/dependencies/").then(r => r.json()).catch(e => undefined) as { name: string, download_url: string, size: number, sha: string }[] | undefined
+    const availablePackages = await fetch("https://api.github.com/repos/remkoj/optimizely-dxp-clients/contents/dependencies/").then(r => r.json()).catch(() => undefined) as { name: string, download_url: string, size: number, sha: string }[] | undefined
     if (!Array.isArray(availablePackages) || availablePackages.length == 0) {
       process.stderr.write(chalk.redBright(figures.cross + " Unable to get available patched packages from GitHub\n"));
       process.exit(1)

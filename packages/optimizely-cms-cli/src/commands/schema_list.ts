@@ -14,7 +14,7 @@ export const SchemaListCommand: SchemaListModule = {
     const newYargs = yargs
     return newYargs
   },
-  async handler(args, opts) {
+  async handler(args) {
     const client = createCmsClient(args);
 
     process.stdout.write(`\n${figures.arrowRight} Downloading OpenAPI Specification\n`)

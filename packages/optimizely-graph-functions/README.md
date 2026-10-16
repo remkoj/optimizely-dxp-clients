@@ -1,4 +1,8 @@
 # Optimizely GraphQL Codegen Plugin  <!-- omit in toc -->
+
+> [!WARNING]
+> This package is obsolete. Use Optimizely's official [`@optimizely/cms-sdk`](https://www.npmjs.com/package/@optimizely/cms-sdk) and [`@optimizely/cms-cli`](https://www.npmjs.com/package/@optimizely/cms-cli) packages instead.
+
 GraphQL Codegen plugin and preset which generate both the GraphQL type definitions and a few convenienece methods for useage with [Optimizely Graph Client](../optimizely-graph-client/README.md).
 
 [Release notes](https://github.com/remkoj/optimizely-dxp-clients/releases)

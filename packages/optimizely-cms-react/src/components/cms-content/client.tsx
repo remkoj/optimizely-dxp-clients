@@ -51,7 +51,7 @@ export function CmsContent<LocalesType = string>({
     [myContentType, variant, contentTypePrefix, ctx]
   )
   const [data, setData] = useState<Record<string, any>>(
-    //@ts-expect-error
+    // @ts-expect-error Inline content can return a record synchronously in no-load mode.
     getContent(graphClient, contentLink, Component, fragmentData, true)
   )
 
@@ -112,7 +112,7 @@ export function CmsContent<LocalesType = string>({
       )
       return
     }
-    //@ts-expect-error
+    // @ts-expect-error The fragment loading overload is asynchronous for this client component.
     getContent(graphClient, contentLink, Component, fragmentData).then(
       (newData) => {
         if (!isCancelled) setData(newData)

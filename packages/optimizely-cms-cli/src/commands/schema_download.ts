@@ -25,7 +25,7 @@ export const SchemaDownloadCommand: SchemaDownloadModule = {
     newYargs.option('force', { alias: 'f', description: "Overwrite existing files", boolean: true, type: 'boolean', demandOption: false, default: false });
     return newYargs
   },
-  async handler(args, opts) {
+  async handler(args) {
     const { _config: cmsConfig, path: projectPath, force, schemaDir, schemas } = parseArgs(args);
     const client = createCmsClient(cmsConfig);
 

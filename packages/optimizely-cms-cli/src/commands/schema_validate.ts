@@ -66,12 +66,14 @@ export const SchemaValidateCommand: SchemaValidateModule = {
                     process.stdout.write(`    Allowed values: ${error.params.allowedValues.map((x: any) => x.toString()).join(', ')}\n`)
                     break;
                   case 'oneOf':
+                  {
                     const matching = Array.isArray(error.params.passingSchemas) ? error.params.passingSchemas : []
                     if (matching.length === 0)
                       process.stdout.write(`    Currently none matching\n`)
                     else
                       process.stdout.write(`    Currently matching ${matching.map((x: any) => x.toString()).join(", ")}\n`)
                     break;
+                  }
                   default:
                     //console.log(key, error)
                     break;

@@ -1,4 +1,8 @@
 # Optimizely Graph Client <!-- omit in toc -->
+
+> [!WARNING]
+> This package is obsolete. Use Optimizely's official [`@optimizely/cms-sdk`](https://www.npmjs.com/package/@optimizely/cms-sdk) and [`@optimizely/cms-cli`](https://www.npmjs.com/package/@optimizely/cms-cli) packages instead.
+
 An extension of the [graphql-request](https://www.npmjs.com/package/graphql-request) package, providing the configuration and additional logic needed to connect with Optimizely Graph.
 
 ## Within this document <!-- omit in toc -->

@@ -1,5 +1,4 @@
 import type { CliModule } from '../types.js'
-import chalk from 'chalk'
 import figures from 'figures'
 import fs from 'node:fs'
 import path from 'node:path'

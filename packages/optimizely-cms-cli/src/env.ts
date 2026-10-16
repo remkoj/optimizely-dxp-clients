@@ -7,18 +7,13 @@ import fs from 'node:fs'
 export function getProjectDir() : string
 {
   let testPath = process.cwd();
-  let hasPackageJson = false;
   do {
-    hasPackageJson = fs.statSync(path.join(testPath, 'package.json'), {throwIfNoEntry: false})?.isFile() ?? false;
-    if (!hasPackageJson)
-      testPath = path.normalize(path.join(testPath,'..'));
-  } while (!hasPackageJson && testPath.length > 2);
+    if (fs.statSync(path.join(testPath, 'package.json'), {throwIfNoEntry: false})?.isFile())
+      return testPath;
+    testPath = path.normalize(path.join(testPath, '..'));
+  } while (testPath.length > 2);
 
-  if (!hasPackageJson) {
-    throw new Error('No package.json found!')
-  }
-
-  return testPath
+  throw new Error('No package.json found!')
 }
 
 /**

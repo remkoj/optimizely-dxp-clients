@@ -21,6 +21,12 @@ const ignoreFileConfigs = ignoreFiles.map(file => includeIgnoreFile(file));
 const esLintConfig = defineConfig([
   eslint.configs.recommended,
   tseslint.configs.recommended,
+  {
+    rules: {
+      '@typescript-eslint/no-empty-object-type': 'warn',
+      '@typescript-eslint/no-explicit-any': 'warn',
+    },
+  },
 
   // Handle Node.js scripts, which may use CommonJS or ESM and need 
   // access to Node globals
@@ -54,9 +60,16 @@ const esLintConfig = defineConfig([
     ".*/**",
     "*.gen.ts",
     "*.gen.js",
+    "**/*.config.mjs",
+    "**/*.config.js",
+    "**/script/*.mjs",
+    "**/script/*.js",
+    "**/scripts/*.mjs",
+    "**/scripts/*.js",
     "artefacts/**",
     "dependencies/**",
     "node_modules/**",
+    "packages/optimizely-graph-client/src/admin-api/client/**",
     // Samples may or may not use ESLint, but we're not enforcing it from
     // here.
     "samples/**",

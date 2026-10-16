@@ -3,7 +3,7 @@ import { createClient as createBaseClient, AuthMode, type IOptiGraphClient, type
 import { isNonEmptyString } from '@remkoj/optimizely-cms-react/utils'
 
 const AuthModeValues = Object.getOwnPropertyNames(AuthMode).reduce<string[]>((a: string[], b: string) => {
-  //@ts-ignore
+  // @ts-expect-error AuthMode's reverse enum mapping is intentionally read here.
   a.push(AuthMode[b]);
   return a
 }, [] as string[])

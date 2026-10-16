@@ -1,5 +1,8 @@
 # Optimizely SaaS CMS React Components
 
+> [!WARNING]
+> This package is obsolete. Use Optimizely's official [`@optimizely/cms-sdk`](https://www.npmjs.com/package/@optimizely/cms-sdk) and [`@optimizely/cms-cli`](https://www.npmjs.com/package/@optimizely/cms-cli) packages instead.
+
 This package provides two main entry points, depending on your build environment:
 - `@remkoj/optimizely-cms-react` This export contains the library, whith React components that use a client side context
 - `@remkoj/optimizely-cms-react/rsc` This export contains the library, whith React components that use a server side context

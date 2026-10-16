@@ -1,5 +1,8 @@
 # @remkoj/optimizely-graph-client — usage
 
+> [!WARNING]
+> This package is obsolete. Use Optimizely's official [`@optimizely/cms-sdk`](https://www.npmjs.com/package/@optimizely/cms-sdk) and [`@optimizely/cms-cli`](https://www.npmjs.com/package/@optimizely/cms-cli) packages instead.
+
 GraphQL client and REST wrapper for Optimizely Graph (Content Graph).
 
 ## Install

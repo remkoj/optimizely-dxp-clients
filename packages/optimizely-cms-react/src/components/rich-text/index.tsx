@@ -68,7 +68,7 @@ export const RichText = <ET extends ElementWithChildrenType>({
       )
 
     return (
-      //@ts-expect-error
+      // @ts-expect-error Wrapper props are validated by the dynamically selected element.
       <Wrapper className={className} {...props}>
         {textContent}
       </Wrapper>

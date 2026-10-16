@@ -1,5 +1,8 @@
 # Optimizely Content Graph CLI
 
+> [!WARNING]
+> This package is obsolete. Use Optimizely's official [`@optimizely/cms-sdk`](https://www.npmjs.com/package/@optimizely/cms-sdk) and [`@optimizely/cms-cli`](https://www.npmjs.com/package/@optimizely/cms-cli) packages instead.
+
 Command line utitilities to work with Optimizely Content Graph.
 
 [Release notes](https://github.com/remkoj/optimizely-dxp-clients/releases)

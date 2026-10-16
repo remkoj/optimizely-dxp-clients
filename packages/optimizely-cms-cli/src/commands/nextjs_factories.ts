@@ -80,7 +80,7 @@ export const NextJsFactoryCommand : NextJsModule = {
     // Build factory / component structure
     const componentFactoryDefintions = new Map<string, ComponentFactoryDefintion>()
     components.forEach(component => {
-       // Keep this POSIX: it's compared against (and made relative to) factoryKey,
+      // Keep this POSIX: it's compared against (and made relative to) factoryKey,
       // which is built with path.posix, and it ends up inside import specifiers.
       const componentDir = path.posix.dirname(path.posix.join(...component));
       // const componentFile = path.basename(path.posix.join(...component));
