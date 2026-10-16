@@ -36,20 +36,20 @@
   "devDependencies": {
     "@remkoj/optimizely-graph-client": "workspace:6.0.0-rc.5",
     "@types/crypto-js": "^4.2.2",
-    "@types/node": "^24.13.3",
-    "@types/react": "^19.2.18",
-    "@types/react-dom": "^19.2.5",
+    "@types/node": "^24.19.2",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
     "prop-types": "^15.8.1",
-    "react": "^19.2.8",
-    "react-dom": "^19.2.8",
-    "scheduler": "^0.27.0",
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1",
+    "scheduler": "^0.28.0",
     "typescript": "^5.9.3"
   },
   "dependencies": {
     "@graphql-typed-document-node/core": "^3.2.0",
     "@remkoj/optimizely-graph-client": "6.0.0-rc.5",
     "crypto-js": "^4.2.0",
-    "entities": "^8.0.0",
+    "entities": "^8.1.0",
     "graphql": "^16.14.2",
     "graphql-request": "^7.4.0"
   },

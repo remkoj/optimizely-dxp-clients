@@ -26,8 +26,8 @@
   },
   "dependencies": {
     "@remkoj/hey-api-wrapper": "6.0.0-rc.5",
-    "@types/node": "^24.13.3",
-    "dotenv": "^17.4.2",
+    "@types/node": "^24.19.2",
+    "dotenv": "^18.0.8",
     "dotenv-expand": "^1000.0.0",
     "glob": "^13.0.6",
     "openapi-types": "^12.1.3",
