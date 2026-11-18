@@ -7,6 +7,7 @@
     "nextjs:install": "yarn clean && graphql-codegen && opti-cms nextjs:create -f && eslint --fix && next build",
     "compile": "graphql-codegen",
     "dev": "graphql-codegen && next dev --turbopack",
+    "dev:fast": "next dev --turbopack",
     "build": "graphql-codegen && next build",
     "start": "next start",
     "lint": "eslint",
@@ -20,26 +21,26 @@
     "@remkoj/optimizely-graph-client": "6.0.0",
     "@remkoj/optimizely-one-nextjs": "6.0.0",
     "graphql-request": "^7.4.0",
-    "next": "^16.3.1",
-    "react": "^19.2.8",
-    "react-dom": "^19.2.8"
+    "next": "^16.4.6",
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1"
   },
   "devDependencies": {
-    "@eslint/eslintrc": "^3.3.6",
-    "@graphql-codegen/cli": "7.2.0",
-    "@next/env": "^16.3.1",
+    "@eslint/eslintrc": "^3.3.7",
+    "@graphql-codegen/cli": "7.4.6",
+    "@next/env": "^16.4.6",
     "@remkoj/optimizely-cms-cli": "6.0.0",
     "@remkoj/optimizely-graph-cli": "6.0.0",
     "@remkoj/optimizely-graph-functions": "6.0.0",
     "@stylistic/eslint-plugin": "^5.10.0",
-    "@swc-contrib/plugin-graphql-codegen-client-preset": "^0.31.0",
-    "@types/node": "^24.13.3",
-    "@types/react": "^19.2.18",
-    "@types/react-dom": "^19.2.4",
+    "@swc-contrib/plugin-graphql-codegen-client-preset": "^0.37.2",
+    "@types/node": "^24.19.2",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
     "eslint": "^9.39.5",
-    "eslint-config-next": "16.3.1",
-    "graphql": "^16.14.2",
-    "typescript": "5.9.3"
+    "eslint-config-next": "16.4.6",
+    "graphql": "^16.15.0",
+    "typescript": "6.0.3"
   },
   "resolutions": {
     "@graphql-codegen/visitor-plugin-common": "file:../../dependencies/graphql-codegen-visitor-plugin-common-v7.2.4-patched.tgz",
@@ -53,5 +54,5 @@
     "@remkoj/optimizely-one-nextjs": "file:../../packages/optimizely-one-nextjs",
     "@remkoj/hey-api-wrapper": "file:../../packages/hey-api-wrapper"
   },
-  "packageManager": "yarn@4.18.0"
+  "packageManager": "yarn@4.18.1"
 }

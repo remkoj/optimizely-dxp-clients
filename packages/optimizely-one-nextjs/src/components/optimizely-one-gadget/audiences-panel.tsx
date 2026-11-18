@@ -1,12 +1,15 @@
 'use client'
 import { useEffect, type FunctionComponent } from 'react'
-import { UserGroupIcon } from '@heroicons/react/20/solid'
+// import { UserGroupIcon } from '@heroicons/react/20/solid'
+import { IconUsers as UserGroupIcon } from '@optiaxiom/icons'
 import useSWRInfinite, {
   type SWRInfiniteKeyLoader,
   type SWRInfiniteConfiguration,
 } from 'swr/infinite'
 import type { ProfileApiResponse as MeResponse } from '../../api/profile-api-service'
+import { Button, Text } from '@optiaxiom/react'
 import Notice from './_notice'
+import { ItemList, ListItem, PoweredBy } from './_ui'
 
 export type AudiencesPanelProps = {
   servicePrefix?: string
@@ -87,47 +90,43 @@ export const AudiencesPanel: FunctionComponent<AudiencesPanelProps> = ({
             <>
               Showing results for the first {size * pageSize} audiences of{' '}
               {audienceCount},{' '}
-              <span
-                onClick={() => setSize(size + 1)}
-                className="oo:cursor-pointer oo:underline oo:text-blue-800"
+              <Text
+                asChild
+                color="fg.link.default"
+                style={{ cursor: 'pointer', textDecoration: 'underline' }}
               >
-                load more
-              </span>
+                <span onClick={() => setSize(size + 1)}>load more</span>
+              </Text>
             </>
           }
         />
       )}
-      <ul className="oo:grid oo:grid-cols-1 oo:divide-y oo:divide-slate-200">
+      <ItemList>
         {(profiles || [])
           .map((profile) =>
             (profile?.rts.audiences ?? []).map((a) => {
               return (
-                <li className="oo:py-1" key={'audience-' + a.id}>
-                  <UserGroupIcon className="oo:inline-block oo:h-4 oo:w-4 oo:mr-2" />
+                <ListItem
+                  key={'audience-' + a.id}
+                  icon={<UserGroupIcon size={16} />}
+                >
                   {a.name}
-                </li>
+                </ListItem>
               )
             })
           )
           .flat()}
-      </ul>
-      <p className="oo:text-[12px]">Powered by: Optimizely Data Platform</p>
+      </ItemList>
       {hasMore && (
-        <p
-          onClick={() => setSize(size + 1)}
-          className="oo:text-center oo:inline-block oo:cursor-pointer oo:px-2 oo:py-1 oo:border oo:border-b-0 oo:border-slate-300 oo:rounded-md oo:bg-blue-500 oo:text-white"
-        >
+        <Button mt="8" size="sm" onClick={() => setSize(size + 1)}>
           Load more
-        </p>
+        </Button>
       )}
+      <PoweredBy>Powered by: Optimizely Data Platform</PoweredBy>
       {isLoading && <Notice isLoading message="Loading the audiences..." />}
       {isValidating && !isLoading && (
         <Notice isLoading message="Refreshing audiences" />
       )}
-      <Notice
-        prefix="Please note:"
-        message="Interest based audiences are updated once per hour"
-      />
     </>
   )
 }

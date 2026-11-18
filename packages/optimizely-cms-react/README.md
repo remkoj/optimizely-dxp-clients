@@ -46,3 +46,5 @@ An entry within the factory consists of the following fields:
 - ***component:*** The component to do the actual rendering of the data. *The factory is indifferent to the actual type, so this could be the output of `next/dynamic` to trigger bundle splitting in Next.js.*
 - ***useSuspense:*** When set to `true` the component will be wrapped in the `<Suspense></Suspense>` from React. Optional, the default value is `false`.
 - ***loader:*** The component to show while Suspense is awaiting the actual component. This component is given to the `fallback` property of `<Suspense>`. Optional, the default value is `undefined`.
+- ***variant:*** The specific variant of the component (for example `header`, `footer`). Optional, the default value is `default`.
+- ***isClient:*** Set to `true` when the component is a Client Component (for example a `next/dynamic` import of a `use client` module). The `DefaultComponentFactory` then hands `ctx` and `editProps.ctx` to the component in their serializable form, as React does not allow class instances (like `ServerContext`) to cross the Server/Client boundary. Optional, the default value is `false`.

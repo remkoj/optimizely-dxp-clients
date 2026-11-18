@@ -1,6 +1,6 @@
 {
   "name": "@remkoj/optimizely-one-nextjs",
-  "description": "Optimizely One Next.js integration for ODP, Content Recommendations, and Web Experimentation",
+  "description": "Optimizely One Next.js integration for ODP, Content Recommendations, Web Experimentation, and Feature Experimentation",
   "license": "Apache-2.0",
   "version": "6.0.0-rc.5",
   "repository": {
@@ -25,6 +25,10 @@
     ".": "./dist/client.js",
     "./api": "./dist/api.js",
     "./client": "./dist/client.js",
+    "./data-platform/server": "./dist/products/data-platform/server-index.js",
+    "./feature-experimentation/server": "./dist/products/feature-experimentation/server-index.js",
+    "./proxy": "./dist/proxy-entry.js",
+    "./security": "./dist/security.js",
     "./server": "./dist/server.js"
   },
   "typesVersions": {
@@ -35,6 +39,18 @@
       "client": [
         "dist/client.d.ts"
       ],
+      "data-platform/server": [
+        "dist/products/data-platform/server-index.d.ts"
+      ],
+      "feature-experimentation/server": [
+        "dist/products/feature-experimentation/server-index.d.ts"
+      ],
+      "proxy": [
+        "dist/proxy-entry.d.ts"
+      ],
+      "security": [
+        "dist/security.d.ts"
+      ],
       "server": [
         "dist/server.d.ts"
       ]
@@ -42,20 +58,16 @@
   },
   "devDependencies": {
     "@remkoj/optimizely-graph-client": "workspace:6.0.0-rc.5",
-    "@tailwindcss/cli": "^4.3.3",
     "@types/node": "^24.19.2",
     "@types/react": "^19.3.0",
     "@types/react-dom": "^19.3.0",
     "@types/uuid": "^11.0.0",
-    "browserslist": "^4.29.3",
-    "next": "^16.4.1",
+    "next": "^16.4.6",
     "prop-types": "^15.8.1",
     "react": "^19.3.1",
     "react-dom": "^19.3.1",
     "scheduler": "^0.28.0",
-    "tailwindcss": "^4.3.3",
-    "typescript": "^5.9.3",
-    "update-browserslist-db": "^1.3.4"
+    "typescript": "^6.0.3"
   },
   "peerDependencies": {
     "next": "^16",
@@ -63,21 +75,32 @@
     "react-dom": "^19"
   },
   "dependencies": {
-    "@fastify/deepmerge": "^3.2.2",
-    "@headlessui/react": "^2.2.10",
-    "@heroicons/react": "^2.2.0",
-    "@optimizely/react-sdk": "^4.2.1",
+    "@fastify/deepmerge": "^3.2.4",
+    "@optiaxiom/icons": "^1.12.0",
+    "@optiaxiom/react": "^3.5.1",
+    "@optimizely/optimizely-sdk": "^6.7.0",
+    "@optimizely/react-sdk": "^4.3.0",
     "@remkoj/optimizely-graph-client": "6.0.0-rc.5",
+    "@tanstack/react-table": "^8.21.3",
+    "@tanstack/table-core": "^8.21.3",
+    "@tiptap/core": "^2.27.3",
+    "@tiptap/extension-link": "^2.27.3",
+    "@tiptap/extension-placeholder": "^2.27.3",
+    "@tiptap/extension-table": "^2.27.3",
+    "@tiptap/extension-table-cell": "^2.27.3",
+    "@tiptap/extension-table-header": "^2.27.3",
+    "@tiptap/extension-table-row": "^2.27.3",
+    "@tiptap/pm": "^2.27.3",
+    "@tiptap/react": "^2.27.3",
+    "@tiptap/starter-kit": "^2.27.3",
     "deep-object-diff": "^1.1.9",
     "swr": "^2.5.1",
     "uuid": "^14.0.3"
   },
   "scripts": {
     "clean": "tsc --build --clean",
-    "prepare": "tsc --build --force && tailwindcss -i ./src/styles.css -o ./dist/styles.css --minify",
+    "prepare": "tsc --build --force",
     "watch": "tsc --watch",
-    "watch-styles": "tailwindcss -i ./src/styles.css -o ./dist/styles.css --minify --watch",
-    "tailwind": "tailwindcss -i ./src/styles.css -o ./dist/styles.css --minify",
     "recompile": "tsc --build --clean && tsc --build --force"
   }
 }

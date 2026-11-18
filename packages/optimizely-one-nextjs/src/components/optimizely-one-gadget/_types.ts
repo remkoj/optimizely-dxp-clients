@@ -1,5 +1,7 @@
 
-
+/**
+ * Properties accepted by the Optimizely One debug gadget.
+ */
 export type OptimizelyOneGadgetProps = {
   /**
      * The API Route at which the companion API has been installed in your
@@ -17,13 +19,11 @@ export type OptimizelyOneGadgetProps = {
      */
   refreshInterval?: number
 
-  /**
-     * If set, bypasses the enabled/disabled detection allowing the application
-     * to take control of the visibility of the gadget.
-     */
-  show?: boolean
-
   showDataPlatform?: boolean
   showContentRecs?: boolean
   showWebEx?: boolean
+  /** Enables the Feature Experimentation decisions panel. */
+  showFeatureExperimentation?: boolean
+  /** Feature Experimentation project ID to display in the gadget. */
+  featureExperimentationProject?: string
 }

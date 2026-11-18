@@ -2,14 +2,34 @@
 import { type FunctionComponent } from 'react'
 import useSWR from 'swr'
 import type { GraphInfoApiResponse as ApiResponse } from '../../api/graph-info-service'
-import Link from 'next/link'
+import { Link, Text } from '@optiaxiom/react'
 import Notice from './_notice'
+import { DefinitionList, Term, Description, ItemList, ListItem } from './_ui'
 
+const sourceLabels = new Map([
+  ['default', 'Optimizely CMS'],
+  ['cmp', 'Optimizely DAM'],
+  ['cmpsc', 'Optimizely CMP'],
+  ['hub', 'Optimizely Connect'],
+  ['ocp', 'Optimizely Connect Platform']
+])
+
+/**
+ * Options for the Optimizely Graph status panel.
+ */
 export type GraphPanelProps = {
+  /** Prefix for the package API route. */
   servicePrefix?: string
+  /** Poll interval in milliseconds; `0` disables periodic refresh. */
   refreshInterval?: number
 }
 
+/**
+ * Displays Graph publishing hooks and the content sources available to Graph.
+ *
+ * @param props API route and refresh configuration.
+ * @returns The Graph status panel.
+ */
 export const GraphPanel: FunctionComponent<GraphPanelProps> = ({
   servicePrefix = '/api/me',
   refreshInterval = 30000,
@@ -37,53 +57,46 @@ export const GraphPanel: FunctionComponent<GraphPanelProps> = ({
 
   return (
     <>
-      <dl className="oo:grid oo:grid-cols-3 oo:gap-x-4 oo:gap-y-1">
-        <dt className="oo:font-bold">Publishing changes to:</dt>
-        <dd className="oo:col-span-2">
-          <ul className="oo:grid oo:grid-cols-1 oo:divide-y oo:divide-slate-200">
+      <DefinitionList>
+        <Term>Publishing changes to</Term>
+        <Description>
+          <ItemList>
             {(data?.hooks || []).map((hook) => (
-              <li className="oo:py-1" key={`webhook-${hook.url}`}>
+              <ListItem key={`webhook-${hook.url}`}>
                 {hook.method && (
-                  <span className="oo:text-amber-800">
-                    ({hook.method?.toLowerCase() ?? ''}){' '}
-                  </span>
+                  <Text asChild color="fg.warning">
+                    <span>({hook.method?.toLowerCase() ?? ''}) </span>
+                  </Text>
                 )}
                 {hook.url}
                 {hook.hasQueryParams && <>?...</>}
-              </li>
+              </ListItem>
             ))}
-          </ul>
-        </dd>
-        <dt className="oo:font-bold">Exposing content from:</dt>
-        <dd className="oo:col-span-2">
-          <ul className="oo:grid oo:grid-cols-1 oo:divide-y oo:divide-slate-200">
+          </ItemList>
+        </Description>
+        <Term>Exposing content from</Term>
+        <Description>
+          <ItemList>
             {(data?.sources || []).map((source) => (
-              <li className="oo:py-1" key={`source-${source.label}`}>
+              <ListItem key={`source-${source.label}`}>
                 {updateLabel(source.label)}, available languages:{' '}
                 {source.languages.join(', ')}
-              </li>
+              </ListItem>
             ))}
-          </ul>
-        </dd>
-      </dl>
-      <p className="oo:pt-4 oo:text-[14px]">
-        <Link
-          className="oo:cursor-pointer oo:underline oo:text-blue-800"
-          href="https://cg.optimizely.com/app/portal/"
-          target="_new"
-        >
+          </ItemList>
+        </Description>
+      </DefinitionList>
+      <Text fontSize="sm" mt="12">
+        <Link href="https://cg.optimizely.com/portal" target="_blank">
           Login to Optimizely Graph
         </Link>
-      </p>
+      </Text>
     </>
   )
 }
 
 function updateLabel(label: string) {
-  if (label == 'default') return 'Optimizely CMS'
-  if (label == 'cmp') return 'Optimizely CMP'
-  if (label == 'hub') return 'Optimizely Connect'
-  return label
+  return sourceLabels.get(label.toLowerCase()) ?? label
 }
 
 export default GraphPanel

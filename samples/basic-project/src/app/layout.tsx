@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import { CmsContent } from '@remkoj/optimizely-cms-react/rsc'
 import { publishedContext as ctx } from '@/api'
 import Link from 'next/link'
+import { Scripts } from '@remkoj/optimizely-one-nextjs/server'
 
 import './globals.css'
 
@@ -17,13 +18,22 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
+      <head>
+        <Scripts.Header />
+      </head>
       <body>
         <header style={{ borderBottom: '2px solid #000', minHeight: '25px', marginBottom: '5px' }}>
           <Link href='/'>
             <CmsContent contentLink={{key: '7950541bb6a84d049784cb6f46262c12'}} variant='header' ctx={ctx} />
           </Link>
         </header>
-        {children}
+        <main>
+          {children}
+        </main>
+        <footer>
+          Footer goes here
+        </footer>
+        <Scripts.Footer />
       </body>
     </html>
   )

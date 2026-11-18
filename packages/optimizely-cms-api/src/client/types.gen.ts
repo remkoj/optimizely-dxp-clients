@@ -753,6 +753,10 @@ export type ContentType = {
      */
     description?: string;
     /**
+     * The icon name for this content type (e.g., "file", "folder", "image").
+     */
+    icon?: null | string;
+    /**
      * The base type of this content type. Ignored for contracts; required for all other content types.
      */
     baseType?: null | string;
@@ -932,6 +936,10 @@ export type ContentTypePatch = {
      * A description of this content type.
      */
     description?: null | string;
+    /**
+     * The icon name for this content type (e.g., "file", "folder", "image").
+     */
+    icon?: null | string;
     /**
      * A value that is used when sorting content type instances.
      */
@@ -2089,6 +2097,10 @@ export type ContentTypeWritable = {
      * A description of this content type.
      */
     description?: string;
+    /**
+     * The icon name for this content type (e.g., "file", "folder", "image").
+     */
+    icon?: null | string;
     /**
      * The base type of this content type. Ignored for contracts; required for all other content types.
      */

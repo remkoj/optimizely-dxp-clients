@@ -30,6 +30,7 @@
     "allowJs": true,
     "checkJs": true,
     "skipLibCheck": true,
+    "types": ["node"],
     "strict": true,
     "alwaysStrict": true,
     "forceConsistentCasingInFileNames": true,

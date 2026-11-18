@@ -1,220 +1,170 @@
 'use client'
+
 import type { OptimizelyOneGadgetProps } from './_types'
 import {
-  Fragment,
-  useCallback,
+  useState,
   useMemo,
+  useEffect,
+  useLayoutEffect,
   type FunctionComponent,
   type ComponentType,
-  useEffect,
-  Suspense,
 } from 'react'
-import useCookie from '../use-cookie'
 import {
+  AxiomProvider,
+  Box,
+  Button,
+  Flex,
   Popover,
-  PopoverButton,
-  PopoverPanel,
-  Tab,
-  TabGroup,
-  TabList,
-  TabPanels,
-  TabPanel,
-} from '@headlessui/react'
-import {
-  ChevronUpIcon,
-  UserGroupIcon,
-  TagIcon,
-  RocketLaunchIcon,
-  IdentificationIcon,
-  Square3Stack3DIcon,
-  TrophyIcon,
-  FingerPrintIcon,
-} from '@heroicons/react/20/solid'
-import OptiLogo from './logo'
-import { useIsInTestMode } from '../use-test-mode'
-import { useSearchParams, usePathname } from 'next/navigation'
-
-// Import the Panel CSS
-import '../../styles.css'
-
-// Prepare panel imports
+  PopoverTrigger,
+  PopoverContent,
+  Tabs,
+  TabsList,
+  TabsTrigger,
+  TabsContent,
+  Text,
+} from '@optiaxiom/react'
+import { IconBolt, IconXmark } from '@optiaxiom/icons'
 import dynamic from 'next/dynamic'
+import type { SupportedProductNames } from '../types'
+import { useOptimizelyOne } from '../context'
+import OptimizelyLogo from './logo'
+import { useDragScroll } from './_ui'
+import { useOptimizelyTestCookie } from './_test-cookie'
+import {
+  CONTENT_CLASS,
+  GADGET_CSS,
+  TABS_CLASS,
+  TRIGGER_CLASS,
+  ensureAxiomLayerOrder,
+} from './_styles'
+
+/**
+ * Session storage key under which the open/closed state of the gadget is kept,
+ * so the gadget stays open across full page loads.
+ */
+const OPEN_STATE_KEY = 'opti-one-gadget-open'
+
 type PanelList = Array<{
   id: string
-  Tab: ComponentType<object>
-  Panel: ComponentType<{ servicePrefix?: string; refreshInterval?: number }>
-  products: Array<string>
+  label: string
+  Panel: ComponentType<{
+    servicePrefix?: string
+    refreshInterval?: number
+    featureExperimentationProject?: string
+  }>
+  products: Array<SupportedProductNames>
 }>
+
 const Panels: PanelList = [
   {
     id: 'Profile',
-    Tab: () => (
-      <Tab
-        as="div"
-        className="oo:text-center oo:inline-block oo:cursor-pointer oo:px-2 oo:py-1 oo:border oo:border-b-0  oo:border-slate-300 oo:rounded-t-md oo:data-selected:bg-blue-500 oo:data-selected:text-white"
-      >
-        <IdentificationIcon className="oo:inline-block oo:h-[1em] oo:w-[1em] oo:mr-[0.25em]" />
-        Profile
-      </Tab>
-    ),
+    label: 'Profile',
     Panel: dynamic(() => import('./profile-panel'), { ssr: false }),
-    products: ['odp'],
+    products: ['dataPlatform'],
   },
   {
     id: 'Interests',
-    Tab: () => (
-      <Tab
-        as="div"
-        className="oo:text-center oo:inline-block oo:cursor-pointer oo:px-2 oo:py-1 oo:border oo:border-b-0  oo:border-slate-300 oo:rounded-t-md oo:data-selected:bg-blue-500 oo:data-selected:text-white"
-      >
-        <TagIcon className="oo:inline-block oo:h-[1em] oo:w-[1em] oo:mr-[0.25em]" />
-        Interests
-      </Tab>
-    ),
+    label: 'Interests',
     Panel: dynamic(() => import('./interests-panel'), { ssr: false }),
-    products: ['crecs'],
+    products: ['contentRecsClient', 'contentRecsApi'],
   },
   {
     id: 'Goals',
-    Tab: () => (
-      <Tab
-        as="div"
-        className="oo:text-center oo:inline-block oo:cursor-pointer oo:px-2 oo:py-1 oo:border oo:border-b-0  oo:border-slate-300 oo:rounded-t-md oo:data-selected:bg-blue-500 oo:data-selected:text-white"
-      >
-        <TrophyIcon className="oo:inline-block oo:h-[1em] oo:w-[1em] oo:mr-[0.25em]" />
-        Goals
-      </Tab>
-    ),
+    label: 'Goals',
     Panel: dynamic(() => import('./goals-panel'), { ssr: false }),
-    products: ['crecs'],
+    products: ['contentRecsClient', 'contentRecsApi'],
   },
   {
     id: 'Audiences',
-    Tab: () => (
-      <Tab
-        as="div"
-        className="oo:text-center oo:inline-block oo:cursor-pointer oo:px-2 oo:py-1 oo:border oo:border-b-0  oo:border-slate-300 oo:rounded-t-md oo:data-selected:bg-blue-500 oo:data-selected:text-white"
-      >
-        <UserGroupIcon className="oo:inline-block oo:h-[1em] oo:w-[1em] oo:mr-[0.25em]" />
-        Audiences
-      </Tab>
-    ),
+    label: 'Audiences',
     Panel: dynamic(() => import('./audiences-panel'), { ssr: false }),
-    products: ['odp'],
+    products: ['dataPlatform'],
   },
   {
     id: 'Experiments',
-    Tab: () => (
-      <Tab
-        as="div"
-        className="oo:text-center oo:inline-block oo:cursor-pointer oo:px-2 oo:py-1 oo:border oo:border-b-0  oo:border-slate-300 oo:rounded-t-md oo:data-selected:bg-blue-500 oo:data-selected:text-white"
-      >
-        <RocketLaunchIcon className="oo:inline-block oo:h-[1em] oo:w-[1em] oo:mr-[0.25em]" />
-        Experiments
-      </Tab>
-    ),
+    label: 'Experiments',
     Panel: dynamic(() => import('./exp-panel'), { ssr: false }),
-    products: ['webex'],
+    products: ['webExperimentation'],
+  },
+  {
+    id: 'FeatureExperimentation',
+    label: 'Feature Experimentation',
+    Panel: dynamic(() => import('./feature-experimentation-panel'), {
+      ssr: false,
+    }),
+    products: ['featureExperimentation'],
   },
   {
     id: 'Identifiers',
-    Tab: () => (
-      <Tab
-        as="div"
-        className="oo:text-center oo:inline-block oo:cursor-pointer oo:px-2 oo:py-1 oo:border oo:border-b-0  oo:border-slate-300 oo:rounded-t-md oo:data-selected:bg-blue-500 oo:data-selected:text-white"
-      >
-        <FingerPrintIcon className="oo:inline-block oo:h-[1em] oo:w-[1em] oo:mr-[0.25em]" />
-        Identifiers
-      </Tab>
-    ),
+    label: 'Identifiers',
     Panel: dynamic(() => import('./ids-panel'), { ssr: false }),
     products: [],
   },
   {
     id: 'Graph',
-    Tab: () => (
-      <Tab
-        as="div"
-        className="oo:text-center oo:inline-block oo:cursor-pointer oo:px-2 oo:py-1 oo:border oo:border-b-0  oo:border-slate-300 oo:rounded-t-md oo:data-selected:bg-blue-500 oo:data-selected:text-white"
-      >
-        <Square3Stack3DIcon className="oo:inline-block oo:h-[1em] oo:w-[1em] oo:mr-[0.25em]" />
-        Graph
-      </Tab>
-    ),
+    label: 'Graph',
     Panel: dynamic(() => import('./graph-panel'), { ssr: false }),
     products: [],
   },
 ]
 
 /**
- * Add an Optimizely One Demo helper to the page, which can be triggered by
- * the "test cookie" feature of the Optimizely Web Experimentation browser
- * extension.
+ * Add an Optimizely One Demo helper to the page.
+ *
+ * The gadget renders nothing until an Optimizely test cookie
+ * (`optly_<domain name>_test`, with any value) is present in the browser, as
+ * set by the bookmark or the Optimizely Web Experimentation browser
+ * extension. Removing the cookie hides the gadget again. The cookie is
+ * tracked fully client side, through Cookie Store change events when
+ * supported and by polling every 500ms otherwise.
+ *
+ * Once opened, the gadget stays open (also across page navigations and
+ * reloads within the browser session) until the close button is clicked;
+ * pressing Escape also closes it, but clicking outside of it or clicking the
+ * trigger again does not.
  *
  * @param       param0      The component properties
  * @returns     The component JSX
  */
-const OptimizelyOneGadgetInner: FunctionComponent<
+export const OptimizelyOneGadget: FunctionComponent<
   OptimizelyOneGadgetProps
 > = ({
   servicePrefix = '/api/me',
   refreshInterval = 0,
-  show = undefined,
-  showContentRecs = true,
-  showDataPlatform = true,
-  showWebEx = true,
+  featureExperimentationProject,
 }) => {
-  const inTestMode = useIsInTestMode()
-  const searchParams = useSearchParams()
-  const pathname = usePathname()
-  const wxProjectIdParam = searchParams.get('pid')
-  const [projectIdCookie, setProjectIdCookie, removeProjectIdCookie] =
-    useCookie('wx.projectid')
-  const enabledProducts: Array<string> = useMemo(() => {
-    const enabledProducts: Array<string> = []
-    if (showContentRecs) enabledProducts.push('crecs')
-    if (showDataPlatform) enabledProducts.push('odp')
-    if (showWebEx) enabledProducts.push('webex')
-    return enabledProducts
-  }, [showContentRecs, showDataPlatform, showWebEx])
-  const { forceHidden, forceShown } = useMemo(() => {
-    const forceHidden = show != undefined && show == false
-    const forceShown = show != undefined && show == true
-    return { forceHidden, forceShown }
-  }, [show])
+  const { enabledOptimizelyProducts } = useOptimizelyOne()
+  const testCookiePresent = useOptimizelyTestCookie()
+  const tabs: PanelList = useMemo(() => {
+    return Panels.filter(({ products }) => products.length === 0 || products.some(product => enabledOptimizelyProducts.includes(product)))
+  }, [enabledOptimizelyProducts]);
 
-  const removeQueryParam = useCallback(
-    (paramName: string) => {
-      const newParams = new URLSearchParams(searchParams.toString())
-      if (newParams.has(paramName)) newParams.delete(paramName)
-      const newSearch = newParams.toString()
-      const newPath =
-        pathname + (newSearch.length > 0 ? '?' + newParams.toString() : '')
-      try {
-        window.location.href = newPath
-      } catch {
-        console.log(
-          '🛑 Refreshing the page to apply the new Web Experimenation project failed, please refresh manually.'
-        )
-      }
-    },
-    [pathname, searchParams]
-  )
+  const [selectedTab, setSelectedTab] = useState('Identifiers');
+  const dragScroll = useDragScroll<HTMLDivElement>()
+  const [open, setOpenState] = useState(false)
+
+  // The gadget is only closed explicitly, and the state survives navigations
+  const setOpen = (newState: boolean) => {
+    setOpenState(newState)
+    try {
+      if (newState) sessionStorage.setItem(OPEN_STATE_KEY, '1')
+      else sessionStorage.removeItem(OPEN_STATE_KEY)
+    } catch {
+      // Storage not available, the state is kept in memory only
+    }
+  }
 
   useEffect(() => {
-    if (wxProjectIdParam != null && wxProjectIdParam != projectIdCookie) {
-      if (wxProjectIdParam == '') removeProjectIdCookie()
-      else setProjectIdCookie(wxProjectIdParam)
-
-      removeQueryParam('pid')
+    try {
+      if (sessionStorage.getItem(OPEN_STATE_KEY) === '1') setOpenState(true)
+    } catch {
+      // Storage not available
     }
-  }, [
-    wxProjectIdParam,
-    projectIdCookie,
-    removeQueryParam,
-    removeProjectIdCookie,
-    setProjectIdCookie,
-  ])
+  }, [])
+
+  useLayoutEffect(() => {
+    ensureAxiomLayerOrder()
+  }, [])
 
   useEffect(() => {
     console.groupCollapsed(
@@ -224,66 +174,134 @@ const OptimizelyOneGadgetInner: FunctionComponent<
     console.log(
       `Refresh interval: ${refreshInterval == 0 ? 'DISABLED' : refreshInterval + 'ms'}`
     )
-    console.log(`Enabled products: ${enabledProducts.join(', ')}`)
+    console.log(`Enabled products: ${enabledOptimizelyProducts.length === 0 ? 'NONE' : enabledOptimizelyProducts.join(', ')}`)
     console.groupEnd()
-  },[servicePrefix, refreshInterval,enabledProducts])
+  },[servicePrefix, refreshInterval, enabledOptimizelyProducts])
 
-  if (forceHidden || (!forceShown && !inTestMode)) return <></>
+  if (!testCookiePresent) return null
 
   return (
-    <Popover className="oo:md:fixed oo:md:bottom-0 oo:z-500 oo:font-sans oo:text-[10px]">
-      <PopoverButton className="oo:fixed oo:bottom-0 oo:right-0 oo:w-full oo:h-[50px] oo:flex oo:flex-row oo:justify-between oo:border-t oo:border-slate-500 oo:bg-slate-100 oo:text-slate-800 oo:md:w-[350px] oo:md:right-4 oo:md:rounded-t-md oo:md:border-x oo:z-[500] oo:p-[10px] oo:dark:text-slate-800 oo:m-0 oo:cursor-pointer oo:border-b-0">
-        <OptiLogo className="oo:w-auto oo:h-full" />
-        <ChevronUpIcon className="oo:data-open:rotate-180 oo:data-open:transform oo:h-full oo:w-auto oo:inline-block" />
-      </PopoverButton>
-      <PopoverPanel className="oo:text-[14px] oo:fixed oo:bottom-[50px] oo:right-0 oo:w-full oo:top-0 oo:md:border oo:md:border-slate-300 oo:bg-white oo:md:right-4 oo:md:bottom-[55px] oo:md:w-[800px] oo:z-[501] oo:max-w-full oo:flex oo:flex-col oo:justify-stretch oo:md:h-[350px] oo:md:top-auto oo:md:rounded-md oo:md:shadow-xl oo:md:overflow-hidden oo:text-slate-800 oo:dark:text-slate-800">
-        <div className="oo:text-[18px] oo:border-b oo:border-slate-300 oo:bg-slate-100 oo:text-slate-800 oo:font-bold oo:p-1 oo:flex-none oo:md:p-2 oo:m-0">
-          <IdentificationIcon className="oo:inline-block oo:h-[1.0em] oo:w-[1.0em] oo:mr-[0.5em] oo:text-blue-500" />
-          My Profile
-        </div>
-        <TabGroup as={Fragment}>
-          <TabList className="oo:flex-none oo:flex oo:justify-between oo:md:justify-start oo:gap-[0.25em] oo:px-[0.25em] oo:pt-[0.5em] oo:border-b oo:border-slate-300">
-            {Panels.filter(
-              (pnl) =>
-                pnl.products.length == 0 ||
-                pnl.products.every((pk) => enabledProducts.includes(pk))
-            ).map(({ id: pnlId, Tab: GadgetTab }) => {
-              const pnlTabKey = 'Tab-' + pnlId
-              return <GadgetTab key={pnlTabKey} />
-            })}
-          </TabList>
-          <TabPanels className="oo:flex-1 oo:md:h-24 oo:overscroll-contain oo:overflow-y-auto">
-            {Panels.filter(
-              (pnl) =>
-                pnl.products.length == 0 ||
-                pnl.products.every((pk) => enabledProducts.includes(pk))
-            ).map(({ id: pnlId, Panel: GadgetPanel }) => {
-              const pnlKey = 'Panel-' + pnlId
-              return (
-                <TabPanel key={pnlKey} as="div" className="oo:p-1 oo:md:p-2">
-                  <Suspense fallback={<div className="oo:text-center oo:py-4">Loading...</div>}>
-                    <GadgetPanel
-                      servicePrefix={servicePrefix}
-                      refreshInterval={refreshInterval}
-                    />
-                  </Suspense>
-                </TabPanel>
-              )
-            })}
-          </TabPanels>
-        </TabGroup>
-      </PopoverPanel>
-    </Popover>
-  )
-}
-
-export const OptimizelyOneGadget: FunctionComponent<
-  OptimizelyOneGadgetProps
-> = (props) => {
-  return (
-    <Suspense fallback={null}>
-      <OptimizelyOneGadgetInner {...props} />
-    </Suspense>
+    <AxiomProvider>
+      <style>{GADGET_CSS}</style>
+      <Popover open={open} onOpenChange={() => {}}>
+        <PopoverTrigger
+          aria-label="Open the Optimizely One gadget"
+          onClick={(e) => {
+            e.preventDefault()
+            setOpen(true)
+          }}
+          className={TRIGGER_CLASS}
+          appearance="primary"
+          icon={<IconBolt />}
+          rounded="full"
+          shadow="lg"
+          size="lg"
+          style={{
+            position: 'fixed',
+            right: '1.5rem',
+            bottom: '1.5rem',
+            zIndex: 2999,
+            paddingInline: '1.5rem',
+            gap: '0.625rem',
+            border: '2px solid var(--ax-colors-bg-default)',
+            boxShadow:
+              '0 0 0 1px var(--ax-colors-border-default), 0 8px 20px rgba(0, 0, 0, 0.35)',
+          }}
+        >
+          DXP
+        </PopoverTrigger>
+        <PopoverContent
+          className={CONTENT_CLASS}
+          onInteractOutside={(e) => e.preventDefault()}
+          onEscapeKeyDown={() => setOpen(false)}
+          side="top"
+          align="end"
+          sideOffset={12}
+          p="0"
+          shadow="xl"
+          style={{
+            display: 'flex',
+            flexDirection: 'column',
+            height: 'min(30rem, calc(100vh - 6rem))',
+            overflow: 'hidden',
+          }}
+        >
+          <Flex
+            flexDirection="row"
+            alignItems="center"
+            gap="8"
+            px="16"
+            py="10"
+            borderB="1"
+            borderColor="border.default"
+            bg="bg.secondary"
+            style={{ flex: 'none' }}
+          >
+            <OptimizelyLogo style={{ height: '1.5rem', width: 'auto' }} />
+            <Text fontSize="sm" color="fg.secondary" style={{ flex: '1 1 auto' }}>
+              Demo gadget
+            </Text>
+            <Button
+              aria-label="Close the Optimizely One gadget"
+              appearance="subtle"
+              icon={<IconXmark />}
+              size="sm"
+              onClick={() => setOpen(false)}
+            />
+          </Flex>
+          <Tabs
+            value={selectedTab}
+            onValueChange={setSelectedTab}
+            style={{
+              display: 'flex',
+              flexDirection: 'column',
+              flex: '1 1 0',
+              minHeight: 0,
+            }}
+          >
+            <TabsList
+              {...dragScroll}
+              className={TABS_CLASS}
+              style={{
+                flex: 'none',
+                overflowX: 'auto',
+                overflowY: 'hidden',
+                flexWrap: 'nowrap',
+                paddingInline: '1rem',
+                scrollbarWidth: 'thin',
+              }}
+            >
+              {tabs.map(({ id, label }) => (
+                <TabsTrigger
+                  key={`tab-${id}`}
+                  value={id}
+                  style={{ flex: 'none', whiteSpace: 'nowrap' }}
+                >
+                  {label}
+                </TabsTrigger>
+              ))}
+            </TabsList>
+            {tabs.map(({ id, Panel }) => (
+              <TabsContent
+                value={id}
+                key={`tab-content-${id}`}
+                style={{ flex: '1 1 0', minHeight: 0, overflowY: 'auto' }}
+              >
+                <Box p="16">
+                  <Panel
+                    refreshInterval={refreshInterval}
+                    servicePrefix={servicePrefix}
+                    featureExperimentationProject={
+                      featureExperimentationProject
+                    }
+                  />
+                </Box>
+              </TabsContent>
+            ))}
+          </Tabs>
+        </PopoverContent>
+      </Popover>
+    </AxiomProvider>
   )
 }
 

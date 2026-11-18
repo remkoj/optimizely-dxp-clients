@@ -61,7 +61,10 @@ export const ProfileApiService: ApiService<ProfileApiResponse> = {
     }
 
     // Fetch the profile if needed
-    const profile = odp && fetchProfileCard && odpId ? await odp.getProfileInfo(odpId) : undefined
+    const fetchedProfile = odp && fetchProfileCard && odpId ? await odp.getProfileInfo(odpId) : undefined
+    // A profile without any identifying field only holds anonymous activity
+    const profile = fetchedProfile && isIdentified(fetchedProfile) ? fetchedProfile : undefined
+    const profileState: ProfileState = !odpId ? 'anonymous' : fetchedProfile ? (profile ? 'identified' : 'anonymous') : 'unknown'
 
     // Determine topics if needed
     let topics: string[] = []
@@ -85,6 +88,7 @@ export const ProfileApiService: ApiService<ProfileApiResponse> = {
         audiencesCount,
       },
       profile: profile ?? null,
+      profileState,
       contentTopics: topics,
       duration: `${Date.now() - start}ms`
     }
@@ -95,6 +99,12 @@ export const ProfileApiService: ApiService<ProfileApiResponse> = {
 
 
 export default ProfileApiService
+
+export type ProfileState = 'identified' | 'anonymous' | 'unknown'
+
+function isIdentified(profile: DataPlatform.Profile): boolean {
+  return [profile.email, profile.name, profile.first_name, profile.last_name, profile.phone].some(v => !!v)
+}
 
 export type ProfileApiResponse = {
   ids: {
@@ -112,6 +122,12 @@ export type ProfileApiResponse = {
     pageNumber: number
   }
   profile: DataPlatform.Profile | null
+  /**
+   * Why `profile` is, or is not, present: `identified` when it is returned,
+   * `anonymous` when there is no ODP visitor ID or the profile has no
+   * identifying fields, and `unknown` when ODP has no profile for the visitor ID.
+   */
+  profileState?: ProfileState
   duration?: string
 }
 

@@ -27,6 +27,8 @@ const deepmerge = createDeepmerge({
  * and capability-specific service selectors used by consumers.
  */
 export type OptimizelyOneContextType = Readonly<{
+  enabledOptimizelyProducts: ReadonlyArray<SupportedProductNames>
+
   /**
    * With tracking completely disabled, all events will be stopped by
    * the OptimizelyOne hook. The "PageActivator" component will propagate
@@ -150,6 +152,7 @@ const throwNoContextDefined = (): never => {
 }
 
 const DefaultOptimizelyOneContextValues : OptimizelyOneContextType = {
+  enabledOptimizelyProducts: [],
   disableTracking: false,
   disableAutotracking: false,
   services: [],
@@ -225,7 +228,7 @@ export function OptimizelyOneProvider(
       debug = false
     } = {}, 
     children, 
-    enabledOptimizelyServices
+    enabledOptimizelyServices = []
   }: ProviderProps)
 {
   // Local state to hold the current profile data, allowing it to be updated and
@@ -330,6 +333,7 @@ export function OptimizelyOneProvider(
     return {
       disableTracking,
       disableAutotracking,
+      enabledOptimizelyProducts: enabledOptimizelyServices,
       services: activeServices,
       debug: ctxDebug,
       setDebug: setCtxDebug,
@@ -344,7 +348,7 @@ export function OptimizelyOneProvider(
       discoverProfileData,
       updateProfile
     }
-  }, [ disableTracking, disableAutotracking, activeServices, ctxDebug, track, discoverProfileData, updateProfile ])
+  }, [ disableTracking, disableAutotracking, activeServices, ctxDebug, track, discoverProfileData, updateProfile, enabledOptimizelyServices ])
 
   return <OptimizelyOneContext.Provider value={contextValue}>{ children }</OptimizelyOneContext.Provider>
 }

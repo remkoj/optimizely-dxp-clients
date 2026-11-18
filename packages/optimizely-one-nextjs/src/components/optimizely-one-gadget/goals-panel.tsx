@@ -1,9 +1,11 @@
 'use client'
 import { type FunctionComponent, type JSX } from 'react'
-import { TrophyIcon } from '@heroicons/react/20/solid'
+// import { TrophyIcon } from '@heroicons/react/20/solid'
+import { IconDollarSign as TrophyIcon } from '@optiaxiom/icons'
 import useSWR from 'swr'
 import { type GoalsReponse as ApiResponse } from '../../products/content-recs/webservice-goals'
 import Notice from './_notice'
+import { ItemList, ListItem, PoweredBy } from './_ui'
 
 export type GoalsPanelProps = {
   servicePrefix?: string
@@ -32,26 +34,24 @@ export const GoalsPanel: FunctionComponent<GoalsPanelProps> = ({
     return <Notice>There was an error loading your next best goals</Notice>
 
   const goals: JSX.Element[] = (data?.goals ?? []).map((t) => (
-    <li className="oo:py-1" key={'goal-' + t.goal}>
-      <TrophyIcon className="oo:inline-block oo:h-4 oo:w-4 oo:mr-2" />
+    <ListItem
+      key={'goal-' + t.goal}
+      icon={<TrophyIcon size={16} />}
+    >
       {t.goal} ({`${t.score * 100}%`})
-    </li>
+    </ListItem>
   ))
   if (goals.length == 0)
     goals.push(
-      <li className="oo:py-1" key="no-topics">
+      <ListItem key="no-goals">
         <Notice>No goals inferred from behaviour</Notice>
-      </li>
+      </ListItem>
     )
 
   return (
     <>
-      <ul className="oo:grid oo:grid-cols-1 oo:divide-y oo:divide-slate-200">
-        {goals}
-      </ul>
-      <p className="oo:text-[12px]">
-        Powered by: Optimizely Content Recommendations
-      </p>
+      <ItemList>{goals}</ItemList>
+      <PoweredBy>Powered by: Optimizely Content Recommendations</PoweredBy>
       {isValidating && !isLoading && (
         <Notice isLoading> Refreshing goals</Notice>
       )}

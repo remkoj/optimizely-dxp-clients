@@ -5,6 +5,7 @@ import useSWR from 'swr'
 import { useOptimizelyOne } from '../context'
 import type { ProfileApiResponse as MeResponse } from '../../api/profile-api-service'
 import Notice from './_notice'
+import { DefinitionList, Term, Description } from './_ui'
 
 export type IdsPanelProps = {
   servicePrefix?: string
@@ -18,6 +19,8 @@ export const IdsPanel: FunctionComponent<IdsPanelProps> = ({
   const currentPath = usePathname()
   const opti = useOptimizelyOne()
   const webEx = opti.getService('webex')?.getBrowserApi()
+  // Mirrors the condition under which the gadget shows the Feature Experimentation tab
+  const showFx = opti.enabledOptimizelyProducts.includes('featureExperimentation')
 
   const ids = `${servicePrefix}?scope=ids`
   const {
@@ -42,24 +45,20 @@ export const IdsPanel: FunctionComponent<IdsPanelProps> = ({
     )
 
   return (
-    <>
-      <dl className="oo:grid oo:grid-cols-3 oo:gap-x-4 oo:gap-y-1">
-        <dt className="oo:font-bold">Frontend (Feature Experimentation):</dt>
-        <dd className="oo:col-span-2">{profile?.ids.frontend ?? 'n/a'}</dd>
-        <dt className="oo:font-bold">Web Experimentation:</dt>
-        <dd className="oo:col-span-2">
-          {webEx && webEx.get ? webEx.get('visitor').visitorId : 'n/a'}
-        </dd>
-        <dt className="oo:font-bold">Content Intelligence:</dt>
-        <dd className="oo:col-span-2">
-          {profile?.ids.contentIntelligence ?? 'n/a'}
-        </dd>
-        <dt className="oo:font-bold">Data Platform:</dt>
-        <dd className="oo:col-span-2">{profile?.ids.dataPlatform ?? 'n/a'}</dd>
-        <dt className="oo:font-bold">Current path:</dt>
-        <dd className="oo:col-span-2">{currentPath}</dd>
-      </dl>
-    </>
+    <DefinitionList>
+      <Term>{showFx ? 'Frontend (Feature Experimentation)' : 'Frontend'}</Term>
+      <Description>{profile?.ids.frontend ?? 'n/a'}</Description>
+      <Term>Web Experimentation</Term>
+      <Description>
+        {webEx && webEx.get ? webEx.get('visitor').visitorId : 'n/a'}
+      </Description>
+      <Term>Content Intelligence</Term>
+      <Description>{profile?.ids.contentIntelligence ?? 'n/a'}</Description>
+      <Term>Data Platform</Term>
+      <Description>{profile?.ids.dataPlatform ?? 'n/a'}</Description>
+      <Term>Current path</Term>
+      <Description>{currentPath}</Description>
+    </DefinitionList>
   )
 }
 

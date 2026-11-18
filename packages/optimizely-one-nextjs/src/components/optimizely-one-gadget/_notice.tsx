@@ -5,8 +5,15 @@ import {
   type FunctionComponent,
   type PropsWithChildren,
 } from 'react'
-import { ArrowPathIcon } from '@heroicons/react/20/solid'
+import { Alert, Box, Spinner } from '@optiaxiom/react'
 
+/**
+ * Message box used by the gadget panels to show loading, error and
+ * informational states.
+ *
+ * @param props   Optional bold prefix, message, loading state and children.
+ * @returns       The notice element.
+ */
 export const Notice: FunctionComponent<
   PropsWithChildren<{
     prefix?: string
@@ -14,19 +21,19 @@ export const Notice: FunctionComponent<
     isLoading?: boolean
   }>
 > = ({ prefix, message, isLoading = false, children }) => {
-  const PrefixComponent = prefix && (
-    <span className="oo:font-bold">{prefix}</span>
-  )
-  const Spinner = isLoading && (
-    <ArrowPathIcon className="oo:inline-block oo:h-4 oo:w-4 oo:ml-2 oo:animate-spin" />
-  )
   return (
-    <p className="oo:text-[12px] oo:m-2 oo:mt-3 oo:p-1 oo:md:p-2 oo:rounded-md oo:bg-amber-200 oo:border oo:border-amber-800 oo:text-amber-800">
-      {Spinner}
-      {PrefixComponent}
-      {message}
-      {children}
-    </p>
+    <Box my="8">
+      <Alert intent={isLoading ? 'information' : 'warning'}>
+        {isLoading && (
+          <Box mr="8" style={{ display: 'inline-block', verticalAlign: 'middle' }}>
+            <Spinner />
+          </Box>
+        )}
+        {prefix && <strong>{prefix} </strong>}
+        {message}
+        {children}
+      </Alert>
+    </Box>
   )
 }
 

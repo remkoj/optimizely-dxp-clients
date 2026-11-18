@@ -6,6 +6,9 @@ import type {
   ComponentTypeDictionaryEntry,
 } from './types.js'
 import { Suspense } from 'react'
+import { toSerializableContext } from '../context/shared.js'
+
+const clientBoundaries = new Map<ComponentType, ComponentType>()
 
 export const MERGE_SYMBOL = '/'
 
@@ -55,19 +58,20 @@ export class DefaultComponentFactory implements ComponentFactory {
     component: ComponentType,
     useSuspense: boolean = false,
     loader?: ComponentType,
-    variant: string = 'default'
+    variant: string = 'default',
+    isClient?: boolean
   ): void {
     const registryKey = this.processComponentTypeHandle(type, variant)
     if (this.dbg)
       console.log(`➕ [DefaultComponentFactory] Registering ${registryKey}`)
-    this.registry.set(registryKey, { type: registryKey, component, useSuspense, loader, variant })
+    this.registry.set(registryKey, { type: registryKey, component, useSuspense, loader, variant, isClient })
   }
 
   /**
    * @inheritDoc
    */
   public registerAll(components: ComponentTypeDictionary): void {
-    components.forEach(c => this.register(c.type, c.component, c.useSuspense, c.loader, c.variant))
+    components.forEach(c => this.register(c.type, c.component, c.useSuspense, c.loader, c.variant, c.isClient))
   }
 
   /**
@@ -94,10 +98,11 @@ export class DefaultComponentFactory implements ComponentFactory {
         )
       return undefined // The key is not registered in the factory
     }
-    if (entry.useSuspense != true) return entry.component // There's no suspense, so we're using the component directly
+    // Client Components cannot receive the (class based) context from a Server Component
+    const EntryComponent = entry.isClient ? createClientBoundary(entry.component) : entry.component
+    if (entry.useSuspense != true) return EntryComponent // There's no suspense, so we're using the component directly
 
     // We need to wrap the component in a Supense
-    const EntryComponent = entry.component
     const EntryLoader = entry.loader
     function Suspended(props: object) {
       return (
@@ -154,4 +159,31 @@ export class DefaultComponentFactory implements ComponentFactory {
     }
     throw new Error(`Invalid component type handle: ${typeof handle}`)
   }
+}
+
+/**
+ * Wrap a Client Component so it can be rendered by a Server Component with the
+ * regular props. The `ctx` and `editProps.ctx` props are replaced by their
+ * serializable form, as React does not allow class instances to cross the
+ * Server/Client boundary.
+ *
+ * @param     component   The Client Component to wrap
+ * @returns   The wrapped component
+ */
+function createClientBoundary(component: ComponentType): ComponentType {
+  const cached = clientBoundaries.get(component)
+  if (cached) return cached
+  const Target = component as React.ComponentType<Record<string, unknown>>
+  const ClientBoundary = (props: Record<string, unknown>) => {
+    const { ctx, editProps, ...rest } = props
+    const editPropsObj = editProps as Record<string, unknown> | undefined
+    return <Target
+      {...rest}
+      {...(ctx !== undefined ? { ctx: toSerializableContext(ctx) } : {})}
+      {...(editPropsObj ? { editProps: { ...editPropsObj, ...(editPropsObj.ctx !== undefined ? { ctx: toSerializableContext(editPropsObj.ctx) } : {}) } } : {})}
+    />
+  }
+  ClientBoundary.displayName = `ClientBoundary(${ (component as { displayName?: string }).displayName ?? 'Component' })`
+  clientBoundaries.set(component, ClientBoundary)
+  return ClientBoundary
 }

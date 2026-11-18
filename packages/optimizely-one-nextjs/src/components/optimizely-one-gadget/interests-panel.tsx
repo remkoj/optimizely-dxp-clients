@@ -1,10 +1,12 @@
 'use client'
 
 import { type FunctionComponent, type JSX } from 'react'
-import { TagIcon } from '@heroicons/react/20/solid'
+// import { TagIcon } from '@heroicons/react/20/solid'
+import { IconTag as TagIcon } from '@optiaxiom/icons'
 import useSWR from 'swr'
 import type { ProfileApiResponse as MeResponse } from '../../api/profile-api-service'
 import Notice from './_notice'
+import { ItemList, ListItem, PoweredBy } from './_ui'
 
 export type InterestsPanelProps = {
   servicePrefix?: string
@@ -36,27 +38,22 @@ export const InterestsPanel: FunctionComponent<InterestsPanelProps> = ({
 
   const contentTopics: JSX.Element[] = (profile?.contentTopics ?? []).map(
     (t) => (
-      <li className="oo:py-1" key={'topic-' + t}>
-        <TagIcon className="oo:inline-block oo:h-4 oo:w-4 oo:mr-2" />
+      <ListItem key={'topic-' + t} icon={<TagIcon size={16} />}>
         {t}
-      </li>
+      </ListItem>
     )
   )
   if (contentTopics.length == 0)
     contentTopics.push(
-      <li className="oo:py-1" key="no-topics">
+      <ListItem key="no-topics">
         <Notice>No topics inferred from behaviour</Notice>
-      </li>
+      </ListItem>
     )
 
   return (
     <>
-      <ul className="oo:grid oo:grid-cols-1 oo:divide-y oo:divide-slate-200">
-        {contentTopics}
-      </ul>
-      <p className="oo:text-[12px]">
-        Powered by: Optimizely Content Recommendations
-      </p>
+      <ItemList>{contentTopics}</ItemList>
+      <PoweredBy>Powered by: Optimizely Content Recommendations</PoweredBy>
       {isValidating && !isLoading && (
         <Notice isLoading> Refreshing interests</Notice>
       )}

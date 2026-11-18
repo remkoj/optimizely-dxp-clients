@@ -14,7 +14,8 @@ import EnvVars from "./env-vars"
  *
  * - `RuntimeEnv`: Node runtime environment (defaults to `'production'`)
  * - `OdpApiKey`: API key for Optimizely Data Platform
- * - `OdpService`: ODP service endpoint URL (defaults to `https://api.zaius.com/`)
+ * - `OdpService`: ODP endpoint from `OPTIMIZELY_DATAPLATFORM_ENDPOINT`
+ *   (defaults to `https://api.zaius.com/`; the misspelled legacy variable is a deprecated fallback)
  * - `OdpAudienceBatchSize`: Batch size for ODP audience queries (defaults to `25`)
  * - `HelperEnabled`: Enable/disable Optimizely One integration (defaults to `false`)
  * - `ContentRecsClient`: Content Recommendations client identifier
@@ -23,6 +24,13 @@ import EnvVars from "./env-vars"
  * - `ContentRecsHost`: Content Recommendations host (defaults to `"idio.co"`)
  * - `FrontendCookie`: Cookie name for visitor ID (defaults to `"visitorId"`)
  * - `WebExperimentationProject`: Project ID for Web Experimentation
+ * - `FeatureExperimentationSdkKey`: SDK key for Feature Experimentation decisions
+ * - `FeatureExperimentationProject`: Optional Feature Experimentation project ID
+ * - `FeatureExperimentationToken`: Optional server-side Feature Experimentation PAT
+ * - `FeatureExperimentationProxy`: Serve and cache the Feature Experimentation datafile through
+ *   the application (`OPTIMIZELY_FX_PROXY`, defaults to `false`)
+ * - `FeatureExperimentationWebhookSecret`: Optional secret (`OPTIMIZELY_FX_WEBHOOK_SECRET`) used to
+ *   verify the signature of the datafile webhook. Server-side only.
  * - `OptimizelyDebug`: Enable debug logging for Optimizely (defaults to `false`)
  *
  * @returns Configuration object with type `OptiOneConfig`.
@@ -52,7 +60,7 @@ export function readConfigFromEnv() {
   return {
     RuntimeEnv: readValue('NODE_ENV', 'production'),
     OdpApiKey: readValue(EnvVars.OdpApiKey),
-    OdpService: readValue(EnvVars.OdpService, "https://api.zaius.com/"),
+    OdpService: readValue(EnvVars.OdpService) ?? readValue(EnvVars.OdpServiceLegacy, "https://api.zaius.com/"),
     OdpAudienceBatchSize: readValueAsInt(EnvVars.OdpAudienceBatchSize, 25),
     HelperEnabled: readValueAsBoolean(EnvVars.HelperEnabled, false),
     ContentRecsClient: readValue(EnvVars.ContentRecsClient),
@@ -64,7 +72,9 @@ export function readConfigFromEnv() {
     OptimizelyDebug: readValueAsBoolean(EnvVars.OptimizelyDebug, false),
     FeatureExperimentationProject: readValue(EnvVars.FeatureExperimentationProject),
     FeatureExperimentationSdkKey: readValue(EnvVars.FeatureExperimentationSdkKey),
-    FeatureExperimentationToken: readValue(EnvVars.FeatureExperimentationPat)
+    FeatureExperimentationToken: readValue(EnvVars.FeatureExperimentationPat),
+    FeatureExperimentationProxy: readValueAsBoolean(EnvVars.FeatureExperimentationProxy, false),
+    FeatureExperimentationWebhookSecret: readValue(EnvVars.FeatureExperimentationWebhookSecret)
   }
 }
 
@@ -81,6 +91,7 @@ export function readConfigFromEnv() {
  * - `contentRecsClient`: Both `ContentRecsClient` AND `ContentRecsDelivery` must be set
  * - `contentRecsApi`: Both `ContentRecsClient` AND `ContentRecsDeliveryKey` must be set
  * - `webExperimentation`: `WebExperimentationProject` must be a string with >5 characters
+ * - `featureExperimentation`: `FeatureExperimentationSdkKey` must be a string with >5 characters
  *
  * @param config - Optional partial configuration object.
  *                 If not provided, configuration is read from environment variables.
@@ -89,6 +100,7 @@ export function readConfigFromEnv() {
  *          - `contentRecsClient: boolean`
  *          - `contentRecsApi: boolean`
  *          - `webExperimentation: boolean`
+ *          - `featureExperimentation: boolean`
  *
  * @example
  * ```tsx

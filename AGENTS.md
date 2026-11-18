@@ -5,7 +5,7 @@
 - Package manager: Yarn 4.18.0 (`packageManager` field is authoritative — do not use npm/pnpm)
 - Node: `>=24 <25` for the whole workspace (root `engines.node`; also pinned per-package in
   `optimizely-cms-cli`, `optimizely-graph-cli`, `optimizely-cms-nextjs`, `optimizely-one-nextjs`)
-- Versions: lockstep, currently `6.0.0-rc.2`
+- Versions: lockstep (all packages share one version; see the `version` field in the package manifests)
 - License: Apache-2.0
 
 ## Mandatory agent rules
@@ -105,7 +105,7 @@ Anti-circumvention:
 | `dependencies/` | Patched 3rd-party packages consumed via `resolutions` |
 | `scripts/` | `clean.mjs`, `licenses.mjs` |
 | `eslint.config.mjs` | Root ESLint flat config |
-| `tsconfig.json` | Root TS config (`composite`, `NodeNext`, `strict`) |
+| `tsconfig.json` | Root TS config (`composite`, `NodeNext`, `strict`, `types: ["node"]`, `noUncheckedSideEffectImports: false`) |
 | `docs/agents/` | Per-package agent docs (how to **work on** the packages) |
 
 Each package also contains an `AGENTS.md` at its root with consumer-focused usage docs (how to **use** the package in a project). These are published with the package and available in `node_modules/@remkoj/<name>/AGENTS.md`.
@@ -121,7 +121,7 @@ Each package also contains an `AGENTS.md` at its root with consumer-focused usag
 | `@remkoj/optimizely-graph-cli` | Rollup | ESM | No `clean`. `recompile` = `prepare`. | [→](docs/agents/optimizely-graph-cli.md) |
 | `@remkoj/optimizely-graph-client` | `tsc` | ESM | `src/admin-api/client/**` generated — do not hand-edit. | [→](docs/agents/optimizely-graph-client.md) |
 | `@remkoj/optimizely-graph-functions` | `tsc` | CommonJS | Requires patched `@graphql-codegen/visitor-plugin-common`. | [→](docs/agents/optimizely-graph-functions.md) |
-| `@remkoj/optimizely-one-nextjs` | `tsc` + Tailwind | ESM | Node `>=24`. Ships `dist/styles.css`. | [→](docs/agents/optimizely-one-nextjs.md) |
+| `@remkoj/optimizely-one-nextjs` | `tsc` | ESM | Node `>=24`. Gadget uses Axiom; no stylesheet shipped. | [→](docs/agents/optimizely-one-nextjs.md) |
 | `@remkoj/hey-api-wrapper` | `tsc` | CommonJS | Internal. | [→](docs/agents/hey-api-wrapper.md) |
 
 Cross-package deps: `workspace:<version>` in devDeps, exact published version in deps.
@@ -164,12 +164,16 @@ Orchestration: `yarn workspaces foreach -Apt --topological-dev`
 
 [`samples/basic-project/AGENTS.md`](samples/basic-project/AGENTS.md) — dev workflow, commands, credentials.
 
-Sample consumes packages via `resolutions` → `file:` links to `artefacts/*-dev.tgz`. After changing a package, rebuild and reinstall:
+Sample consumes packages via `resolutions` → `file:../../packages/<name>` (copied into the sample's `node_modules`). After changing a package, rebuild and reinstall:
 
 ```bash
-yarn artefacts:fast
+yarn prepare
 cd samples/basic-project && yarn install
 ```
+
+Do not use `portal:` (or symlinked) resolutions for the sample: the packages would then resolve their dependencies from the root workspace `node_modules`, giving two instances of `graphql` (`Cannot use GraphQLScalarType "Bool" from another module or realm`) and unpatched `@graphql-codegen/visitor-plugin-common` during code generation.
+
+The sample exercises the Feature Experimentation datafile proxy: `OPTIMIZELY_FX_PROXY=true` in its `.env.local` and the routes `src/app/api/fx/{datafile,webhook}/route.ts`. Its `yarn build` currently reports pre-existing TypeScript errors in generated `src/components/cms/**` components; to verify the proxy anyway, temporarily set `typescript.ignoreBuildErrors` in `next.config.ts` and run `yarn next build` (use `yarn`, which injects the credentials).
 
 CLI tools may only be executed from within the `samples/basic-project` scope.
 
@@ -190,6 +194,7 @@ yarn publish              # npm publish --access public per workspace, topologic
 - Respect each package's `type` (ESM vs CommonJS); root TS is `NodeNext`
 - After `yarn install` or `yarn upgrade`, re-apply the patched dep: `yarn opti-graph patches:apply`
 - Cross-package deps must use `workspace:` protocol; all package versions stay in sync
+- TypeScript 6: `types` defaults to `[]`, `strict` defaults to `true`, and `moduleResolution: node10`/`baseUrl` are deprecated (no `ignoreDeprecations` is used). Packages that don't extend the root tsconfig must set `types: ["node"]` (cms-api) or `strict` explicitly (cms-cli sets `strict: false`); graph-functions uses `Node16` module resolution (still emits CommonJS), one-nextjs uses `bundler`, and graph-cli uses relative imports only (no `baseUrl`)
 - Run `yarn lint` before completing any change
 
 <!-- @remkoj/optimizely-packages:start -->

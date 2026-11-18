@@ -18,7 +18,9 @@ Open [http://localhost:3000](http://localhost:3000) with your browser to see the
 
 You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
 
-The Optimizely One provider, page activator, and gadget are enabled only for the `/single` and `/multi` routing variants. They are mounted by those routes' layouts, so the sample's wrapper page does not render the gadget.
+The Optimizely One provider, page activator, and gadget are enabled only for the `/single` and `/multi` routing variants. Those layouts use the package's `OptimizelyOne` server component, so the sample's wrapper page does not render the integration.
+
+The root layout renders the Optimizely One tracking scripts; the provider and gadget remain limited to the two routing variants.
 
 This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
 

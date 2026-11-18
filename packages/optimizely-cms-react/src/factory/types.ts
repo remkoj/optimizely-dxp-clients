@@ -41,8 +41,9 @@ export type ComponentTypeDictionaryEntry = {
   variant?: string
 
   /**
-   * Optional marker to indicate that the component is a Client Side component, which
-   * may add attribute filtering in the future.
+   * Marker to indicate that the component is a Client Component. The
+   * `DefaultComponentFactory` wraps these, so that the `ctx` and `editProps.ctx`
+   * props are passed in their serializable form when rendered by a Server Component.
    */
   isClient?: boolean
 }
@@ -78,8 +79,9 @@ export interface ComponentFactory {
    * @param       useSuspense     If set to 'true' the registered component will be wrapped in <Suspense />
    * @param       loader          The component to use as "loading" state by the <Suspense />
    * @param       variant         The specific variant of the component (for example 'header', 'footer', 'menu')
+   * @param       isClient        If set to 'true' the component is a Client Component and will receive a serializable context
    */
-  register(type: ComponentTypeHandle, component: ComponentType, useSuspense?: boolean, loader?: ComponentType, variant?: string) : void
+  register(type: ComponentTypeHandle, component: ComponentType, useSuspense?: boolean, loader?: ComponentType, variant?: string, isClient?: boolean) : void
 
   /**
    * Register all components provided through the dictionary. When the 

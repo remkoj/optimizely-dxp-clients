@@ -8,6 +8,7 @@ import {
   createHtmlComponent,
 } from './components.js'
 import { type PropsWithContext } from '../../context/types.js'
+import { toComponentContext } from '../../context/shared.js'
 import { CmsEditable } from '../cms-editable/index.js'
 import type { ElementWithChildrenType } from '../type-utils.js'
 
@@ -96,7 +97,7 @@ const RichTextElement: FunctionComponent<
   if (Utils.isText(node)) {
     if (node.text.length == 0) return null
     const TextComponent = factory?.resolve(`RichText/text`) ?? DefaultTextNode
-    return <TextComponent node={node} ctx={ctx} />
+    return <TextComponent node={node} ctx={toComponentContext(TextComponent, ctx)} />
   }
 
   // Ignore incorrect data
@@ -139,7 +140,7 @@ const RichTextElement: FunctionComponent<
 
   // Return component
   return (
-    <Component node={node} ctx={ctx}>
+    <Component node={node} ctx={toComponentContext(Component, ctx)}>
       {childData && childData.length > 0 ? childData : undefined}
     </Component>
   )

@@ -13,6 +13,7 @@ import resolveComponent, {
   isComponentMissingComponent,
 } from './resolve-component.js'
 import resolveContentType from './resolve-content-type.js'
+import { toComponentContext } from '../../context/shared.js'
 
 export type * from './types.js'
 
@@ -94,8 +95,11 @@ export async function CmsContent<LocalesType = string>({
     noDataLoad
   )
 
+  // Client Components can only receive the serializable form of the context
+  const componentCtx = toComponentContext(Component, ctx)
+
   const editProps: ComponentCmsEditableProps = {
-    ctx,
+    ctx: componentCtx,
     currentContent: ctx.editableContent || undefined,
     cmsId: editorComponentId || contentLink?.key,
   }
@@ -108,7 +112,7 @@ export async function CmsContent<LocalesType = string>({
       inEditMode={ctx.inEditMode}
       layoutProps={layoutProps}
       editProps={editProps}
-      ctx={ctx}
+      ctx={componentCtx}
     >
       {children}
     </Component>

@@ -4,6 +4,7 @@
         "moduleResolution": "NodeNext",
         
         "esModuleInterop": true,
+        "strict": false,
         "allowSyntheticDefaultImports": true,
 
         "sourceMap": true,

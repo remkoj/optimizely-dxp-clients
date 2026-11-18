@@ -62,11 +62,11 @@
     "openapi-typescript-codegen": "^0.31.0",
     "prop-types": "^15.8.1",
     "scheduler": "^0.28.0",
-    "typescript": "^5.9.3"
+    "typescript": "^6.0.3"
   },
   "dependencies": {
     "crypto-js": "^4.2.0",
-    "graphql": "^16.14.2",
+    "graphql": "^16.15.0",
     "graphql-request": "^7.4.0",
     "uuid": "^14.0.3"
   },

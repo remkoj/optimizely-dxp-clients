@@ -1,3 +1,5 @@
+@layer base, optiaxiom;
+
 :root {
   --background: #ffffff;
   --foreground: #171717;
@@ -24,16 +26,14 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
-* {
-  box-sizing: border-box;
-  padding: 0;
-  margin: 0;
+@layer base {
+  a {
+    color: inherit;
+    text-decoration: none;
+  }
 }
 
-a {
-  color: inherit;
-  text-decoration: none;
-}
+@layer optiaxiom {}
 
 @media (prefers-color-scheme: dark) {
   html {

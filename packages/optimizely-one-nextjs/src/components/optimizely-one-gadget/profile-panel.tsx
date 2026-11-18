@@ -1,9 +1,12 @@
 'use client'
 import { type FunctionComponent } from 'react'
-import { UserCircleIcon } from '@heroicons/react/20/solid'
+//import { UserCircleIcon } from '@heroicons/react/20/solid'
+import { IconCircleUser as UserCircleIcon } from '@optiaxiom/icons'
 import useSWR from 'swr'
 import type { ProfileApiResponse as MeResponse } from '../../api/profile-api-service'
+import { Box, Flex } from '@optiaxiom/react'
 import Notice from './_notice'
+import { DefinitionList, Term, Description, PoweredBy } from './_ui'
 
 export type ProfilePanelProps = {
   servicePrefix?: string
@@ -36,52 +39,68 @@ export const ProfilePanel: FunctionComponent<ProfilePanelProps> = ({
 
   return (
     <>
-      {profile && !profile.profile && <Notice message="Anonymous session" />}
+      {profile && !profile.profile && (
+        <Notice
+          message={
+            profile.profileState === 'unknown' && profile.ids.dataPlatform !== 'n/a'
+              ? `No profile found for visitor ${profile.ids.dataPlatform}`
+              : 'Anonymous session'
+          }
+        />
+      )}
       {profile && profile.profile && (
-        <div className="oo:w-full oo:flex oo:flex-row oo:gap-4 oo:mb-2">
-          <div className="oo:flex-none oo:w-25">
+        <Flex flexDirection="row" gap="16" mb="8">
+          <Box style={{ flex: 'none', width: '4.5rem' }}>
             {profile.profile.image_url ? (
               <img
                 src={profile.profile.image_url}
                 alt={profile.profile.name ?? ''}
-                className="oo:w-full oo:aspect-square oo:rounded-[15px]"
+                style={{
+                  width: '100%',
+                  aspectRatio: '1 / 1',
+                  objectFit: 'cover',
+                  borderRadius: '0.75rem',
+                }}
               />
             ) : (
-              <UserCircleIcon className="oo:w-full oo:aspect-square oo:rounded-[15px]" />
+              <Box color="fg.tertiary">
+                <UserCircleIcon size="100%" />
+              </Box>
             )}
-          </div>
-          <div className="oo:grow">
-            <dl className="oo:grid oo:grid-cols-3 oo:gap-x-4 oo:gap-y-1">
-              <dt className="oo:font-bold">Name:</dt>
-              <dd className="oo:col-span-2">
+          </Box>
+          <Box style={{ flex: '1 1 0', minWidth: 0 }}>
+            <DefinitionList>
+              <Term>Name</Term>
+              <Description>
                 {profile.profile.name
                   ? profile.profile.name
-                  : `${profile.profile.first_name ?? ''} ${profile.profile.last_name}`.trim()}
-              </dd>
-              <dt className="oo:font-bold">City:</dt>
-              <dd className="oo:col-span-2">{profile.profile.city ?? ''}</dd>
-              <dt className="oo:font-bold">E-Mail:</dt>
-              <dd className="oo:col-span-2">{profile.profile.email ?? ''}</dd>
-              <dt className="oo:font-bold">Phone:</dt>
-              <dd className="oo:col-span-2">{profile.profile.phone ?? ''}</dd>
-              <dt className="oo:font-bold">Age:</dt>
-              <dd className="oo:col-span-2">
-                {profile.profile.observations.computed_age_years ?? 'n/a'}
-              </dd>
-              <dt className="oo:font-bold">Number of visits:</dt>
-              <dd className="oo:col-span-2">
-                {profile.profile.observations.session_count}
-              </dd>
-              <dt className="oo:font-bold">Likelyhood of still alive:</dt>
-              <dd className="oo:col-span-2">{`${(profile.profile.insights.probability_alive ?? 0) * 100}%`}</dd>
-            </dl>
-            <pre className="oo:hidden">
-              {JSON.stringify(profile.profile, undefined, 4)}
-            </pre>
-          </div>
-        </div>
+                  : `${profile.profile.first_name ?? ''} ${profile.profile.last_name ?? ''}`.trim()}
+              </Description>
+              <Term>City</Term>
+              <Description>{profile.profile.city ?? ''}</Description>
+              <Term>E-Mail</Term>
+              <Description>{profile.profile.email ?? ''}</Description>
+              <Term>Phone</Term>
+              <Description>{profile.profile.phone ?? ''}</Description>
+              <Term>Age</Term>
+              <Description>
+                {profile.profile.observations?.computed_age_years ?? 'n/a'}
+              </Description>
+              <Term>Number of visits</Term>
+              <Description>
+                {profile.profile.observations?.session_count ?? 'n/a'}
+              </Description>
+              <Term>Likelyhood of still alive</Term>
+              <Description>
+                {profile.profile.insights?.probability_alive != null
+                  ? `${profile.profile.insights.probability_alive * 100}%`
+                  : 'n/a'}
+              </Description>
+            </DefinitionList>
+          </Box>
+        </Flex>
       )}
-      <p className="oo:text-[12px]">Powered by: Optimizely Data Platform</p>
+      <PoweredBy>Powered by: Optimizely Data Platform</PoweredBy>
       {isLoading && <Notice isLoading message="Loading profile" />}
     </>
   )

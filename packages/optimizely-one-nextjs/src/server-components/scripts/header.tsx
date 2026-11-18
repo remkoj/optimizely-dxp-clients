@@ -3,6 +3,8 @@ import EnvTools from '../../utils/env'
 import EnvVars from '../../env-vars'
 import OdpScript from '../../products/data-platform/snippet'
 import ExpScript from '../../products/web-experimentation/snippet'
+import { readConfigFromEnv } from '../../config'
+import { getOptimizelyResourceHints } from '../../security'
 
 export type HeaderScriptsProps = {
   /**
@@ -22,6 +24,12 @@ export type HeaderScriptsProps = {
      * environment variable.
      */
   experimentationProjectId?: string
+  /** Content Recommendations client ID, matching the footer script override. */
+  contentRecsClient?: string
+  /** Content Recommendations delivery ID, matching the footer script override. */
+  contentRecsDelivery?: number
+  /** Content Recommendations host without the `s.` prefix. */
+  contentRecsDomain?: string
 
   /**
      * Allow (persisted using localStorage) overriding of the Web Experimentation
@@ -60,14 +68,30 @@ export default function ({
   dataPlatformTrackerId,
   experimentationProjectId,
   experimentationAllowOverride,
+  contentRecsClient,
+  contentRecsDelivery,
+  contentRecsDomain,
   useScriptProxy = false,
   apiPrefix = '/api/me'
 }: HeaderScriptsProps)
 {
   const odp_id = dataPlatformTrackerId || EnvTools.readValue(EnvVars.OdpApiKey)
   const exp_id = experimentationProjectId || EnvTools.readValue(EnvVars.WebExperimentationProject)
+  const crecs_client = contentRecsClient || EnvTools.readValue(EnvVars.ContentRecsClient)
+  const crecs_delivery = contentRecsDelivery || EnvTools.readValueAsInt(EnvVars.ContentRecsDelivery, 0)
+  const crecs_domain = contentRecsDomain || EnvTools.readValue(EnvVars.ContentRecsHost, 'idio.co')
   const useOptiOneHelper = experimentationAllowOverride == undefined ? EnvTools.readValueAsBoolean(EnvVars.HelperEnabled, false) : experimentationAllowOverride
+  const config = {
+    ...readConfigFromEnv(),
+    OdpApiKey: odp_id,
+    WebExperimentationProject: exp_id,
+    ContentRecsClient: crecs_client,
+    ContentRecsDelivery: crecs_delivery,
+    ContentRecsHost: crecs_domain
+  }
+  const resourceHints = getOptimizelyResourceHints(config, { webExperimentationUseProxy: useScriptProxy })
   return <>
+    {resourceHints.map(({ href, crossOrigin }) => <link key={href} rel="preconnect" href={href} crossOrigin={crossOrigin} />)}
     { odp_id && <OdpScript trackerId={ odp_id } /> }
     { exp_id && <ExpScript projectId={ exp_id } allowProjectOverride={ useOptiOneHelper } useProxy={ useScriptProxy } apiPrefix={ apiPrefix }/> }
   </>

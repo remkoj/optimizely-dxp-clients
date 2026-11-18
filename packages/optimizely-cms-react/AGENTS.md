@@ -169,3 +169,4 @@ import { isNonEmptyString, slugify } from '@remkoj/optimizely-cms-react/utils'
 - Always pass `ctx` down from layout to leaf components; components warn at runtime when `ctx` is missing.
 - `ContentLink` and `ContentLinkWithLocale` are re-exported from `@remkoj/optimizely-graph-client` (direct import preferred).
 - `RichTextComponentDictionary` must be registered on the factory before passing it to `ServerContext`.
+- Factory entries that are Client Components (for example wrapped with `next/dynamic`) must set `isClient: true`. `DefaultComponentFactory` then passes `ctx` and `editProps.ctx` in their serializable form (`ServerContext.toJSON()`), as React rejects class instances crossing the Server/Client boundary.

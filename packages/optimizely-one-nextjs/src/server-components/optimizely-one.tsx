@@ -1,10 +1,10 @@
 // This is a server only component
-import 'server-only';
+// import 'server-only';
 
 // Import global libararies and shared utilities
 import { PropsWithChildren } from "react";
 import { getEnabledProducts } from "../utils/products.js";
-import { type OptiOneConfig, readConfigFromEnv } from "../config.js";
+import { type OptiOneConfig, readConfigFromEnv, checkProductStatus } from "../config.js";
 
 // Import client-side components that need a server side data
 // to render correctly
@@ -15,6 +15,7 @@ import { OptimizelyOneProvider } from "../components/context.js";
 // server context aware.
 import { OptimizelyOneGadget } from './optimizely-one-gadget.js'
 import FeatureExperimentationProvider from '../products/feature-experimentation/provider.js';
+import { DEFAULT_PROXY_PATH, getDatafilePath, type FeatureExperimentationAttributes, type FeatureExperimentationAttributesResolver } from '../products/feature-experimentation/index.js';
 
 /**
  * Properties for the `OptimizelyOne` root component.
@@ -68,17 +69,6 @@ export type OptimizelyOneProps = PropsWithChildren<{
    * or testing without analytics.
    */
   disableTracking?: boolean
-
-  /**
-   * Disable the Optimizely One developer gadget.
-   *
-   * - `true`: gadget is not rendered.
-   * - `false` (default): gadget is rendered in the page.
-   *
-   * The gadget provides debugging tools and inspection capabilities.
-   * Recommended: hide in production with `disableGadget={!isDevelopment}`.
-   */
-  disableGadget?: boolean
 
   /**
    * Enable debug mode for detailed Optimizely One diagnostics.
@@ -147,6 +137,42 @@ export type OptimizelyOneProps = PropsWithChildren<{
    * ```
    */
   gadgetRefreshInterval?: number
+
+  /**
+   * Base path of the Feature Experimentation proxy endpoints.
+   *
+   * - Default: `'/api/fx'`
+   * - Only used when `OPTIMIZELY_FX_PROXY` is enabled: the browser then reads the datafile
+   *   from `<fxProxyPath>/datafile` instead of the Optimizely CDN.
+   * - Must include the `basePath` of the application, if there is one.
+   */
+  fxProxyPath?: string
+
+  /**
+   * Initial attributes of the visitor, to use for Feature Experimentation decisions in the
+   * browser. Must be serializable and must not depend on the request: reading `cookies()`
+   * or `headers()` here makes the layout dynamic. Use `fxResolveAttributes` for those.
+   */
+  fxAttributes?: FeatureExperimentationAttributes
+
+  /**
+   * The ODP real-time audiences (segments) of the visitor when fetched on the server
+   * (`getQualifiedSegments`), so the browser doesn't fetch them from ODP for its
+   * decisions. Visitor specific, so only usable in layouts that are dynamic already;
+   * without it the browser fetches the segments itself.
+   */
+  fxQualifiedSegments?: string[]
+
+  /**
+   * A Server Function (`'use server'`, which can use `cookies()` and `headers()`) or client
+   * function that determines more attributes of the visitor. It is executed asynchronously
+   * in the browser, once per visitor, and its result is merged into `fxAttributes`, which
+   * updates the decisions. This keeps the layout static while still using request context.
+   * Use the same function in server-side decisions to make both sides decide for the same visitor.
+   * Client functions cannot be passed from a Server Component; render
+   * `<ResolveFeatureExperimentationAttributes resolve={...} />` (client entry) for those.
+   */
+  fxResolveAttributes?: FeatureExperimentationAttributesResolver
 }>
 
 /**
@@ -164,8 +190,10 @@ export type OptimizelyOneProps = PropsWithChildren<{
  *
  * - If `disableAutoTracking` is `false` (default), automatic page view tracking
  *   is enabled via the `PageActivator` component.
- * - If `disableGadget` is `false` (default), the developer gadget is rendered
- *   in the DOM for debugging/inspection.
+ * - If the `OPTIMIZELY_ONE_HELPER` environment variable is true, the developer
+ *   gadget is included in the page; it stays hidden in the browser until an
+ *   Optimizely test cookie (`optly_<domain name>_test`) is present. Otherwise the
+ *   gadget is never included.
  * - The `debug` flag affects internal context and may influence child
  *   component logging behavior.
  * - All disabled flags default to `false`, enabling features by default.
@@ -178,8 +206,11 @@ export type OptimizelyOneProps = PropsWithChildren<{
  * @param props - Configuration properties for Optimizely One initialization.
  * @param props.disableAutoTracking - Set to `true` to prevent automatic page activation/tracking.
  * @param props.disableTracking - Set to `true` to disable all tracking to Optimizely.
- * @param props.disableGadget - Set to `true` to hide the developer gadget.
  * @param props.debug - Set to `true` to enable verbose debug logging.
+ * @param props.fxProxyPath - Base path of the Feature Experimentation proxy endpoints, defaults to `/api/fx`.
+ * @param props.fxAttributes - Initial attributes of the visitor for browser-side Feature Experimentation decisions.
+ * @param props.fxQualifiedSegments - ODP real-time audiences of the visitor, when already known on the server.
+ * @param props.fxResolveAttributes - Server Function that updates the attributes of the visitor asynchronously.
  * @param props.children - Nested React content to render within the Optimizely One context.
  * @returns A provider component that wraps children with Optimizely One context.
  *
@@ -216,7 +247,6 @@ export type OptimizelyOneProps = PropsWithChildren<{
  *       debug={isDevelopment}
  *       disableAutoTracking={false}
  *       disableTracking={false}
- *       disableGadget={!isDevelopment}
  *     >
  *       {children}
  *     </OptimizelyOne>
@@ -230,7 +260,6 @@ export type OptimizelyOneProps = PropsWithChildren<{
  * <OptimizelyOne
  *   disableTracking
  *   disableAutoTracking
- *   disableGadget
  *   debug={false}
  * >
  *   <App />
@@ -242,28 +271,35 @@ export function OptimizelyOne({
   apiPath,
   disableAutoTracking = false,
   disableTracking = false,
-  disableGadget = false,
   debug: requestedDebug,
   children,
-  gadgetRefreshInterval = 0
+  gadgetRefreshInterval = 0,
+  fxProxyPath = DEFAULT_PROXY_PATH,
+  fxAttributes,
+  fxQualifiedSegments,
+  fxResolveAttributes
 }: OptimizelyOneProps) {
   const config = partialConfig ? { ...readConfigFromEnv(), ...partialConfig } : readConfigFromEnv();
   const enabledProducts = getEnabledProducts(config);
   const fxSdkKey = config.FeatureExperimentationSdkKey;
   const frontendCookie = config.FrontendCookie;
   const debug = requestedDebug === undefined ? config.OptimizelyDebug ?? false : requestedDebug;
-  return <>
+  return (
     <OptimizelyOneProvider value={{ debug, disableAutotracking: disableAutoTracking, disableTracking }} enabledOptimizelyServices={ enabledProducts }>
-      {fxSdkKey ? 
-        <FeatureExperimentationProvider sdkKey={fxSdkKey} frontendCookie={frontendCookie} debug={debug}>
-          {!disableAutoTracking && <PageActivator />}
-          {children}
-        </FeatureExperimentationProvider> : 
+      {fxSdkKey ?
+        <FeatureExperimentationProvider sdkKey={fxSdkKey} frontendCookie={frontendCookie} debug={debug} datafileUrl={config.FeatureExperimentationProxy ? getDatafilePath(fxProxyPath) : undefined} odpEnabled={checkProductStatus(config).dataPlatform} attributes={fxAttributes} qualifiedSegments={fxQualifiedSegments} resolveAttributes={fxResolveAttributes}>
+          <>
+            {!disableAutoTracking && <PageActivator />}
+            {children}
+            {config.HelperEnabled && <OptimizelyOneGadget servicePrefix={apiPath} refreshInterval={gadgetRefreshInterval} />}
+          </>
+        </FeatureExperimentationProvider> :
         <>
           {!disableAutoTracking && <PageActivator />}
           {children}
-        </>}
-      <OptimizelyOneGadget show={ disableGadget ? false : undefined } servicePrefix={ apiPath } refreshInterval={ gadgetRefreshInterval } />
+          {config.HelperEnabled && <OptimizelyOneGadget servicePrefix={apiPath} refreshInterval={gadgetRefreshInterval} />}
+        </>
+      }
     </OptimizelyOneProvider>
-  </>
+  )
 }

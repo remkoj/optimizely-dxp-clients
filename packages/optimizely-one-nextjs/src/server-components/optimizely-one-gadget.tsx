@@ -2,37 +2,39 @@ import type { OptimizelyOneGadgetProps } from '../components/optimizely-one-gadg
 import getConfig, { checkProductStatus } from '../config.js'
 import dynamic from 'next/dynamic'
 
-import 'server-only'
-
 const OptimizelyOneClientGadget = dynamic(() => import('../components/optimizely-one-gadget/gadget.js'), { ssr: false, loading: () => null })
 
+/**
+ * Server wrapper for the client-side Optimizely One debug gadget.
+ *
+ * The client component is only included in the page when the
+ * `OPTIMIZELY_ONE_HELPER` environment variable is true. Once included, the
+ * gadget stays hidden in the browser until an Optimizely test cookie
+ * (`optly_<domain name>_test`) is present.
+ *
+ * @param props Gadget visibility and refresh configuration.
+ * @returns The configured gadget when the helper is enabled, otherwise `null`.
+ */
 export const OptimizelyOneGadget = ({
   refreshInterval = 0,
   servicePrefix = '/api/me',
-  show,
+  showFeatureExperimentation,
 }: OptimizelyOneGadgetProps) => {
   const optiOneConfig = getConfig()
-  const { HelperEnabled, OptimizelyDebug } = optiOneConfig
+  if (!optiOneConfig.HelperEnabled) return null
   const productStatus = checkProductStatus(optiOneConfig)
 
-  if (show || (show === undefined && HelperEnabled)) {
-    return (
-      <OptimizelyOneClientGadget
-        refreshInterval={refreshInterval}
-        servicePrefix={servicePrefix}
-        show={show}
-        showContentRecs={productStatus.contentRecsApi}
-        showDataPlatform={productStatus.dataPlatform}
-        showWebEx={productStatus.webExperimentation}
-      />
-    )
-  }
-
-  if (OptimizelyDebug)
-    console.log(
-      `🚀 [OptimizelyOne Gadget] Gadget disabled by ${show === undefined ? 'configuration' : 'parameter'}`
-    )
-  return null
+  return (
+    <OptimizelyOneClientGadget
+      refreshInterval={refreshInterval}
+      servicePrefix={servicePrefix}
+      showContentRecs={productStatus.contentRecsApi}
+      showDataPlatform={productStatus.dataPlatform}
+      showWebEx={productStatus.webExperimentation}
+      showFeatureExperimentation={showFeatureExperimentation ?? productStatus.featureExperimentation}
+      featureExperimentationProject={optiOneConfig.FeatureExperimentationProject}
+    />
+  )
 }
 
 export default OptimizelyOneGadget

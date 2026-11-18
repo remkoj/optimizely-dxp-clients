@@ -1,18 +1,30 @@
-import Script from 'next/script'
+import { InlineScript } from '../../components/inline-script.js'
 
+/**
+ * Configuration for the Content Recommendations tracking script.
+ */
 export type OptimizelyContentRecsProps = {
+  /** Content Recommendations client ID. */
   client: string
+  /** Content Recommendations delivery ID. */
   delivery: number
+  /** Content Recommendations domain, without the `s.` prefix. */
   domain?: string
 }
 
+/**
+ * Renders the Content Recommendations tracking snippet.
+ *
+ * @param props Content Recommendations client, delivery, and host settings.
+ * @returns The Content Recommendations inline script.
+ */
 export const OptimizelyContentRecsTrackingScript = ({
   client: client_id,
   delivery: delivery_id,
   domain = 'idio.co'
 }: OptimizelyContentRecsProps) => {
 
-  return <Script id='content-recs-script' strategy='beforeInteractive'>{`
+  return <InlineScript id='content-recs-script' html={`
     // Set client and delivery
     _iaq = [
         ['client', ${ JSON.stringify(client_id) }],
@@ -24,12 +36,11 @@ export const OptimizelyContentRecsTrackingScript = ({
         var ia=d.createElement(s);
         ia.async=1;
         ia.id='content-recs-snippet';
-        ia.src='//s.${ domain }/ia.js';
+        ia.src='https://s.${ domain }/ia.js';
         s=d.getElementById('content-recs-script');
         s.parentNode.insertBefore(ia,s)
     }(document,'script');
-`}
-  </Script>
+`} />
 }
 
 export default OptimizelyContentRecsTrackingScript

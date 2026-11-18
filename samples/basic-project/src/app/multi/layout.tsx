@@ -1,11 +1,7 @@
-import { OptimizelyOneProvider, OptimizelyOneGadget, PageActivator } from '@remkoj/optimizely-one-nextjs/client'
+import { OptimizelyOne } from '@remkoj/optimizely-one-nextjs/server'
 
 export default function MultiQueryLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <OptimizelyOneProvider>
-      <PageActivator />
-      {children}
-      <OptimizelyOneGadget />
-    </OptimizelyOneProvider>
+    <OptimizelyOne enableGadget={true}>{children}</OptimizelyOne>
   )
 }
