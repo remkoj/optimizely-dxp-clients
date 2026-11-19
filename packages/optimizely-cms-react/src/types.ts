@@ -130,7 +130,7 @@ export type GetDataFragment<T> = () => [string, TypedDocumentNode<T, never> | Do
 export type WithGqlFragment<BaseComponent, DataType> = BaseComponent & {
   getDataFragment: GetDataFragment<DataType>
   validateFragment?: (data: unknown) => data is DataType
-}
+    }
 
 /**
  * Extends a base component type with the `getDataQuery` static method
@@ -193,9 +193,9 @@ export type CmsComponentWithOptionalQuery<T = DocumentNode, L extends Record<str
 export type CmsComponent<T = DocumentNode, L extends Record<string, unknown> = Record<string, unknown>> =
   T extends TypedDocumentNode<infer R, unknown> ? CmsComponentWithQuery<R, L> :
     T extends DocumentNode ? CmsComponentWithQuery<{ [key: string]: unknown }, L> :
-      T extends GraphQLFragmentBase ? CmsComponentWithFragment<T, L> :
-        T extends GraphQLQueryBase ? CmsComponentWithQuery<T, L> :
-          CmsComponentWithOptionalQuery<T, L>
+    T extends GraphQLFragmentBase ? CmsComponentWithFragment<T, L> :
+    T extends GraphQLQueryBase ? CmsComponentWithQuery<T, L> :
+    CmsComponentWithOptionalQuery<T, L>
 
 /**
  * A generic Optimizely CMS Component used to render a layout node from an experience, which cannot

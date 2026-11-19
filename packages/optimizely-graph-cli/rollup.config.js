@@ -31,7 +31,8 @@ export default {
   external: getExternals(),
   plugins: [
     typescript({
-      outDir: "./bin"
+      outDir: "./bin",
+      outputToFilesystem: true
     }),
     json({
       preferConst: true

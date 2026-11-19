@@ -116,7 +116,7 @@ export type EditViewOptions<LocaleType = string> = {
    * has been received from the CMS and the instruction to Next.JS to actually
    * refresh the page.
    */
-  refreshTimeout?: number | false
+    refreshTimeout?: number | false
 }
 
 type MayBe<T> = T extends Array<infer R> ? Array<R | null> | null : T | null
