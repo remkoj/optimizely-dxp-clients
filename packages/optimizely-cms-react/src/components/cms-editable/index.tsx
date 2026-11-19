@@ -117,10 +117,10 @@ export type CmsEditableProps<FT extends ElementType> = PropsWithChildren<
   >
 >
 
-export type CmsEditableComponent = <CT extends ElementType>(
+export type CmsEditableComponent = <CT extends ElementType = 'div'>(
   props: CmsEditableProps<CT>
 ) => ReactNode
-export type CmsEditableBaseComponent = <CT extends ElementType>(
+export type CmsEditableBaseComponent = <CT extends ElementType = 'div'>(
   props: PropsWithContext<CmsEditableProps<CT>>
 ) => ReactNode
 

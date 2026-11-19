@@ -142,7 +142,7 @@ export const OptimizelyGraphPreset: IOptimizelyGraphPreset = {
             useTypeImports: true,
             importOperationTypesFrom: 'Schema',
             rawRequest: options.presetConfig.recursion ? true : undefined,
-            documentMode: options.presetConfig.recursion ? 'string' : options.config.documentMode,
+            documentMode: options.presetConfig.recursion ? 'plainString' : options.config.documentMode,
             // experimentalAddDocumentNodeType: options.presetConfig.recursion ? true : undefined,
             rawString: options.presetConfig.recursion ? true : options.config.documentMode === 'string',
           },

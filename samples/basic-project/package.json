@@ -27,12 +27,12 @@
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3.3.7",
-    "@graphql-codegen/cli": "7.4.6",
+    "@graphql-codegen/cli": "8.0.0",
     "@next/env": "^16.4.6",
     "@remkoj/optimizely-cms-cli": "6.0.0",
     "@remkoj/optimizely-graph-cli": "6.0.0",
     "@remkoj/optimizely-graph-functions": "6.0.0",
-    "@stylistic/eslint-plugin": "^5.10.0",
+    "@stylistic/eslint-plugin": "^6.0.1",
     "@swc-contrib/plugin-graphql-codegen-client-preset": "^0.37.2",
     "@types/node": "^24.19.2",
     "@types/react": "^19.3.0",
@@ -43,7 +43,7 @@
     "typescript": "6.0.3"
   },
   "resolutions": {
-    "@graphql-codegen/visitor-plugin-common": "file:../../dependencies/graphql-codegen-visitor-plugin-common-v7.2.4-patched.tgz",
+    "@graphql-codegen/visitor-plugin-common": "file:../../dependencies/graphql-codegen-visitor-plugin-common-v8.0.1-patched.tgz",
     "@remkoj/optimizely-cms-api": "file:../../packages/optimizely-cms-api",
     "@remkoj/optimizely-cms-react": "file:../../packages/optimizely-cms-react",
     "@remkoj/optimizely-cms-nextjs": "file:../../packages/optimizely-cms-nextjs",

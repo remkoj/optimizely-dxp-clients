@@ -1528,6 +1528,14 @@ export type ManifestImportMessage = {
      * The identifier of the resource that was the reason for this message to be created.
      */
     resource?: null | string;
+    /**
+     * A reference to the field in the submitted manifest where the error was detected.
+     */
+    field?: null | string;
+    /**
+     * The problem code for the specific error that occurred.
+     */
+    code?: null | string;
 };
 
 /**

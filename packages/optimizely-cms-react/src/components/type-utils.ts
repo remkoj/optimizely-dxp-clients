@@ -6,7 +6,8 @@ import type { PropsWithChildren, JSX } from "react"
  * representing a HTML Element (e.g. "div", "a", etc...), this value can be used
  * as first argument of React.createElement()
  */
-export type ElementType = React.ComponentType | React.ExoticComponent | (keyof JSX.IntrinsicElements)
+// eslint-disable-next-line @typescript-eslint/no-explicit-any -- JSX element constructors are typed with any; stricter types break component props inference
+export type ElementType = React.ComponentType<any> | React.ExoticComponent<any> | (keyof JSX.IntrinsicElements)
 /**
  * Define an element as a React Component, React ExoticComponent or string name
  * representing a HTML Element (e.g. "div", "a", etc...), this value can be used
@@ -19,7 +20,7 @@ export type ElementWithChildrenType = React.ComponentType<PropsWithChildren> | R
 /**
  * The properties type of an ElementType
  */
-export type ElementProps<T extends ElementType> = T extends keyof JSX.IntrinsicElements ? React.HTMLProps<JSX.IntrinsicElements[T]> : React.ComponentProps<T>
+export type ElementProps<T extends ElementType> = T extends keyof JSX.IntrinsicElements ? React.ComponentPropsWithoutRef<T> : React.ComponentProps<T>
 
 /**
  * Tests if K is a property of T - if so: it is the type of
