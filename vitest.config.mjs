@@ -6,7 +6,8 @@ import { defineConfig } from 'vitest/config'
 const testedPackages = [
   'optimizely-one-nextjs',
   'optimizely-cms-nextjs',
-  'optimizely-graph-cli'
+  'optimizely-graph-cli',
+  'optimizely-cms-api'
 ]
 
 export default defineConfig({
