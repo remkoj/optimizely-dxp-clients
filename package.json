@@ -20,6 +20,8 @@
     "globals": "^17.14.0",
     "typescript": "^6.0.3",
     "typescript-eslint": "^8.73.0",
+    "vite": "^8.3.8",
+    "vitest": "^5.1.1",
     "yaml": "^2.9.1"
   },
   "packageManager": "yarn@4.18.1",
@@ -36,6 +38,8 @@
     "clean": "yarn node ./scripts/clean.mjs",
     "lint": "eslint",
     "lint:fix": "eslint --fix",
+    "test": "vitest run",
+    "test:watch": "vitest",
     "generate": "npx -y update-browserslist-db && yarn workspaces foreach -Apt --topological-dev --exclude optimizely-dxp-clients run generate",
     "prepare": "yarn workspaces foreach -Apt --topological-dev --exclude optimizely-dxp-clients run prepare",
     "recompile": "yarn workspaces foreach -Apt --topological-dev --exclude optimizely-dxp-clients run recompile",
