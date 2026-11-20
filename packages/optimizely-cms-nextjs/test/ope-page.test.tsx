@@ -52,11 +52,14 @@ describe('createEditPageComponent', () => {
   })
 
   it('renders the debug content link of the loaded content', async () => {
+    const log = vi.spyOn(console, 'log').mockImplementation(() => undefined)
     const page = createPage(true)
     const output = await page({ params: Promise.resolve({}), searchParams: Promise.resolve({}) } as never)
     const text = collectText(output).join('')
     expect(text).toContain('ContentItem:')
     expect(text).not.toContain('Invalid content link')
+    expect(log).toHaveBeenCalledWith(expect.stringContaining('[OnPageEdit] Requested content:'), expect.any(String))
+    expect(log).toHaveBeenCalledWith(expect.stringContaining('[OnPageEdit] Identified content:'), expect.any(String))
   })
 
   it('does not render the debug content link when not debugging', async () => {
