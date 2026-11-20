@@ -55,6 +55,7 @@ try {
 
   process.stdout.write("➡ Building dependency graph\n")
   const graph = buildGraph(lockData, mainPkgInfo.resolutions)
+  await applyPackageExtensions(graph, readPackageExtensions())
   const workspaces = readWorkspaces(graph)
 
   // Dependencies that are installed for runtime use. Anything that can be reached
@@ -452,9 +453,101 @@ function readWorkspaces(graph)
       }
       return { node: dependencyNode, dev }
     }).filter(x => x && x.node.source != 'workspace')
-      .sort((a, b) => a.node.name.localeCompare(b.node.name) || a.node.version.localeCompare(b.node.version))
+      .sort((a, b) => a.node.name.localeCompare(b.node.name) || String(a.node.version).localeCompare(String(b.node.version)))
     return { name: pkgInfo.name ?? node.name, version: pkgInfo.version, description: formatDescription(pkgInfo.description), dependencies, isRoot: location == '.' }
   }).sort((a, b) => Number(a.isRoot) - Number(b.isRoot) || a.name.localeCompare(b.name))
+}
+
+/**
+ * Find the package a dependency descriptor resolves to
+ *
+ * @param {ReturnType<typeof buildGraph>} graph
+ * @param {string} descriptor   The descriptor (`name@range`). A range without protocol is also
+ *      looked up as `npm:` range, as descriptors added by `packageExtensions` are not always normalized.
+ * @returns {any}   The package, `undefined` when the descriptor is not in the lockfile
+ */
+function findDescriptor(graph, descriptor)
+{
+  const separator = descriptor.indexOf('@', 1)
+  const name = descriptor.substring(0, separator)
+  const range = descriptor.substring(separator + 1)
+  return graph.byDescriptor.get(descriptor)
+    ?? (range.includes(':') ? undefined : graph.byDescriptor.get(`${ name }@npm:${ range }`))
+    ?? graph.overrides.get(name)
+}
+
+/**
+ * Read the `packageExtensions` from the Yarn configuration
+ *
+ * @param {string} [file]   The Yarn configuration file
+ * @returns {Record<string, any>}   The package extensions by `name@range`, empty when there are none
+ *      or when the configuration cannot be read
+ */
+function readPackageExtensions(file = '.yarnrc.yml')
+{
+  try {
+    if (!fs.existsSync(file))
+      return {}
+    const extensions = YAML.parse(fs.readFileSync(file, { encoding: 'utf-8' }))?.packageExtensions
+    return extensions && typeof(extensions) == 'object' ? extensions : {}
+  } catch (e) {
+    process.stdout.write(`⚠ Unable to read the packageExtensions from ${ file }: ${ e.message }\n`)
+    return {}
+  }
+}
+
+/**
+ * Add the dependencies that Yarn `packageExtensions` add to third-party packages to the graph. Yarn
+ * applies these when installing and does not store them in the `dependencies` of the lockfile entry,
+ * only the descriptors of the added dependencies are in the lockfile. Peer dependencies (and their
+ * meta data) are not followed by the graph, so only `dependencies` and `optionalDependencies` are applied.
+ * Extensions that cannot be applied are reported and skipped.
+ *
+ * @param {ReturnType<typeof buildGraph>} graph    The graph, which is updated
+ * @param {Record<string, any>} extensions  The package extensions by `name@range`
+ * @returns {Promise<void>}
+ */
+async function applyPackageExtensions(graph, extensions)
+{
+  const entries = Object.entries(extensions)
+  if (entries.length == 0)
+    return
+  /** @type {((version: string, range: string) => boolean) | undefined} */
+  let satisfies
+  try {
+    satisfies = (await import('semver')).default.satisfies
+  } catch {
+    satisfies = undefined
+  }
+  entries.forEach(([key, extension]) => {
+    const separator = key.indexOf('@', 1)
+    const name = separator > 0 ? key.substring(0, separator) : key
+    const range = (separator > 0 ? key.substring(separator + 1) : '*').replace(/^npm:/, '')
+    const added = Object.entries({ ...extension?.optionalDependencies, ...extension?.dependencies }).map(([dependency, dependencyRange]) => {
+      const normalized = String(dependencyRange).includes(':') ? String(dependencyRange) : `npm:${ dependencyRange }`
+      return `${ dependency }@${ normalized }`
+    })
+    const matches = [...graph.nodes.values()].filter(node => {
+      if (node.name != name || node.source != 'npm' || !node.version)
+        return false
+      if (range == '*' || range == '')
+        return true
+      if (satisfies)
+        return satisfies(node.version, range)
+      return node.version == range
+    })
+    if (matches.length == 0) {
+      process.stdout.write(`⚠ The packageExtension ${ key } does not match a package in the lockfile\n`)
+      return
+    }
+    added.forEach(descriptor => {
+      if (!findDescriptor(graph, descriptor))
+        process.stdout.write(`⚠ The packageExtension ${ key } adds ${ descriptor }, which is not in the lockfile\n`)
+    })
+    matches.forEach(node => {
+      added.filter(descriptor => !node.dependencies.includes(descriptor)).forEach(descriptor => node.dependencies.push(descriptor))
+    })
+  })
 }
 
 /**
@@ -479,7 +572,7 @@ function reachable(graph, roots)
       continue
     queue.push(...(graph.twins.get(node) ?? []))
     node.dependencies.forEach(descriptor => {
-      const dependencyNode = graph.byDescriptor.get(descriptor) ?? graph.overrides.get(parseResolution(descriptor).name)
+      const dependencyNode = findDescriptor(graph, descriptor)
       if (dependencyNode)
         queue.push(dependencyNode)
     })
