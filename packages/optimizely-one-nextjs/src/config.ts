@@ -1,5 +1,5 @@
-import { readValue, readValueAsBoolean, readValueAsInt } from "./utils/env"
-import EnvVars from "./env-vars"
+import { readValue, readValueAsBoolean, readValueAsInt } from "./utils/env.js"
+import EnvVars from "./env-vars.js"
 
 /**
  * Load Optimizely One configuration from environment variables.

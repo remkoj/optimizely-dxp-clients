@@ -226,8 +226,8 @@ has `OPTIMIZELY_FX_PROXY=true` and the routes in `src/app/api/fx/`; after
   scripts and API origins. Keep Content Recommendations host overrides in sync
   between the header and footer script components.
 - The `./security` subpath exports `getSecurityPolicySources`,
-  `buildContentSecurityPolicy`, `buildOptimizelySecurityHeaders`, and
-  `getOptimizelyResourceHints`. These derive product origins and CSP directives
+  `buildContentSecurityPolicy`, `buildOptimizelySecurityHeaders`,
+  `applyDynamicSecurityHeaders`, and `getOptimizelyResourceHints`. These derive product origins and CSP directives
   from configuration; the header builder adds
   `Cross-Origin-Opener-Policy: same-origin`.
 - `SecurityPolicySources` covers `script-src`, `connect-src`, `img-src`,
@@ -239,6 +239,29 @@ has `OPTIMIZELY_FX_PROXY=true` and the routes in `src/app/api/fx/`; after
   them. All Web Experimentation sources are omitted without a configured
   Web Experimentation project, regardless of `webExVeActive`. Hosts must pass their own base sources (`'self'`,
   `'unsafe-inline'`, `data:`) for the directives that get emitted.
+- Recommended wiring: put the policy that is the same for every request in
+  `next.config.ts` `headers()` (the `./security` entry point loads in plain Node
+  ESM there) and only request-dependent policy in `proxy.ts`. Keep the host's
+  base sources in one shared module (e.g. `src/security.ts` exporting
+  `baseSources(isDevelopment)`, with `'unsafe-eval'` in `script-src` and
+  `ws:`/`wss:` in `connect-src` for Next.js HMR in development only) and use it in
+  both files. `next.config.ts` calls
+  `buildOptimizelySecurityHeaders(baseSources(isDev), { webExVeActive: false })`
+  so the visual editor (VE) sources are not served to everybody.
+- `applyDynamicSecurityHeaders(headers, base, { webExVeActive?, extra?, config? })`
+  (`./security`) is the proxy-side helper. A proxy cannot read the CSP set by
+  `next.config` `headers()`, and a CSP set in the proxy replaces the static one on
+  the matched routes, so the helper builds the complete policy from the same
+  `base` plus the product sources, and sets `Content-Security-Policy` and
+  `Cross-Origin-Opener-Policy` on `headers` (typically `response.headers`).
+  `webExVeActive` overrides the config for the request (`false` omits the VE
+  sources, otherwise included); `extra` adds request-dependent sources. The
+  package does not detect the VE: the host supplies the check, only calls the
+  helper for matching requests, and the proxy matcher must cover every route the
+  VE can open (real implementations: all pages except `/api`, `/_next` and files
+  with an extension, e.g. `'/((?!api(?:/|$)|_next(?:/|$)|.*\\..*).*)'`; the
+  sample's `/single` and `/multi` matcher is intentionally narrow). The inline snippets carry no nonce: don't use a nonce-only
+  `script-src`.
 - Next.js development HMR may additionally require `ws:`/`wss:` in the host
   application's `connect-src`; those development sources are not added to
   production policy output.

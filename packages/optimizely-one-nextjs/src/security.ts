@@ -228,3 +228,46 @@ export function buildOptimizelySecurityHeaders(
     'Cross-Origin-Opener-Policy': 'same-origin'
   }
 }
+
+/**
+ * Options for applying request-dependent security headers.
+ */
+export type DynamicSecurityHeadersOptions = {
+  /**
+   * Include the Web Experimentation visual editor (VE) sources for this request. Overrides
+   * `config.webExVeActive`; `undefined`, `null` and `true` include the VE sources, `false` omits them.
+   */
+  webExVeActive?: boolean | null
+  /** Additional request-dependent sources, merged with `base`. */
+  extra?: Partial<SecurityPolicySources>
+  /** Optional partial configuration; omitted values use environment defaults. */
+  config?: SecurityPolicyConfig
+}
+
+/**
+ * Sets the complete security headers for the current request, for use in a Next.js proxy.
+ *
+ * A proxy cannot read the headers set by `headers()` in `next.config`, and a
+ * Content-Security-Policy set here replaces that static one. Pass the same
+ * `base` sources that `next.config` uses, so the policy only gains the sources
+ * that depend on the request.
+ *
+ * @param headers The response headers to update, typically `response.headers`; modified in place.
+ * @param base The host's base sources, identical to those used for the static policy.
+ * @param options Request-dependent options: `webExVeActive`, additional `extra` sources and `config`.
+ * @returns The updated headers.
+ */
+export function applyDynamicSecurityHeaders(
+  headers: Headers,
+  base: Partial<SecurityPolicySources>,
+  options: DynamicSecurityHeadersOptions = {}
+): Headers {
+  const { webExVeActive, extra = {}, config } = options
+  const merged: Partial<SecurityPolicySources> = {}
+  for (const directive of new Set([...Object.keys(base), ...Object.keys(extra)]) as Set<keyof SecurityPolicySources>)
+    merged[directive] = [...(base[directive] ?? []), ...(extra[directive] ?? [])]
+  const policyConfig = webExVeActive === undefined ? config : { ...config, webExVeActive }
+  for (const [name, value] of Object.entries(buildOptimizelySecurityHeaders(merged, policyConfig)))
+    headers.set(name, value)
+  return headers
+}

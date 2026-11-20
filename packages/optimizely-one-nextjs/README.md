@@ -254,22 +254,111 @@ overridden through `Scripts.Footer` props, pass the same values to
 
 The `@remkoj/optimizely-one-nextjs/security` entry point exposes
 `getSecurityPolicySources`, `buildContentSecurityPolicy`, and
-`buildOptimizelySecurityHeaders`. The helpers derive external sources from
-enabled snippet configuration and merge application-owned sources:
+`buildOptimizelySecurityHeaders`, plus `applyDynamicSecurityHeaders` for the
+proxy. The helpers derive external sources from enabled snippet configuration
+and merge application-owned sources.
+
+**Recommended setup:** put the policy that is the same for every request in
+`next.config.ts` and apply only request-dependent policy in `proxy.ts`. The two
+files must build on the same base sources, so keep them in one shared module.
+The entry point can be loaded from `next.config.ts` (plain Node ESM) and reads
+the product configuration from the environment.
+
+1. Define the host's base sources once. Next.js needs inline scripts, and
+   development also needs `'unsafe-eval'` and websockets for HMR; add those in
+   development only, the helpers never add them.
 
 ```typescript
-import { buildOptimizelySecurityHeaders } from '@remkoj/optimizely-one-nextjs/security'
+// src/security.ts
+import type { SecurityPolicySources } from '@remkoj/optimizely-one-nextjs/security'
 
-const optimizelyHeaders = buildOptimizelySecurityHeaders({
-  'script-src': ["'self'"],
-  'connect-src': ["'self'"],
-  'img-src': ["'self'", 'data:'],
-  'frame-src': ["'self'"],
-  'style-src': ["'self'", "'unsafe-inline'"],
-  'font-src': ["'self'", 'data:'],
-  'worker-src': ["'self'"]
-})
+export function baseSources(isDevelopment: boolean): Partial<SecurityPolicySources> {
+  return {
+    'script-src': ["'self'", "'unsafe-inline'", ...(isDevelopment ? ["'unsafe-eval'"] : [])],
+    'connect-src': ["'self'", ...(isDevelopment ? ['ws:', 'wss:'] : [])],
+    'img-src': ["'self'", 'data:'],
+    'frame-src': ["'self'"],
+    'style-src': ["'self'", "'unsafe-inline'"],
+    'font-src': ["'self'", 'data:'],
+    'worker-src': ["'self'"]
+  }
+}
 ```
+
+2. Apply the static policy in `next.config.ts`. Passing
+   `webExVeActive: false` leaves the Web Experimentation visual editor (VE)
+   sources out of the policy served to everybody else (omit it to include them
+   for every request and skip step 3):
+
+```typescript
+// next.config.ts
+import type { NextConfig } from 'next'
+import { buildOptimizelySecurityHeaders } from '@remkoj/optimizely-one-nextjs/security'
+import { baseSources } from './src/security'
+
+const isDevelopment = process.env.NODE_ENV === 'development'
+const securityHeaders = buildOptimizelySecurityHeaders(baseSources(isDevelopment), { webExVeActive: false })
+
+const nextConfig: NextConfig = {
+  async headers() {
+    return [{
+      source: '/:path*',
+      headers: Object.entries(securityHeaders).map(([key, value]) => ({ key, value }))
+    }]
+  }
+}
+
+export default nextConfig
+```
+
+3. Add the request-dependent sources in `proxy.ts` with
+   `applyDynamicSecurityHeaders(headers, base, options)`. A proxy cannot read
+   the headers set by `headers()` in `next.config.ts`, and a
+   `Content-Security-Policy` set in the proxy replaces the static one on the
+   routes the proxy matches. The helper therefore builds the complete policy from
+   the same `base` and sets `Content-Security-Policy` and
+   `Cross-Origin-Opener-Policy` on the headers you pass (typically
+   `response.headers`). `options.webExVeActive` overrides the configuration for
+   this request (`false` omits the VE sources, anything else includes them),
+   `options.extra` adds further request-dependent sources and `options.config`
+   passes a partial configuration. The package does not detect the VE: the host
+   supplies that check, and the proxy matcher must cover every route the VE can
+   open. Only call the helper for the requests that need it; all other requests
+   keep the static policy.
+
+```typescript
+// proxy.ts
+import { withOptimizelyOne } from '@remkoj/optimizely-one-nextjs/proxy'
+import { applyDynamicSecurityHeaders } from '@remkoj/optimizely-one-nextjs/security'
+import { NextResponse, type NextProxy, type NextRequest } from 'next/server'
+import { baseSources } from './src/security'
+
+// The host implements this check, e.g. on a query parameter or cookie it controls
+declare function isVisualEditorActive(request: NextRequest): boolean
+
+const baseProxy: NextProxy = (request) => {
+  const response = NextResponse.next()
+  if (isVisualEditorActive(request))
+    applyDynamicSecurityHeaders(response.headers, baseSources(process.env.NODE_ENV === 'development'), { webExVeActive: true })
+  return response
+}
+
+export const proxy = withOptimizelyOne(baseProxy)
+
+export const config = {
+  // Every page the visual editor can open
+  matcher: ['/((?!api(?:/|$)|_next(?:/|$)|.*\\..*).*)']
+}
+```
+
+Real implementations should use the widened matcher shown above (all pages except
+`/api`, `/_next` and files with an extension); the sample site deliberately uses a
+narrower one. The request check can be forged by anyone, so a request-based check only
+widens the policy with the Optimizely hosts for that request. Responses that
+differ per request must not be shared-cached without a matching `Vary`.
+
+The inline snippets rendered by this package carry no nonce, so a nonce-only
+`script-src` blocks them; keep `'unsafe-inline'` (a nonce makes browsers ignore it).
 
 The returned headers include `Content-Security-Policy` and the recommended
 `Cross-Origin-Opener-Policy: same-origin`. The helper manages the `script-src`,
@@ -287,9 +376,10 @@ without a Web Experimentation project no Web Experimentation sources are
 emitted regardless of this option. A directive that is emitted replaces the browser's
 `default-src` fallback, so pass the host's own base sources (such as `'self'`
 and `'unsafe-inline'`) for `style-src`, `font-src` and `worker-src` as in the
-example. Retain the rest of the host application's policy. Next.js
-development may also require `ws:`/`wss:` in the host's `connect-src` for HMR;
-those development sources are not added to production policy output.
+examples above. Retain the rest of the host application's policy. Next.js
+development requires `'unsafe-eval'` in `script-src` and `ws:`/`wss:` in
+`connect-src` for HMR; add them in development only, as the helpers do not add
+HMR sources to the policy output.
 
 ## 3. Usage
 When leveraging the components and structure from the installation, everything should work immediately.
