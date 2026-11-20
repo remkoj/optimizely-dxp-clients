@@ -1,5 +1,6 @@
 import { getArgsConfig, getFrontendURL } from "../config.js";
 import type { CliModule } from '../types.js';
+import { maskSecret } from '../utils/index.js'
 import createAdminApi, { isApiError } from '@remkoj/optimizely-graph-client/admin'
 
 type PublishToVercelProps = { path: string, token_id: string, publish_token: string }
@@ -102,7 +103,7 @@ export const publishToVercelModule: CliModule<PublishToVercelProps> = {
     const defaultToken = process.env.FRONTEND_PUBLISH_TOKEN || undefined
     const hasDefaultToken = typeof (defaultToken) == 'string' && defaultToken.length > 0
     args.positional('path', { type: "string", describe: "The frontend route to invoke to publish", default: "/api/content/publish", demandOption: false })
-    args.option("publish_token", { alias: "pt", description: "Publishing token", string: true, type: "string", demandOption: !hasDefaultToken, default: defaultToken })
+    args.option("publish_token", { alias: "pt", description: "Publishing token", string: true, type: "string", demandOption: !hasDefaultToken, default: defaultToken, defaultDescription: maskSecret(defaultToken) })
     args.option("token_id", { alias: "ti", description: "If set, removes this webhook only", string: true, type: "string", demandOption: false, default: undefined })
     return args
   }

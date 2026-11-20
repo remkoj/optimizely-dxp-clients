@@ -1,5 +1,6 @@
 import { getArgsConfig, getFrontendURL } from "../config.js";
 import type { CliModule } from '../types.js';
+import { maskSecret } from '../utils/index.js'
 import createAdminApi, { isApiError } from '@remkoj/optimizely-graph-client/admin'
 import { readEnvironmentVariables as getEnvConfig } from "@remkoj/optimizely-graph-client/config"
 import chalk from 'chalk'
@@ -101,7 +102,7 @@ export const publishToVercelModule: CliModule<PublishToVercelProps> = {
 
     args.positional('path', { type: "string", describe: "The frontend route to invoke to publish", default: "/api/content/publish", demandOption: false })
     args.positional('verb', { type: "string", describe: "The HTTP verb to be used when sending the webhook", default: "POST", demandOption: false })
-    args.option("publish_token", { alias: "pt", description: "Publishing token", string: true, type: "string", demandOption: !hasDefaultToken, default: defaultToken })
+    args.option("publish_token", { alias: "pt", description: "Publishing token", string: true, type: "string", demandOption: !hasDefaultToken, default: defaultToken, defaultDescription: maskSecret(defaultToken) })
     return args
   }
 }

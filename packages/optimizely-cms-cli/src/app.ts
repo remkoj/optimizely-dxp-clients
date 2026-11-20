@@ -2,6 +2,7 @@ import { type CmsIntegrationApiOptions, readPartialEnvConfig } from '@remkoj/opt
 import yargs from 'yargs'
 import { type OptiCmsApp } from './types.js'
 import chalk from 'chalk';
+import { maskSecret } from './utils/index.js'
 
 export function createOptiCmsApp(scriptName: string, version?: string, epilogue?: string, envFiles?: Array<string>, projectDir?: string): OptiCmsApp {
   if (envFiles) {
@@ -27,7 +28,7 @@ export function createOptiCmsApp(scriptName: string, version?: string, epilogue?
     .option("components", { alias: "c", description: "Path to components folder", string: true, type: "string", demandOption: false, default: "./src/components/cms" })
     .option("cms_url", { alias: "cu", description: "Optimizely CMS URL", string: true, type: "string", demandOption: isDemanded(config.base), default: config.base, coerce: (val) => val ? new URL(val) : undefined })
     .option("client_id", { alias: "ci", description: "API Client ID", string: true, type: "string", demandOption: isDemanded(config.clientId), default: config.clientId })
-    .option('client_secret', { alias: "cs", description: "API Client Secrent", string: true, type: "string", demandOption: isDemanded(config.clientSecret), default: config.clientSecret })
+    .option('client_secret', { alias: "cs", description: "API Client Secrent", string: true, type: "string", demandOption: isDemanded(config.clientSecret), default: config.clientSecret, defaultDescription: maskSecret(config.clientSecret) })
     .option('api_base_url', { alias: 'au', description: "CMS API URL", string: true, type: "string", demandOption: isDemanded(config.apiBaseUrl), default: config.apiBaseUrl, coerce: (val) => val ? new URL(val) : undefined })
     .option('verbose', { description: "Enable logging", boolean: true, type: 'boolean', demandOption: false, default: config.debug })
     .group(['path', 'components'], "Frontend:")
