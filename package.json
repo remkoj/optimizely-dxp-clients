@@ -59,6 +59,9 @@
     "publish": "yarn workspaces foreach -At --topological-dev --exclude optimizely-dxp-clients npm publish --access public"
   },
   "resolutions": {
+    "handlebars": "^4.7.10",
+    "js-yaml@npm:4.2.0": "^4.3.2",
+    "js-yaml@npm:^4.1.0": "^4.3.2",
     "picomatch": "^4"
   }
 }
