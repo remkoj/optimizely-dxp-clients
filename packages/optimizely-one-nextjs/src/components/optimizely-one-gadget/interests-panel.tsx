@@ -1,7 +1,6 @@
 'use client'
 
 import { type FunctionComponent, type JSX } from 'react'
-// import { TagIcon } from '@heroicons/react/20/solid'
 import { IconTag as TagIcon } from '@optiaxiom/icons'
 import useSWR from 'swr'
 import type { ProfileApiResponse as MeResponse } from '../../api/profile-api-service'

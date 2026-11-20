@@ -151,12 +151,9 @@ function toPosixPath(osPath: string) {
   return osPath.replace(new RegExp(path.sep == '\\' ? '\\\\' : path.sep, 'g'), path.posix.sep)
 }
 
-function tryReadJsonFile<T = any>(filename: string, validator?: (inpt: any) => inpt is T): T | undefined {
+function tryReadJsonFile<T = any>(filename: string): T | undefined {
   try {
-    const data = JSON.parse(fs.readFileSync(filename).toString('utf8'))
-    if (validator && !validator(data))
-      return undefined
-    return data as T
+    return JSON.parse(fs.readFileSync(filename).toString('utf8')) as T
   } catch {
     return undefined
   }

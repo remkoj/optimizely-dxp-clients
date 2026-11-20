@@ -2,7 +2,6 @@
   "compilerOptions": {
     "target": "esnext",
     "module": "CommonJS",
-    /*"moduleResolution": "Bundler",*/
     "lib": [
       "DOM",
       "DOM.AsyncIterable",

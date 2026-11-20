@@ -60,7 +60,7 @@ export const EXPORTED_FUNCTIONS = 0;`
 
       const fragments = resolveSpreads(queryNode, docs)
 
-      const fnTypeName = fn //.charAt(0).toUpperCase() + fn.slice(1)
+      const fnTypeName = fn
       const varsType = `Types.${fnTypeName}QueryVariables`
       const returnType = `Types.${fnTypeName}Query`
 

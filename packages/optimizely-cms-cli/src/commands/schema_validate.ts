@@ -22,9 +22,6 @@ export const SchemaValidateCommand: SchemaValidateModule = {
   describe: "Validate the opti-type.json & opti-style.json files",
   builder: (yargs) => {
     const newYargs = yargs
-    //newYargs.option('schemas', { alias: 's', description: "The schema's to download", array: true, type: 'string', demandOption: false, default: ['DisplayTemplate', 'ContentType'] })
-    //newYargs.option('force', { alias: 'f', description: "Overwrite existing files", boolean: true, type: 'boolean', demandOption: false, default: false })
-    //newYargs.option("definitions", { alias: 'd', description: "Create/overwrite typescript definitions", boolean: true, type: 'boolean', demandOption: false, default: true })
     return newYargs
   },
   handler: async (args) => {
@@ -75,7 +72,6 @@ export const SchemaValidateCommand: SchemaValidateModule = {
                     break;
                   }
                   default:
-                    //console.log(key, error)
                     break;
                 }
               }

@@ -49,14 +49,10 @@ export function normalizeFragmentNames(files: Types.DocumentFile[], schema: Docu
         enter(node) {
           const nodeName = node.name.value
           if (operations.toRemove.includes(nodeName)) {
-            //if (options.verbose)
-            //  console.log(`  ⚠ Removing default fragment ${node.name.value.substring(1)} from the documents as it has been overridden.`)
             isModified = true
             return null
           }
           if (operations.toRename.includes(nodeName)) {
-            //if (options.verbose)
-            //  console.log(`  ⚠ Making default fragment ${node.name.value.substring(1)} available as it has not been overridden.`)
             isModified = true
             return {
               ...node,

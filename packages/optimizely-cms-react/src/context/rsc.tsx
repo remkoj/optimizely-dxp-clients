@@ -209,7 +209,6 @@ export class ServerContext implements GenericContext {
     this._editableIsExperience = isExperience
   }
 
-  //private _hasWarned: boolean = false;
   /**
    * Convert this context into its transferrable (serializable) form, so it can
    * cross the React Server/Client boundary

@@ -75,8 +75,7 @@
     "graphql-request": "^7.4.0",
     "graphql-sock": "^1.0.1",
     "graphql-tag": "^2.12.7",
-    "node-object-hash": "^3.1.1",
-    "tslib": "^2.9.1"
+    "node-object-hash": "^3.1.1"
   },
   "scripts": {
     "clean": "tsc --build --clean",

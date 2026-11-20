@@ -143,7 +143,6 @@ export const OptimizelyGraphPreset: IOptimizelyGraphPreset = {
             importOperationTypesFrom: 'Schema',
             rawRequest: options.presetConfig.recursion ? true : undefined,
             documentMode: options.presetConfig.recursion ? 'plainString' : options.config.documentMode,
-            // experimentalAddDocumentNodeType: options.presetConfig.recursion ? true : undefined,
             rawString: options.presetConfig.recursion ? true : options.config.documentMode === 'string',
           },
         },
@@ -256,7 +255,6 @@ function configureDefaults<PresetConfig extends PresetOptions = PresetOptions, P
     dedupeFragments: true, // Remove duplicate fragment references
     preResolveTypes: true, // Flatten some types
     emitLegacyCommonJSImports: false, //Switch to ESM
-    //documentMode:  options.presetConfig.recursion ? 'string' : undefined,
     
     // Provided options
     ...options.config,

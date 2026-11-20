@@ -6,8 +6,6 @@ export { ApiClient, ApiError, ApiClient as CoreClient, type ApiClientStatic, typ
 import { type CmsIntegrationApiOptions } from './config'
 import { ApiClient, type CmsIntegrationApiClient } from './api-client'
 
-export { readEnvConfig } from './config'
-
 /**
  * Type alias describing a CMS Integration API client instance.
  */

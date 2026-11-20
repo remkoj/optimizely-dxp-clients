@@ -68,8 +68,6 @@ export const TypesPushCommand: TypesPushModule = {
       if (outType.created) delete outType.created
       if (outType.lastModified) delete outType.lastModified
       if (outType.lastModifiedBy || outType.lastModifiedBy == "") delete outType.lastModifiedBy
-      //if (outType.features) delete outType.features
-      //if (outType.usage) delete outType.usage
 
       const validationResult = typeValidator(outType)
       if (validationResult || force) {

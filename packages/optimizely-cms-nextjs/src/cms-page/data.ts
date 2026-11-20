@@ -1,4 +1,3 @@
-//import { gql } from "graphql-request"
 import type { IOptiGraphClient, VariationInput } from "@remkoj/optimizely-graph-client"
 export type { VariationInput } from "@remkoj/optimizely-graph-client"
 

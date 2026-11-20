@@ -1,6 +1,5 @@
 'use client'
 import { type FunctionComponent } from 'react'
-//import { UserCircleIcon } from '@heroicons/react/20/solid'
 import { IconCircleUser as UserCircleIcon } from '@optiaxiom/icons'
 import useSWR from 'swr'
 import type { ProfileApiResponse as MeResponse } from '../../api/profile-api-service'

@@ -69,7 +69,7 @@ export const StylesPushCommand: StylesPushModule = {
           readonlyFields: ['key', 'created', 'lastModified', 'createdBy', 'lastModifiedBy'],
           atomicFields: ['settings']
         })
-        if (!path || Object.entries(patch).length === 0) return currentTemplate
+        if (Object.entries(patch).length === 0) return currentTemplate
         return client.displayTemplatesPatch({ path: { key: styleKey }, body: patch }) 
       })() :
         client.displayTemplatesCreate({ body: styleDefinition })

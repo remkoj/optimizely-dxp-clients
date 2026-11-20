@@ -145,9 +145,7 @@ export function createEditPageComponent<LocaleType = string>(
           {context.isDebug && (
             <div className="optly-contentLink">
               ContentItem:{' '}
-              {contentLink
-                ? contentLinkToString(contentLink)
-                : 'Invalid content link returned from Optimizely Graph'}
+              {contentLinkToString(contentLink)}
             </div>
           )}
         </>

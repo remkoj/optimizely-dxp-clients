@@ -92,18 +92,7 @@ export async function performInjections(files: Types.DocumentFile[], schema: Doc
             return { ...node, selections: selections } as SelectionSetNode
           }
         }
-      },
-
-      // Remove fragments if cleanup is enabled
-      // **Note:** this is too agressive, it'll break the DTS logic from the client preset
-      /*FragmentDefinition: {
-        enter(node) {
-          if (cleanUpFragmentSpreads.includes(node.name.value)) {
-            documentChanged = true;
-            return null; // Remove the definition
-          }
-        }
-      }*/
+      }
     });
 
     // Output the new file if changed, otherwise keep the current one
@@ -210,9 +199,6 @@ function buildInjectionMap(documents: Types.DocumentFile[], config: Readonly<Req
     }
   });
 
-  // Report the contained items
-  // if (verbose)
-  //  injectionMap.report(console.log, '➡  ', config.cleanup ? 'replaced by' : 'extended with');
   return injectionMap;
 }
 

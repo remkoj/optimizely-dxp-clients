@@ -7,7 +7,6 @@ import { getContentTypes } from '../tools/contentTypes.js'
 import { type NextJsModule, builder, createTypeFolders } from './_nextjs_base.js'
 
 // Sub commands
-//import createFragments from './nextjs_fragments.js'
 import createComponents from './nextjs_components.js'
 import createVisualBuilder from './nextjs_visualbuilder.js'
 import createFactories from './nextjs_factories.js'
@@ -31,7 +30,6 @@ export const NextJsCreateCommand: NextJsModule = {
     await Promise.all([
       createTypes.handler(args),
       createStyles.handler({ ...args, excludeNodeTypes: [], excludeTemplates: [], nodes: [], templates: [], templateTypes: [], definitions: true }),
-      //createFragments.handler(args, { loadedContentTypes: getContentTypesResult, createdTypeFolders: folders })
     ])
     process.stdout.write(chalk.yellowBright(chalk.bold(figures.tick) + " Prepared types, styles and fragments") + "\n")
 

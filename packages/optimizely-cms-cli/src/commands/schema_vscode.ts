@@ -15,9 +15,6 @@ export const SchemaVsCodeCommand: SchemaVsCodeModule = {
   describe: "Configure schema validation for opti-type.json & opti-style.json files by VSCode in the current project folder",
   builder: (yargs) => {
     const newYargs = yargs
-    //newYargs.option('schemas', { alias: 's', description: "The schema's to download", array: true, type: 'string', demandOption: false, default: ['DisplayTemplate', 'ContentType'] })
-    //newYargs.option('force', { alias: 'f', description: "Overwrite existing files", boolean: true, type: 'boolean', demandOption: false, default: false })
-    //newYargs.option("definitions", { alias: 'd', description: "Create/overwrite typescript definitions", boolean: true, type: 'boolean', demandOption: false, default: true })
     return newYargs
   },
   handler: async (args) => {

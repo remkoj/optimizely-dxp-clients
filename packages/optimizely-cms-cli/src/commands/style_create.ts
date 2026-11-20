@@ -75,7 +75,6 @@ export const StylesCreateCommand: CliModule<StylesCreateParams> = {
         break;
     }
     const isDefault = await confirm({ message: "Should this style be marked as default?" })
-    //const commitToCms = await confirm({ message: "Do you want to upload this style immediately to the CMS?"})
     const definition = { key, displayName, isDefault }
     definition[type] = typeId
     definition['settings'] = {}

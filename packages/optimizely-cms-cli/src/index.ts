@@ -12,7 +12,6 @@ async function main() {
     await app.parse(process.argv.slice(2))
   } catch {
     //We're ignoring error here, as yargs will already generate the "nice output" for it
-    //console.log ('Caught error')
   }
 }
 

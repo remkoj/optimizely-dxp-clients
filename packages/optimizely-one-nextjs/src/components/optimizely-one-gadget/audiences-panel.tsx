@@ -1,6 +1,5 @@
 'use client'
 import { useEffect, type FunctionComponent } from 'react'
-// import { UserGroupIcon } from '@heroicons/react/20/solid'
 import { IconUsers as UserGroupIcon } from '@optiaxiom/icons'
 import useSWRInfinite, {
   type SWRInfiniteKeyLoader,

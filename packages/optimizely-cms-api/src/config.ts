@@ -179,7 +179,7 @@ export function getAuthBaseUrl(apiBaseUrl: URL | string): URL {
 
 function getOptional<DT extends string | undefined>(variable: string, defaultValue?: DT): DT extends string ? string : string | undefined {
   const envValue = process.env[variable]
-  if (!envValue || envValue == "")
+  if (!envValue)
     return defaultValue as DT extends string ? string : undefined
   return envValue
 }

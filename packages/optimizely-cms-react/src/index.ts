@@ -7,5 +7,4 @@ export * from './context/types.js'
 
 // Export React Client Components
 export * from './context/client.js'
-export * from './factory/index.js'
 export * from './components/client.js'

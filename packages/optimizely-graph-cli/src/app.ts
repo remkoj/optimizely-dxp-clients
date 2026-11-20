@@ -4,13 +4,11 @@ import { isDemanded, maskSecret } from './utils/index.js'
 import chalk from 'chalk'
 import type { CliApp } from './types.js'
 
-export function createCliApp(scriptName: string, version?: string, epilogue?: string, envFiles?: Array<string>): CliApp {
+export function createCliApp(scriptName: string, version?: string, epilogue?: string): CliApp {
   let config: OptimizelyGraphConfig
   try {
     config = getEnvConfig()
   } catch (e) {
-    if (envFiles)
-      console.error(chalk.gray(`Included environment files: ${envFiles.join(', ')}\n`))
     console.error(chalk.redBright(`[${chalk.bold((e as Error)?.name ?? "Error")}] ${(e as Error)?.name ?? "Unknown error"}`))
     process.exit(1)
   }
@@ -33,9 +31,6 @@ export function createCliApp(scriptName: string, version?: string, epilogue?: st
     .epilogue(epilogue ?? `Copyright Remko Jantzen - 2023-${(new Date(Date.now())).getFullYear()}`)
     .help()
     .fail((msg, error, args) => {
-      if (envFiles)
-        console.error(chalk.gray(`Included environment files: ${envFiles.join(', ')}\n`))
-
       if (msg)
         console.error(msg + "\n")
 

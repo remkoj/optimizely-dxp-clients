@@ -98,7 +98,6 @@ export class ChannelDefinition implements Readonly<ChannelDefinitionData> {
 
   protected getPrimaryChannelDomain() {
     return this.domains.find(x => x.isPrimary) || // First get the configured primary
-        //this.domains.find(x => x.name.startsWith('localhost') || x.name.includes('.local')) || // Then get a localhost or .local
         this.domains[0] //Finally try to get the first one
   }
 

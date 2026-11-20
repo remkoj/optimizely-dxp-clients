@@ -1,10 +1,8 @@
 import type { CodegenPlugin } from '@graphql-codegen/plugin-helpers'
-//import { isOptiCmsURL } from './generator/virtual-location'
 
 export const UnhideGeneratedComponentsPlugin: CodegenPlugin<Record<string,unknown>> = {
   async plugin(schema, documents) {
     const data = (documents || [])
-      /*.filter((d) => isOptiCmsURL(d.location))*/
       .map((doc) => `# Location: ${ doc.location }\n${ doc.rawSDL }`);
     return { 
       prepend: [

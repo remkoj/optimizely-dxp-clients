@@ -29,7 +29,6 @@ export async function loadSchema(client: CmsApiClient, schemaName: string | stri
     const definitions = {}
     const processedSchema = processSchema(specSchemas[schema], definitions, spec as unknown as TypedSchema)
     const jsonSchema: TypedSchema = {
-      //"$schema": "https://json-schema.org/draft-07/schema",
       "$id": new URL(`schema/${schema}`,client.getSchemaItemBase()).href,
       type: "object",
       title: schema,
@@ -139,8 +138,6 @@ function processSchema(schema: BaseSchema | BaseSchema[], defs: { [name: string]
     for (const key of props) {
       if (key === 'pattern' && typeof schema[key] === 'string') {
         newSchema[key] = safeCreateUnicodeRegExp(schema[key])
-        /*} else if (key === 'readOnly' && schema[key] === true) {
-          return undefined*/
       } else if (['additionalProperties', 'required', 'properties', 'discriminator'].includes(key) && typeof schema[key] !== 'object') {
         // Ignore additional properties value
       } else if (key === 'discriminator' && !Array.isArray(schema['oneOf'])) {
@@ -178,8 +175,6 @@ function isLocalRef(ref: unknown): ref is string {
 }
 
 function getLocalRefName(ref: string): string | undefined {
-  if (!isLocalRef(ref))
-    return undefined
   const refPath = ref.substring(2).split('/')
   return refPath.at(refPath.length - 1)
 }

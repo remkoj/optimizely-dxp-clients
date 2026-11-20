@@ -83,7 +83,6 @@ export const NextJsFactoryCommand : NextJsModule = {
       // Keep this POSIX: it's compared against (and made relative to) factoryKey,
       // which is built with path.posix, and it ends up inside import specifiers.
       const componentDir = path.posix.dirname(path.posix.join(...component));
-      // const componentFile = path.basename(path.posix.join(...component));
 
       // Determine component target
       const componentKey = getComponentKey(component, basePath)
@@ -190,7 +189,6 @@ export default NextJsFactoryCommand
 function getComponentKey(component: string[], componentsRootDir: string) : string
 {
   // Prepare context
-  //const componentFile = path.basename(path.join(...component));
   const componentDir = path.dirname(path.join(...component));
 
   // Calculate the fallback value
@@ -198,11 +196,9 @@ function getComponentKey(component: string[], componentsRootDir: string) : strin
 
   // Try to read the key from the opti-type.json file in the same folder
   const definitions = globSync("*.opti-type.json", { cwd: path.join(componentsRootDir, componentDir) });
-  //console.log(definitions, componentDir);
   if (definitions.length == 1) {
     try {
       const data = JSON.parse(fs.readFileSync(path.join(componentsRootDir, componentDir, definitions[0])).toString('utf8')) as IntegrationApi.ContentType;
-      //console.log('Updating to', data.key)
       if (data.key)
         return data.key;
     } catch {

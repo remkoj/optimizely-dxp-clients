@@ -152,12 +152,7 @@ export const CmsEditable: CmsEditableBaseComponent = <CT extends ElementType>({
     isDebugOrDevelopment,
     isDebug,
     editableContent
-  } = ctx || {
-    inEditMode: false,
-    isDebug: true,
-    isDebugOrDevelopment: true,
-    editableContentIsExperience: false,
-  }
+  } = ctx
   const addEditProps = inEditMode
     ? currentContent
       ? editableContent?.key === currentContent.key
@@ -165,7 +160,6 @@ export const CmsEditable: CmsEditableBaseComponent = <CT extends ElementType>({
     : false
 
   if (!addEditProps) {
-    // console.log('⚠ [CmsEditable] Not adding edit props, either not in edit mode or currentContent does not match editableContent', props)
     return children ? <RenderElement {...props}>{children}</RenderElement> : <RenderElement {...props} />
   }
 
@@ -190,25 +184,15 @@ export const CmsEditable: CmsEditableBaseComponent = <CT extends ElementType>({
     editableContent.key !== cmsId :
     true));
 
-  const itemProps: Record<string, unknown> = addEditProps
-    ? {
-      ...props,
-      // We assume GUIDs are represented as 32 char long strings, all other values are IDs
-      'data-epi-block-id': showBlockId ? cmsId : undefined,
-      // We assume GUIDs are represented as 32 char long strings
-      'data-epi-content-id': showContentId ? cmsId : undefined,
-      // We pass through the property name if provided
-      'data-epi-edit': propertyName,
-      // We pass through the property name if provided
-      // 'data-epi-property-name': editType ? dataEpiPropertyName : undefined,
-      // We pass through the property name if provided
-      // 'data-epi-edit': editType ? undefined : dataEpiPropertyName,
-      // Configure the rendition of the property editor
-      // 'data-epi-property-edittype': editType ?? undefined,
-    }
-    : {
-      ...props,
-    }
+  const itemProps: Record<string, unknown> = {
+    ...props,
+    // We assume GUIDs are represented as 32 char long strings, all other values are IDs
+    'data-epi-block-id': showBlockId ? cmsId : undefined,
+    // We assume GUIDs are represented as 32 char long strings
+    'data-epi-content-id': showContentId ? cmsId : undefined,
+    // We pass through the property name if provided
+    'data-epi-edit': propertyName,
+  }
 
   if (typeof RenderElement !== 'string') {
     console.log(`⚠ [CmsEditable] Rendering a custom component, forwarding context to ${RenderElement.name}`, forwardCtx);

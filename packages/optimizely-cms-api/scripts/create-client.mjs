@@ -113,7 +113,7 @@ async function getAccessToken() {
   const clientSecret = process.env.OPTIMIZELY_CMS_CLIENT_SECRET || '';
 
   const headers = new Headers()
-  headers.append('Authorization', `Basic ${Buffer.from(`${clientId ?? ''}:${clientSecret ?? ''}`).toString('base64')}`);
+  headers.append('Authorization', `Basic ${Buffer.from(`${clientId}:${clientSecret}`).toString('base64')}`);
   headers.append('Content-Type', 'application/x-www-form-urlencoded');
   headers.append('Connection', 'close');
 
@@ -134,28 +134,27 @@ async function getAccessToken() {
   if (!httpResponse.ok)
     throw new Error("Authentication error: " + response.error_description, { cause: httpResponse })
 
-  console.log(`⚪ [CMS API] Authenticated as: ${clientId ?? '-'}`)
+  console.log(`⚪ [CMS API] Authenticated as: ${clientId}`)
   return `${response.token_type} ${response.access_token}`;
 }
 
 /**
  * Fetches the CMS OpenAPI specification as JSON, authenticating with the given
- * token (or acquiring one if none is supplied).
+ * token.
  *
- * @param {string} [token] Authorization header value; obtained via {@link getAccessToken} when omitted.
+ * @param {string} token Authorization header value as returned by {@link getAccessToken}.
  * @param {typeof buildApiEndpoint} [endpointBuilder] Endpoint builder, overridable for testing.
  * @returns {Promise<object>} The parsed OpenAPI specification.
  * @throws {Error} When the spec endpoint returns a non-OK response.
  */
 async function readOpenApiSpec(token, endpointBuilder = buildApiEndpoint) {
-  const accessToken = token || await getAccessToken();
   const specUrl = endpointBuilder(CMS_PATHS.apiSpec);
 
   console.log(`⚪ [CMS API] Using OpenAPI Spec endpoint: ${specUrl}`);
   const httpResponse = await fetch(specUrl, {
     headers: {
       accept: "application/json",
-      authorization: accessToken
+      authorization: token
     }
   })
 
@@ -170,7 +169,7 @@ async function readOpenApiSpec(token, endpointBuilder = buildApiEndpoint) {
 /**
  * Resolves the CMS instance version info and writes it to `src/version.json`.
  *
- * @param {string} [token] Authorization header value passed through to {@link getVersionInfo}.
+ * @param {string} token Authorization header value passed through to {@link getVersionInfo}.
  * @returns {Promise<void>}
  */
 async function createVersionFile(token) {
@@ -189,7 +188,7 @@ async function createVersionFile(token) {
  * resolved {@link getApiBaseUrl} is always included, so the generated client
  * can be traced back to the gateway it was built against.
  *
- * @param {string} [token] Authorization header value; obtained via {@link getAccessToken} when omitted.
+ * @param {string} token Authorization header value as returned by {@link getAccessToken}.
  * @returns {Promise<{api: string, service: string, cms: string, baseUrl: string}>} The version descriptor.
  * @throws {Error} When the info endpoint returns a non-OK response.
  */
@@ -198,12 +197,11 @@ async function getVersionInfo(token) {
   const baseUrl = getApiBaseUrl();
   if (apiVersion.includes('preview')) {
     const infoEndpoint = buildApiEndpoint(CMS_PATHS.info);
-    const accessToken = token || await getAccessToken();
     console.log(` - Reading CMS version information from: ${infoEndpoint}`);
     const response = await fetch(infoEndpoint, {
       headers: {
         accept: "application/json",
-        authorization: accessToken
+        authorization: token
       }
     });
     if (!response.ok) {

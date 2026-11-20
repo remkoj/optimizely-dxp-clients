@@ -40,7 +40,7 @@ export function getContent<NDL extends boolean = false>(client: IOptiGraphClient
 
   // Stop before running unknown Async operation if we're not loading data
   if (noDataLoad)
-    return (noDataLoad ? {} : Promise.resolve({})) as NDL extends true ? Record<string, unknown> : Promise<Record<string, unknown>>
+    return {} as NDL extends true ? Record<string, unknown> : Promise<Record<string, unknown>>
 
   // If we don't have a valid link, stop here
   if (!isContentLink(contentLink)) {

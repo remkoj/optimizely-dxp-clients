@@ -54,9 +54,7 @@ export const ProfileApiService: ApiService<ProfileApiResponse> = {
       audiencesPageCount = chunks.length
 
       // Apply filtering to the audiences
-      const userAudienceIds = /*chunkNr == 0 ?
-                (await Promise.all(chunks.map(chunk => odp.filterAudiences(odpId, chunk)))).flat() :*/
-        await odp.filterAudiences(odpId, chunks[pageNumber])
+      const userAudienceIds = await odp.filterAudiences(odpId, chunks[pageNumber])
       audiences = allAudiences.filter(a => userAudienceIds.includes(a.id))
     }
 

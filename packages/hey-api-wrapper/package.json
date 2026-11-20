@@ -26,8 +26,5 @@
   },
   "devDependencies": {
     "typescript": "^6.0.3"
-  },
-  "dependencies": {
-    "tslib": "^2.9.1"
   }
 }

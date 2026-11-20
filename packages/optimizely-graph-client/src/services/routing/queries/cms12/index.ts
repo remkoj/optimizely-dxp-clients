@@ -17,7 +17,7 @@ export class OptimizelyCms12Client implements OptimizelyCmsRoutingApi {
   }
 
   async getRoutes(client: GraphQLClient, siteId?: string): Promise<Route[]> {
-    client.updateFlags({ queryCache: false/*, cache: false*/ }, true)
+    client.updateFlags({ queryCache: false }, true)
     let page = await client.request<GetAllRoutes.Result, GetAllRoutes.Variables>(GetAllRoutes.query, { siteId, typeFilter: "Page" })
     let results = page?.Content?.items ?? []
     const totalCount = page?.Content?.total ?? 0

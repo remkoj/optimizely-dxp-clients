@@ -8,6 +8,14 @@ function isErrorResponse(response: AuthResponse): response is ErrorResponse {
   return typeof ((response as ErrorResponse).error) == 'string'
 }
 
+/**
+ * Retrieves an access token using the OAuth client-credentials flow.
+ *
+ * @param config - Client options; read from the environment when omitted.
+ * @param baseUrl - Optional API base URL used to resolve the token endpoint.
+ * @returns The access token, or an empty string when no client credentials are configured.
+ * @throws {Error} When the token endpoint fails or returns an error response.
+ */
 export async function getAccessToken(config?: CmsIntegrationApiOptions, baseUrl?: string): Promise<string> {
   const options = config ?? readEnvConfig()
   // Resolve against the API base rather than the CMS frontend URL, which never
@@ -25,13 +33,13 @@ export async function getAccessToken(config?: CmsIntegrationApiOptions, baseUrl?
     return '';
   }
 
-  headers.append('Authorization', `Basic ${base64Encode(`${options.clientId ?? ''}:${options.clientSecret ?? ''}`)}`);
+  headers.append('Authorization', `Basic ${base64Encode(`${options.clientId}:${options.clientSecret}`)}`);
   headers.append('Content-Type', 'application/x-www-form-urlencoded');
   headers.append('Connection', 'close');
 
   if (options.debug) {
     console.log(`⚪ [CMS API] Using authentication endpoint: ${authUrl}`);
-    console.log(`⚪ [CMS API] Retrieving new credentials for ${options.clientId ?? '-'}`);
+    console.log(`⚪ [CMS API] Retrieving new credentials for ${options.clientId}`);
   }
 
   const body = new URLSearchParams();
@@ -72,13 +80,8 @@ export async function getAccessToken(config?: CmsIntegrationApiOptions, baseUrl?
 }
 
 function base64Encode(input: string): string {
-  if (btoa && typeof (btoa) == 'function')
-    return btoa(input)
-  if (Buffer && typeof (Buffer) == 'object')
-    //@ts-expect-error We're running in server context, so no need for errors here
-    return Buffer.from(input).toString('base64')
-
-  throw new Error("Unable to base64Encode")
+  return btoa(input)
 }
 
+/** Default export, see {@link getAccessToken}. */
 export default getAccessToken

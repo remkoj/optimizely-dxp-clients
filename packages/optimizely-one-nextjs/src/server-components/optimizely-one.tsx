@@ -1,5 +1,4 @@
 // This is a server only component
-// import 'server-only';
 
 // Import global libararies and shared utilities
 import { PropsWithChildren } from "react";

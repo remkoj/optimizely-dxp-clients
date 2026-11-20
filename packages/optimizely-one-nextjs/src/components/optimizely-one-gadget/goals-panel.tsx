@@ -1,6 +1,5 @@
 'use client'
 import { type FunctionComponent, type JSX } from 'react'
-// import { TrophyIcon } from '@heroicons/react/20/solid'
 import { IconDollarSign as TrophyIcon } from '@optiaxiom/icons'
 import useSWR from 'swr'
 import { type GoalsReponse as ApiResponse } from '../../products/content-recs/webservice-goals'

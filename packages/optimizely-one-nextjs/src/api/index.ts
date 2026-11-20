@@ -53,7 +53,6 @@ export function createOptimizelyOneApi(config?: Partial<OptimizelyOneApiConfig>)
     else if (Array.isArray(apiPath)) apiPath = '/' + apiPath.join('/')
     else if (!apiPath.startsWith('/')) apiPath = '/' + apiPath
     const path: string = apiPath
-    //const basePath = apiPath == '/' ? request.nextUrl.pathname : request.nextUrl.pathname.endsWith(apiPath) ? request.nextUrl.pathname.substring(0, request.nextUrl.pathname.lastIndexOf(apiPath)) : ''
     const verb = request.method
 
     // Find the service
