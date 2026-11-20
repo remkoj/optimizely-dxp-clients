@@ -34,10 +34,9 @@ export class ApiClient extends CmsIntegrationApiClient
             TOKEN: async () => {
                 if (!access_token)
                     access_token = await getAccessToken(options).catch(e => {
-                        if (options.debug) {
-                            console.error(`🔴 [CMS API] Failed to obtain an access token`)
+                        console.error(`🔴 [CMS API] Failed to obtain an access token: ${ e instanceof Error ? e.message : e }`)
+                        if (options.debug)
                             console.error(e)
-                        }
                         return undefined
                     })
                 return access_token ?? ''

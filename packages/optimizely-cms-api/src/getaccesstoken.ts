@@ -11,13 +11,28 @@ function isErrorResponse(response: AuthResponse) : response is ErrorResponse
     return typeof((response as ErrorResponse).error) == 'string'
 }
 
+function isManagedApiGateway(url: URL) : boolean
+{
+    return /^api\.cms[^.]*\.optimizely\.com$/i.test(url.hostname)
+}
+
+/**
+ * Resolves the OAuth token endpoint. The managed API gateway serves it from the
+ * host root (not below the versioned `/v1` API path), other hosts relative to
+ * the configured API base.
+ */
+export function getAuthUrl(options: CmsIntegrationApiOptions) : string
+{
+    if (isManagedApiGateway(options.base))
+        return new URL('/oauth/token', options.base).href
+    const authUrl = new URL('oauth/token', options.base.href.replace(/\/*$/, '/')).href
+    return options.cmsVersion === OptiCmsVersion.CMS12 ? authUrl.replace('preview2', 'preview1') : authUrl
+}
+
 export async function getAccessToken(config?: CmsIntegrationApiOptions) : Promise<string>
 {
     const options = config ?? getCmsIntegrationApiConfigFromEnvironment()
-    let authUrl = options.cmsVersion === OptiCmsVersion.CMS12 ? (() => {
-      let u = new URL('oauth/token', options.base.href.replace(/\/*$/, '/')).href;
-      return u.replace('preview2', 'preview1');
-    })() : new URL('oauth/token', options.base.href.replace(/\/*$/, '/')).href;
+    const authUrl = getAuthUrl(options)
     const headers = new Headers()
 
     headers.append('Authorization', `Basic ${ base64Encode(`${ options.clientId }:${ options.clientSecret }`)}`)
@@ -40,10 +55,12 @@ export async function getAccessToken(config?: CmsIntegrationApiOptions) : Promis
         body: body.toString(),
         cache: "no-store"
     })
-    const response = await httpResponse.json() as AuthResponse
+    const response = await httpResponse.json().catch(() => ({})) as AuthResponse
     
     if (isErrorResponse(response))
         throw new Error("Authentication error: " + response.error_description)
+    if (!httpResponse.ok || typeof response.access_token != 'string' || response.access_token == '')
+        throw new Error(`Authentication error: no access token received from ${ authUrl } (HTTP ${ httpResponse.status })`)
 
     return response.access_token
 }
