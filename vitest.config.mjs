@@ -7,7 +7,8 @@ const testedPackages = [
   'optimizely-one-nextjs',
   'optimizely-cms-nextjs',
   'optimizely-graph-cli',
-  'optimizely-cms-api'
+  'optimizely-cms-api',
+  'optimizely-cms-cli'
 ]
 
 export default defineConfig({

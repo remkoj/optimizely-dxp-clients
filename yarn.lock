@@ -2526,7 +2526,7 @@ __metadata:
     "@remkoj/hey-api-wrapper": "workspace:6.0.0-rc.6"
     "@types/node": "npm:^24.19.2"
     dotenv: "npm:^18.0.10"
-    dotenv-expand: "npm:^1000.0.0"
+    dotenv-expand: "npm:^13.0.0"
     glob: "npm:^14.0.6"
     openapi-types: "npm:^12.1.3"
     openapi-typescript-codegen: "npm:^0.31.0"
@@ -2555,7 +2555,7 @@ __metadata:
     cli-table3: "npm:^0.6.5"
     deep-object-diff: "npm:^1.1.9"
     dotenv: "npm:^18.0.10"
-    dotenv-expand: "npm:^1000.0.0"
+    dotenv-expand: "npm:^13.0.0"
     fast-deep-equal: "npm:^3.1.3"
     figures: "npm:^6.1.0"
     glob: "npm:^14.0.6"
@@ -2640,7 +2640,7 @@ __metadata:
     cli-table3: "npm:^0.6.5"
     compare-versions: "npm:^6.1.1"
     dotenv: "npm:^18.0.10"
-    dotenv-expand: "npm:^1000.0.0"
+    dotenv-expand: "npm:^13.0.0"
     figures: "npm:^6.1.0"
     glob: "npm:^14.0.6"
     rollup: "npm:^4.68.6"
@@ -4639,14 +4639,16 @@ __metadata:
   languageName: node
   linkType: hard
 
-"dotenv-expand@npm:^1000.0.0":
-  version: 1000.0.0
-  resolution: "dotenv-expand@npm:1000.0.0"
-  checksum: 10c0/c8f897db0276f729445a5b5cbd022f4301a9c7d53f6b5007ba1545cb99378fbd36a16568cb1b390e9b466dddbfd5f298d025431eaa0569bb6f451e31e57e5fe0
+"dotenv-expand@npm:^13.0.0":
+  version: 13.0.0
+  resolution: "dotenv-expand@npm:13.0.0"
+  dependencies:
+    dotenv: "npm:^17.4.2"
+  checksum: 10c0/debebb7807fedebb21078dc661d28d69d373f3a673165afea7f7a8c3b82f0da675e417b2d42c40b1f3d357741c8b24a77d6f4376886092a82456225b3d241b88
   languageName: node
   linkType: hard
 
-"dotenv@npm:^17.3.1":
+"dotenv@npm:^17.3.1, dotenv@npm:^17.4.2":
   version: 17.4.2
   resolution: "dotenv@npm:17.4.2"
   checksum: 10c0/164f8e77a646c8446867d5b588d26ea6005c8ea7c5eb41cf926f6113d23f2191355f6e0cfd95ea9bab98394a5b0a3f1e51a8399711b666fe55cc7b0bd745f942
