@@ -47,8 +47,10 @@ describe('createEditPageComponent', () => {
   })
 
   it('returns notFound for an invalid request', async () => {
+    const error = vi.spyOn(console, 'error').mockImplementation(() => undefined)
     const page = createEditPageComponent({} as never, { requestValidator: () => false })
     expect(await page({ params: Promise.resolve({}), searchParams: Promise.resolve({}) } as never)).toBe('not-found')
+    expect(error).toHaveBeenCalledWith(expect.stringContaining('[OnPageEdit] Invalid edit mode request'))
   })
 
   it('renders the debug content link of the loaded content', async () => {

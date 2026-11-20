@@ -1,10 +1,14 @@
-import { describe, expect, it } from 'vitest'
+import { afterEach, describe, expect, it, vi } from 'vitest'
 import type { IOptiGraphClient } from '@remkoj/optimizely-graph-client'
 import { getContent } from '../src/components/cms-content/get-content.js'
 
 const Component = Object.assign(() => null, { displayName: 'TestComponent' })
 
 describe('getContent', () => {
+  afterEach(() => {
+    vi.restoreAllMocks()
+  })
+
   it('returns the provided fragment data as is when not loading data', () => {
     const data = { title: 'Hello' }
     expect(getContent(undefined, { key: 'abc' }, Component, data, true)).toBe(data)
@@ -32,7 +36,9 @@ describe('getContent', () => {
   })
 
   it('requires a client to load data for a content link', () => {
+    const error = vi.spyOn(console, 'error').mockImplementation(() => undefined)
     expect(() => getContent(undefined, { key: 'abc' }, Component, undefined)).toThrow(/requires a GraphQL Client/)
+    expect(error).toHaveBeenCalledWith(expect.stringContaining('Data loading for "TestComponent" requires a GraphQL Client'))
   })
 
   it('resolves to an empty object for a component without a data source', async () => {
