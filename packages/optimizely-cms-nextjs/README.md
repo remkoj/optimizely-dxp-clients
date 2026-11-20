@@ -74,10 +74,9 @@ The `createPublishApi` method has many more options allowing you to take control
 
 
 ### Middleware
-The package provides the following enhancements for Next.js middleware:
+The package provides the following enhancement for Next.js middleware:
 | Wrapper | import | Purpose |
 | --- | --- | --- |
-| withEditFallback | `@remkoj/optimizely-cms-nextjs/preview` | Rewrite incoming Optimizely CMS 12 preview / on-page-edit URLs to Optimizely SaaS CMS preview  URLs |
 | withLanguagePrefix | `@remkoj/optimizely-cms-nextjs/page` | Handle the redirect of the homepage `/` to the locale that best matches the incoming request, such as `/en`. The locales and their URLs are taken from the second parameter - the ChannelDefinition.
 
-If you use both wrappers, the `withEditFallback` wrapper must wrap the `withLanguagePrefix` wrapper, to ensure that the edit mode URL is rewritten before the language prefix is applied.
+> **Breaking change:** The `withEditFallback` wrapper (previously exported from `@remkoj/optimizely-cms-nextjs/preview`) has been removed. It only served Optimizely CMS 12 preview / on-page-edit URLs, which are no longer supported, and it injected the `OPTIMIZELY_PUBLISH_TOKEN` as preview token for unauthenticated requests. Remove it from your middleware.

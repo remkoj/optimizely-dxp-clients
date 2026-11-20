@@ -4,7 +4,8 @@ import { defineConfig } from 'vitest/config'
 // the package's `test` folder, outside of `src`, so they're never part of the
 // package build output.
 const testedPackages = [
-  'optimizely-one-nextjs'
+  'optimizely-one-nextjs',
+  'optimizely-cms-nextjs'
 ]
 
 export default defineConfig({
