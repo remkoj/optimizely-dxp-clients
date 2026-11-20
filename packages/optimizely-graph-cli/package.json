@@ -52,7 +52,7 @@
     "cli-table3": "^0.6.5",
     "compare-versions": "^6.1.1",
     "dotenv": "^18.0.10",
-    "dotenv-expand": "^1000.0.0",
+    "dotenv-expand": "^13.0.0",
     "figures": "^6.1.0",
     "glob": "^14.0.6",
     "tslib": "^2.9.1",
