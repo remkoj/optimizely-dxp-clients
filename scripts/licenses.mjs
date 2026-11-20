@@ -8,6 +8,35 @@ import YAML from 'yaml'
  */
 const DEV_MARKER = '🔧'
 
+/**
+ * Marker used in the "Conflict" column for dependencies with a license that conflicts
+ * with releasing the package that references them under Apache-2.0
+ */
+const CONFLICT_MARKER = '⚠️'
+
+/**
+ * Text used for dependencies without license information
+ */
+const UNSPECIFIED_LICENSE = '*unspecified*'
+
+/**
+ * License identifiers (SPDX, case-insensitive) that conflict with a release under Apache-2.0:
+ * strong and network copyleft (GPL, LGPL, AGPL), SSPL, the Business Source License (BUSL-*, the
+ * SPDX identifier BSL-1.0 is the permissive Boost license and is not matched), non-commercial
+ * and Commons Clause style licenses and licenses that are not specified or are custom.
+ */
+const CONFLICTING_LICENSES = [
+  /^(?:A|L)?GPL(?:-|$)/i,
+  /^SSPL(?:-|$)/i,
+  /^BUSL(?:-|$)/i,
+  /^BSL-1\.1$/i,
+  /^CC-BY(?:-[A-Z]+)*-NC(?:-|$)/i,
+  /^Commons-?Clause$/i,
+  /NON-?COMMERCIAL/i,
+  /^LicenseRef-/i,
+  /^(?:UNLICENSED|NONE|UNKNOWN|CUSTOM|PROPRIETARY)$/i
+]
+
 if (!fs.existsSync('yarn.lock')) {
   process.stdout.write("⚠ No Yarn lockfile found\n")
   process.exit(0)
@@ -41,13 +70,13 @@ try {
 
   // Packages that are declared directly by one of the workspace packages
   const directNodes = new Set(workspaces.flatMap(ws => ws.dependencies.map(d => d.node)))
-  const transitiveNodes = [...graph.nodes.values()].filter(n => n.source != 'workspace' && !directNodes.has(n))
+  const transitiveNodes = [...graph.nodes.values()].filter(n => n.source != 'workspace' && !n.isTwin && !directNodes.has(n))
   const unreachable = transitiveNodes.filter(n => !allNodes.has(n) && !(graph.twins.get(n) ?? []).length && !n.isTwin)
   if (unreachable.length > 0) {
     process.stdout.write(`⚠ Not reachable from any workspace package, marked as development-only: ${ unreachable.map(n => n.id).join(', ') }\n`)
   }
 
-  const listedNodes = [...graph.nodes.values()].filter(n => n.source != 'workspace' && (directNodes.has(n) || transitiveNodes.includes(n)))
+  const listedNodes = [...directNodes, ...transitiveNodes]
   process.stdout.write(`➡ Fetching additional data from NPM for ${ listedNodes.length } packages\n`)
   const enriched = await batchedTransform(listedNodes, async pkg => {
     if (pkg.source != 'npm')
@@ -60,7 +89,7 @@ try {
     const packageInfo = await response.json()
     return {
       ...pkg,
-      license: packageInfo.license,
+      license: normalizeLicense(packageInfo),
       author: packageInfo.author,
       maintainers: packageInfo.maintainers,
       homepage: packageInfo.homepage
@@ -74,70 +103,242 @@ try {
   }
   const metadata = new Map(enriched.data.map(item => [item.id, item]))
   const getInfo = node => metadata.get(node.id) ?? node
+  const hasConflict = node => isConflictingLicense(getInfo(node).license)
 
   process.stdout.write("➡ Writing dependencies file\n")
   const licenses = []
   listedNodes.forEach(node => {
-    const licenseCode = getInfo(node).license ?? '*unspecified*'
+    const licenseCode = getInfo(node).license ?? UNSPECIFIED_LICENSE
     if (!licenses.includes(licenseCode)) licenses.push(licenseCode)
   })
 
   /**
-   * Render the table rows for a list of packages
+   * Sort the packages for a table: conflicting first, then runtime before development-only,
+   * then by name (case-insensitive, ascending) and version (ascending)
+   *
+   * @param {Array<{ node: any, dev: boolean }>} items
+   * @returns {Array<{ node: any, dev: boolean }>}    A sorted copy of the items
+   */
+  function sortItems(items)
+  {
+    return [...items].sort((a, b) => {
+      const infoA = getInfo(a.node)
+      const infoB = getInfo(b.node)
+      return Number(hasConflict(b.node)) - Number(hasConflict(a.node))
+        || Number(a.dev) - Number(b.dev)
+        || infoA.name.localeCompare(infoB.name, 'en', { sensitivity: 'base' })
+        || String(infoA.version).localeCompare(String(infoB.version), 'en', { numeric: true })
+    })
+  }
+
+  /**
+   * Render the table for a list of packages. The Conflict column is only included when at
+   * least one of the packages conflicts.
    *
    * @param {Array<{ node: any, dev: boolean }>} items
    * @returns {string}
    */
-  function renderRows(items)
+  function renderTable(items)
   {
-    return items.map(({ node, dev }) => {
+    const showConflict = items.some(({ node }) => hasConflict(node))
+    const header = `| Package | Dev |${ showConflict ? ' Conflict |' : '' } Version | License | Author | Maintainers | Link |
+| --- | :---: |${ showConflict ? ' :---: |' : '' } --- | --- | --- | --- | --- |`
+    const rows = sortItems(items).map(({ node, dev }) => {
       const item = getInfo(node)
-      return `| ${ item.homepage ? `[${ item.name}](${item.homepage})` : item.name } | ${ dev ? DEV_MARKER : '' } | ${ item.version } | ${ item.license ?? '*unspecified*' } | ${ formatAuthor(item.author) } | ${ formatAuthor(item.maintainers) } | [npm](https://www.npmjs.com/package/${ item.name }) |`
-    }).join("\n")
+      return `| ${ item.homepage ? `[${ item.name}](${item.homepage})` : item.name } | ${ dev ? DEV_MARKER : '' } |${ showConflict ? ` ${ hasConflict(node) ? CONFLICT_MARKER : '' } |` : '' } ${ item.version } | ${ item.license ?? UNSPECIFIED_LICENSE } | ${ formatAuthor(item.author) } | ${ formatAuthor(item.maintainers) } | [npm](https://www.npmjs.com/package/${ item.name }) |`
+    })
+    return `${ header }\n${ rows.join("\n") }`
   }
-  const tableHeader = `| Package | Dev | Version | License | Author | Maintainers | Link |
-| --- | :---: | --- | --- | --- | --- | --- |`
+
+  /**
+   * Render the count line of a section, the conflict count is only included when there are conflicts
+   *
+   * @param {Array<{ node: any, dev: boolean }>} items
+   * @returns {string}
+   */
+  function renderCounts(items)
+  {
+    const conflictCount = items.filter(({ node }) => hasConflict(node)).length
+    return `Dependencies: ${ items.length } (development-only: ${ items.filter(i => i.dev).length }${ conflictCount > 0 ? `, ${ CONFLICT_MARKER } conflicting with Apache-2.0: ${ conflictCount }` : '' })`
+  }
 
   const perPackageSections = workspaces.map(ws => {
-    const devCount = ws.dependencies.filter(d => d.dev).length
     return `### ${ ws.name }${ ws.version ? ` (${ ws.version })` : '' }
-Dependencies: ${ ws.dependencies.length } (development-only: ${ devCount })
+${ ws.description ? `${ ws.description }\n\n` : '' }${ renderCounts(ws.dependencies) }
 
-${ ws.dependencies.length > 0 ? `${ tableHeader }\n${ renderRows(ws.dependencies) }` : '*No dependencies*' }
+${ ws.dependencies.length > 0 ? renderTable(ws.dependencies) : '*No dependencies*' }
 `
   }).join("\n")
 
   const transitiveItems = transitiveNodes.map(node => ({ node, dev: isDevOnly(node) }))
-  const transitiveDevCount = transitiveItems.filter(i => i.dev).length
+  const conflictingNodes = listedNodes.filter(hasConflict)
+
+  const licenseRows = licenses.map(l => ({
+    license: l,
+    conflict: isConflictingLicense(l == UNSPECIFIED_LICENSE ? undefined : l),
+    count: listedNodes.filter(x => (getInfo(x).license ?? UNSPECIFIED_LICENSE) == l).length
+  })).sort((a, b) => Number(b.conflict) - Number(a.conflict) || a.license.localeCompare(b.license, 'en', { sensitivity: 'base' }))
+  const showLicenseConflict = licenseRows.some(row => row.conflict)
+  const licenseTable = `| License |${ showLicenseConflict ? ' Conflict |' : '' } Package count |
+| --- |${ showLicenseConflict ? ' :---: |' : '' } --- |
+${ licenseRows.map(row => `| ${ row.license } |${ showLicenseConflict ? ` ${ row.conflict ? CONFLICT_MARKER : '' } |` : '' } ${ row.count } |`).join("\n") }`
+
+  const slugs = new Set()
+  const sectionTitles = [
+    ...workspaces.map(ws => `${ ws.name }${ ws.version ? ` (${ ws.version })` : '' }`),
+    'Remaining dependencies (through hierarchy)',
+    'License usage overview'
+  ]
+  const [ packageTitles, otherTitles ] = [ sectionTitles.slice(0, workspaces.length), sectionTitles.slice(workspaces.length) ]
+  const contents = [
+    `- [Dependencies per package](#${ slugify('Dependencies per package', slugs) })`,
+    ...packageTitles.map(title => `  - [${ title }](#${ slugify(title, slugs) })`),
+    ...otherTitles.map(title => `- [${ title }](#${ slugify(title, slugs) })`)
+  ].join("\n")
 
   const packageList = `# Dependency disclosure
-The package ${ mainPkgName } has the following dependencies, which are software packages that are required to run this software. These packages are only referenced and will be resolved, downloaded and installed by your dependency manager.
+The dependencies of the packages in ${ mainPkgName } are only referenced: your dependency manager resolves, downloads and installs them.
 
-This overview and list is automatically generated from the dependencies used in developing of these packages, not necessarily in running the packages.
+**Contents**
+${ contents }
 
-The overview first lists the dependencies that each package of this repository declares itself. After that, all remaining dependencies are listed, which are imported through the hierarchy of dependencies. Dependencies on other packages of this repository are not listed. The version is the version that is resolved in the lockfile.
+Generated from the dependencies used to develop these packages, not necessarily to run them. Packages of this repository are not listed. Versions are those resolved in the lockfile. Rows are sorted conflicting first, then runtime before development-only, then by name and version.
 
-Legend: ${ DEV_MARKER } in the *Dev* column indicates a development-only dependency. For the direct dependencies of a package, these are the packages the package only declares as \`devDependencies\`. For the remaining dependencies, these are the packages that can only be reached through a \`devDependencies\` entry; a package with at least one path from a runtime dependency is not development-only. Peer dependencies are only listed when the package also declares them as \`devDependencies\`, as these are the only ones that are installed for the package.
+- ${ DEV_MARKER } *Dev*: development-only. For a package's own dependencies: only declared in \`devDependencies\`. For the remaining dependencies: only reachable through a \`devDependencies\` entry. Peer dependencies are only listed when also a \`devDependencies\` entry.
+- ${ CONFLICT_MARKER } *Conflict*: the license conflicts with releasing the referencing package under Apache-2.0: GPL (also with exceptions), LGPL, AGPL, SSPL, BUSL, non-commercial or Commons Clause licenses, and unknown, missing or custom licenses (\`UNLICENSED\`, \`SEE LICENSE IN\`). Weak copyleft (MPL, EPL, CDDL) and permissive licenses are not marked. \`A OR B\` and \`A AND B\` are only marked when none of the licenses is acceptable. This is an automated indication based on npm license metadata, not legal advice. ${ conflictingNodes.length > 0 ? `${ conflictingNodes.length } of ${ listedNodes.length } dependencies are marked; the column is only shown in tables that contain one.` : 'No conflicts were found, so the column is not shown.' }
 
 ## Dependencies per package
 ${ perPackageSections }
 ## Remaining dependencies (through hierarchy)
-These packages are not declared by one of the packages above, but are imported through the hierarchy of the dependencies listed above. Dependencies: ${ transitiveItems.length } (development-only: ${ transitiveDevCount })
+Not declared by the packages above, but imported through their dependencies. ${ renderCounts(transitiveItems) }
 
-${ tableHeader }
-${ renderRows(transitiveItems) }
+${ renderTable(transitiveItems) }
 
 ## License usage overview
-The dependencies listed above make use of these licenses:
-| License | Package count |
-| --- | --- |
-${ licenses.sort().map(l => `| ${ l } | ${ listedNodes.filter(x => (getInfo(x).license ?? '*unspecified*') == l ).length } |`).join("\n")}
+${ licenseTable }
 `
   fs.writeFileSync('DEPENDENCIES.md', packageList)
-  process.stdout.write(`✔ Created dependencies file (${ workspaces.length } packages, ${ directNodes.size } direct and ${ transitiveItems.length } remaining dependencies)\n`)
+  conflictingNodes.forEach(node => {
+    const referencedBy = workspaces.filter(ws => reachable(graph, ws.dependencies.map(d => d.node)).has(node)).map(ws => ws.name)
+    process.stdout.write(`${ CONFLICT_MARKER } ${ node.name }@${ node.version } (${ getInfo(node).license ?? UNSPECIFIED_LICENSE }) referenced by ${ referencedBy.join(', ') }\n`)
+  })
+  process.stdout.write(`✔ Created dependencies file (${ workspaces.length } packages, ${ directNodes.size } direct and ${ transitiveItems.length } remaining dependencies, ${ conflictingNodes.length } marked ${ CONFLICT_MARKER })\n`)
 } catch (e) {
   process.stderr.write(`Error: ${ e.message }\n`)
   process.exit(1)
+}
+
+/**
+ * Create the anchor GitHub generates for a heading: lowercase, characters other than letters,
+ * numbers, `_`, `-` and spaces removed, spaces replaced by `-` and a numeric suffix for duplicates
+ *
+ * @param {string} title    The heading text
+ * @param {Set<string>} used    The anchors already used in the document, which is updated
+ * @returns {string}    The anchor, without the leading `#`
+ */
+function slugify(title, used)
+{
+  const base = title.toLowerCase().replace(/[^\p{L}\p{N}\p{M}_\- ]/gu, '').replace(/ /g, '-')
+  let slug = base
+  for (let counter = 1; used.has(slug); counter++)
+    slug = `${ base }-${ counter }`
+  used.add(slug)
+  return slug
+}
+
+/**
+ * Get the license of a package as text from its npm metadata, supporting the current
+ * `license` string and the legacy `license` object and `license`/`licenses` arrays
+ *
+ * @param {{ license?: any, licenses?: any }} packageInfo   The package metadata
+ * @returns {string | undefined}    The license (SPDX) expression, `undefined` when not specified.
+ *      Multiple licenses are alternatives, so they are combined with `OR`.
+ */
+function normalizeLicense(packageInfo)
+{
+  /**
+   * @param {any} value
+   * @returns {string | undefined}
+   */
+  const toText = value => {
+    if (Array.isArray(value)) {
+      const texts = value.map(toText).filter(x => x)
+      return texts.length > 1 ? `(${ texts.join(' OR ') })` : texts[0]
+    }
+    const text = typeof(value) == 'string' ? value : value?.type
+    return typeof(text) == 'string' && text.trim().length > 0 ? text.trim() : undefined
+  }
+  return toText(packageInfo.license) ?? toText(packageInfo.licenses)
+}
+
+/**
+ * Determine if a license (SPDX) expression conflicts with releasing a package that
+ * references it under Apache-2.0, see `CONFLICTING_LICENSES` for the used policy.
+ *
+ * @param {string | undefined} license  The license expression, `undefined` when not specified
+ * @returns {boolean}   `true` when there is a conflict. For `A OR B` and `A AND B` only when
+ *      none of the licenses is acceptable (multiple licenses do not conflict when at least one is compatible). Expressions that
+ *      cannot be parsed conflict, as these cannot be assessed.
+ */
+function isConflictingLicense(license)
+{
+  if (!license || /^SEE LICENSE IN/i.test(license.trim()))
+    return true
+  const tokens = license.match(/\(|\)|[^\s()]+/g) ?? []
+  let position = 0
+
+  const parseOr = () => {
+    let conflicts = parseAnd()
+    while (tokens[position]?.toUpperCase() == 'OR') {
+      position++
+      const next = parseAnd()
+      conflicts = conflicts && next
+    }
+    return conflicts
+  }
+  const parseAnd = () => {
+    let conflicts = parseTerm()
+    while (tokens[position]?.toUpperCase() == 'AND') {
+      position++
+      const next = parseTerm()
+      conflicts = conflicts && next
+    }
+    return conflicts
+  }
+  const parseTerm = () => {
+    const token = tokens[position++]
+    if (token == '(') {
+      const conflicts = parseOr()
+      if (tokens[position++] != ')')
+        throw new Error('Unbalanced parentheses')
+      return conflicts
+    }
+    if (!token || token == ')' || ['AND', 'OR', 'WITH'].includes(token.toUpperCase()))
+      throw new Error('Unexpected token')
+    const identifier = token.replace(/\+$/, '')
+    // An exception (WITH) does not make a GPL license acceptable, as that needs a case-by-case assessment
+    if (tokens[position]?.toUpperCase() == 'WITH')
+      position += 2
+    return CONFLICTING_LICENSES.some(pattern => pattern.test(identifier)) || isUnknownIdentifier(identifier)
+  }
+
+  try {
+    const conflicts = parseOr()
+    return position < tokens.length ? true : conflicts
+  } catch {
+    return true
+  }
+}
+
+/**
+ * Check if an identifier is not a valid license identifier, which means that it can not be assessed
+ *
+ * @param {string} identifier
+ * @returns {boolean}
+ */
+function isUnknownIdentifier(identifier)
+{
+  return !/^[A-Za-z0-9][A-Za-z0-9.-]*$/.test(identifier)
 }
 
 /**
@@ -206,11 +407,29 @@ function buildGraph(lockData, resolutions = {})
 }
 
 /**
+ * Format the description of a package.json for use as a single line of Markdown text
+ *
+ * @param {any} description     The `description` value of the package.json
+ * @returns {string | undefined}    The description with whitespace collapsed and Markdown/HTML syntax
+ *      escaped, `undefined` when there is no description
+ */
+function formatDescription(description)
+{
+  if (typeof(description) != 'string')
+    return undefined
+  const text = description.replace(/\s+/g, ' ').trim()
+  if (text.length == 0)
+    return undefined
+  return text.replace(/[\\`*_{}[\]()<>|~&]/g, '\\$&').replace(/^([#+-]|\d+[.)])/, '\\$1')
+}
+
+/**
  * Read the workspace packages from the graph, with the dependencies they declare in their package.json
  *
  * @param {ReturnType<typeof buildGraph>} graph
- * @returns {Array<{ name: string, version: string | undefined, dependencies: Array<{ node: any, dev: boolean }> }>}
- *      The workspace packages (workspace root last), with their sorted direct dependencies. A dependency
+ * @returns {Array<{ name: string, version: string | undefined, description: string | undefined, dependencies: Array<{ node: any, dev: boolean }> }>}
+ *      The workspace packages (workspace root last), with their Markdown-safe description (`undefined`
+ *      when the package.json has none) and their sorted direct dependencies. A dependency
  *      is `dev` when it is only declared in the `devDependencies`.
  */
 function readWorkspaces(graph)
@@ -234,7 +453,7 @@ function readWorkspaces(graph)
       return { node: dependencyNode, dev }
     }).filter(x => x && x.node.source != 'workspace')
       .sort((a, b) => a.node.name.localeCompare(b.node.name) || a.node.version.localeCompare(b.node.version))
-    return { name: pkgInfo.name ?? node.name, version: pkgInfo.version, dependencies, isRoot: location == '.' }
+    return { name: pkgInfo.name ?? node.name, version: pkgInfo.version, description: formatDescription(pkgInfo.description), dependencies, isRoot: location == '.' }
   }).sort((a, b) => Number(a.isRoot) - Number(b.isRoot) || a.name.localeCompare(b.name))
 }
 
