@@ -12,11 +12,22 @@ const testedPackages = [
   'optimizely-cms-react'
 ]
 
+// Tests always run as a production build without debug or query logging,
+// regardless of the developer's shell or .env files.
+const testEnv = {
+  NODE_ENV: 'production',
+  OPTIMIZELY_DEBUG: '0',
+  OPTIMIZELY_GRAPH_QUERY_LOG: '0'
+}
+
 export default defineConfig({
   test: {
     projects: testedPackages.map(name => ({
+      // NODE_ENV=production removes jsxDEV from React's JSX runtime
+      oxc: { jsx: { development: false } },
       test: {
         name,
+        env: testEnv,
         root: `./packages/${name}`,
         include: ['test/**/*.test.{ts,tsx}']
       }
