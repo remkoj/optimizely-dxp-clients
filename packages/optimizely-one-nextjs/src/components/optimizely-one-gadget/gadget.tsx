@@ -27,6 +27,7 @@ import { IconBolt, IconXmark } from '@optiaxiom/icons'
 import dynamic from 'next/dynamic'
 import type { SupportedProductNames } from '../types'
 import { useOptimizelyOne } from '../context'
+import { isLoggingEnabled } from '../../logger'
 import OptimizelyLogo from './logo'
 import { useDragScroll } from './_ui'
 import { useOptimizelyTestCookie } from './_test-cookie'
@@ -167,6 +168,8 @@ export const OptimizelyOneGadget: FunctionComponent<
   }, [])
 
   useEffect(() => {
+    if (!isLoggingEnabled())
+      return
     console.groupCollapsed(
       `🔎 [Optimizely One Gadget] Initializing Optimizely Demo Gadget`
     )

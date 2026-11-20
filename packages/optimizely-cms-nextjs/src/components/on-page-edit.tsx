@@ -8,6 +8,7 @@ import {
   type PropsWithChildren,
 } from 'react'
 import { useRouter } from 'next/navigation.js'
+import { logger } from '../logger.js'
 
 type OptimizelyCmsContentSavedEvent = {
   contentLink: string
@@ -33,7 +34,7 @@ export const OnPageEdit: FunctionComponent<
     if (eventData?.previewUrl && previewUrl != eventData.previewUrl) {
       // First: Use the updated preview URL if we have it
       const newUrl = new URL(eventData.previewUrl)
-      console.log(
+      logger.log(
         `Navigating to provided preview path: ${newUrl.pathname}${newUrl.search}`
       )
       if (refreshTimeout)
@@ -44,7 +45,7 @@ export const OnPageEdit: FunctionComponent<
       else router.push(newUrl.pathname + newUrl.search, { scroll: false })
       // or refresh the page
     } else {
-      console.log(`Refreshing preview: ${eventData.contentLink}`)
+      logger.log(`Refreshing preview: ${eventData.contentLink}`)
       if (refreshTimeout)
         reloadDelay.current = setTimeout(() => router.refresh(), refreshTimeout)
       else router.refresh()
@@ -56,7 +57,7 @@ export const OnPageEdit: FunctionComponent<
 
   // Bind to the Saved event
   useEffect(() => {
-    console.log(`🟢 Enabling ContentSaved event handler`)
+    logger.log(`🟢 Enabling ContentSaved event handler`)
     window.addEventListener('optimizely:cms:contentSaved', listener)
 
     let unsub: (() => void) | undefined = undefined
@@ -65,7 +66,7 @@ export const OnPageEdit: FunctionComponent<
     waitFor(() => window.epi)
       .then((epi) => {
         if (!cancelled) {
-          console.log(`⚪ Enabling ContentSaved event handler`)
+          logger.log(`⚪ Enabling ContentSaved event handler`)
           const r = epi.subscribe('contentSaved', onContentSaved)
           unsub = r.remove
         }
@@ -77,7 +78,7 @@ export const OnPageEdit: FunctionComponent<
     // Unsubscribe when needed
     return () => {
       cancelled = true
-      console.log(`Navigating away, disabling ContentSaved event handler`)
+      logger.log(`Navigating away, disabling ContentSaved event handler`)
       window.removeEventListener('optimizely:cms:contentSaved', listener)
       if (unsub) unsub()
     }

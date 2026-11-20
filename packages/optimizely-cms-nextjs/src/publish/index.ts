@@ -2,6 +2,7 @@ import { type NextRequest, NextResponse } from 'next/server.js'
 import { revalidatePath, revalidateTag } from "next/cache.js"
 import { type ClientFactory, type IOptiGraphClient, OptiCmsSchema, RouteResolver, type Route } from '@remkoj/optimizely-graph-client'
 import { createAuthorizedClient } from '../client.js'
+import { logger } from '../logger.js'
 
 export { type NextRequest, NextResponse } from 'next/server.js'
 export type PublishApiHandler = (req: NextRequest) => Promise<NextResponse<PublishApiResponse>> | NextResponse<PublishApiResponse>
@@ -258,36 +259,36 @@ export function createPublishApi(options?: Partial<PublishApiOptions>): PublishA
     try {
       // Get the webhook data
       const webhookData = await req.json().catch(() => undefined) as PublishHookData | null | undefined
-      console.debug('[Publish-API] Webhook data', webhookData)
+      logger.debug('[Publish-API] Webhook data', webhookData)
 
       // Resolve the tags related to this request
       const publishTags = await resolveTags(webhookData)
-      console.debug('[Publish-API] Publishing tags', publishTags)
+      logger.debug('[Publish-API] Publishing tags', publishTags)
 
       // Purge everything if not known (e.g. for a GET request)
       if (!webhookData) {
         console.error("[Publish-API] No hook data received, optimization disabled")
         const responseData = publishAll(paths, publishTags);
-        console.debug("[Publish-API] Publish result:", JSON.stringify(responseData))
+        logger.debug("[Publish-API] Publish result:", JSON.stringify(responseData))
         return NextResponse.json(responseData)
       }
 
       // Make sure we're allowed to process the hook
       if (!hookDataFilter(webhookData.type)) {
-        console.log("[Publish-API] Webhook ignored due to hookDataFilter", webhookData.type)
+        logger.log("[Publish-API] Webhook ignored due to hookDataFilter", webhookData.type)
         return NextResponse.json({ optimized: false, revalidated: { paths: [], tags: [] } })
       }
 
       // If we're not optimizing, just publish everything
       if (!optimizePublish) {
         const responseData = publishAll(paths, publishTags);
-        console.debug("[Publish-API] Publish result:", JSON.stringify(responseData))
+        logger.debug("[Publish-API] Publish result:", JSON.stringify(responseData))
         return NextResponse.json(responseData)
       }
 
       // Get the actual content ids from the hook data
       const contentIds = getItemIds(webhookData)
-      console.debug("[Publish-API] Content items to publish:", JSON.stringify(contentIds))
+      logger.debug("[Publish-API] Content items to publish:", JSON.stringify(contentIds))
 
       // Resolve the contentids to paths
       const router = getRouteResolver(client)
@@ -299,11 +300,11 @@ export function createPublishApi(options?: Partial<PublishApiOptions>): PublishA
         }
         return result.value?.path
       }).filter(x => x) as Array<string>
-      console.debug("[Publish-API] Content paths to publish:", JSON.stringify(pathsToFlush))
+      logger.debug("[Publish-API] Content paths to publish:", JSON.stringify(pathsToFlush))
 
       // Flush these paths
       const responseData = publishAll(pathsToFlush, publishTags, true);
-      console.debug("[Publish-API] Publish result:", JSON.stringify(responseData))
+      logger.debug("[Publish-API] Publish result:", JSON.stringify(responseData))
       return NextResponse.json(responseData)
     } catch (e) {
       console.error("[Publish-API] Error handling publishing request", (e as Error)?.message ?? e)

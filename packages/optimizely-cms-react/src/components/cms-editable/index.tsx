@@ -6,6 +6,7 @@ import type {
   ElementProps,
 } from '../type-utils.js'
 import { type ContentLink } from '@remkoj/optimizely-graph-client'
+import { logger } from '../../logger.js'
 
 /**
  * Properties for `CmsEditable`.
@@ -195,7 +196,7 @@ export const CmsEditable: CmsEditableBaseComponent = <CT extends ElementType>({
   }
 
   if (typeof RenderElement !== 'string') {
-    console.log(`⚠ [CmsEditable] Rendering a custom component, forwarding context to ${RenderElement.name}`, forwardCtx);
+    logger.log(`⚠ [CmsEditable] Rendering a custom component, forwarding context to ${RenderElement.name}`, forwardCtx);
     if (forwardCtx === true) itemProps['ctx'] = ctx
     if (typeof forwardCtx === 'string' && forwardCtx.length > 0)
       itemProps[forwardCtx] = ctx

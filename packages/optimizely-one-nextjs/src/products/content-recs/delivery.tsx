@@ -1,6 +1,7 @@
 'use client'
 import { useMemo, useEffect, useState, useId, type FunctionComponent } from "react"
 import { usePathname } from "next/navigation"
+import { logger } from '../../logger.js'
 
 function getFullUrl()
 {
@@ -69,7 +70,7 @@ export const ContentRecsDelivery : FunctionComponent<ContentRecsDeliveryProps> =
 
   // Make sure we only load the recommendations client side
   useEffect(() => {
-    console.log(`💭 Enabling recommendations widget ${ apiKey } on page ${path}`)
+    logger.log(`💭 Enabling recommendations widget ${ apiKey } on page ${path}`)
     setPageUrl(getFullUrl())
   }, [ path, apiKey ])
 
@@ -88,7 +89,7 @@ export const ContentRecsDelivery : FunctionComponent<ContentRecsDeliveryProps> =
   // Run the actual request for the recommendations
   useEffect(() => {
     if (!serviceUrl) return
-    console.log(`💭 Fetching recommendations for widget ${ apiKey }`)
+    logger.log(`💭 Fetching recommendations for widget ${ apiKey }`)
     const abort = new AbortController()
     fetch(serviceUrl, { signal: abort.signal, cache: 'no-store' })
       .then(r => r.json())
