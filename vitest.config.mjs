@@ -9,7 +9,8 @@ const testedPackages = [
   'optimizely-graph-cli',
   'optimizely-cms-api',
   'optimizely-cms-cli',
-  'optimizely-cms-react'
+  'optimizely-cms-react',
+  'hey-api-wrapper'
 ]
 
 // Tests always run as a production build without debug or query logging,

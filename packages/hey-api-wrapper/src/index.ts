@@ -7,7 +7,9 @@ import type { ApiClientConfig, ApiClientFunctions, ClassWithMixin, OperationsLis
  * hey-api operation. Each generated method calls the matching operation,
  * injecting the instance's network client and `throwOnError: false`, throws an
  * {@link ApiError} when the operation reports an error, and otherwise returns
- * the response `data` (falling back to the full result).
+ * the response `data` (falling back to the full result). The thrown
+ * {@link ApiError} carries the full request and response, so sanitize it before
+ * logging or storing it.
  *
  * @param Base The {@link ApiClient} subclass to extend.
  * @param Operations Map of hey-api operation functions to bind as methods.
@@ -66,6 +68,48 @@ export function withOperations<TBase extends ApiClientStatic, TOperations extend
 
   // Return the new class
   return NewClass as unknown as ClassWithMixin<TBase, ApiClientFunctions<TOperations>>
+}
+
+/**
+ * Replaces the sensitive parts of a URL so it can be written to a log: the
+ * credentials and fragment are dropped and the values of all query-string
+ * parameters are masked, while the origin, path and parameter names are kept.
+ * Only the returned text is affected, the original URL is never modified.
+ *
+ * @param url The URL to make safe for logging.
+ * @returns The URL with the query-string values masked.
+ */
+function redactUrl(url: string): string {
+  const maskedValue = '***'
+  try {
+    const parsed = new URL(url)
+    const names = [...parsed.searchParams.keys()].map(name => `${encodeURIComponent(name)}=${maskedValue}`)
+    return `${parsed.origin}${parsed.pathname}${names.length > 0 ? '?' + names.join('&') : ''}`
+  } catch {
+    // Not an absolute URL, so mask the values of everything that follows the first `?`
+    const [target] = url.split('#')
+    const queryStart = target.indexOf('?')
+    if (queryStart < 0)
+      return target
+    const names = target.slice(queryStart + 1).split('&').filter(part => part.length > 0).map(part => `${part.split('=')[0]}=${maskedValue}`)
+    return `${target.slice(0, queryStart)}${names.length > 0 ? '?' + names.join('&') : ''}`
+  }
+}
+
+/** The maximum length of the text that is used as the message of an {@link ApiError} */
+const MAX_MESSAGE_LENGTH = 500
+
+/**
+ * Makes untrusted text safe to use as an error message: control characters
+ * (including line breaks and escape sequences) are replaced by a space and the
+ * length is bounded. Only the returned text is affected.
+ *
+ * @param text The untrusted text, e.g. an error string returned by a server.
+ * @returns The sanitized text, which is empty when no printable text remains.
+ */
+function sanitizeMessage(text: string): string {
+  const printable = text.replace(/[\p{Cc}\u2028\u2029]+/gu, ' ').trim()
+  return printable.length > MAX_MESSAGE_LENGTH ? printable.slice(0, MAX_MESSAGE_LENGTH - 1) + '…' : printable
 }
 
 /**
@@ -161,11 +205,11 @@ export abstract class ApiClient<
     if (this._config.debug) {
       const name = this._config.name ?? 'API Client';
       this._client.interceptors.request.use(async (request) => {
-        console.log(`🔍 [${ name }] Sending ${request.method} request to ${request.url}`)
+        console.log(`🔍 [${ name }] Sending ${request.method} request to ${redactUrl(request.url)}`)
         return request
       })
       this._client.interceptors.response.use((response, request) => {
-        console.log(`✨ [CMS API] Received response ${response.status} ${response.statusText} of type ${response.headers.get('Content-Type') ?? 'unknown'} for ${request.url}`)
+        console.log(`✨ [CMS API] Received response ${response.status} ${response.statusText} of type ${response.headers.get('Content-Type') ?? 'unknown'} for ${redactUrl(request.url)}`)
         return response
       })
     }
@@ -215,40 +259,61 @@ export abstract class ApiClient<
  * Error thrown when an API operation returns an error result. Wraps the
  * originating error payload together with the HTTP request and response for
  * inspection.
+ *
+ * **Sanitizing is the responsibility of the implementor.** The error
+ * deliberately exposes the complete, unmodified {@link ApiError.request | request},
+ * {@link ApiError.response | response} and error payload ({@link ApiError.data | data}).
+ * These can contain credentials (e.g. the `Authorization` header or access tokens
+ * in the URL) and personal data (request and response bodies). Whoever writes
+ * this error, or any of these properties, to a log, error reporter or other
+ * storage, or serializes it, must remove or mask such values first. Humans and
+ * agents extending this code must not forward the error as-is to such outputs.
+ *
+ * Only the {@link Error.message | message} is sanitized: control characters are
+ * replaced and its length is bounded, as it may originate from the server.
  */
 export class ApiError extends Error {
   /** Raw error context captured from the failed operation: the error payload and the originating HTTP request and response. */
   protected _ctx: { error?: unknown, request?: Request, response?: Response }
 
   /**
-   * @param data The operation error context: the error payload plus the HTTP request and response. A string error is used verbatim as the message; otherwise the message is derived from the response status.
+   * @param data The operation error context: the error payload plus the HTTP request and response, stored as-is. A string error is used as the message after control characters are replaced and the length is bounded (the stored payload stays unchanged); otherwise the message is derived from the response status.
    */
   constructor(data: { error?: unknown, request?: Request, response?: Response }) {
-    if (typeof data.error == 'string')
-      super(data.error)
-    else
-      super(`Optimizely CMS API Error: ${data.response?.status ?? 500} ${data.response?.statusText ?? 'Unknown error'}`)
+    const message = typeof data.error == 'string' ? sanitizeMessage(data.error) : ''
+    super(message.length > 0 ? message : `Optimizely CMS API Error: ${data.response?.status ?? 500} ${data.response?.statusText ?? 'Unknown error'}`)
     this._ctx = data;
   }
 
-  /** The error payload returned by the operation. */
+  /**
+   * The error payload returned by the operation, unmodified. It may contain
+   * sensitive or personal data: sanitize it before logging or storing it.
+   */
   public get data(): unknown {
     return this._ctx.error
   }
 
   /**
-   * @deprecated Use {@link data} instead.
+   * @deprecated Use {@link data} instead. The same sanitizing responsibility applies.
    */
   public get body(): unknown {
     return this._ctx.error
   }
 
-  /** The HTTP request that produced the error. */
+  /**
+   * The HTTP request that produced the error, unmodified. Its URL and headers
+   * (e.g. `Authorization`) may contain credentials: sanitizing it before
+   * logging, storing or serializing is the responsibility of the implementor.
+   */
   public get request(): Request | undefined {
     return this._ctx.request
   }
 
-  /** The HTTP response that produced the error. */
+  /**
+   * The HTTP response that produced the error, unmodified. Its headers and body
+   * may contain credentials or personal data: sanitizing it before logging,
+   * storing or serializing is the responsibility of the implementor.
+   */
   public get response(): Response | undefined {
     return this._ctx.response
   }

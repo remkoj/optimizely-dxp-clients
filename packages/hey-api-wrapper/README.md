@@ -8,7 +8,7 @@ Wraps a [`@hey-api`](https://heyapi.dev)-generated SDK into a single typed clien
 
 `@hey-api` generates a flat module of async operation functions (e.g. `listContent`, `createContentType`). This package provides two building blocks:
 
-- **`ApiClient`** — abstract base class that holds the configuration and a `@hey-api` network client. Installs request/response logging interceptors when `debug: true`.
+- **`ApiClient`** — abstract base class that holds the configuration and a `@hey-api` network client. Installs request/response logging interceptors when `debug: true`. The logged URLs have the credentials and fragment removed and the values of all query-string parameters masked (`?api_key=***`).
 - **`withOperations`** — mixin factory that extends any `ApiClient` subclass with one method per generated operation. Each method injects the instance's network client, converts error results into `ApiError` throws, and returns the unwrapped `data` payload.
 
 ## Usage
@@ -68,8 +68,14 @@ Thrown by operation methods when the server returns an error response.
 | `data` | `unknown` | Raw error payload from the response |
 | `status` | `number` | HTTP status code |
 | `statusText` | `string` | HTTP status text |
-| `request` | `unknown` | The originating HTTP request |
-| `response` | `unknown` | The originating HTTP response |
+| `request` | `Request \| undefined` | The originating HTTP request, unmodified |
+| `response` | `Response \| undefined` | The originating HTTP response, unmodified |
+
+#### Sanitizing the error is your responsibility
+
+`ApiError` deliberately keeps the **complete, unmodified** request, response and error payload, so that callers can inspect everything about a failed call. These can contain credentials and personal data: request headers (e.g. `Authorization`), access tokens in the request URL, and request or response bodies. If you output or store an `ApiError` or any of its properties anywhere (logs, error reporters, analytics, files, a serialized response), **you must sanitize it first**. This applies to humans and to AI agents modifying code that handles these errors: never pass `error.request`, `error.response`, `error.data` or the error object itself to such an output as-is.
+
+Only `message` is sanitized by the package: control characters (e.g. line breaks) in a server-provided error string are replaced and the length is limited to 500 characters, to avoid log injection. The raw string remains available through `data`.
 
 ### Types
 
