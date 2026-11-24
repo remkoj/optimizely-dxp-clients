@@ -39,7 +39,7 @@
     "@rollup/pluginutils": "^5.5.1",
     "@types/node": "^24.19.2",
     "@types/yargs": "^17.0.35",
-    "rollup": "^4.68.7",
+    "rollup": "^4.68.8",
     "source-map-support": "^0.5.21",
     "typescript": "^6.0.3"
   },

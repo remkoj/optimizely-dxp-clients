@@ -46,12 +46,12 @@
     "@rollup/plugin-typescript": "^12.3.1",
     "@types/node": "^24.19.2",
     "@types/yargs": "^17.0.35",
-    "rollup": "^4.68.7",
+    "rollup": "^4.68.8",
     "typescript": "^6.0.3"
   },
   "dependencies": {
     "@fastify/deepmerge": "^3.2.4",
-    "@inquirer/prompts": "^8.8.0",
+    "@inquirer/prompts": "^8.8.1",
     "@remkoj/optimizely-cms-api": "6.0.0-rc.6",
     "@remkoj/optimizely-graph-functions": "6.0.0-rc.6",
     "@sindresorhus/slugify": "^4.0.1",
