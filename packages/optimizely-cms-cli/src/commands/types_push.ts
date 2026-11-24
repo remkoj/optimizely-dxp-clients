@@ -17,9 +17,13 @@ type TypesPushModule = CliModule<{
   types?: string[]
 }>
 
+/**
+ * CLI command that pushes the local `.opti-type.json` content type definitions into the CMS.
+ * Missing content types are created, existing content types are patched.
+ */
 export const TypesPushCommand: TypesPushModule = {
   command: "types:push",
-  describe: "Push content type definition into Optimizely CMS (create / replace)",
+  describe: "Push content type definition into Optimizely CMS (create / patch)",
   builder: (yargs) => {
     yargs.option('force', { alias: 'f', description: "Overwrite existing files", boolean: true, type: 'boolean', demandOption: false, default: false })
     yargs.option('excludeTypes', { alias: 'ect', description: "Exclude these content types", string: true, type: 'array', demandOption: false, default: [] })
@@ -33,7 +37,7 @@ export const TypesPushCommand: TypesPushModule = {
     const client = createClient(cfg)
 
     // Find all type files
-    process.stdout.write(chalk.yellowBright(`${figures.arrowRight} Pushing (create/replace) Content Types into Optimizely CMS\n`))
+    process.stdout.write(chalk.yellowBright(`${figures.arrowRight} Pushing (create/patch) Content Types into Optimizely CMS\n`))
     const typeDefinitionFiles = await glob("./**/*.opti-type.json", { cwd: basePath })
 
     // Read & filter all identified type files
@@ -121,4 +125,5 @@ export const TypesPushCommand: TypesPushModule = {
   }
 }
 
+/** Default export for command registration convenience. */
 export default TypesPushCommand

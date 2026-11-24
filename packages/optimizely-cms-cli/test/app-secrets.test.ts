@@ -53,7 +53,13 @@ describe('createOptiCmsApp secret handling', () => {
   it('does not print the client secret in the usage error output', async () => {
     const app = createOptiCmsApp('test-cli', '0.0.0')
     await app.exitProcess(false).parse(['--no-such-option-given'])
-    expectMasked()
+    const text = output.join('\n')
+    const secret = ENV.OPTIMIZELY_CMS_CLIENT_SECRET
+    // Usage errors only report the error, the full help (with option defaults) is not printed
+    expect(text).toContain('Not enough non-option arguments')
+    expect(text).not.toContain(secret)
+    expect(text).not.toContain(secret.substring(0, 8))
+    expect(text).not.toContain(`${secret.substring(0, 4)}********`)
   })
 
   it('keeps the real client secret as runtime default', async () => {

@@ -68,7 +68,7 @@ yarn opti-cms <command> [options]
 | `styles:push` | Push Visual Builder style definitions into the CMS (create/replace) |
 | `styles:delete` | Remove Visual Builder style definitions from the CMS |
 | `types:pull` | Pull content type definition files into the project |
-| `types:push` | Push content type definitions into the CMS (create/replace) |
+| `types:push` | Push content type definitions into the CMS (create/patch) |
 
 ## `nextjs:factory` — Component Factory generation
 

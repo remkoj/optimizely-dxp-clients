@@ -4,6 +4,17 @@ import { type OptiCmsApp } from './types.js'
 import chalk from 'chalk';
 import { maskSecret } from './utils/index.js'
 
+/**
+ * Creates the yargs application for the `opti-cms` CLI, including the global options.
+ * Command errors are printed to stderr as the error message only, without the full help output.
+ *
+ * @param scriptName The name of the CLI script, shown in the usage information
+ * @param version    The version to report, defaults to `development`
+ * @param epilogue   The text shown below the help output, defaults to the copyright notice
+ * @param envFiles   The environment files that have been loaded, these are listed on startup
+ * @param projectDir The default application root folder, defaults to the current working directory
+ * @returns The configured yargs application
+ */
 export function createOptiCmsApp(scriptName: string, version?: string, epilogue?: string, envFiles?: Array<string>, projectDir?: string): OptiCmsApp {
   if (envFiles) {
     process.stdout.write(chalk.bold(`✅ Loaded environment files:`) + "\n")
@@ -37,17 +48,16 @@ export function createOptiCmsApp(scriptName: string, version?: string, epilogue?
     .demandCommand(1, 1)
     .epilogue(epilogue ?? `Copyright Remko Jantzen - 2023-${(new Date(Date.now())).getFullYear()}`)
     .help()
-    .fail((msg, error, args) => {
+    .fail((msg, error) => {
       if (msg)
         console.error(chalk.redBright(msg) + "\n")
 
       if (error)
         console.error(chalk.redBright(`[${chalk.bold(error.name ?? 'Error')}]: ${error.message ?? ''}`) + '\n')
-
-      args.showHelp("error")
     })
 }
 
+/** Default export for convenience, see {@link createOptiCmsApp}. */
 export default createOptiCmsApp
 
 function isDemanded(value: unknown) {

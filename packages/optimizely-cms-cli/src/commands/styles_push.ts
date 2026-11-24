@@ -17,6 +17,11 @@ type StylesPushModule = CliModule<{
   templates?: string[]
 }>
 
+/**
+ * CLI command that pushes the local `.opti-style.json` definitions into the CMS.
+ * Missing styles are created, existing styles are patched. The result is validated
+ * against the definition from disk, an incomplete create/patch is reported as an error.
+ */
 export const StylesPushCommand: StylesPushModule = {
   command: "styles:push",
   describe: "Push Visual Builder style definitions into the CMS (create/replace)",
@@ -75,7 +80,8 @@ export const StylesPushCommand: StylesPushModule = {
         client.displayTemplatesCreate({ body: styleDefinition })
       )
 
-      const missedFields = newTemplate ? generatePatch(newTemplate, currentTemplate, {
+      // Validate the result against the desired definition, so fields the CMS did not apply are detected
+      const missedFields = newTemplate ? generatePatch(newTemplate, styleDefinition, {
         readonlyFields: ['key', 'created', 'lastModified', 'createdBy', 'lastModifiedBy']
       }) : undefined;
       if (missedFields && Object.keys(missedFields).length > 0)
@@ -115,6 +121,7 @@ export const StylesPushCommand: StylesPushModule = {
     process.stdout.write(chalk.green(chalk.bold(figures.tick + " Done")) + "\n")
   }
 }
+/** Default export for command registration convenience. */
 export default StylesPushCommand
 
 function tryReadJsonFile<T = unknown>(filePath: string, debug: boolean = false): T | undefined {
