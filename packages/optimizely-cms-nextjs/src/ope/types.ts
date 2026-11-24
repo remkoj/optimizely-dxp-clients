@@ -1,7 +1,7 @@
 import { type ComponentType, type PropsWithChildren, type JSX } from 'react'
-import { type IOptiGraphClient } from '@remkoj/optimizely-graph-client'
 import { type GraphQLClient } from 'graphql-request'
 import { GenericContext, type ContentQueryProps } from '@remkoj/optimizely-cms-react/rsc'
+import { type NextJsClientOption } from '../client.js';
 
 export type ContentRequest = (Omit<ContentQueryProps<string>, 'path'> & { path: string | null, token: string, ctx: 'edit' | 'preview' })
 
@@ -59,7 +59,7 @@ export type EditViewOptions<LocaleType = string> = {
    * The message to show to the editor when awaiting the data to be updated
    * in ContentGraph
    */
-  refreshNotice: ComponentType<{}>
+  refreshNotice: ComponentType
 
   /**
    * The layout to use when rendering a page component
@@ -81,7 +81,7 @@ export type EditViewOptions<LocaleType = string> = {
    * @param       token       The token to be used
    * @returns     The Optimizely Graph Client
    */
-  clientFactory: (token?: string, scope?: 'request' | 'metadata') => IOptiGraphClient | Promise<IOptiGraphClient>
+  clientFactory: NextJsClientOption
 
   /**
    * If provided, this allows to override the CommunicationInjector

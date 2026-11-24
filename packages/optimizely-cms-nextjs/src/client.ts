@@ -75,31 +75,14 @@ function prevalidateToken(token?: string): token is string {
   return isNonEmptyString(token) && (token.length >= MIN_TOKEN_LENGTH || token.startsWith('use-'));
 }
 
-/**
- * Create an Optimizely Graph client with Next.js fetch directives and caching
- * enabled. Applied tokens update authentication and disable Graph caching.
- * In development or debug mode, a matching publish token or the HMAC/Basic
- * mode values may also select authenticated access unless bypass is disabled.
- *
- * In `request` scope, enabled Draft Mode switches a public client to HMAC and
- * enables preview. An already authorized client is left unchanged. This reads
- * Next.js request state unless `disableDraftMode` is set; use `metadata` scope
- * outside a request.
- *
- * @param token - Optional Graph token or development/debug authentication override.
- *   Values shorter than 16 characters are ignored unless they start with `use-`.
- * @param configOrScope - Graph configuration with Next.js options, or a scope
- *   shorthand. Defaults to `request`.
- * @returns A promise for the configured Graph client.
- * @throws If Graph configuration or authentication is invalid, or request
- *   state cannot be accessed when Draft Mode is checked.
- */
-export async function createNextJsClient(token?: string, configOrScope: RequestScope | NextJsOptimizelyGraphConfig = 'request'): Promise<IOptiGraphClient> {
+
+export function createNextJsClientSync(
+  token?: string,
+  configOrScope: RequestScope | NextJsOptimizelyGraphConfig = 'request'
+): IOptiGraphClient {
   // Prepare the context
   const hasToken = prevalidateToken(token);
   const config = extractConfig(configOrScope);
-  const scope = extractScope(configOrScope);
-  const allowDraftMode = config?.disableDraftMode !== true;
 
   // Create the client with Next.js fetch directives and caching enabled.
   const client = createBaseClient(config, undefined, { nextJsFetchDirectives: true, cache: true, queryCache: true });
@@ -149,6 +132,34 @@ export async function createNextJsClient(token?: string, configOrScope: RequestS
       updateAuthentication(client, token)
     }
   }
+
+  return client;
+}
+
+/**
+ * Create an Optimizely Graph client with Next.js fetch directives and caching
+ * enabled. Applied tokens update authentication and disable Graph caching.
+ * In development or debug mode, a matching publish token or the HMAC/Basic
+ * mode values may also select authenticated access unless bypass is disabled.
+ *
+ * In `request` scope, enabled Draft Mode switches a public client to HMAC and
+ * enables preview. An already authorized client is left unchanged. This reads
+ * Next.js request state unless `disableDraftMode` is set; use `metadata` scope
+ * outside a request.
+ *
+ * @param token - Optional Graph token or development/debug authentication override.
+ *   Values shorter than 16 characters are ignored unless they start with `use-`.
+ * @param configOrScope - Graph configuration with Next.js options, or a scope
+ *   shorthand. Defaults to `request`.
+ * @returns A promise for the configured Graph client.
+ * @throws If Graph configuration or authentication is invalid, or request
+ *   state cannot be accessed when Draft Mode is checked.
+ */
+export async function createNextJsClient(token?: string, configOrScope: RequestScope | NextJsOptimizelyGraphConfig = 'request'): Promise<IOptiGraphClient> {
+  const client = createNextJsClientSync(token, configOrScope);
+  const config = extractConfig(configOrScope);
+  const scope = extractScope(configOrScope);
+  const allowDraftMode = config?.disableDraftMode !== true;
 
   // Draft mode support
   if (allowDraftMode && scope === 'request' && (await draftMode()).isEnabled) {

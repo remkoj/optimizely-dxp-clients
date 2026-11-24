@@ -1,4 +1,3 @@
-import { createClient as client } from '@remkoj/optimizely-cms-nextjs';
 import { createPage } from '@remkoj/optimizely-cms-nextjs/page'
 import { factory } from '@/components/factory'
 import { channelId as channel } from '@/api';
@@ -8,7 +7,7 @@ const {
   generateMetadata,
   generateStaticParams,
   CmsPage: Page,
-} = createPage(factory, { channel, client })
+} = createPage(factory, { channel })
 
 // Configure the Next.JS route handling for the pages
 export const dynamic = 'error' // Throw an error when the [[...path]] route becomes dynamic, as this will seriously hurt site performance

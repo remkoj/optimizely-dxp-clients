@@ -19,7 +19,7 @@ import {
 } from '@remkoj/optimizely-cms-react/rsc'
 import { notFound } from 'next/navigation.js'
 import OnPageEdit from '../components/on-page-edit.js'
-import { createAuthorizedClient } from '../client.js'
+import { resolveClient, createNextJsClient } from '../client.js'
 import { type JSX } from 'react'
 import Script from 'next/script.js'
 import { getContentRequest, isValidRequest } from './tools.js'
@@ -30,7 +30,7 @@ const EmptyPageLayout : EditViewPageLayout = ({ children }) => <>{children}</>
 const defaultOptions: EditViewOptions<string> = {
   refreshNotice: () => <></>,
   layout: EmptyPageLayout,
-  clientFactory: (token?: string) => createAuthorizedClient(token),
+  clientFactory: createNextJsClient,
   communicationInjectorPath: '/util/javascript/communicationinjector.js',
   contentResolver: getContentRequest,
   requestValidator: isValidRequest,
@@ -88,7 +88,7 @@ export function createEditPageComponent<LocaleType = string>(
     const { token, ctx, ...contentRequest } = contentRequestInfo
 
     // Build context
-    const client = await clientFactory(token)
+    const client = await resolveClient(clientFactory, token, 'metadata')
     const context = new ServerContext({
       client,
       factory,
