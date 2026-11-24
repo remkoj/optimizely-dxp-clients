@@ -1,4 +1,4 @@
-import { readEnvironmentVariables, applyConfigDefaults, validateConfig, type OptimizelyGraphConfigInternal, type OptimizelyGraphConfig } from "../config.js"
+import { readEnvironmentVariables, applyConfigDefaults, validateConfig, DEFAULT_PUBLISH_HEADER, type OptimizelyGraphConfigInternal, type OptimizelyGraphConfig } from "../config.js"
 import { type ClientError, GraphQLClient, type RequestMiddleware, type Variables, type ResponseMiddleware } from "graphql-request"
 import { AuthMode, type RequestMethod, type IOptiGraphClient, type OptiGraphSiteInfo, type IOptiGraphClientFlags, type OptiCmsSchema, type FrontendUser, SchemaVersion } from "./types.js"
 import createHmacFetch, { type FetchAPI } from "../hmac-fetch.js"
@@ -79,7 +79,8 @@ export class ContentGraphClient extends GraphQLClient implements IOptiGraphClien
     return {
       frontendDomain: this._config.deploy_domain,
       cmsURL: this._config.dxp_url,
-      publishToken: this._config.publish
+      publishToken: this._config.publish,
+      publishHeader: this._config.publish_header ?? DEFAULT_PUBLISH_HEADER
     }
   }
 

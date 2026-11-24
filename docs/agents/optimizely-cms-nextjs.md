@@ -39,3 +39,7 @@ When a page cannot be resolved, `cms-page/_loadContentByPath.ts` and `cms-page/p
 - `createNextJsClient` reports authentication overrides and the Draft Mode switch through `logger.warn` from `src/logger.ts`, which always writes to stderr (`console.warn`) and is never gated; stdout stays clean in production. Warnings may only be silenced in tests (spy in the test setup), never in production code.
 - `createPublishApi` accepts an `IOptiGraphClient` instance or a (async) factory returning one; anything else makes the handler throw `The client must be an instance of IOptiGraphClient or a factory function returning the client`.
 - `test/draft-mode-client.test.tsx` covers `createNextJsClient` (Draft Mode on/off, `metadata` scope, `disableDraftMode`, authorized tokens), the `createPage`/`createLayout` call paths and the publish API client handling.
+
+## Publish API token
+
+`src/publish/index.ts` reads the token from the header `client.siteInfo.publishHeader` (set from `OPTIMIZELY_PUBLISH_HEADER`, default `DEFAULT_PUBLISH_HEADER` = `X-OPTLY-PUBLISH`, both from graph-client) and falls back to the deprecated `?token=` query parameter, which logs a `logger.warn` (stderr, never the value). The header wins over the query. Tokens are compared as SHA-256 digests with Web Crypto in constant time, the 401 log does not print the supplied token and the 500 body is generic. `test/publish-header.test.tsx` covers this.

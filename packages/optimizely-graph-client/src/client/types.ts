@@ -58,6 +58,10 @@ export type OptiGraphSiteInfo = {
   frontendDomain?: string,
   cmsURL?: string
   publishToken?: string
+  /**
+   * The name of the HTTP header that carries the publish token in the webhook request
+   */
+  publishHeader: string
 }
 
 export type IOptiGraphClientFlags = {

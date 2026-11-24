@@ -104,6 +104,10 @@ export const GET = publishApi
 export const POST = publishApi
 ```
 
+Optimizely Graph must send the publish token in a header: `OPTIMIZELY_PUBLISH_HEADER` (default `X-OPTLY-PUBLISH`) holds the header name and `OPTIMIZELY_PUBLISH_TOKEN` the secret, `${VAR}` references are expanded. Use `opti-graph webhook:create` to register the webhook. To pass Vercel Deployment Protection use `OPTIMIZELY_PUBLISH_HEADER=x-vercel-protection-bypass` and `OPTIMIZELY_PUBLISH_TOKEN=${VERCEL_AUTOMATION_BYPASS_SECRET}`.
+
+> **Breaking change:** the token is expected in the header. The `?token=` query parameter is deprecated (still accepted, but logs a warning), the 401 log no longer shows the supplied token and the 500 response no longer contains error details.
+
 The `createPublishApi` method has many more options allowing you to take control over what is happening while the page renders. The options object has built-in documentation that your IDE can show if you've got JavaScript / TypeScript language support enabled.
 
 

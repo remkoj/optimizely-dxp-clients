@@ -57,13 +57,14 @@
     }
   },
   "devDependencies": {
+    "@hey-api/openapi-ts": "^0.99.0",
     "@types/crypto-js": "^4.2.2",
     "@types/node": "^24.19.2",
-    "openapi-typescript-codegen": "^0.31.0",
     "typescript": "^6.0.3"
   },
   "dependencies": {
     "crypto-js": "^4.2.0",
+    "dotenv-expand": "^13.0.0",
     "graphql": "^16.15.0",
     "graphql-request": "^7.4.0",
     "uuid": "^14.0.3"
@@ -74,7 +75,6 @@
     "prepare": "node ./scripts/update-cfg.mjs && tsc --build",
     "watch": "yarn tsc --watch",
     "recompile": "tsc --build --clean && tsc --build --force",
-    "generate": "openapi --input https://cg.optimizely.com/app/swagger/swagger.json --output ./src/admin-api/client --name OptimizelyGraphAdminApi && yarn update-imports",
-    "update-imports": "node ./scripts/update-imports.mjs"
+    "generate": "node ./scripts/create-client.mjs"
   }
 }

@@ -47,6 +47,12 @@ export type OptimizelyGraphConfigInternal = {
   publish?: string
 
   /**
+     * The name of the HTTP header that carries the publishing token in the webhook
+     * request, defaults to X-OPTLY-PUBLISH (environment variable: OPTIMIZELY_PUBLISH_HEADER)
+     */
+  publish_header?: string
+
+  /**
      * The CMS Schema version that is used
      */
   opti_cms_schema: OptiCmsSchema

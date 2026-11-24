@@ -1,6 +1,6 @@
 import { getArgsConfig, getFrontendURL } from "../config.js";
 import type { CliModule } from '../types.js';
-import { maskSecret } from '../utils/index.js'
+import { maskSecret, isSameTarget } from '../utils/index.js'
 import createAdminApi, { isApiError } from '@remkoj/optimizely-graph-client/admin'
 
 type PublishToVercelProps = { path: string, token_id: string, publish_token: string }
@@ -21,7 +21,6 @@ export const publishToVercelModule: CliModule<PublishToVercelProps> = {
     // Read configuration
     const cgConfig = getArgsConfig(args)
     const hookPath = args.path ?? '/'
-    const token = args.publish_token
     const token_id = args.token_id
 
     // Create secure client
@@ -52,8 +51,8 @@ export const publishToVercelModule: CliModule<PublishToVercelProps> = {
     // Automatic
     const frontendUrl = getFrontendURL(cgConfig)
     const webhookTarget = new URL(hookPath, frontendUrl)
-    if (token)
-      webhookTarget.searchParams.set('token', token)
+    webhookTarget.search = ''
+    webhookTarget.hash = ''
     process.stdout.write(`Removing webhook target: ${webhookTarget.href}\n`)
     if (webhookTarget.hostname == 'localhost') {
       process.stderr.write("!! Cannot register a localhost Site URL with Content Graph\n")
@@ -64,7 +63,7 @@ export const publishToVercelModule: CliModule<PublishToVercelProps> = {
     // Delete hook by url
     try {
       const currentHooks = await adminApi.webhooks.listWebhookHandler()
-      const hooks = currentHooks.filter(x => x.request.url == webhookTarget.href)
+      const hooks = currentHooks.filter(x => isSameTarget(x, webhookTarget))
 
       // Check if the hook is present
       if (!hooks || hooks.length == 0) {
@@ -101,9 +100,8 @@ export const publishToVercelModule: CliModule<PublishToVercelProps> = {
   describe: "Removes a webhook from ContentGraph that invokes /api/content/publish on every publish in ContentGraph",
   builder: (args) => {
     const defaultToken = process.env.FRONTEND_PUBLISH_TOKEN || undefined
-    const hasDefaultToken = typeof (defaultToken) == 'string' && defaultToken.length > 0
     args.positional('path', { type: "string", describe: "The frontend route to invoke to publish", default: "/api/content/publish", demandOption: false })
-    args.option("publish_token", { alias: "pt", description: "Publishing token", string: true, type: "string", demandOption: !hasDefaultToken, default: defaultToken, defaultDescription: maskSecret(defaultToken) })
+    args.option("publish_token", { alias: "pt", description: "Publishing token (deprecated, ignored: webhooks are matched on host and path)", string: true, type: "string", demandOption: false, default: defaultToken, defaultDescription: maskSecret(defaultToken) })
     args.option("token_id", { alias: "ti", description: "If set, removes this webhook only", string: true, type: "string", demandOption: false, default: undefined })
     return args
   }

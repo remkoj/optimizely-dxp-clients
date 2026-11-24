@@ -1,44 +1,68 @@
 import { readEnvironmentVariables, applyConfigDefaults, validateConfig, type OptimizelyGraphConfig, OptimizelyGraphConfigInternal } from '../config.js'
-import { OptimizelyGraphAdminApi as BaseOptimizelyGraphAdminApi, type ApiError, type CancelablePromise, type OpenAPIConfig } from './client/index.js'
-import OptiHttpRequest, { isOptiHttpRequest } from './request/index.js'
+import { createHmacFetch } from '../hmac-fetch.js'
+import { createClient as createHttpClient, createConfig, type Client } from './client/client/index.js'
+import { ApiError, unwrap, BestBetsService, DefinitionV2Service, DefinitionV3Service, LogsService, OidcService, PinnedResultsService, QueryGraphQlService, ResourcesService, WebhooksService } from './services.js'
 import type * as ClientTypes from './types.js'
 
 export * from './types.js'
-export * from './client/index.js'
+export type * from './client/types.gen.js'
+export type * from './legacy-types.js'
+export * from './services.js'
 
-export class OptimizelyGraphAdminApi extends BaseOptimizelyGraphAdminApi {
+/**
+ * Client for the Optimizely Graph Admin API. The requests are signed with the
+ * App Key and Secret of the provided configuration.
+ */
+export class OptimizelyGraphAdminApi {
   protected readonly graphConfig : OptimizelyGraphConfigInternal
+  /** The underlying HTTP client, which is dedicated to this instance */
+  protected readonly httpClient : Client
+  public readonly bestBets: BestBetsService
+  public readonly definitionV2: DefinitionV2Service
+  public readonly definitionV3: DefinitionV3Service
+  public readonly logs: LogsService
+  public readonly oidc: OidcService
+  public readonly pinnedResults: PinnedResultsService
+  public readonly queryGraphQl: QueryGraphQlService
+  public readonly resources: ResourcesService
+  public readonly webhooks: WebhooksService
 
+  /**
+   * @param   config    The Optimizely Graph config, will be read from the
+   *                    environment when omitted
+   */
   public constructor(config?: OptimizelyGraphConfig) {
     const graphConfig = applyConfigDefaults(config ?? readEnvironmentVariables())
     if (!validateConfig(graphConfig, true))
       throw new Error("The Optimizely Graph Admin API requires the App Key and Secret to be defined")
-    const apiConfig : Partial<OpenAPIConfig> = {
-      BASE: graphConfig.gateway,
-      CREDENTIALS: "include",
-      HEADERS: {
-        "X-Client": "@RemkoJ/OptimizelyGraphClient",
-      }
-    }
-    super(apiConfig, OptiHttpRequest)
-    if (isOptiHttpRequest(this.request))
-      this.request.setOptiGraphConfig(graphConfig)
     this.graphConfig = graphConfig
+    this.httpClient = createHttpClient(createConfig({
+      baseUrl: graphConfig.gateway,
+      credentials: 'include',
+      headers: { "X-Client": "@RemkoJ/OptimizelyGraphClient" },
+      ...(graphConfig.app_key && graphConfig.secret ? { fetch: createHmacFetch(graphConfig.app_key, graphConfig.secret) } : {})
+    }))
+    this.bestBets = new BestBetsService(this.httpClient)
+    this.definitionV2 = new DefinitionV2Service(this.httpClient)
+    this.definitionV3 = new DefinitionV3Service(this.httpClient)
+    this.logs = new LogsService(this.httpClient)
+    this.oidc = new OidcService(this.httpClient)
+    this.pinnedResults = new PinnedResultsService(this.httpClient)
+    this.queryGraphQl = new QueryGraphQlService(this.httpClient)
+    this.resources = new ResourcesService(this.httpClient)
+    this.webhooks = new WebhooksService(this.httpClient)
   }
+
   /**
      * Retrieve the journal contents from a Content Source post operation
      * 
      * @param       journalId       The journal identifier, typically something like 'stream/{guid}'
      * @returns     The journal contents
      */
-  public getJournal(journalId: string) : CancelablePromise<ClientTypes.JournalResponse> {
-    return this.request.request<ClientTypes.JournalResponse>({
-      method: "GET",
-      url: "/journal/{journalId}",
-      path: {
-        'journalId': journalId,
-      }
-    })
+  public getJournal(journalId: string) : Promise<ClientTypes.JournalResponse> {
+    return unwrap<ClientTypes.JournalResponse>(this.httpClient.get<{ 200: ClientTypes.JournalResponse }, unknown>({
+      url: `/journal/${journalId.split('/').map(encodeURIComponent).join('/')}`
+    }))
   }
 
   /**
@@ -49,17 +73,15 @@ export class OptimizelyGraphAdminApi extends BaseOptimizelyGraphAdminApi {
      * @param   contentItems    The data to be sent to Optimizely Graph in the required NDJson format
      * @returns The results of the operation
      */
-  public postSourceContent(sourceId: string, contentItems: string) : CancelablePromise<ClientTypes.PostContentV2DataHandlerResponse>
+  public postSourceContent(sourceId: string, contentItems: string) : Promise<ClientTypes.PostContentV2DataHandlerResponse>
   {
-    return this.request.request<ClientTypes.PostContentV2DataHandlerResponse>({
-      method: 'POST',
+    return unwrap<ClientTypes.PostContentV2DataHandlerResponse>(this.httpClient.post<{ 200: ClientTypes.PostContentV2DataHandlerResponse }, unknown>({
       url: '/api/content/v2/data',
-      query: {
-        'id': sourceId,
-      },
+      query: { id: sourceId },
       body: contentItems,
-      mediaType: 'application/x-ndjson',
-    });
+      bodySerializer: null,
+      headers: { 'Content-Type': 'application/x-ndjson' }
+    }))
   }
 
   /**
@@ -70,12 +92,11 @@ export class OptimizelyGraphAdminApi extends BaseOptimizelyGraphAdminApi {
      * 
      * @returns     The OpenAPI spec
      */
-  public getOpenApiSpec() : CancelablePromise<unknown>
+  public getOpenApiSpec() : Promise<unknown>
   {
-    return this.request.request({
-      method: 'GET',
+    return unwrap<unknown>(this.httpClient.get<{ 200: unknown }, unknown>({
       url: '/app/swagger/swagger.json'
-    })
+    }))
   }
 }
 

@@ -1,5 +1,6 @@
 import { getArgsConfig } from "../config.js";
 import type { CliModule } from '../types.js';
+import { displayUrl } from '../utils/index.js'
 import createAdminApi, { isApiError } from '@remkoj/optimizely-graph-client/admin'
 import chalk from 'chalk'
 import figures from 'figures'
@@ -36,7 +37,7 @@ export const publishToVercelModule: CliModule<PublishToVercelProps> = {
       })
 
       currentHooks.forEach(x => {
-        hooks.push([x.id, x.request.method, x.request.url])
+        hooks.push([x.id, x.request.method ?? '', displayUrl(x.request.url)])
       })
       process.stdout.write(hooks.toString() + "\n")
       process.stdout.write(chalk.green(chalk.bold(figures.tick + " Done")) + "\n")

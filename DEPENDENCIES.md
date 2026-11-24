@@ -144,17 +144,18 @@ Dependencies: 17 (development-only: 9)
 ### @remkoj/optimizely-graph-client (6.0.0-rc.6)
 GraphQL client for Optimizely Graph \(Content Graph\)
 
-Dependencies: 8 (development-only: 4)
+Dependencies: 9 (development-only: 4)
 
 | Package | Dev | Version | License | Author | Maintainers | Link |
 | --- | :---: | --- | --- | --- | --- | --- |
 | [crypto-js](http://github.com/brix/crypto-js) |  | 4.2.0 | MIT | Evan Vosberg | [evanvosberg (evanvosberg@urban.to)](mailto:evanvosberg@urban.to) | [npm](https://www.npmjs.com/package/crypto-js) |
+| [dotenv-expand](https://github.com/motdotla/dotenv-expand#readme) |  | 13.0.0 | BSD-2-Clause | motdotla | [motdotla (mot@mot.la)](mailto:mot@mot.la) | [npm](https://www.npmjs.com/package/dotenv-expand) |
 | [graphql](https://github.com/graphql/graphql-js) |  | 16.15.0 | MIT |  | [benjie (npm@benjiegillam.com)](mailto:npm@benjiegillam.com), [leebyron (lee@leebyron.com)](mailto:lee@leebyron.com), [yaacovcr (yaacovcr@gmail.com)](mailto:yaacovcr@gmail.com), [i1g (ivan.goncharov.ua@gmail.com)](mailto:ivan.goncharov.ua@gmail.com), [mjmahone (mahoney.mattj@gmail.com)](mailto:mahoney.mattj@gmail.com) et al. | [npm](https://www.npmjs.com/package/graphql) |
 | [graphql-request](https://github.com/graffle-js/graffle/tree/graphql-request) |  | 7.4.0 | MIT | [Jason Kuhrt (jasonkuhrt@me.com)](mailto:jasonkuhrt@me.com) | [schickling (schickling.j@gmail.com)](mailto:schickling.j@gmail.com), [timsuchanek (tim.suchanek@gmail.com)](mailto:tim.suchanek@gmail.com), [jasonkuhrt (jasonkuhrt@me.com)](mailto:jasonkuhrt@me.com), [divyenduz (mail@divyendusingh.com)](mailto:mail@divyendusingh.com), [weakky (rav4g3@hotmail.fr)](mailto:rav4g3@hotmail.fr) | [npm](https://www.npmjs.com/package/graphql-request) |
 | [uuid](https://github.com/uuidjs/uuid#readme) |  | 14.0.3 | MIT |  | [broofa (robert@broofa.com)](mailto:robert@broofa.com), [ctavan (dev@tavan.de)](mailto:dev@tavan.de) | [npm](https://www.npmjs.com/package/uuid) |
+| [@hey-api/openapi-ts](https://heyapi.dev/docs/openapi/typescript/get-started) | 🔧 | 0.99.0 | MIT | [Hey API (lubos@heyapi.dev)](mailto:lubos@heyapi.dev) | [mrlubos (lmenus@lmen.us)](mailto:lmenus@lmen.us) | [npm](https://www.npmjs.com/package/@hey-api/openapi-ts) |
 | [@types/crypto-js](https://github.com/DefinitelyTyped/DefinitelyTyped/tree/master/types/crypto-js) | 🔧 | 4.2.2 | MIT |  | [types (ts-npm-types@microsoft.com)](mailto:ts-npm-types@microsoft.com) | [npm](https://www.npmjs.com/package/@types/crypto-js) |
 | [@types/node](https://github.com/DefinitelyTyped/DefinitelyTyped/tree/master/types/node) | 🔧 | 24.19.2 | MIT |  | [types (ts-npm-types@microsoft.com)](mailto:ts-npm-types@microsoft.com) | [npm](https://www.npmjs.com/package/@types/node) |
-| [openapi-typescript-codegen](https://github.com/ferdikoomen/openapi-typescript-codegen) | 🔧 | 0.31.0 | MIT | Ferdi Koomen | [ferdikoomen (info@madebyferdi.com)](mailto:info@madebyferdi.com) | [npm](https://www.npmjs.com/package/openapi-typescript-codegen) |
 | [typescript](https://www.typescriptlang.org/) | 🔧 | 6.0.3 | Apache-2.0 | Microsoft Corp. | [microsoft1es (npmjs@microsoft.com)](mailto:npmjs@microsoft.com), [typescript-bot (typescript@microsoft.com)](mailto:typescript@microsoft.com), [weswigham (wwigham@gmail.com)](mailto:wwigham@gmail.com), [andrewbranch (andrew@wheream.io)](mailto:andrew@wheream.io), [typescript-deploys (typescript-design@microsoft.com)](mailto:typescript-design@microsoft.com) et al. | [npm](https://www.npmjs.com/package/typescript) |
 
 ### @remkoj/optimizely-graph-functions (6.0.0-rc.6)

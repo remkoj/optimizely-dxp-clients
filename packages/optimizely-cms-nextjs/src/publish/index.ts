@@ -1,6 +1,6 @@
 import { type NextRequest, NextResponse } from 'next/server.js'
 import { revalidatePath, revalidateTag } from "next/cache.js"
-import { type IOptiGraphClient, OptiCmsSchema, RouteResolver, type Route } from '@remkoj/optimizely-graph-client'
+import { type IOptiGraphClient, OptiCmsSchema, RouteResolver, type Route, DEFAULT_PUBLISH_HEADER } from '@remkoj/optimizely-graph-client'
 import { resolveClient,  type NextJsClientOption, createNextJsClient as createClient } from '../client.js'
 import { logger } from '../logger.js'
 
@@ -153,8 +153,13 @@ const publishApiDefaults: PublishApiOptions = {
 
 /**
  * Create the default handler for webhooks received from Optimizely Graph.
- * 
- * @param     options   The configuration fo the API
+ *
+ * The request must carry the publish token (`OPTIMIZELY_PUBLISH_TOKEN`) in the header
+ * named by `OPTIMIZELY_PUBLISH_HEADER` (default `X-OPTLY-PUBLISH`). The `token` query
+ * parameter is deprecated: it is still accepted when the header is absent, but logs a
+ * warning (once) as URLs end up in logs. Requests without a valid token get a 401.
+ *
+ * @param     options   The configuration of the API
  * @returns   The created API Handler
  */
 export function createPublishApi(options?: Partial<PublishApiOptions>): PublishApiHandler {
@@ -242,18 +247,24 @@ export function createPublishApi(options?: Partial<PublishApiOptions>): PublishA
     return items.filter((x, i, a) => a.findIndex(v => v.key == x.key && v.locale == x.locale) == i)
   }
 
+  let queryTokenWarned = false
   const requestHandler: PublishApiHandler = async (req) => {
     const client = await resolveClient(clientFactory, undefined, 'metadata');
 
     const publishToken = client.siteInfo.publishToken
-    const requestToken = getRequestToken(req)
+    const publishHeader = client.siteInfo.publishHeader ?? DEFAULT_PUBLISH_HEADER
+    const requestToken = getRequestToken(req, publishHeader)
     if (!publishToken) {
       console.error("[Publish-API] No authentication configured, publishing has been disabled")
       return NextResponse.json({ error: "Not authorized" }, { status: 401 })
     }
-    if (!requestToken || requestToken != publishToken) {
-      console.error("[Publish-API] The provided publishing token is invalid", requestToken)
+    if (!requestToken || !(await tokensMatch(requestToken.value, publishToken))) {
+      console.error(`[Publish-API] The provided publishing token is invalid or missing, expected in the ${publishHeader} header`)
       return NextResponse.json({ error: "Not authorized" }, { status: 401 })
+    }
+    if (requestToken.source == 'query' && !queryTokenWarned) {
+      queryTokenWarned = true
+      logger.warn(`[Publish-API] Receiving the publishing token in the "token" query parameter is deprecated, because URLs end up in logs. Register the webhook again (webhook:create) to send it in the ${publishHeader} header`)
     }
 
     try {
@@ -308,17 +319,52 @@ export function createPublishApi(options?: Partial<PublishApiOptions>): PublishA
       return NextResponse.json(responseData)
     } catch (e) {
       console.error("[Publish-API] Error handling publishing request", (e as Error)?.message ?? e)
-      return NextResponse.json({ error: (e as Error)?.message ?? "Unknown error " }, { status: 500 })
+      return NextResponse.json({ error: "Internal server error" }, { status: 500 })
     }
   }
 
   return requestHandler
 }
 
-function getRequestToken(req: NextRequest): string | undefined {
-  return req.headers.get("X-OPTLY-PUBLISH") ??
-    req.nextUrl.searchParams.get("token") ??
-    undefined
+/**
+ * Read the publishing token from the request. The header takes precedence over the
+ * deprecated `token` query parameter, so a request that has a header is never
+ * validated against the query parameter.
+ *
+ * @param   req     The incoming request
+ * @param   header  The name of the header that carries the token
+ * @returns The token and where it was found, or `undefined` when the request has none
+ */
+function getRequestToken(req: NextRequest, header: string): { value: string, source: 'header' | 'query' } | undefined {
+  const headerValue = req.headers.get(header)
+  if (headerValue)
+    return { value: headerValue, source: 'header' }
+  const queryValue = req.nextUrl.searchParams.get("token")
+  if (queryValue)
+    return { value: queryValue, source: 'query' }
+  return undefined
+}
+
+/**
+ * Compare two secrets without leaking their content or length through timing, by
+ * comparing their SHA-256 digests.
+ *
+ * @param   supplied    The value received with the request
+ * @param   expected    The configured secret
+ * @returns `true` when both values are equal
+ */
+async function tokensMatch(supplied: string, expected: string): Promise<boolean> {
+  const encoder = new TextEncoder()
+  const [a, b] = await Promise.all([
+    crypto.subtle.digest('SHA-256', encoder.encode(supplied)),
+    crypto.subtle.digest('SHA-256', encoder.encode(expected))
+  ])
+  const left = new Uint8Array(a)
+  const right = new Uint8Array(b)
+  let difference = 0
+  for (let i = 0; i < left.length; i++)
+    difference |= left[i] ^ right[i]
+  return difference === 0
 }
 
 export default createPublishApi

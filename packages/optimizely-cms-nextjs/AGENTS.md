@@ -123,6 +123,8 @@ export const GET = handler
 export const POST = handler
 ```
 
+The handler reads the publish token from the request header `client.siteInfo.publishHeader` (`OPTIMIZELY_PUBLISH_HEADER`, default `X-OPTLY-PUBLISH`) and compares it in constant time with `OPTIMIZELY_PUBLISH_TOKEN`. `${VAR}` references in these variables are expanded (e.g. `OPTIMIZELY_PUBLISH_TOKEN=${VERCEL_AUTOMATION_BYPASS_SECRET}` with `OPTIMIZELY_PUBLISH_HEADER=x-vercel-protection-bypass`). The `?token=` query parameter is deprecated: it is still accepted (the header wins) but logs a warning; re-register the webhook with `opti-graph webhook:create`.
+
 ## Constraints
 
 - All files using these helpers must include `import 'server-only'`.

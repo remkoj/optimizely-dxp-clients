@@ -21,6 +21,8 @@ Requires Node `>=24.0.0 <25.0.0`.
 | `OPTIMIZELY_GRAPH_SECRET` | yes | Content Graph secret |
 | `OPTIMIZELY_GRAPH_SINGLE_KEY` | yes | Content Graph single key (read-only) |
 | `OPTIMIZELY_GRAPH_GATEWAY` | no | Gateway URL (default: `https://cg.optimizely.com`) |
+| `OPTIMIZELY_PUBLISH_TOKEN` | for `webhook:create` | Publish webhook secret (or `--publish_token`; `webhook:delete` no longer needs a token: `--publish_token`/`FRONTEND_PUBLISH_TOKEN` are optional, deprecated and ignored there, as it matches on host and path). `${VAR}` references are expanded, e.g. `${VERCEL_AUTOMATION_BYPASS_SECRET}` |
+| `OPTIMIZELY_PUBLISH_HEADER` | no | Header that carries the token (default `X-OPTLY-PUBLISH`) |
 | `OPTIMIZELY_CMS_URL` | no | CMS instance URL |
 | `OPTIMIZELY_DEBUG` | no | Set to `"1"` for verbose output |
 
@@ -52,6 +54,7 @@ yarn opti-graph <command> [options]
 | `source:clear [sourceId]` | `sc` | Remove all data for the specified source |
 | `source:delete [sourceId]` | `sd` | Delete the specified source entirely |
 | `config:create [file_path]` | `cc`, `site-config` | Generate a static site configuration file |
-| `webhook:create [path] [verb]` | `wc`, `register` | Register a publish webhook on Optimizely Graph |
-| `webhook:delete [path]` | `wd`, `unregister` | Remove a publish webhook from Optimizely Graph |
+| `webhook:create [path] [verb]` | `wc`, `register` | Register a publish webhook on Optimizely Graph. The publish token is registered as header `OPTIMIZELY_PUBLISH_HEADER` (default `X-OPTLY-PUBLISH`), the URL contains no token. Existing webhooks for the same host and path (including legacy `?token=` ones) are replaced; the token is never printed |
+| `webhook:delete [path]` | `wd`, `unregister` | Remove the publish webhook(s) for the host and path from Optimizely Graph, regardless of query string or headers (or one webhook with `--token_id`) |
+| `webhook:list` | `wl`, `list` | List the webhooks; query strings and header values are not shown |
 | `patches:apply` | | Re-apply the patched `@graphql-codegen/visitor-plugin-common` dependency |

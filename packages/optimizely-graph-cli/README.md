@@ -22,14 +22,18 @@ This package installs the command `opti-graph` into the project, which can be us
 ### Commands
 | Command | Description | Aliases |
 | --- | --- | --- |
-| webhook:create [path] [verb] |  Adds a webhook to Optimizely Graph that invokes /api/content/publish on every publish in Optimizely Graph | wc, register |
-| webhook:delete [path] | Removes a webhook from ContentGraph that invokes /api/content/publish on every publish in ContentGraph | wd, unregister |
-| webhook:list | List all webhooks in ContentGraph | wl, list |
+| webhook:create [path] [verb] |  Adds a webhook to Optimizely Graph that invokes /api/content/publish on every publish in Optimizely Graph. The publish token is sent as header `OPTIMIZELY_PUBLISH_HEADER` (default `X-OPTLY-PUBLISH`), not in the URL. Existing webhooks for the same URL (also legacy `?token=` ones) are replaced | wc, register |
+| webhook:delete [path] | Removes the webhook(s) for this host and path from ContentGraph, regardless of query string or headers | wd, unregister |
+| webhook:list | List all webhooks in ContentGraph (query strings and header values are masked) | wl, list |
 | config:create [file_path] | ***Optimizely CMS 12 Only***: Generate a static site configuration file | cc, site-config |
 | source:clear [sourceId] | Remove all data for the specified source | sc |
 | source:list | List all content sources in Optimizely Graph | [default], sl |
 | source:delete [sourceId] | Remove all data for the specified source | sd |
 | patches:apply | Apply patches to the package.json in the working directory (use the `-p` parameter to change). Validate before running with the `-t` parameter |  |
+
+> **Breaking change:** the publish token is no longer added to the webhook URL as `?token=`. Run `webhook:create` again after upgrading (it replaces the legacy webhook) and deploy the frontend with the same `OPTIMIZELY_PUBLISH_TOKEN` / `OPTIMIZELY_PUBLISH_HEADER`. For Vercel Deployment Protection use `OPTIMIZELY_PUBLISH_HEADER=x-vercel-protection-bypass` and `OPTIMIZELY_PUBLISH_TOKEN=${VERCEL_AUTOMATION_BYPASS_SECRET}`.
+
+> `webhook:delete` no longer requires `--publish_token` / `FRONTEND_PUBLISH_TOKEN`: webhooks are matched on host and path. The option is still accepted for compatibility, is deprecated and is ignored.
 
 ### Arguments
 #### Frontend:

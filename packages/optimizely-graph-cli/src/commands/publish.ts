@@ -1,8 +1,8 @@
 import { getArgsConfig, getFrontendURL } from "../config.js";
 import type { CliModule } from '../types.js';
-import { maskSecret } from '../utils/index.js'
+import { maskSecret, buildWebhookPayload, displayUrl, isCurrentRegistration, isSameTarget } from '../utils/index.js'
 import createAdminApi, { isApiError } from '@remkoj/optimizely-graph-client/admin'
-import { readEnvironmentVariables as getEnvConfig } from "@remkoj/optimizely-graph-client/config"
+import { readEnvironmentVariables as getEnvConfig, DEFAULT_PUBLISH_HEADER } from "@remkoj/optimizely-graph-client/config"
 import chalk from 'chalk'
 import figures from 'figures'
 
@@ -27,12 +27,18 @@ export const publishToVercelModule: CliModule<PublishToVercelProps> = {
     const hookPath = args.path ?? '/'
     const verb = args.verb ?? 'POST'
     const token = args.publish_token
+    const header = getEnvConfig().publish_header ?? DEFAULT_PUBLISH_HEADER
     const webhookTarget = new URL(hookPath, frontendUrl)
-    if (token)
-      webhookTarget.searchParams.set('token', token)
-    process.stdout.write(`${chalk.yellow(chalk.bold(figures.arrowRight))} Registering webhook target: ${chalk.yellow(webhookTarget.href)}\n`)
+    webhookTarget.search = ''
+    webhookTarget.hash = ''
+    process.stdout.write(`${chalk.yellow(chalk.bold(figures.arrowRight))} Registering webhook target: ${chalk.yellow(webhookTarget.href)} (publish token in header ${header})\n`)
     if (webhookTarget.hostname == 'localhost') {
       process.stderr.write(chalk.redBright(chalk.bold(figures.cross) + " Cannot register a localhost Site URL with Content Graph") + "\n")
+      process.exitCode = 1
+      return
+    }
+    if (!token) {
+      process.stderr.write(chalk.redBright(chalk.bold(figures.cross) + " No publish token available, set OPTIMIZELY_PUBLISH_TOKEN or provide --publish_token") + "\n")
       process.exitCode = 1
       return
     }
@@ -45,24 +51,16 @@ export const publishToVercelModule: CliModule<PublishToVercelProps> = {
     // Get current hooks
     try {
       const currentHooks = await adminApi.webhooks.listWebhookHandler()
-      if (currentHooks.some(x => x.request.url == webhookTarget.href)) {
+      if (currentHooks.some(x => isCurrentRegistration(x, webhookTarget, verb, header, token))) {
         process.stdout.write("\n" + chalk.greenBright(chalk.bold(figures.tick) + " Webhook already registered, no action needed") + "\n")
         process.exitCode = 0
         return
       }
 
-      // Remove hooks to the same URL with different Query Parameters
-      function urlWithoutSearch(url: URL): URL {
-        const newURL = new URL(url.href)
-        for (const key in newURL.searchParams.keys)
-          newURL.searchParams.delete(key)
-        return newURL
-      }
-      const targetWithoutQuery = urlWithoutSearch(webhookTarget)
+      // Remove hooks to the same URL that don't (or no longer) match, including legacy hooks with the token in the URL
       await Promise.allSettled(currentHooks.map(async hook => {
-        const hookUrl = urlWithoutSearch(new URL(hook.request.url))
-        if (hookUrl.href == targetWithoutQuery.href) {
-          process.stdout.write(`${chalk.yellow(chalk.bold(figures.arrowRight))} Removing webhook with incorrect query parameters: ${chalk.yellow(hookUrl.href)}`)
+        if (isSameTarget(hook, webhookTarget)) {
+          process.stdout.write(`${chalk.yellow(chalk.bold(figures.arrowRight))} Removing webhook with outdated configuration: ${chalk.yellow(displayUrl(hook.request.url))}\n`)
           try {
             await adminApi.webhooks.deleteWebhookHandler(hook.id)
             return true
@@ -74,12 +72,7 @@ export const publishToVercelModule: CliModule<PublishToVercelProps> = {
       }))
 
       // Register the hook
-      await adminApi.webhooks.createWebhookHandler({
-        request: {
-          url: webhookTarget.href,
-          method: verb
-        }
-      })
+      await adminApi.webhooks.createWebhookHandler(buildWebhookPayload(webhookTarget, verb, header, token))
 
       process.stdout.write("\n" + chalk.greenBright(`${chalk.bold(figures.tick)} ${webhookTarget.href} has been added as Webhook recipient to Optimizely Graph`) + "\n")
     } catch (e) {

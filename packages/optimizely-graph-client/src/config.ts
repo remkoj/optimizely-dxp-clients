@@ -1,9 +1,25 @@
 import type * as Types from './types.js'
 import { OptiCmsSchema, SchemaVersion } from "./client/types.js"
+import { expand } from 'dotenv-expand'
 
 export type { ContentGraphConfig, OptimizelyGraphConfigInternal, OptimizelyGraphConfig } from './types.js'
 export { OptiCmsSchema, SchemaVersion } from "./client/types.js"
 
+/**
+ * The name of the HTTP header that carries the publish secret when Optimizely Graph
+ * calls the publish webhook, unless overridden using `OPTIMIZELY_PUBLISH_HEADER`.
+ */
+export const DEFAULT_PUBLISH_HEADER = 'X-OPTLY-PUBLISH'
+
+const HEADER_NAME_TOKEN = /^[!#$%&'*+\-.^_`|~0-9A-Za-z]+$/
+const ENV_REFERENCE = /\$\{[^{}]+\}/
+
+/**
+ * Read the configuration from the environment variables
+ *
+ * @returns The configuration, as defined by the environment variables
+ * @throws  When `OPTIMIZELY_PUBLISH_HEADER` is not a valid HTTP header name
+ */
 export function readEnvironmentVariables(): Types.OptimizelyGraphConfig {
   const config: Types.OptimizelyGraphConfig = {
     secret: getOptional('OPTIMIZELY_GRAPH_SECRET', () => getOptional('OPTIMIZELY_CONTENTGRAPH_SECRET')),
@@ -15,7 +31,8 @@ export function readEnvironmentVariables(): Types.OptimizelyGraphConfig {
     dxp_url: getOptional('OPTIMIZELY_CMS_URL', () => getOptional('DXP_URL')),
     query_log: getBoolean('OPTIMIZELY_GRAPH_QUERY_LOG', () => getBoolean('OPTIMIZELY_CONTENTGRAPH_QUERY_LOG', false)),
     debug: getBoolean('OPTIMIZELY_DEBUG', () => getBoolean('DXP_DEBUG', false)),
-    publish: getOptional('OPTIMIZELY_PUBLISH_TOKEN'),
+    publish: getExpandedOptional('OPTIMIZELY_PUBLISH_TOKEN'),
+    publish_header: resolvePublishHeader(getOptional('OPTIMIZELY_PUBLISH_HEADER'), 'OPTIMIZELY_PUBLISH_HEADER'),
     opti_cms_schema: getSelection<OptiCmsSchema>('OPTIMIZELY_CMS_SCHEMA', [OptiCmsSchema.CMS12, OptiCmsSchema.CMS13], OptiCmsSchema.CMS13),
     graph_schema: getSelection<SchemaVersion>('OPTIMIZELY_GRAPH_SCHEMA', [SchemaVersion.Default, SchemaVersion.Next], SchemaVersion.Default)
   }
@@ -37,11 +54,70 @@ export function readEnvironmentVariables(): Types.OptimizelyGraphConfig {
     }
 
   if (config.debug)
-    console.log("🚧 Detected configuration from Environment Variables:", JSON.stringify(config))
+    console.log("🚧 Detected configuration from Environment Variables:", JSON.stringify({ ...config, publish: config.publish ? '***' : undefined }))
 
   return config
 }
 
+/**
+ * Expand `${VAR}` references in a configuration value against the current
+ * environment variables (dotenv-expand semantics), without modifying `process.env`.
+ * Values without a braced reference are returned as-is, so secrets containing `$`
+ * are never altered.
+ *
+ * @param   value   The raw value
+ * @returns The expanded value, which is empty when it refers to a variable that is not set
+ */
+function expandReferences(value: string): string {
+  if (!ENV_REFERENCE.test(value))
+    return value
+  // A plain ${NAME} that is not set must never yield a partial secret, such as 'prefix-'
+  for (const [, name] of value.matchAll(/\$\{([A-Za-z_][A-Za-z0-9_]*)\}/g))
+    if (!process.env[name])
+      return ''
+  const parsed = { value }
+  expand({ parsed, processEnv: { ...process.env } as Record<string, string> })
+  return parsed.value.trim()
+}
+
+function getExpandedOptional(envVarName: string): string | undefined {
+  const raw = getOptional(envVarName)
+  if (raw == undefined)
+    return undefined
+  const expanded = expandReferences(raw)
+  if (expanded == "") {
+    console.warn(`⚠️ [Optimizely Graph] ${envVarName} refers to an environment variable that is not set, treating it as not configured`)
+    return undefined
+  }
+  return expanded
+}
+
+/**
+ * Resolve the name of the HTTP header that carries the publish secret.
+ *
+ * @param   configured  The configured value; `${VAR}` references are expanded
+ * @param   source      The name of the setting, used in messages only
+ * @returns The configured header name, or {@link DEFAULT_PUBLISH_HEADER} when empty
+ * @throws  When the configured value is not a valid HTTP header name (RFC 7230 token)
+ */
+export function resolvePublishHeader(configured?: string, source: string = 'OPTIMIZELY_PUBLISH_HEADER'): string {
+  const name = configured == undefined ? '' : expandReferences(configured.trim())
+  if (name == '') {
+    if (configured != undefined && configured.trim() != '')
+      console.warn(`⚠️ [Optimizely Graph] ${source} refers to an environment variable that is not set, using ${DEFAULT_PUBLISH_HEADER}`)
+    return DEFAULT_PUBLISH_HEADER
+  }
+  if (!HEADER_NAME_TOKEN.test(name))
+    throw new Error(`❌ [Optimizely Graph] ${source} must be a valid HTTP header name (letters, digits and !#$%&'*+-.^_\`|~)`)
+  return name
+}
+
+/**
+ * Apply the default values to a (partial) configuration
+ *
+ * @param   configuredValues  The configuration
+ * @returns The configuration with all defaults applied
+ */
 export function applyConfigDefaults(configuredValues: Types.OptimizelyGraphConfig): Types.OptimizelyGraphConfigInternal {
   const defaults: Types.OptimizelyGraphConfigInternal = {
     single_key: "",
@@ -51,12 +127,14 @@ export function applyConfigDefaults(configuredValues: Types.OptimizelyGraphConfi
     debug: false,
     query_log: false,
     opti_cms_schema: OptiCmsSchema.CMS13,
-    graph_schema: SchemaVersion.Default
+    graph_schema: SchemaVersion.Default,
+    publish_header: DEFAULT_PUBLISH_HEADER
   }
   const config = {
     ...defaults,
     ...configuredValues
   }
+  config.publish_header = resolvePublishHeader(config.publish_header)
   if (config.gateway && config.gateway?.endsWith("/"))
     config.gateway = config.gateway.substring(0, config.gateway.length - 1)
   return config
