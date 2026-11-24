@@ -78,6 +78,8 @@ The client factory receives `(token, scope)`, where `scope` is `'request'` when 
 
 `createNextJsClient` reads Next.js Draft Mode in `request` scope unless `disableDraftMode` is true. When enabled, it switches a public client to HMAC and enables preview; an already authorized client is left unchanged. `metadata` scope skips request access. Reading Draft Mode does not make a route dynamic in Next.js 16, but it must not be called in `generateStaticParams`; `createPage` only uses the `request` scope while rendering.
 
+The route that enables Draft Mode (such as `.well-known/drafts` in `samples/basic-project`) gives every caller the Draft Mode cookie, which elevates Graph access to HMAC with preview. In production it MUST be protected with a secret/token check (constant-time comparison, token never logged). The sample's check is a placeholder, not production grade: it compares the publish token from the query string, which leaks it into URLs and logs.
+
 `createPage`, `createLayout` and `createPublishApi` default to `createNextJsClient`, so the scope-aware factory above is only needed to customise the client. `createPage` and `createLayout` call it with a scope (`createLayout` always `'metadata'`, so layout metadata is never draft-aware); `createPublishApi` calls it with `(undefined, 'metadata')` (never draft-aware) and awaits the result, or uses a Graph client instance as-is; anything that is neither an `IOptiGraphClient` nor a factory returning one makes the handler throw. The deprecated aliases (`createClient`, `createAuthorizedClient`, `getServerClient`, `getAuthorizedServerClient`) accept only a token and return a promise.
 
 ## `app/preview/page.tsx` — On-Page Editing route

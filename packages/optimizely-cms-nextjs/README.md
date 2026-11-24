@@ -70,6 +70,17 @@ const { CmsPage, generateMetadata, generateStaticParams } = OptimizelyCmsPage.cr
 
 Reading Draft Mode does not make a route dynamic in Next.js 16. Do not call it
 in `generateStaticParams`; the `request` scope is only used while rendering.
+
+> **Protect the route that enables Draft Mode.** Draft Mode is enabled by a
+> cookie that any caller of your enable route receives, and with
+> `createNextJsClient` that cookie elevates Optimizely Graph access to HMAC
+> with preview, exposing unpublished content. In production, this route MUST
+> check a secret/token before enabling Draft Mode: compare it in constant time
+> and never log it. The `.well-known/drafts` route in `samples/basic-project`
+> shows where to put this check, but it is not production grade: it compares
+> the publish token from the query string, which leaks the token into URLs and
+> logs.
+
 `createClient`, `createAuthorizedClient`, `getServerClient` and
 `getAuthorizedServerClient` are deprecated token-only aliases of
 `createNextJsClient` and return a promise. Client factories for `createPage`,
