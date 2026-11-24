@@ -15,7 +15,7 @@ import { createPublishApi } from '../src/publish/index.js'
 import { createEditPageComponent } from '../src/ope/page.js'
 import { getContentRequest } from '../src/ope/tools.js'
 import { loadContent } from '../src/ope/load-content.js'
-import { createAuthorizedClient } from '../src/client.js'
+import { createNextJsClient } from '../src/client.js'
 
 /** The outputs that end up on stdout */
 let stdout: Array<MockInstance>
@@ -26,7 +26,12 @@ function stdoutCalls() {
 
 /** Exercise the code paths that report problems on regular (non-debug) usage */
 async function triggerReports() {
-  const client = (publishToken?: string) => ({ siteInfo: { publishToken } }) as never
+  // The publish API only accepts a real Graph client (or a factory that returns one)
+  const client = (publishToken?: string) => ({
+    siteInfo: { publishToken },
+    updateAuthentication: () => undefined,
+    request: async () => ({})
+  }) as never
 
   // Publish API: not configured, wrong token, and a request without data
   await createPublishApi({ client: client() })(new NextRequest('https://example.com/publish'))
@@ -49,7 +54,8 @@ async function triggerReports() {
   await loadContent({ key: 'abc', locale: 'en' } as never, graphClient, (() => Promise.resolve({ content: { total: 2, items: [] } })) as never)
 
   // Client creation with a mode as token, outside of development
-  createAuthorizedClient('use-hmac', { app_key: 'a', secret: 'b', single_key: 'c', gateway: 'https://example.com', publish_token: 'secret' } as never)
+  // (metadata scope: outside a request, Draft Mode is not available)
+  await createNextJsClient('use-hmac', { scope: 'metadata', app_key: 'a', secret: 'b', single_key: 'c', gateway: 'https://example.com', publish: 'secret' } as never)
 }
 
 beforeEach(() => {

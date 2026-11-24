@@ -1,4 +1,4 @@
-import { createClient } from '@remkoj/optimizely-cms-nextjs';
+import { createNextJsClientSync } from '@remkoj/optimizely-cms-nextjs';
 import { ServerContext } from '@remkoj/optimizely-cms-react/rsc';
 import { getSdk } from './gql/client';
 import { factory } from './components/factory';
@@ -13,7 +13,7 @@ export const channelId = process.env.CHANNEL_ID || undefined;
  * that do not depend on the current request/authorization, for example custom
  * routes, APIs and Layouts.
  */
-export const client = createClient();
+export const client = createNextJsClientSync();
 
 /**
  * The always readonly, published content SDK that can be used in locations

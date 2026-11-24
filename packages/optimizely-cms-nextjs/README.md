@@ -20,15 +20,17 @@ Default implementation of the Catch-All route in Next.js to allow rendering any 
 // In `src/app/[[...path]]/page.tsx`
 
 import { CmsPage as OptimizelyCmsPage } from "@remkoj/optimizely-cms-nextjs"
+import { createNextJsClient } from "@remkoj/optimizely-cms-nextjs/rsc"
 import getFactory from '@/components/factory' // Or any other file where you have your component factory defined.
 import { getContentByPath } from "@/gql/functions" // Or any other file that has the `getContentByPath` function
 
 const { CmsPage, generateMetadata, generateStaticParams } = OptimizelyCmsPage.createPage(getFactory(), {
-    getContentByPath: getContentByPath
+    getContentByPath: getContentByPath,
+    client: (token, scope) => createNextJsClient(token, scope ?? "request")
 })
 
 // Configure the Next.JS route handling for the pages
-export const dynamic = "error"; // Make sure we're leveraging SSG for CMS managed pages.
+// Choose the route settings appropriate for your site.
 export const dynamicParams = true; // Allow new pages to be resolved without rebuilding the site.
 export const revalidate = false; // Keep the cache untill manually revalidated using the Webhook.
 export const fetchCache = "default-cache"; // Cache fetch results by default, while allowing an opt-out.
@@ -43,6 +45,36 @@ export default CmsPage
 
 The `createPage` method has many more options allowing you to take control over what is happening while the page renders. The options object has built-in documentation that your IDE can show if you've got JavaScript / TypeScript language support enabled.
 
+### Draft Mode
+`createNextJsClient` is asynchronous and reads Next.js Draft Mode by default in
+`request` scope. When Draft Mode is enabled, it switches a public client to
+HMAC authentication and enables preview; an already authorized client is left
+unchanged. Set `disableDraftMode: true` to skip this check, or use `metadata`
+scope when creating a client outside a request.
+
+`createPage`, `createLayout` and `createPublishApi` default to
+`createNextJsClient`. `createPage` calls the client factory with the `request`
+scope for rendering and metadata and with the `metadata` scope for
+`generateStaticParams`; `createLayout` always uses the `metadata` scope, so the
+layout metadata is never draft-aware. Provide a factory only to customise the
+client:
+
+```typescript
+import { createNextJsClient } from "@remkoj/optimizely-cms-nextjs/rsc"
+
+const { CmsPage, generateMetadata, generateStaticParams } = OptimizelyCmsPage.createPage(getFactory(), {
+    getContentByPath: getContentByPath,
+    client: (token, scope) => createNextJsClient(token, scope ?? "request")
+})
+```
+
+Reading Draft Mode does not make a route dynamic in Next.js 16. Do not call it
+in `generateStaticParams`; the `request` scope is only used while rendering.
+`createClient`, `createAuthorizedClient`, `getServerClient` and
+`getAuthorizedServerClient` are deprecated token-only aliases of
+`createNextJsClient` and return a promise. Client factories for `createPage`,
+`createLayout` and `createPublishApi` may be synchronous or asynchronous.
+
 ### Cache invalidation
 Default implementation to handle webhooks from Optimizely Graph to purge the Next.js cache based upon taht incoming request.
 
@@ -50,10 +82,12 @@ Default implementation to handle webhooks from Optimizely Graph to purge the Nex
 // In `src/app/api/content/publish/route.ts`
 
 import createPublishApi from '@remkoj/optimizely-cms-nextjs/publish'
+import { createClient } from '@remkoj/optimizely-graph-client'
 
 const publishApi = createPublishApi(
     { 
-        paths: [ '/', '/[[...path]]', '/sitemap.xml' ] // The list of fall-back paths to flush,
+        paths: [ '/', '/[[...path]]', '/sitemap.xml' ], // The list of fall-back paths to flush
+        client: () => createClient(),
         optimizePublish: true // Use the data received from Graph to selectively flush the cache
     }
 )

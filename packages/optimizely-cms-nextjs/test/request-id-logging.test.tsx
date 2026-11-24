@@ -37,6 +37,8 @@ function mockClient(requestId?: string) {
     isPreviewEnabled: () => false,
     getChangeset: () => null,
     currentOptiCmsSchema: 'OPTI-CMS-13',
+    updateAuthentication: () => undefined,
+    request: async () => ({}),
     getRequestId: requestId ? () => requestId : undefined
   } as never
 }

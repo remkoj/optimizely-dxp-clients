@@ -18,9 +18,10 @@ export function isLoggingEnabled(): boolean {
 }
 
 /**
- * Console wrapper for the SDK output that is written to stdout, that only
- * writes when {@link isLoggingEnabled} is `true`. The environment is evaluated
- * on every call, so changes to the environment are picked up immediately.
+ * Console wrapper for the SDK output. `log`, `info` and `debug` write to stdout
+ * and only when {@link isLoggingEnabled} is `true`; `warn` writes to stderr and
+ * is never gated. The environment is evaluated on every call, so changes to the
+ * environment are picked up immediately.
  */
 export const logger = {
   /** Write a message to `console.log` when logging is enabled */
@@ -34,6 +35,10 @@ export const logger = {
   /** Write a message to `console.debug` when logging is enabled */
   debug: (...args: Array<unknown>): void => {
     if (isLoggingEnabled()) console.debug(...args)
+  },
+  /** Write a message to `console.warn` (stderr), regardless of the environment */
+  warn: (...args: Array<unknown>): void => {
+    console.warn(...args)
   }
 } as const
 

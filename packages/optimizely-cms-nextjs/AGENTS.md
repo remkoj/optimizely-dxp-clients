@@ -18,7 +18,7 @@ Requires Node `>=24.0.0 <25.0.0`.
 | Import path | Contents |
 | --- | --- |
 | `@remkoj/optimizely-cms-nextjs` | `OptimizelyNextPage`, `OnPageEdit`, `CmsPage` namespaces |
-| `@remkoj/optimizely-cms-nextjs/rsc` | RSC-specific utilities |
+| `@remkoj/optimizely-cms-nextjs/rsc` | Server-side client factory `createNextJsClient` and its deprecated aliases |
 | `@remkoj/optimizely-cms-nextjs/publish` | Content publish webhook helpers (`createPublishApi`) |
 | `@remkoj/optimizely-cms-nextjs/types` | Shared TypeScript types |
 | `@remkoj/optimizely-cms-nextjs/components` | CMS-aware Next.js components |
@@ -49,42 +49,36 @@ Use `createPage()` to generate the three Next.js exports (`generateStaticParams`
 
 ```typescript
 import 'server-only'
-import { createClient, AuthMode } from '@remkoj/optimizely-graph-client'
 import { createPage } from '@remkoj/optimizely-cms-nextjs/page'
+import { createNextJsClient } from '@remkoj/optimizely-cms-nextjs/rsc'
 import { getContentByPath } from '@gql/functions'
 import { factory } from '@/components/factory'
-import { draftMode } from 'next/headers'
 
 const { generateMetadata, generateStaticParams, CmsPage: Page } = createPage(factory, {
   // Inject the generated master query to load all page content in one request
   getContentByPath,
 
-  // Required: factory function that creates the GraphQL client
-  client: (_, scope) => {
-    const client = createClient(undefined, undefined, {
-      nextJsFetchDirectives: true,
-      cache: true,
-      queryCache: true,
-    })
-    if (scope === 'request' && draftMode().isEnabled) {
-      client.updateAuthentication(AuthMode.HMAC)
-      client.enablePreview()
-    }
-    return client
-  },
+  // Use a scope-aware client factory; see "Draft Mode" below.
+  client: (token, scope) => createNextJsClient(token, scope ?? 'request'),
 
   // Optional: map params to a single locale (omit for multi-lingual with [lang] segment)
   // paramsToLocale: () => 'en',
 })
 
-export const dynamic = 'error'      // fail loudly if the route becomes dynamic
+// Choose the route settings appropriate for your site.
 export const dynamicParams = true   // allow new pages without rebuild
 export const revalidate = false     // keep cache until webhook revalidates
 export { generateMetadata, generateStaticParams }
 export default Page
 ```
 
-The `client` option is **required**. The `scope` argument is `'request'` when rendering a page and `'metadata'` when generating metadata.
+The client factory receives `(token, scope)`, where `scope` is `'request'` when rendering a page or generating its metadata and `'metadata'` when generating static params; it may be async.
+
+### Draft Mode
+
+`createNextJsClient` reads Next.js Draft Mode in `request` scope unless `disableDraftMode` is true. When enabled, it switches a public client to HMAC and enables preview; an already authorized client is left unchanged. `metadata` scope skips request access. Reading Draft Mode does not make a route dynamic in Next.js 16, but it must not be called in `generateStaticParams`; `createPage` only uses the `request` scope while rendering.
+
+`createPage`, `createLayout` and `createPublishApi` default to `createNextJsClient`, so the scope-aware factory above is only needed to customise the client. `createPage` and `createLayout` call it with a scope (`createLayout` always `'metadata'`, so layout metadata is never draft-aware); `createPublishApi` calls it with `(undefined, 'metadata')` (never draft-aware) and awaits the result, or uses a Graph client instance as-is; anything that is neither an `IOptiGraphClient` nor a factory returning one makes the handler throw. The deprecated aliases (`createClient`, `createAuthorizedClient`, `getServerClient`, `getAuthorizedServerClient`) accept only a token and return a promise.
 
 ## `app/preview/page.tsx` — On-Page Editing route
 
@@ -132,7 +126,7 @@ export const POST = handler
 ## Constraints
 
 - All files using these helpers must include `import 'server-only'`.
-- Use `createClient` from `@remkoj/optimizely-graph-client` directly; do not import it from this package.
-- Set `dynamic = 'error'` on the `[[...path]]` route to detect unintended dynamic rendering early.
+- Use `createNextJsClient` with the appropriate scope for CMS pages. Client factories for `createPage`, `createLayout` and `createPublishApi` may be synchronous or asynchronous.
+- Do not read Draft Mode in `generateStaticParams`: use the `metadata` scope there (`createPage` already does).
 - `createPublishApi` is the default export of `./publish`.
 - When a page cannot be resolved, the error output includes `[request-id: …]` (the Optimizely Graph request id from `client.getRequestId()`) and, for empty results, the request variables (capped at 2000 characters); quote the id when contacting Optimizely Support.
