@@ -6,6 +6,9 @@ vi.mock('server-only', () => ({}))
 vi.mock('next/script.js', () => ({ default: () => null }))
 vi.mock('next/navigation.js', () => ({ notFound: () => 'not-found' }))
 vi.mock('next/cache.js', () => ({ revalidatePath: vi.fn(), revalidateTag: vi.fn() }))
+vi.mock('../src/ope/load-content.js', () => ({
+  default: vi.fn(async () => ({ contentLink: { key: 'abcdef', locale: 'en' }, contentItem: {}, contentType: ['Page'] }))
+}))
 
 const draftModeState = vi.hoisted(() => ({ isEnabled: false }))
 const nextHeaders = vi.hoisted(() => ({
@@ -20,6 +23,7 @@ import { createNextJsClient, createClient, createAuthorizedClient, getServerClie
 import { createPage } from '../src/cms-page/page.js'
 import { createLayout } from '../src/cms-page/layout.js'
 import { createPublishApi } from '../src/publish/index.js'
+import { createEditPageComponent } from '../src/ope/page.js'
 import { logger } from '../src/logger.js'
 
 const config = {
@@ -315,6 +319,43 @@ describe('creating pages and layouts', () => {
     const factory = vi.fn(async () => custom)
     expect(await runLayout({ client: factory })).toBe(custom)
     expect(factory).toHaveBeenCalledWith(undefined, 'metadata')
+  })
+})
+
+describe('edit view page', () => {
+  const editProps = { params: Promise.resolve({}), searchParams: Promise.resolve({}) } as never
+  const edit = (client: unknown) => createEditPageComponent({} as never, {
+    clientFactory: client as never,
+    requestValidator: () => true,
+    contentResolver: (() => ({ key: 'abcdef', locale: 'en', ctx: 'edit', token: 'edit-token' })) as never
+  })
+
+  it('calls the client factory with the request token and the metadata scope, without reading Draft Mode', async () => {
+    draftModeState.isEnabled = true
+    const custom = await createNextJsClient(undefined, 'metadata')
+    const factory = vi.fn(async () => custom)
+    await edit(factory)(editProps)
+    expect(factory).toHaveBeenCalledWith('edit-token', 'metadata')
+    expectNoRequestApiAccess()
+  })
+
+  it('accepts a Graph client instance as the client option', async () => {
+    const custom = await createNextJsClient(undefined, 'metadata')
+    await expect(edit(custom)(editProps)).resolves.toBeDefined()
+  })
+
+  it('refuses a factory that does not return a Graph client', async () => {
+    await expect(edit(() => ({}))(editProps)).rejects.toThrow('The client must be an instance of IOptiGraphClient')
+  })
+
+  it('creates the default client in the metadata scope, so it never reads Draft Mode', async () => {
+    draftModeState.isEnabled = true
+    const page = createEditPageComponent({} as never, {
+      requestValidator: () => true,
+      contentResolver: (() => ({ key: 'abcdef', locale: 'en', ctx: 'edit' })) as never
+    })
+    await page(editProps)
+    expectNoRequestApiAccess()
   })
 })
 

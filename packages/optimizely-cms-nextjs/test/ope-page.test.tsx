@@ -34,7 +34,11 @@ function collectText(node: ReactNode, out: string[] = []): string[] {
 function createPage(debug: boolean) {
   vi.stubEnv('OPTIMIZELY_DEBUG', debug ? '1' : '0')
   return createEditPageComponent({} as never, {
-    clientFactory: (() => ({ siteInfo: { cmsURL: new URL('https://cms.example.com') } })) as never,
+    clientFactory: (() => ({
+      siteInfo: { cmsURL: new URL('https://cms.example.com') },
+      updateAuthentication: () => undefined,
+      request: async () => ({})
+    })) as never,
     requestValidator: () => true,
     contentResolver: (() => ({ key: 'abcdef', locale: 'en', ctx: 'edit' })) as never
   })
