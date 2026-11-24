@@ -48,3 +48,10 @@ An entry within the factory consists of the following fields:
 - ***loader:*** The component to show while Suspense is awaiting the actual component. This component is given to the `fallback` property of `<Suspense>`. Optional, the default value is `undefined`.
 - ***variant:*** The specific variant of the component (for example `header`, `footer`). Optional, the default value is `default`.
 - ***isClient:*** Set to `true` when the component is a Client Component (for example a `next/dynamic` import of a `use client` module). The `DefaultComponentFactory` then hands `ctx` and `editProps.ctx` to the component in their serializable form, as React does not allow class instances (like `ServerContext`) to cross the Server/Client boundary. Optional, the default value is `false`.
+
+#### Resolution and fallback
+The `DefaultComponentFactory` registers each component by the last (most specific) part of its type and the variant. When `has()` or `resolve()` is called with a type that consists of multiple parts (for example the type and contracts reported by Optimizely CMS, such as `['Hero', 'Item']`), it:
+1. Removes the contracts listed in the `ignoredContracts` property (case insensitive, default: `item`, `assetitem`, `imageitem` and `content`). Values must be lowercase and without the leading underscore. Adjust the list to your needs, for example `factory.ignoredContracts.push('mycontract')`.
+2. Looks for a registration of the remaining parts, starting with the last (most specific) part and falling back to the less specific parts.
+
+Only the requested variant is used, there is no fall-back to another variant. To disable the fall-back and the removal of the ignored contracts, create the factory with `new DefaultComponentFactory(initialComponents, false)`; the exact type (the last part) is then used. The variant that is used when none is specified is available as `defaultVariant` (`default`).

@@ -60,6 +60,8 @@ factory.registerAll(RichTextComponentDictionary) // register built-in rich text 
 factory.registerAll(myComponents)
 ```
 
+`resolve()` and `has()` accept a string or list of type names (for example `['Hero', 'Item']`). The contracts in `factory.ignoredContracts` (lowercase, no leading underscore; default `item`, `assetitem`, `imageitem`, `content`) are removed first, then the registrations are tried from the last (most specific) part to the first. Only the requested variant is matched. Pass `false` as second constructor argument (`new DefaultComponentFactory(components, false)`) to only match the exact (last) part.
+
 ## RSC components (import from `./rsc`)
 
 ```typescript
