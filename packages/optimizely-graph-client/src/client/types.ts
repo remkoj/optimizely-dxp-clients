@@ -173,6 +173,21 @@ export interface IOptiGraphClient extends ClientInstanceType {
   readonly graphSchemaVersion: SchemaVersion
 
   /**
+   * Retrieve the request/correlation id that Optimizely Graph returned for 
+   * one of the most recent requests (at most 8 are kept per client), so it 
+   * can be logged when something is wrong with the result, e.g. when content 
+   * cannot be found. Quote this id when contacting Optimizely Support.
+   * 
+   * Only the id (a string) is kept, never the response. When a client is 
+   * shared between concurrent requests, the id may belong to another request.
+   * 
+   * @param       operationName   Only consider requests of this GraphQL operation
+   * @returns     The most recent matching request id, or `undefined` when 
+   *              there is none or Optimizely Graph did not return one
+   */
+  getRequestId(operationName?: string): string | undefined
+
+  /**
    * Update the authentication data for this client. 
    * - Set to AuthMode.HMAC or AuthMode.Basic to use that authentication 
    *   scheme, this requires the AppKey and Secret to be part of the 

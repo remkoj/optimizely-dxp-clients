@@ -135,3 +135,4 @@ export const POST = handler
 - Use `createClient` from `@remkoj/optimizely-graph-client` directly; do not import it from this package.
 - Set `dynamic = 'error'` on the `[[...path]]` route to detect unintended dynamic rendering early.
 - `createPublishApi` is the default export of `./publish`.
+- When a page cannot be resolved, the error output includes `[request-id: …]` (the Optimizely Graph request id from `client.getRequestId()`) and, for empty results, the request variables (capped at 2000 characters); quote the id when contacting Optimizely Support.

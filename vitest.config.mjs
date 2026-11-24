@@ -10,6 +10,7 @@ const testedPackages = [
   'optimizely-cms-api',
   'optimizely-cms-cli',
   'optimizely-cms-react',
+  'optimizely-graph-client',
   'hey-api-wrapper'
 ]
 

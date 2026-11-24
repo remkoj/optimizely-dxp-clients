@@ -170,3 +170,4 @@ import { isNonEmptyString, slugify } from '@remkoj/optimizely-cms-react/utils'
 - `ContentLink` and `ContentLinkWithLocale` are re-exported from `@remkoj/optimizely-graph-client` (direct import preferred).
 - `RichTextComponentDictionary` must be registered on the factory before passing it to `ServerContext`.
 - Factory entries that are Client Components (for example wrapped with `next/dynamic`) must set `isClient: true`. `DefaultComponentFactory` then passes `ctx` and `editProps.ctx` in their serializable form (`ServerContext.toJSON()`), as React rejects class instances crossing the Server/Client boundary.
+- The error thrown by `CmsContent` when the content cannot be loaded includes `[request-id: …]` (the Optimizely Graph request id from `client.getRequestId()`); quote it when contacting Optimizely Support.

@@ -102,6 +102,20 @@ const client = createClient()
 const result = await client.request(MyQueryDocument, { variables })
 ```
 
+## Request id and errors
+
+```typescript
+import { OptiGraphRequestError } from '@remkoj/optimizely-graph-client/client'
+
+// The request id Optimizely Graph returned for one of the 8 most recent requests of this client
+const requestId = client.getRequestId()            // latest request
+const forOperation = client.getRequestId('MyQuery') // latest request of that operation
+```
+
+- The id is read from the response headers (`correlation-id`, `x-request-id` or `x-correlation-id`); only the string is kept, never the response. When a client is shared between concurrent requests the id may belong to another request.
+- Errors reported by the client include `[request-id: <id>]` in the console output. The `ClientError` thrown by `graphql-request` gets `requestId` and `status` properties; with `errorPolicy: 'all'` an `OptiGraphRequestError` (`requestId`, `status`, `operationName`) is thrown.
+- `debug` and `query_log` output masks the `Authorization`, `cg-username` and `cg-roles` values.
+
 ## Utilities
 
 ```typescript

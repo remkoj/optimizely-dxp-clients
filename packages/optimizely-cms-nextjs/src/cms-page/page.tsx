@@ -29,7 +29,7 @@ import { MetaDataResolver } from '../metadata.js'
 import { urlToPath } from './utils.js'
 import { type GetContentByPathMethod } from './data.js'
 import { createClient } from '../client.js'
-import { getChannelId } from './_base.js'
+import { getChannelId, getRequestDiagnostics } from './_base.js'
 import { loadContentByPath as loadContentByPathBase } from './_loadContentByPath.js'
 import { getInfoByPath as getInfoByPathBase } from './_getInfoByPath.js'
 
@@ -400,7 +400,7 @@ export function createPage<
         : getInfoByPath(context.client, routerFactory, requestPath, channel, requestVariant))
       if (!lookupData) {
         console.error(
-          `🔴 [CmsPage] Unable to resolve the content for ${JSON.stringify(await params)}!`
+          `🔴 [CmsPage] Unable to resolve the content for ${JSON.stringify(await params)}!${getRequestDiagnostics(context.client)}`
         )
         return notFound()
       }

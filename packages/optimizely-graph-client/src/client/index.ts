@@ -1,6 +1,7 @@
 export { ContentGraphClient } from './client.js'
 export { createHmacFetch } from '../hmac-fetch.js'
 export { isContentGraphClient, isOptiGraphClient, isOptiGraphConfig } from './utils.js'
+export { OptiGraphRequestError, type OptiGraphRequestErrorDetails } from './errors.js'
 export * from './types.js'
 
 
