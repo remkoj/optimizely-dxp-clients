@@ -423,7 +423,13 @@ export async function submitContact(email: string, firstName: string) {
 }
 ```
 
-The helper requires an ODP private API key. Verify after submitting:
+The helper requires an ODP private API key. Without a key at all it skips the
+submission and writes a debug message (only when `NODE_ENV` is not `production`
+or `OPTIMIZELY_DEBUG` is enabled); with only a public key it skips and always
+writes a `console.warn`. Neither case throws. When an ODP request fails it throws
+a `DataPlatformError` with a numeric `status` and a `detail` (the ODP response
+body, at most 500 characters, private key and submitted values redacted; not part
+of `message`, treat it as personal data). Verify after submitting:
 `customer(vuid: <browser vuid>)` must return the profile holding the email
 (ODP merges asynchronously; allow 15 seconds to about a minute).
 

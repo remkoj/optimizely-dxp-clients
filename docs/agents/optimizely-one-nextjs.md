@@ -194,8 +194,18 @@ has `OPTIMIZELY_FX_PROXY=true` and the routes in `src/app/api/fx/`; after
   from the `@remkoj/optimizely-one-nextjs/data-platform/server` entry point.
   Import its default `DataPlatform` namespace in a server action. It calls
   `identify` and then `sendEvent` (with `email` added to the event identifiers).
-- The helper throws if the ODP private API key is missing or if either API call
-  fails. This subpath is isolated from server components so it is safe to import
+- The helper skips (returns without throwing) when ODP cannot be written to: no
+  `OPTIMIZELY_DATAPLATFORM_ID` writes a `logger.debug` message (stdout, gated by
+  `NODE_ENV`/`OPTIMIZELY_DEBUG`), a public-only key writes an ungated
+  `console.warn`. The guard parses the key with `parseApiKey` before creating the
+  client, because the `DataPlatformClient` constructor throws without a tracker
+  id. The low-level `upsertProfile`/`sendEvent`/`identify` keep throwing a
+  `DataPlatformError` without a private key.
+- A failed ODP request throws a `DataPlatformError` with `status` and `detail`.
+  `detail` is read in `privatePost` (`api.ts`), capped at 500 characters, stripped
+  of control characters and has the private key and every string value of the
+  request payload (min. 3 characters) replaced by `[redacted]`. It is kept out of
+  `message` on purpose, because ODP can echo personal data. This subpath is isolated from server components so it is safe to import
   from Next.js route handlers and server actions. Do not import it into client
   components.
 - Verify with `customer(vuid: <browser vuid>)`: it must return the profile that
