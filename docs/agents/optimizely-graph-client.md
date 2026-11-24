@@ -65,10 +65,14 @@ The webhook that Optimizely Graph invokes after a publish authenticates with a s
 
 | Variable | Config property | Description |
 | --- | --- | --- |
-| `OPTIMIZELY_PUBLISH_TOKEN` | `publish` | The shared secret. `${VAR}` references are expanded with `dotenv-expand` (BSD-2-Clause; its only runtime dependency, `dotenv`, was already in the dependency tree), e.g. `${VERCEL_AUTOMATION_BYPASS_SECRET}`. A reference to an unset variable results in *no* token (a warning without the value is written to stderr), never in a partial secret. Values without a `${...}` reference are used as is; escape a literal `$` as `\$`. |
-| `OPTIMIZELY_PUBLISH_HEADER` | `publish_header` | Header name that carries the token (`DEFAULT_PUBLISH_HEADER` = `X-OPTLY-PUBLISH`). Must be an RFC 7230 token, otherwise an error is thrown (without the value). May use `${VAR}` references. For Vercel Deployment Protection use `x-vercel-protection-bypass`. |
+| `OPTIMIZELY_PUBLISH_TOKEN` | `publish` | The shared secret. `${VAR}` references are expanded with `dotenv-expand` (BSD-2-Clause; its only runtime dependency, `dotenv`, was already in the dependency tree), e.g. `${VERCEL_AUTOMATION_BYPASS_SECRET}`. A reference to an unset variable results in *no* token (a warning without the value is written to stderr), never in a partial secret. Values without a `${...}` reference are used as is. The expansion is a single pass: the values of referenced variables are used as-is (never expanded again) and unbraced `$name` text is left alone; escape a literal reference as `\${NAME}`. |
+| `OPTIMIZELY_PUBLISH_HEADER` | `publish_header` | Header name that carries the token (`DEFAULT_PUBLISH_HEADER` = `X-OPTLY-PUBLISH`). Must be an RFC 7230 token, otherwise an error is thrown (without the value). May use `${VAR}` references; a reference to an unset variable throws (fail closed, without the value). For Vercel Deployment Protection use `x-vercel-protection-bypass`. |
 
 - `resolvePublishHeader()` and `DEFAULT_PUBLISH_HEADER` are exported from `./config`; the header name is available as `client.siteInfo.publishHeader` (required member of `OptiGraphSiteInfo`).
-- The debug configuration print masks `publish`.
-- Expansion is limited to these two settings and works on a copy of `process.env`; the CLI's `.env` loader (`graph-cli/src/context/env.ts`) already expands the files it loads, so the expansion in the client only acts on values that still contain a `${...}` reference.
+- The `OPTIMIZELY_DEBUG` configuration print masks `secret`, `app_key`, `single_key` and `publish` (`***`).
+- Expansion is limited to these two settings (`EXPANDED_BY_CONFIG`, exported from `./config`) and works on a copy of `process.env`. Other loaders of `.env` files must leave these two variables as-is so a value is expanded exactly once: the CLI's loader (`graph-cli/src/context/env.ts`) expands every other variable but skips `EXPANDED_BY_CONFIG`, so an unresolved reference never turns into a partial token and an escaped `\${...}` survives. Next.js expands its own `.env` files before the client sees the values, so a literal `${...}` in a token cannot be escaped reliably there; use a token without `${`.
 - Tests: `test/publish-config.test.ts` (header/token resolution), `test/admin-api.test.ts` (request contract of the Admin API client), `test/hmac-fetch.test.ts`.
+
+## Channel domains
+
+`ChannelDefinition.channelDomainToUrl` defaults to `https` when `ChannelDomain.isSecure` is not set, except for `localhost` and `*.local` (`http`), so secrets are not sent over plain http by default (`test/channel-definition.test.ts`).

@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi, type MockInstance } from 'vitest'
-import { readEnvironmentVariables, DEFAULT_PUBLISH_HEADER, resolvePublishHeader } from '../src/config.js'
+import { readEnvironmentVariables, DEFAULT_PUBLISH_HEADER, EXPANDED_BY_CONFIG, resolvePublishHeader } from '../src/config.js'
 import { ContentGraphClient } from '../src/client/client.js'
 
 let warn: MockInstance
@@ -113,5 +113,74 @@ describe('publish token expansion', () => {
     vi.stubEnv('OPTIMIZELY_PUBLISH_TOKEN', 'super-secret-token')
     readEnvironmentVariables()
     expect(log.mock.calls.flat().join(' ')).not.toContain('super-secret-token')
+  })
+})
+
+describe('single expansion of references', () => {
+  it('does not expand the value of a referenced variable again', () => {
+    vi.stubEnv('REFERENCED', 'literal-${OTHER}-value')
+    vi.stubEnv('OTHER', 'expanded-twice')
+    vi.stubEnv('OPTIMIZELY_PUBLISH_TOKEN', '${REFERENCED}')
+    expect(readEnvironmentVariables().publish).toBe('literal-${OTHER}-value')
+  })
+
+  it('does not expand unbraced $names next to a reference', () => {
+    vi.stubEnv('PART', 'middle')
+    vi.stubEnv('word', 'expanded')
+    vi.stubEnv('OPTIMIZELY_PUBLISH_TOKEN', 'pa$word-${PART}')
+    expect(readEnvironmentVariables().publish).toBe('pa$word-middle')
+  })
+
+  it('keeps an escaped reference as literal text, without a warning', () => {
+    vi.stubEnv('OPTIMIZELY_PUBLISH_TOKEN', 'abc\\${NOT_A_REFERENCE}')
+    expect(readEnvironmentVariables().publish).toBe('abc${NOT_A_REFERENCE}')
+    expect(warn).not.toHaveBeenCalled()
+  })
+
+  it('still expands a reference next to an escaped one', () => {
+    vi.stubEnv('PART', 'middle')
+    vi.stubEnv('OPTIMIZELY_PUBLISH_TOKEN', '${PART}-\\${LITERAL}')
+    expect(readEnvironmentVariables().publish).toBe('middle-${LITERAL}')
+  })
+
+  it('exposes the variables that are expanded by the configuration only', () => {
+    expect(EXPANDED_BY_CONFIG).toEqual(['OPTIMIZELY_PUBLISH_TOKEN', 'OPTIMIZELY_PUBLISH_HEADER'])
+  })
+})
+
+describe('unresolved references fail closed', () => {
+  it('throws for an unresolved reference in the header name, without leaking values', () => {
+    vi.stubEnv('OPTIMIZELY_PUBLISH_HEADER', 'x-${DOES_NOT_EXIST_ANYWHERE}')
+    let message = ''
+    try {
+      readEnvironmentVariables()
+    } catch (e) {
+      message = (e as Error).message
+    }
+    expect(message).toContain('OPTIMIZELY_PUBLISH_HEADER')
+    expect(message).toContain('not set')
+    expect(message).not.toContain('x-')
+  })
+
+  it('never yields a partial token', () => {
+    vi.stubEnv('OPTIMIZELY_PUBLISH_TOKEN', '${DOES_NOT_EXIST_ANYWHERE}-suffix')
+    expect(readEnvironmentVariables().publish).toBeUndefined()
+    expect(warn).toHaveBeenCalledTimes(1)
+  })
+})
+
+describe('debug output of the configuration', () => {
+  it('masks the credentials', () => {
+    const log = vi.spyOn(console, 'log').mockImplementation(() => undefined)
+    vi.stubEnv('OPTIMIZELY_DEBUG', '1')
+    vi.stubEnv('OPTIMIZELY_GRAPH_SECRET', 'graph-secret-value-0123456789')
+    vi.stubEnv('OPTIMIZELY_GRAPH_APP_KEY', 'graph-app-key-value-0123456789')
+    vi.stubEnv('OPTIMIZELY_GRAPH_SINGLE_KEY', 'graph-single-key-value-0123456789')
+    readEnvironmentVariables()
+    const printed = log.mock.calls.flat().join(' ')
+    expect(printed).toContain('Detected configuration')
+    expect(printed).not.toContain('graph-secret')
+    expect(printed).not.toContain('graph-app-key')
+    expect(printed).not.toContain('graph-single-key')
   })
 })

@@ -33,6 +33,8 @@ This package installs the command `opti-graph` into the project, which can be us
 
 > **Breaking change:** the publish token is no longer added to the webhook URL as `?token=`. Run `webhook:create` again after upgrading (it replaces the legacy webhook) and deploy the frontend with the same `OPTIMIZELY_PUBLISH_TOKEN` / `OPTIMIZELY_PUBLISH_HEADER`. For Vercel Deployment Protection use `OPTIMIZELY_PUBLISH_HEADER=x-vercel-protection-bypass` and `OPTIMIZELY_PUBLISH_TOKEN=${VERCEL_AUTOMATION_BYPASS_SECRET}`.
 
+> The publish token and header are expanded once: `${VAR}` references in `OPTIMIZELY_PUBLISH_TOKEN` / `OPTIMIZELY_PUBLISH_HEADER` (also in `.env` files) are resolved by the Optimizely Graph configuration, an unset reference counts as no token (`webhook:create` exits with code 1) or throws for the header, and a literal `${...}` is written as `\${...}`.
+
 > `webhook:delete` no longer requires `--publish_token` / `FRONTEND_PUBLISH_TOKEN`: webhooks are matched on host and path. The option is still accepted for compatibility, is deprecated and is ignored.
 
 ### Arguments

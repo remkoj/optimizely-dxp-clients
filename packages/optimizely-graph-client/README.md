@@ -163,15 +163,15 @@ The following configuration options are available, the table lists both the envi
 | `OPTIMIZELY_GRAPH_SINGLE_KEY` | single_key | yes | The key needed for public, read-only access |
 | `OPTIMIZELY_GRAPH_SECRET` | secret | no | The Optimizely Graph secret for write access, this value must never be made available in a browser |
 | `OPTIMIZELY_GRAPH_APP_KEY` | app_key | no | The Optimizely Graph app_key for write access, this value must never be made available in a browser |
-| `OPTIMIZELY_PUBLISH_TOKEN` | publish | no | The shared secret that Optimizely Graph sends to your publish webhook, in the header named by `OPTIMIZELY_PUBLISH_HEADER`. `${VAR}` references are expanded, e.g. `${VERCEL_AUTOMATION_BYPASS_SECRET}`; an unresolvable reference results in no token. Escape a literal `$` as `\$`. |
-| `OPTIMIZELY_PUBLISH_HEADER` | publish_header | no | The name of the header that carries the publish token, default `X-OPTLY-PUBLISH`. For Vercel Deployment Protection (Automation Bypass) use `x-vercel-protection-bypass`. |
+| `OPTIMIZELY_PUBLISH_TOKEN` | publish | no | The shared secret that Optimizely Graph sends to your publish webhook, in the header named by `OPTIMIZELY_PUBLISH_HEADER`. `${VAR}` references are expanded, e.g. `${VERCEL_AUTOMATION_BYPASS_SECRET}`; an unresolvable reference results in no token (a warning is written, `webhook:create` and the publish API then refuse to work). References are expanded once: the values of referenced variables are used as-is. Escape a literal `${...}` as `\${...}`. |
+| `OPTIMIZELY_PUBLISH_HEADER` | publish_header | no | The name of the header that carries the publish token, default `X-OPTLY-PUBLISH`. For Vercel Deployment Protection (Automation Bypass) use `x-vercel-protection-bypass`. `${VAR}` references are expanded; a reference to a variable that is not set throws an error. |
 | `OPTIMIZELY_GRAPH_TENANT_ID` | tenant_id | no | The Optimizely Graph Tenant ID.<br/><br/>*Only required when using OIDC Authentication* |
 | `OPTIMIZELY_GRAPH_SCHEMA` | graph_schema | no | The Schema version of Optimizely Graph to use. This defaults to the current version, but can be set to `"new"` (`SchemaVersion.Next`) to use a next version if it has been created by Optimizely CMS. |
 | `SITE_DOMAIN` | deploy_domain | no | The domain of the frontend |
 | `OPTIMIZELY_CMS_URL` | dxp_url | yes | The domain where the CMS has been installed |
 | `OPTIMIZELY_CMS_SCHEMA` | opti_cms_schema | no | The marker for the CMS schema version, which can be used by services and the implementation. Valid values are: `OPTI-CMS-12` and `OPTI-CMS-13`. The default value is `OPTI-CMS-13` |
 | `OPTIMIZELY_GRAPH_QUERY_LOG` | query_log | no | Set to "true" to enable query output to the console |
-| `OPTIMIZELY_DEBUG` | debug | no | Set to "true" to enable verbose debug output to the console |
+| `OPTIMIZELY_DEBUG` | debug | no | Set to "true" to enable verbose debug output to the console. The credentials (`secret`, `app_key`, `single_key`, publish token) are masked in this output |
 
 ### 3.0. Publish webhook secret
 The publish webhook secret is sent in a request header and no longer in the URL. Register the webhook with `opti-graph webhook:create` (see the CLI package) and configure the same values at the frontend:
@@ -189,6 +189,9 @@ OPTIMIZELY_PUBLISH_TOKEN=${VERCEL_AUTOMATION_BYPASS_SECRET}
 - `OptiGraphSiteInfo.publishHeader` is a new required member; custom implementations of the interface must provide it.
 - The publish secret is registered as a webhook header. The `?token=` query parameter is still accepted by `createPublishApi` but deprecated (logs a warning) and will be removed; run `opti-graph webhook:create` again to replace legacy webhooks, then remove the query token.
 - The 500 response of the publish API no longer contains error details.
+- `ChannelDefinition` domains without `isSecure` now default to `https`, except for `localhost` and `*.local`; previously they defaulted to `http` outside of development mode. Set `isSecure: false` explicitly when a domain must use `http`.
+- `${VAR}` expansion of `OPTIMIZELY_PUBLISH_TOKEN` / `OPTIMIZELY_PUBLISH_HEADER` is a single pass (referenced values and unbraced `$name` text are never expanded) and `\${VAR}` is an escape for literal text. An unset reference in `OPTIMIZELY_PUBLISH_HEADER` now throws instead of falling back to the default header.
+- The `OPTIMIZELY_DEBUG` configuration output masks `secret`, `app_key` and `single_key` (it printed them before).
 
 ### 3.0.2. Request id and logging <!-- omit in toc -->
 Optimizely Graph returns an id for each request in a response header (`correlation-id`, `x-request-id` or `x-correlation-id` are read). Use `client.getRequestId(operationName?)` to retrieve the id of one of the 8 most recent requests of a client, e.g. to log it when content cannot be found and quote it when contacting Optimizely Support. Only the id (a string) is retained, never the response. The id is also added to the console error output (`[request-id: ...]`), to the `ClientError` thrown by the client (`requestId` and `status` properties) and, with `errorPolicy: 'all'`, to the `OptiGraphRequestError` that is thrown. The `query_log` and `debug` output masks the `Authorization`, `cg-username` and `cg-roles` header values.

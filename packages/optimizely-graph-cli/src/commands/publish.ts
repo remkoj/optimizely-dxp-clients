@@ -38,7 +38,7 @@ export const publishToVercelModule: CliModule<PublishToVercelProps> = {
       return
     }
     if (!token) {
-      process.stderr.write(chalk.redBright(chalk.bold(figures.cross) + " No publish token available, set OPTIMIZELY_PUBLISH_TOKEN or provide --publish_token") + "\n")
+      process.stderr.write(chalk.redBright(chalk.bold(figures.cross) + " No publish token available, set OPTIMIZELY_PUBLISH_TOKEN (a ${VAR} reference to a variable that is not set counts as no token) or provide --publish_token") + "\n")
       process.exitCode = 1
       return
     }

@@ -18,7 +18,7 @@ npm install @remkoj/optimizely-graph-client
 | `OPTIMIZELY_GRAPH_SINGLE_KEY` | yes | Read-only single key for public queries |
 | `OPTIMIZELY_GRAPH_APP_KEY` | for mutations | Application key |
 | `OPTIMIZELY_GRAPH_SECRET` | for mutations | Application secret |
-| `OPTIMIZELY_PUBLISH_TOKEN` | no | Shared secret of the publish webhook. `${VAR}` references are expanded (e.g. `${VERCEL_AUTOMATION_BYPASS_SECRET}`); an unset reference results in no token |
+| `OPTIMIZELY_PUBLISH_TOKEN` | no | Shared secret of the publish webhook. `${VAR}` references are expanded (e.g. `${VERCEL_AUTOMATION_BYPASS_SECRET}`); an unset reference results in no token; expanded once, escape a literal as `\${...}` |
 | `OPTIMIZELY_PUBLISH_HEADER` | no | Header that carries the publish token (default `X-OPTLY-PUBLISH`; `x-vercel-protection-bypass` for Vercel Deployment Protection) |
 | `OPTIMIZELY_GRAPH_GATEWAY` | no | Gateway URL (default: `https://cg.optimizely.com`) |
 | `OPTIMIZELY_GRAPH_TENANT_ID` | no | Tenant identifier |

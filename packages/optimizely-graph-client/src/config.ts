@@ -11,6 +11,13 @@ export { OptiCmsSchema, SchemaVersion } from "./client/types.js"
  */
 export const DEFAULT_PUBLISH_HEADER = 'X-OPTLY-PUBLISH'
 
+/**
+ * The environment variables of which the `${VAR}` references are expanded by
+ * {@link readEnvironmentVariables} itself. Other loaders of `.env` files (such as
+ * the CLI) must leave these as-is, so a value is expanded at most once.
+ */
+export const EXPANDED_BY_CONFIG: readonly string[] = ['OPTIMIZELY_PUBLISH_TOKEN', 'OPTIMIZELY_PUBLISH_HEADER']
+
 const HEADER_NAME_TOKEN = /^[!#$%&'*+\-.^_`|~0-9A-Za-z]+$/
 const ENV_REFERENCE = /\$\{[^{}]+\}/
 
@@ -18,7 +25,8 @@ const ENV_REFERENCE = /\$\{[^{}]+\}/
  * Read the configuration from the environment variables
  *
  * @returns The configuration, as defined by the environment variables
- * @throws  When `OPTIMIZELY_PUBLISH_HEADER` is not a valid HTTP header name
+ * @throws  When `OPTIMIZELY_PUBLISH_HEADER` is not a valid HTTP header name, or refers to an
+ *          environment variable that is not set
  */
 export function readEnvironmentVariables(): Types.OptimizelyGraphConfig {
   const config: Types.OptimizelyGraphConfig = {
@@ -54,16 +62,28 @@ export function readEnvironmentVariables(): Types.OptimizelyGraphConfig {
     }
 
   if (config.debug)
-    console.log("🚧 Detected configuration from Environment Variables:", JSON.stringify({ ...config, publish: config.publish ? '***' : undefined }))
+    console.log("🚧 Detected configuration from Environment Variables:", JSON.stringify({
+      ...config,
+      secret: maskCredential(config.secret),
+      app_key: maskCredential(config.app_key),
+      single_key: maskCredential(config.single_key),
+      publish: maskCredential(config.publish)
+    }))
 
   return config
+}
+
+function maskCredential(value: string | undefined): string | undefined {
+  return value ? '***' : undefined
 }
 
 /**
  * Expand `${VAR}` references in a configuration value against the current
  * environment variables (dotenv-expand semantics), without modifying `process.env`.
- * Values without a braced reference are returned as-is, so secrets containing `$`
- * are never altered.
+ * The expansion is a single pass: the values of the referenced variables are used
+ * as-is, and unbraced `$name` text is left alone. A reference can be escaped as
+ * `\${NAME}` to keep it as literal text. Values without a reference are returned
+ * as-is, so secrets containing `$` are never altered.
  *
  * @param   value   The raw value
  * @returns The expanded value, which is empty when it refers to a variable that is not set
@@ -72,11 +92,17 @@ function expandReferences(value: string): string {
   if (!ENV_REFERENCE.test(value))
     return value
   // A plain ${NAME} that is not set must never yield a partial secret, such as 'prefix-'
-  for (const [, name] of value.matchAll(/\$\{([A-Za-z_][A-Za-z0-9_]*)\}/g))
+  for (const [, name] of value.matchAll(/(?<!\\)\$\{([A-Za-z_][A-Za-z0-9_]*)\}/g))
     if (!process.env[name])
       return ''
-  const parsed = { value }
-  expand({ parsed, processEnv: { ...process.env } as Record<string, string> })
+  // Escape what dotenv-expand must not expand: unbraced $names in the value, and
+  // any $ in the referenced values, so the outcome is expanded exactly once
+  const parsed = { value: value.replace(/(?<!\\)\$(?=[A-Za-z_])/g, '\\$') }
+  const processEnv: Record<string, string> = {}
+  for (const [name, text] of Object.entries(process.env))
+    if (typeof text == 'string')
+      processEnv[name] = text.replaceAll('$', '\\$')
+  expand({ parsed, processEnv })
   return parsed.value.trim()
 }
 
@@ -98,13 +124,14 @@ function getExpandedOptional(envVarName: string): string | undefined {
  * @param   configured  The configured value; `${VAR}` references are expanded
  * @param   source      The name of the setting, used in messages only
  * @returns The configured header name, or {@link DEFAULT_PUBLISH_HEADER} when empty
- * @throws  When the configured value is not a valid HTTP header name (RFC 7230 token)
+ * @throws  When the configured value refers to an environment variable that is not set, or is
+ *          not a valid HTTP header name (RFC 7230 token)
  */
 export function resolvePublishHeader(configured?: string, source: string = 'OPTIMIZELY_PUBLISH_HEADER'): string {
   const name = configured == undefined ? '' : expandReferences(configured.trim())
   if (name == '') {
     if (configured != undefined && configured.trim() != '')
-      console.warn(`⚠️ [Optimizely Graph] ${source} refers to an environment variable that is not set, using ${DEFAULT_PUBLISH_HEADER}`)
+      throw new Error(`❌ [Optimizely Graph] ${source} refers to an environment variable that is not set`)
     return DEFAULT_PUBLISH_HEADER
   }
   if (!HEADER_NAME_TOKEN.test(name))

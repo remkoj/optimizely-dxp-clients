@@ -115,8 +115,18 @@ export class ChannelDefinition implements Readonly<ChannelDefinitionData> {
     return new URL('http://localhost:3000')
   }
 
+  /**
+   * Convert a channel domain into a URL. When the domain does not specify
+   * `isSecure`, it defaults to https, except for local domains (`localhost` and
+   * `*.local`), so secrets are never sent over plain http by default.
+   *
+   * @param d The channel domain
+   * @returns The URL of the domain
+   */
   protected channelDomainToUrl(d: ChannelDomain) {
-    const isSecure = d.isSecure === undefined ? this.isDev : d.isSecure
+    const hostname = d.name.split(':')[0].toLowerCase()
+    const isLocal = hostname == 'localhost' || hostname.endsWith('.local')
+    const isSecure = d.isSecure === undefined ? !isLocal : d.isSecure
     return new URL(`http${isSecure ? 's' : ''}://${d.name}`)
   }
   /**

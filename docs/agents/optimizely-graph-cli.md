@@ -27,3 +27,7 @@ After `yarn install` or `yarn upgrade`, re-apply the patched dep: `yarn opti-gra
 - The publish token is sent as webhook header (`readEnvironmentVariables().publish_header`, default `X-OPTLY-PUBLISH`), never in the URL. A webhook counts as "already registered" only when URL (without query), method, header name and header value match; otherwise every webhook for the same origin + path is replaced. Whether Optimizely Graph echoes header values in the list response is **unverified**; if it masks them the command re-registers on each run, which is harmless.
 - Output never contains the token or a legacy `?token=` value (`displayUrl`).
 - `test/admin-commands.test.ts` characterizes every command that uses the Admin API (webhook:list/create/delete, source:list/clear/delete) with a stubbed `fetch`. The CLI resolves the built graph-client (`dist`), so run `yarn prepare` first.
+
+## .env loading
+
+`src/context/env.ts` (`buildEnvironment`) loads `.env`, `.env.local` and `.env.<NODE_ENV>.local` with `dotenv` and expands `${VAR}` references with `dotenv-expand`, except for the variables in `EXPANDED_BY_CONFIG` (`OPTIMIZELY_PUBLISH_TOKEN`, `OPTIMIZELY_PUBLISH_HEADER`): these stay raw in `process.env` and are expanded exactly once by `readEnvironmentVariables()` of the graph-client. This keeps an unresolved reference from becoming a partial token, and makes `\${...}` a working escape (`test/env.test.ts`).

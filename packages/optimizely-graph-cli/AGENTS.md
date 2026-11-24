@@ -21,7 +21,7 @@ Requires Node `>=24.0.0 <25.0.0`.
 | `OPTIMIZELY_GRAPH_SECRET` | yes | Content Graph secret |
 | `OPTIMIZELY_GRAPH_SINGLE_KEY` | yes | Content Graph single key (read-only) |
 | `OPTIMIZELY_GRAPH_GATEWAY` | no | Gateway URL (default: `https://cg.optimizely.com`) |
-| `OPTIMIZELY_PUBLISH_TOKEN` | for `webhook:create` | Publish webhook secret (or `--publish_token`; `webhook:delete` no longer needs a token: `--publish_token`/`FRONTEND_PUBLISH_TOKEN` are optional, deprecated and ignored there, as it matches on host and path). `${VAR}` references are expanded, e.g. `${VERCEL_AUTOMATION_BYPASS_SECRET}` |
+| `OPTIMIZELY_PUBLISH_TOKEN` | for `webhook:create` | Publish webhook secret (or `--publish_token`; `webhook:delete` no longer needs a token: `--publish_token`/`FRONTEND_PUBLISH_TOKEN` are optional, deprecated and ignored there, as it matches on host and path). `${VAR}` references are expanded once (by the configuration, not by the `.env` loader), e.g. `${VERCEL_AUTOMATION_BYPASS_SECRET}`; an unset reference counts as no token (exit code 1); escape a literal as `\${...}` |
 | `OPTIMIZELY_PUBLISH_HEADER` | no | Header that carries the token (default `X-OPTLY-PUBLISH`) |
 | `OPTIMIZELY_CMS_URL` | no | CMS instance URL |
 | `OPTIMIZELY_DEBUG` | no | Set to `"1"` for verbose output |
