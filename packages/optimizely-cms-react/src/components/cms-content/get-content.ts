@@ -115,8 +115,10 @@ async function getComponentDataFromFragment<T>(Component: CmsComponentWithFragme
 
   // Check the result count
   const totalItems = fragmentResponse.contentById.total || 0
-  if (totalItems < 1)
-    throw new Error(`CmsContent expected to load exactly one content item of type ${name}, received ${totalItems} from Optimizely Graph. Content Item: ${JSON.stringify(gqlVariables)}`)
+  if (totalItems < 1) {
+    const requestId = typeof client.getRequestId === 'function' ? client.getRequestId() : undefined
+    throw new Error(`CmsContent expected to load exactly one content item of type ${name}, received ${totalItems} from Optimizely Graph. Content Item: ${JSON.stringify(gqlVariables)}${requestId ? ` [request-id: ${requestId}]` : ''}`)
+  }
   if (totalItems > 1 && client.debug) console.warn(`🟠 [CmsContent] Resolved ${totalItems} content items, expected only 1. Picked the first one`)
 
   // Transform CMS 12 results

@@ -60,6 +60,8 @@ factory.registerAll(RichTextComponentDictionary) // register built-in rich text 
 factory.registerAll(myComponents)
 ```
 
+`resolve()` and `has()` accept a string or list of type names (for example `['Hero', 'Item']`). The contracts in `factory.ignoredContracts` (lowercase, no leading underscore; default `item`, `assetitem`, `imageitem`, `content`) are removed first, then the registrations are tried from the last (most specific) part to the first. Only the requested variant is matched. Pass `false` as second constructor argument (`new DefaultComponentFactory(components, false)`) to only match the exact (last) part.
+
 ## RSC components (import from `./rsc`)
 
 ```typescript
@@ -170,3 +172,4 @@ import { isNonEmptyString, slugify } from '@remkoj/optimizely-cms-react/utils'
 - `ContentLink` and `ContentLinkWithLocale` are re-exported from `@remkoj/optimizely-graph-client` (direct import preferred).
 - `RichTextComponentDictionary` must be registered on the factory before passing it to `ServerContext`.
 - Factory entries that are Client Components (for example wrapped with `next/dynamic`) must set `isClient: true`. `DefaultComponentFactory` then passes `ctx` and `editProps.ctx` in their serializable form (`ServerContext.toJSON()`), as React rejects class instances crossing the Server/Client boundary.
+- The error thrown by `CmsContent` when the content cannot be loaded includes `[request-id: …]` (the Optimizely Graph request id from `client.getRequestId()`); quote it when contacting Optimizely Support.

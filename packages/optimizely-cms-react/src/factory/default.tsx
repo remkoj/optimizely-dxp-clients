@@ -21,6 +21,7 @@ export const EmptyComponentHandle = '$$fragment$$'
 export class DefaultComponentFactory implements ComponentFactory {
   private registry = new Map<string, ComponentTypeDictionaryEntry>()
   private dbg: boolean
+  private withFallback: boolean
 
   /**
    * A list of interfaces to ignore when resolving components. Adjust this
@@ -33,12 +34,24 @@ export class DefaultComponentFactory implements ComponentFactory {
   public ignoredContracts: string[] = ['item','assetitem','imageitem','content']
 
   /**
+   * The variant that is used when no variant has been specified
+   */
+  public readonly defaultVariant: string = 'default'
+
+  /**
    * Create a new instance of the DefaultComponentFactory
    *
    * @param   initialComponents   If provided, this dictionary will be registered
    *                              with the factory.
+   * @param   withFallback        When `true` (default), `has` and `resolve` remove
+   *                              the `ignoredContracts` from the type and fall back
+   *                              from the most specific to the least specific part
+   *                              of the type. When `false` only the exact type
+   *                              (the last part of the handle) is used.
    */
-  public constructor(initialComponents?: ComponentTypeDictionary) {
+  public constructor(initialComponents?: ComponentTypeDictionary, withFallback: boolean = true) {
+    this.withFallback = withFallback
+
     // Resolve debug mode
     try {
       this.dbg = process.env.OPTIMIZELY_DEBUG == '1'
@@ -58,7 +71,7 @@ export class DefaultComponentFactory implements ComponentFactory {
     component: ComponentType,
     useSuspense: boolean = false,
     loader?: ComponentType,
-    variant: string = 'default',
+    variant: string = this.defaultVariant,
     isClient?: boolean
   ): void {
     const registryKey = this.processComponentTypeHandle(type, variant)
@@ -77,20 +90,20 @@ export class DefaultComponentFactory implements ComponentFactory {
   /**
    * @inheritDoc
    */
-  public has(type: ComponentTypeHandle, variant: string = 'default'): boolean {
+  public has(type: ComponentTypeHandle, variant: string = this.defaultVariant): boolean {
     const registryKey = this.processComponentTypeHandle(type, variant)
+    const result = this._get(type, variant) !== undefined
     if (this.dbg) 
-      console.log(`🔎 [DefaultComponentFactory] Checking for ${ registryKey } - ${ this.registry.has(registryKey) ? 'YES' : 'NO'}`)
-    return this.registry.has(registryKey)
+      console.log(`🔎 [DefaultComponentFactory] Checking for ${ registryKey } - ${ result ? 'YES' : 'NO'}`)
+    return result
   }
 
   /**
    * @inheritDoc
    */
-  public resolve(type: ComponentTypeHandle, variant: string = 'default'): undefined | ComponentType {
-    const registryKey = this.processComponentTypeHandle(type, variant)
+  public resolve(type: ComponentTypeHandle, variant: string = this.defaultVariant): undefined | ComponentType {
+    const { entry, key: registryKey } = this._get(type, variant) ?? { entry: undefined, key: this.processComponentTypeHandle(type, variant) }
 
-    const entry = this.registry.get(registryKey)
     if (!entry) {
       if (this.dbg)
         console.warn(
@@ -98,6 +111,10 @@ export class DefaultComponentFactory implements ComponentFactory {
         )
       return undefined // The key is not registered in the factory
     }
+
+    if (this.dbg)
+      console.log(`🔎 [DefaultComponentFactory] Resolved component for ${ registryKey }. (Suspense: ${ entry.useSuspense ? 'yes' : 'no' }); Variant: ${ entry.variant ?? this.defaultVariant }`)
+
     // Client Components cannot receive the (class based) context from a Server Component
     const EntryComponent = entry.isClient ? createClientBoundary(entry.component) : entry.component
     if (entry.useSuspense != true) return EntryComponent // There's no suspense, so we're using the component directly
@@ -112,6 +129,24 @@ export class DefaultComponentFactory implements ComponentFactory {
       )
     }
     return Suspended
+  }
+
+  /**
+   * Find the registry entry for the type, using the lookup keys in order of
+   * preference
+   *
+   * @param     type      The type to find the entry for
+   * @param     variant   The variant to find the entry for
+   * @returns   The first matching entry and the key it was found with, or
+   *            `undefined` if there is no match
+   */
+  private _get(type: ComponentTypeHandle, variant: string): { entry: ComponentTypeDictionaryEntry, key: string } | undefined {
+    const lookupKeys = this.withFallback ? this.processComponentTypeHandleForLookup(type, variant) : [this.processComponentTypeHandle(type, variant)]
+    for (const key of lookupKeys) {
+      const entry = this.registry.get(key)
+      if (entry) return { entry, key }
+    }
+    return undefined
   }
 
   /**
@@ -156,6 +191,32 @@ export class DefaultComponentFactory implements ComponentFactory {
       const newHandle = prefix + typeName + '/' + actualVariant
 
       return newHandle
+    }
+    throw new Error(`Invalid component type handle: ${typeof handle}`)
+  }
+
+  /**
+   * Create the registry keys to look for, ordered from the most to the least
+   * preferred. The `ignoredContracts` are removed from the handle first, after
+   * which each remaining part - the last part being the most specific one - is
+   * tried on its own and combined with the parts that follow it.
+   *
+   * @param     handle    The type handle to look up
+   * @param     variant   The variant to look up
+   * @returns   The registry keys, in order of preference
+   */
+  private processComponentTypeHandleForLookup(handle: ComponentTypeHandle, variant: string): string[] {
+    const handleToProcess = typeof handle === 'string' ? handle.split(MERGE_SYMBOL) : [...handle]
+    if (Array.isArray(handleToProcess) && handleToProcess.every((s) => typeof s === 'string')) {
+      const parts = handleToProcess.filter((s) => !this.ignoredContracts.includes(s.toLowerCase()))
+      const keys = parts.flatMap((part, index) => {
+        const combined = parts.slice(index).join(MERGE_SYMBOL)
+        const keysForPart = [part + MERGE_SYMBOL + variant, combined + MERGE_SYMBOL + variant]
+        if (variant === this.defaultVariant)
+          keysForPart.push(part, combined)
+        return keysForPart.filter((key, idx, all) => all.indexOf(key) === idx)
+      })
+      return keys.reverse()
     }
     throw new Error(`Invalid component type handle: ${typeof handle}`)
   }

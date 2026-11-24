@@ -2,7 +2,8 @@ import { readEnvironmentVariables, applyConfigDefaults, validateConfig, type Opt
 import { type ClientError, GraphQLClient, type RequestMiddleware, type Variables, type ResponseMiddleware } from "graphql-request"
 import { AuthMode, type RequestMethod, type IOptiGraphClient, type OptiGraphSiteInfo, type IOptiGraphClientFlags, type OptiCmsSchema, type FrontendUser, SchemaVersion } from "./types.js"
 import createHmacFetch, { type FetchAPI } from "../hmac-fetch.js"
-import { base64encode, isError, validateToken, getAuthMode, isValidFrontendUser } from "./utils.js"
+import { base64encode, isError, validateToken, getAuthMode, isValidFrontendUser, extractRequestId, maskSecret, maskHeaders } from "./utils.js"
+import { OptiGraphRequestError } from "./errors.js"
 import versionInfo from '../version.js'
 
 type RequestExtendedInit<V extends Variables = Variables> = Parameters<RequestMiddleware<V>>[0] & {
@@ -23,6 +24,11 @@ const defaultFlags: IOptiGraphClientFlags = {
   includeDeleted: false
 }
 
+/**
+ * The number of request ids that is kept by each client
+ */
+const REQUEST_ID_HISTORY_SIZE = 8
+
 export class ContentGraphClient extends GraphQLClient implements IOptiGraphClient {
   public static readonly ForceHmacToken: string = AuthMode.HMAC
   public static readonly ForceBasicAuth: string = AuthMode.Basic
@@ -33,6 +39,10 @@ export class ContentGraphClient extends GraphQLClient implements IOptiGraphClien
   private _flags: IOptiGraphClientFlags
   private _customMiddleware: RequestMiddleware<Variables> | undefined
   private _variableToTags: Map<string,(variableValue?:unknown) => string>
+  // Ring buffer with the operation names and request ids (strings only, never the response) of the most recent requests
+  private readonly _recentOperations: Array<string | undefined> = new Array(REQUEST_ID_HISTORY_SIZE).fill(undefined)
+  private readonly _recentRequestIds: Array<string | undefined> = new Array(REQUEST_ID_HISTORY_SIZE).fill(undefined)
+  private _recentRequestIndex: number = 0
   public get currentOptiCmsSchema(): OptiCmsSchema {
     return this._config.opti_cms_schema
   }
@@ -53,7 +63,7 @@ export class ContentGraphClient extends GraphQLClient implements IOptiGraphClien
       throw new Error("❌ [Optimizely Graph] Configuration is invalid for selected authentication mode")
     }
     if (this.debug)
-      console.log(`🔑 [Optimizely Graph] Updating token to ${newValue}`)
+      console.log(`🔑 [Optimizely Graph] Updating token to ${newValue ? maskSecret(newValue) : newValue}`)
     this._token = newValue
   }
   protected get hmacFetch(): FetchAPI {
@@ -100,7 +110,7 @@ export class ContentGraphClient extends GraphQLClient implements IOptiGraphClien
       credentials: "include",
       redirect: "manual",
       requestMiddleware: (request) => this._requestMiddleware(request),
-      responseMiddleware: (response) => this._responseMiddleware(response)
+      responseMiddleware: (response, request) => this._responseMiddleware(response, request)
     });
 
     // Create initial map
@@ -146,7 +156,7 @@ export class ContentGraphClient extends GraphQLClient implements IOptiGraphClien
 
     if (QUERY_LOG) {
       console.log(`🔎 [Optimizely Graph] [Request URL] ${request.url} [${request.cache}]\n
-  🔎 [Optimizely Graph] [Request Headers] ${JSON.stringify(request.headers)}\n
+  🔎 [Optimizely Graph] [Request Headers] ${JSON.stringify(maskHeaders(request.headers))}\n
   🔎 [Optimizely Graph] [Request Query] ${getQueryOrRawBody(request)}\n
   🔖 [Optimizely Graph] [Request Variables] ${JSON.stringify(request.variables,undefined,2)}`)
       if (this._flags.nextJsFetchDirectives)
@@ -155,11 +165,46 @@ export class ContentGraphClient extends GraphQLClient implements IOptiGraphClien
     return request
   }
 
-  private _responseMiddleware(response: Parameters<ResponseMiddleware>[0]) {
+  /**
+   * Keep the request id of the response in the ring buffer. This must stay cheap, as it 
+   * runs for every request: a few header lookups and two array writes, no allocations.
+   */
+  private _recordRequestId(operationName: string | undefined, headers: Parameters<typeof extractRequestId>[0]): string | undefined {
+    const requestId = extractRequestId(headers)
+    const index = this._recentRequestIndex
+    this._recentOperations[index] = operationName
+    this._recentRequestIds[index] = requestId
+    this._recentRequestIndex = (index + 1) % REQUEST_ID_HISTORY_SIZE
+    return requestId
+  }
+
+  public getRequestId(operationName?: string): string | undefined {
+    for (let offset = 1; offset <= REQUEST_ID_HISTORY_SIZE; offset++) {
+      const index = (this._recentRequestIndex - offset + REQUEST_ID_HISTORY_SIZE) % REQUEST_ID_HISTORY_SIZE
+      if (operationName === undefined || this._recentOperations[index] === operationName)
+        return this._recentRequestIds[index]
+    }
+    return undefined
+  }
+
+  private _responseMiddleware(response: Parameters<ResponseMiddleware>[0], request?: Parameters<ResponseMiddleware>[1]) {
     const QUERY_LOG = this._config.query_log ?? false
+    const operationName = request?.operationName
     if (isError(response)) {
-      console.error(`❌ [Optimizely Graph] [Error] ${response.name} => ${response.message}`, (response as ClientError).response, (response as ClientError).request)
-    } else if (response.errors) {
+      // Annotate the error with strings only, the response itself is not retained by the annotation
+      const errorResponse = (response as ClientError).response
+      const requestId = this._recordRequestId(operationName, errorResponse?.headers)
+      if (requestId) {
+        const annotated = response as ClientError & { requestId?: string, status?: number }
+        annotated.requestId = requestId
+        annotated.status = errorResponse?.status
+      }
+      const idLabel = requestId ? ` [request-id: ${requestId}]` : ''
+      console.error(`❌ [Optimizely Graph] [Error] ${response.name}${idLabel} => ${response.message}`, errorResponse, (response as ClientError).request)
+      return
+    }
+    const requestId = this._recordRequestId(operationName, response.headers)
+    if (response.errors) {
       response.errors.forEach(
         ({ message, locations, path, name, source }) => {
           const locationList = (locations ?? []).map(loc => {
@@ -168,11 +213,12 @@ export class ContentGraphClient extends GraphQLClient implements IOptiGraphClien
           const errorName = name && name != 'undefined' ? ` ${name}` : ""
           const sourceInfo = source?.body ?? ""
           const sourceName = source?.name ? ` in ${source.name}` : ""
-          console.error(`❌ [Optimizely Graph] [GraphQL${errorName} error${sourceName}]:\n  Message: ${message}\n  Location: ${locationList}\n  Path: ${path}\n  Query: ${sourceInfo}`)
+          console.error(`❌ [Optimizely Graph] [GraphQL${errorName} error${sourceName}]${requestId ? ` [request-id: ${requestId}]` : ''}:\n  Message: ${message}\n  Location: ${locationList}\n  Path: ${path}\n  Query: ${sourceInfo}`)
         }
       );
-      throw new Error("[Optimizely Graph] Error received from Optimizely Graph, see console for details")
+      throw new OptiGraphRequestError("[Optimizely Graph] Error received from Optimizely Graph, see console for details", { requestId, status: response.status, operationName })
     } else if (QUERY_LOG) {
+      console.log(`🆔 [Optimizely Graph] [Response Status] ${response.status} [request-id: ${requestId ?? 'none'}]`)
       console.log(`📦 [Optimizely Graph] [Response Data] ${JSON.stringify(response.data)}`)
       console.log(`🔖 [Optimizely Graph] [Response Cost] ${JSON.stringify((response.extensions as { cost?: number } | undefined)?.cost || 0)}`)
     }
@@ -316,7 +362,7 @@ export class ContentGraphClient extends GraphQLClient implements IOptiGraphClien
 
     this.setHeaders(headers)
     if (this.debug)
-      console.log(`🔗 [Optimizely Graph] Updated service endpoint headers: ${JSON.stringify(headers)}`)
+      console.log(`🔗 [Optimizely Graph] Updated service endpoint headers: ${JSON.stringify(maskHeaders(headers))}`)
     this.setEndpoint(this.buildUrlWithFlags())
   }
 

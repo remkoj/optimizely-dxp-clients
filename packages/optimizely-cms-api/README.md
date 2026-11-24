@@ -3,6 +3,9 @@
 [![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](./LICENSE)
 ![Static Badge](https://img.shields.io/badge/Optimizely-Content_Management_System-blue?cacheSeconds=7200)
 
+> [!WARNING]
+> This package is obsolete. Use Optimizely's official [`@optimizely/cms-sdk`](https://www.npmjs.com/package/@optimizely/cms-sdk) and [`@optimizely/cms-cli`](https://www.npmjs.com/package/@optimizely/cms-cli) packages instead.
+
 A Javascript client for the Integration API provided by the Optimizely CMS. It wraps the [Optimizely CMS SaaS Core REST API](https://docs.developers.optimizely.com/content-management-system/v1.0.0-SaaS-Core/reference/introduction-to-the-cms-content-api).
 
 ## Installation

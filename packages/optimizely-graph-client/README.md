@@ -171,6 +171,9 @@ The following configuration options are available, the table lists both the envi
 | `OPTIMIZELY_GRAPH_QUERY_LOG` | query_log | no | Set to "true" to enable query output to the console |
 | `OPTIMIZELY_DEBUG` | debug | no | Set to "true" to enable verbose debug output to the console |
 
+### 3.0. Request id and logging
+Optimizely Graph returns an id for each request in a response header (`correlation-id`, `x-request-id` or `x-correlation-id` are read). Use `client.getRequestId(operationName?)` to retrieve the id of one of the 8 most recent requests of a client, e.g. to log it when content cannot be found and quote it when contacting Optimizely Support. Only the id (a string) is retained, never the response. The id is also added to the console error output (`[request-id: ...]`), to the `ClientError` thrown by the client (`requestId` and `status` properties) and, with `errorPolicy: 'all'`, to the `OptiGraphRequestError` that is thrown. The `query_log` and `debug` output masks the `Authorization`, `cg-username` and `cg-roles` header values.
+
 ### 3.1. Preview mode/deployments
 When using a preview deployment or preview mode, the Optimizely Graph client can be used to signal this state to other parts of the application that need to use this in order to adjust the query needed to retrieve the appropriate preview content.
 

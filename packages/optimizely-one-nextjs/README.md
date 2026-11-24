@@ -1,5 +1,8 @@
 # Next.JS Optimizely One toolkit <!-- omit in toc -->
 
+> [!WARNING]
+> This package is obsolete. Use Optimizely's official [`@optimizely/cms-sdk`](https://www.npmjs.com/package/@optimizely/cms-sdk) and [`@optimizely/cms-cli`](https://www.npmjs.com/package/@optimizely/cms-cli) packages instead.
+
 React components (both client & server) to integrate the browser-side products from Optimizely (Web Experimentation, Feature Experimentation, Data Platform, and Content Recommendations).
 
 ## Table of Contents <!-- omit in toc -->
@@ -8,16 +11,20 @@ React components (both client & server) to integrate the browser-side products f
   - [2.1. Add API Routes](#21-add-api-routes)
   - [2.2. Add Provider \& PageTracker to your layout](#22-add-provider--pagetracker-to-your-layout)
   - [2.3. Instrument your site with additional events](#23-instrument-your-site-with-additional-events)
-  - [2.4. Enable session cookie for Visitor ID](#24-enable-session-cookie-for-visitor-id)
+  - [2.4. Enable the persistent Visitor ID cookie](#24-enable-the-persistent-visitor-id-cookie)
   - [2.5. Configuration](#25-configuration)
     - [2.5.1. Prevent key leakage and unauthorized access](#251-prevent-key-leakage-and-unauthorized-access)
     - [2.5.2. List of supported environment variables](#252-list-of-supported-environment-variables)
-    - [2.5.3. Submit form data to ODP from a server action](#253-submit-form-data-to-odp-from-a-server-action)
+    - [2.5.3. Write to ODP from a server action](#253-write-to-odp-from-a-server-action)
     - [2.5.4. Preconnect and security policies](#254-preconnect-and-security-policies)
 - [3. Usage](#3-usage)
   - [3.1. Optimizely One Gadget](#31-optimizely-one-gadget)
   - [3.2. Selecting the Web Experimentation project in browser](#32-selecting-the-web-experimentation-project-in-browser)
   - [3.3. Feature Experimentation decisions](#33-feature-experimentation-decisions)
+    - [Shared visitor and decision methods](#shared-visitor-and-decision-methods)
+    - [Rendering decisions without hydration errors](#rendering-decisions-without-hydration-errors)
+    - [ODP real-time audiences](#odp-real-time-audiences)
+    - [Datafile proxy](#datafile-proxy)
 
 
 ## 1. Requirements
@@ -211,7 +218,8 @@ identifier throws.
 
 Use `DataPlatform.submitForm(cookies, { email, fields, event })` from the
 server-only Data Platform entry point for form submissions. It upserts the
-profile and then records the event. Configure an ODP private API key.
+profile and then records the event. Configure an ODP private API key; without
+one the submission is skipped (see below).
 
 ```typescript
 'use server'
@@ -236,9 +244,23 @@ export async function submitContact(formData: FormData) {
 }
 ```
 
-The helper throws when the ODP private API key is missing or when either ODP
-request fails. Handle these errors in the server action according to the
-application's form UX.
+The helper skips the submission, without throwing, when ODP cannot be written to:
+
+| `OPTIMIZELY_DATAPLATFORM_ID` | Result |
+| --- | --- |
+| Not set | Nothing is sent. A debug message is written, only when `NODE_ENV` is not `production` or `OPTIMIZELY_DEBUG` is enabled. |
+| Public key only | Nothing is sent. A warning is always written to stderr, as the form data is lost. |
+| Private key (`<public>.<private>`) | The profile is upserted and the event is sent. |
+
+The helper throws a `DataPlatformError` when either ODP request fails. Its
+`status` property holds the HTTP status and its `detail` property the ODP
+response body (a single line of at most 500 characters, with the private key and
+the submitted values replaced by `[redacted]`). The `detail` is not part of the
+`message`; it can still contain personal data, so only log it where that is
+acceptable. Handle these errors in the server action according to the
+application's form UX. The `DataPlatform.Client` methods `upsertProfile`,
+`sendEvent` and `identify` keep throwing a `DataPlatformError` when no private
+key is configured.
 
 To verify the merge, submit the form in a browser session and query ODP with
 that browser's VUID: `customer(vuid: "<browser vuid>") { email }` must return

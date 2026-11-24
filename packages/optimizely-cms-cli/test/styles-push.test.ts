@@ -54,4 +54,37 @@ describe('styles:push', () => {
     await run()
     expect(client.displayTemplatesPatch).not.toHaveBeenCalled()
   })
+
+  describe('result validation', () => {
+    const errorOutput = () => vi.mocked(process.stderr.write).mock.calls.map(call => String(call[0])).join('')
+
+    it('reports no error when a patch was fully applied', async () => {
+      existing = [{ key: 'a', displayName: 'Old name', isDefault: false }]
+      client.displayTemplatesPatch.mockResolvedValue({ key: 'a', displayName: 'New name', isDefault: false })
+      await run()
+      expect(errorOutput()).toBe('')
+    })
+
+    it('detects fields the CMS did not apply when patching', async () => {
+      existing = [{ key: 'a', displayName: 'Old name', isDefault: false }]
+      client.displayTemplatesPatch.mockResolvedValue({ key: 'a', displayName: 'Old name', isDefault: false })
+      await run()
+      expect(errorOutput()).toContain('failed to update properties: displayName')
+    })
+
+    it('detects fields the CMS did not apply when creating', async () => {
+      existing = []
+      client.displayTemplatesCreate.mockResolvedValue({ key: 'a', displayName: 'Other name', isDefault: false })
+      await run()
+      expect(client.displayTemplatesCreate).toHaveBeenCalledOnce()
+      expect(errorOutput()).toContain('failed to update properties: displayName')
+    })
+
+    it('reports no error when creating a template that is returned as defined', async () => {
+      existing = []
+      client.displayTemplatesCreate.mockResolvedValue({ key: 'a', displayName: 'New name', isDefault: false, created: '2026-01-01T00:00:00Z' })
+      await run()
+      expect(errorOutput()).toBe('')
+    })
+  })
 })

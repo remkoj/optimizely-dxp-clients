@@ -8,7 +8,7 @@
 This repository contains the SDKs created by [Remko Jantzen](https://github.com/remkoj) and maintained in collaboration [with the community](https://github.com/remkoj/optimizely-dxp-clients/graphs/contributors) to use Optimizely products within Javascript. Though a few of these SDKs are generic, the focus is on Next.JS as framework. See the [GitHub releases page](https://github.com/remkoj/optimizely-dxp-clients/releases) for the latest updates.
 
 > [!WARNING]
-> All packages in this repository except `@remkoj/optimizely-one-nextjs`, `@remkoj/hey-api-wrapper` and `@remkoj/optimizely-cms-api` are obsolete. Use Optimizely's official [`@optimizely/cms-sdk`](https://www.npmjs.com/package/@optimizely/cms-sdk) and [`@optimizely/cms-cli`](https://www.npmjs.com/package/@optimizely/cms-cli) packages instead.
+> All packages in this repository are obsolete. Use Optimizely's official [`@optimizely/cms-sdk`](https://www.npmjs.com/package/@optimizely/cms-sdk) and [`@optimizely/cms-cli`](https://www.npmjs.com/package/@optimizely/cms-cli) packages instead.
 
 If you find a bug, or have a feature request, please [report it as an issue](https://github.com/remkoj/optimizely-dxp-clients/issues) or contribute your fix/enhancement as a [Pull request](https://github.com/remkoj/optimizely-dxp-clients/pulls).
 

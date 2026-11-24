@@ -7,7 +7,7 @@ import { normalizeContentLinkWithLocale, isContentLinkWithSetLocale } from '@rem
 import { Utils } from '@remkoj/optimizely-cms-react/rsc';
 
 import { type GetContentByPathMethod, type GetContentByPathVariables, } from './data.js';
-import { getChannelId, SystemLocales, type LookupResponse } from "./_base.js";
+import { getChannelId, getRequestDiagnostics, SystemLocales, type LookupResponse } from "./_base.js";
 import { localeToGraphLocale } from './utils.js'
 
 export async function loadContentByPath<LocaleEnum = SystemLocales>(
@@ -45,7 +45,7 @@ export async function loadContentByPath<LocaleEnum = SystemLocales>(
   const response = await getContentByPath(client, requestVars)
   if ((response?.content?.total ?? 0) === 0) {
     console.error(
-      `🔴 [CmsPage.loadContentByPath] Unable to load content for ${requestPath}, empty resultset received`
+      `🔴 [CmsPage.loadContentByPath] Unable to load content for ${requestPath}, empty resultset received${getRequestDiagnostics(client, requestVars)}`
     )
     return undefined
   }
@@ -55,7 +55,7 @@ export async function loadContentByPath<LocaleEnum = SystemLocales>(
 
   if (!info) {
     console.error(
-      `🔴 [CmsPage.loadContentByPath] Unable to load content for ${requestPath}, data received: `,
+      `🔴 [CmsPage.loadContentByPath] Unable to load content for ${requestPath}, data received${getRequestDiagnostics(client, requestVars)}: `,
       response
     )
     return undefined

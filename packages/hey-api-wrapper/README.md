@@ -1,5 +1,8 @@
 # @remkoj/hey-api-wrapper
 
+> [!WARNING]
+> This package is obsolete. Use Optimizely's official [`@optimizely/cms-sdk`](https://www.npmjs.com/package/@optimizely/cms-sdk) and [`@optimizely/cms-cli`](https://www.npmjs.com/package/@optimizely/cms-cli) packages instead.
+
 > **Internal package.** Used by `@remkoj/optimizely-cms-api`. Not intended for direct use in application code.
 
 Wraps a [`@hey-api`](https://heyapi.dev)-generated SDK into a single typed client class. Instead of calling raw operation functions, consumers get an object instance whose methods map one-to-one to the SDK operations, with authentication and error handling handled centrally.

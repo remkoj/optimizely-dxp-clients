@@ -334,9 +334,52 @@ export class DataPlatformClient
       cache: 'no-store'
     })
     if (!response.ok)
-      throw new DataPlatformError(`ODP ${path} request failed with ${response.status} ${response.statusText}`, this.trackerId)
+      throw new DataPlatformError(`ODP ${path} request failed with ${response.status} ${response.statusText}`, this.trackerId, {
+        status: response.status,
+        detail: await readErrorDetail(response, [this.privateKey, this.privateKey.split('.')[1], ...collectStringValues(payload)])
+      })
     return response
   }
+}
+
+/** The maximum number of characters of an ODP response that is kept as the error detail */
+const MAX_ERROR_DETAIL_LENGTH = 500
+
+/** Submitted values shorter than this are not redacted, as they can't identify anything and would garble the detail */
+const MIN_REDACTED_VALUE_LENGTH = 3
+
+/** Collect all string values of a request payload, as these can be echoed back in an ODP error response */
+function collectStringValues(value: unknown): string[]
+{
+  if (typeof value == 'string')
+    return [value]
+  if (Array.isArray(value))
+    return value.flatMap(collectStringValues)
+  if (value && typeof value == 'object')
+    return Object.values(value).flatMap(collectStringValues)
+  return []
+}
+
+/** Read the body of a failed ODP response as a single line of sanitised text, without secrets or submitted values */
+async function readErrorDetail(response: Response, redact: Array<string | undefined>): Promise<string | undefined>
+{
+  let detail = await response.text().catch(() => '')
+  // Longest first, so values that contain other values are redacted completely
+  const secrets = [...new Set(redact.filter((value): value is string => (value?.length ?? 0) >= MIN_REDACTED_VALUE_LENGTH))].sort((a, b) => b.length - a.length)
+  for (const secret of secrets)
+    detail = detail.split(secret).join('[redacted]')
+  detail = [...detail].map(char => char.charCodeAt(0) < 32 || char.charCodeAt(0) == 127 ? ' ' : char).join('').replace(/\s+/g, ' ').trim()
+  return detail ? detail.slice(0, MAX_ERROR_DETAIL_LENGTH) : undefined
+}
+
+/**
+ * Additional context of a {@link DataPlatformError}, on top of the native Error options.
+ */
+export type DataPlatformErrorOptions = ErrorOptions & {
+  /** The HTTP status of the failed ODP response. */
+  status?: number
+  /** Sanitised text of the ODP response body; see {@link DataPlatformError.detail}. */
+  detail?: string
 }
 
 /**
@@ -345,6 +388,8 @@ export class DataPlatformClient
 export class DataPlatformError extends Error
 {
   private _trackerId ?: string
+  private _status ?: number
+  private _detail ?: string
 
   /** The public tracker ID associated with the failed request, if available. */
   public get trackerId(): string
@@ -352,17 +397,37 @@ export class DataPlatformError extends Error
     return this._trackerId ?? ''
   }
 
+  /** The HTTP status of the failed ODP response, `undefined` when the error didn't originate from an ODP response. */
+  public get status(): number | undefined
+  {
+    return this._status
+  }
+
+  /**
+   * The body of the failed ODP response, as a single line of text of at most
+   * 500 characters, `undefined` when ODP returned no body. The private key and
+   * the values that were submitted are replaced by `[redacted]`, because ODP can
+   * echo them back. It is intentionally not part of `message`, so it doesn't end
+   * up in generic error logging; treat it as personal data when you log it.
+   */
+  public get detail(): string | undefined
+  {
+    return this._detail
+  }
+
   /**
    * Creates an error associated with a Data Platform tracker.
    *
    * @param message Error description.
    * @param trackerId Optional public tracker ID.
-   * @param options Native Error options, such as a cause.
+   * @param options Native Error options, such as a cause, and the `status` and `detail` of a failed ODP response.
    */
-  public constructor(message?: string, trackerId?: string, options?: ErrorOptions)
+  public constructor(message?: string, trackerId?: string, options?: DataPlatformErrorOptions)
   {
     super(message, options)
     this._trackerId = trackerId
+    this._status = options?.status
+    this._detail = options?.detail
   }
 }
 

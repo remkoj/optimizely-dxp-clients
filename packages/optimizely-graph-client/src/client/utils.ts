@@ -47,6 +47,74 @@ export function isError(toTest: any): toTest is Error {
 }
 
 /**
+ * The response headers in which Optimizely Graph returns the id of a request,
+ * in order of preference. The documentation of Optimizely uses both
+ * `correlation-id` and `X-Request-ID`, so all are read until verified.
+ */
+export const REQUEST_ID_HEADERS: readonly string[] = ['correlation-id', 'x-request-id', 'x-correlation-id']
+
+/**
+ * Read the id of a request from the response headers of Optimizely Graph. This
+ * only does a few header lookups, so it is cheap enough for every request.
+ * 
+ * @param       headers     The response headers
+ * @returns     The request id, or `undefined` when the response has none
+ */
+export function extractRequestId(headers: { get(name: string): string | null } | null | undefined): string | undefined {
+  if (!headers || typeof headers.get != 'function')
+    return undefined
+  for (let i = 0; i < REQUEST_ID_HEADERS.length; i++) {
+    const value = headers.get(REQUEST_ID_HEADERS[i])
+    if (value)
+      return value
+  }
+  return undefined
+}
+
+/**
+ * Mask a credential for logging: the scheme (if any) and the first four
+ * characters are kept for recognition, values of 8 characters or less are
+ * masked completely.
+ * 
+ * @param       value       The credential, e.g. a complete `Authorization` header value
+ * @returns     The masked credential
+ */
+export function maskSecret(value: string): string {
+  const separator = value.indexOf(' ')
+  const scheme = separator > 0 ? value.substring(0, separator + 1) : ''
+  const secret = value.substring(scheme.length)
+  return scheme + (secret.length > 8 ? secret.substring(0, 4) : '') + '***'
+}
+
+const IDENTITY_HEADERS = ['cg-username', 'cg-roles']
+
+/**
+ * Create a loggable copy of request headers, in which the credentials 
+ * (`Authorization`) and the frontend user identity (`cg-username`, `cg-roles`)
+ * are masked. This allocates, so only use it when the output is actually logged.
+ * 
+ * @param       headers     The headers as plain object, `Headers` or list of name/value tuples
+ * @returns     A new object with the masked headers
+ */
+export function maskHeaders(headers: Headers | Record<string, unknown> | Array<[string, string]> | HeadersInit | null | undefined): Record<string, string> {
+  const result: Record<string, string> = {}
+  if (!headers || typeof headers != 'object')
+    return result
+  const add = (name: string, value: unknown) => {
+    const lowerName = name.toLowerCase()
+    const text = String(value)
+    result[name] = lowerName == 'authorization' ? maskSecret(text) : IDENTITY_HEADERS.includes(lowerName) ? '***' : text
+  }
+  if (Array.isArray(headers))
+    headers.forEach(([name, value]) => add(name, value))
+  else if (typeof (headers as Headers).forEach == 'function')
+    (headers as Headers).forEach((value, name) => add(name, value))
+  else
+    Object.entries(headers).forEach(([name, value]) => add(name, value))
+  return result
+}
+
+/**
  * 
  * @deprecated 
  * @see         `isOptiGraphClient()`

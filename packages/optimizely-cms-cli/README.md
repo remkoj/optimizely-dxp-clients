@@ -118,7 +118,7 @@ All commands also support the [global parameters](#21-global-parameters).
 | Command | Description | Usage |
 | --- | --- | --- |
 | `types:pull` | Pull content type definition files into the project | `yarn opti-cms types:pull` |
-| `types:push` | Push content type definition into Optimizely CMS (create / replace) | `yarn opti-cms types:push` |
+| `types:push` | Push content type definition into Optimizely CMS (create / patch) | `yarn opti-cms types:push` |
 
 ### `cms:reset`
 Description: Completely clear & reset the CMS database.
