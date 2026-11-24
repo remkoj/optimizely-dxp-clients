@@ -1,7 +1,7 @@
 import { type NextRequest, NextResponse } from 'next/server.js'
 import { revalidatePath, revalidateTag } from "next/cache.js"
-import { type ClientFactory, type IOptiGraphClient, OptiCmsSchema, RouteResolver, type Route } from '@remkoj/optimizely-graph-client'
-import { createAuthorizedClient } from '../client.js'
+import { type IOptiGraphClient, OptiCmsSchema, RouteResolver, type Route } from '@remkoj/optimizely-graph-client'
+import { resolveClient,  type NextJsClientOption, createNextJsClient as createClient } from '../client.js'
 import { logger } from '../logger.js'
 
 export { type NextRequest, NextResponse } from 'next/server.js'
@@ -79,7 +79,7 @@ export type PublishApiOptions = {
    * The Optimizely Graph client to use for Graph Operations needed to publish 
    * content
    */
-  client: ClientFactory | IOptiGraphClient
+  client: NextJsClientOption
 
   /**
    * The router to use when the publishing optimization is enabled
@@ -132,7 +132,7 @@ const publishApiDefaults: PublishApiOptions = {
   dynamicScopes: ['page', 'layout'],
   tags: [],
   optimizePublish: false,
-  client: createAuthorizedClient,
+  client: createClient,
   router: {},
   hookDataFilter: (hookType) => hookType.subject == 'bulk' && hookType.action == 'completed',
   bulkItemStatusFilter: (bulkItemStatus: string) => bulkItemStatus == "indexed" || bulkItemStatus == "deleted",
@@ -243,8 +243,8 @@ export function createPublishApi(options?: Partial<PublishApiOptions>): PublishA
   }
 
   const requestHandler: PublishApiHandler = async (req) => {
-    // Validate the request
-    const client = typeof (clientFactory) == 'object' ? clientFactory : clientFactory();
+    const client = await resolveClient(clientFactory, undefined, 'metadata');
+
     const publishToken = client.siteInfo.publishToken
     const requestToken = getRequestToken(req)
     if (!publishToken) {
