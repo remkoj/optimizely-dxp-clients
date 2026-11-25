@@ -2,7 +2,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import Base64 from 'crypto-js/enc-base64.js'
 import hmacSHA256 from 'crypto-js/hmac-sha256.js'
 import md5 from 'crypto-js/md5.js'
-import { createHmacFetch } from '../src/hmac-fetch.js'
+import { createHmacFetch } from '../src/hmac-fetch'
 
 const APP_KEY = 'app-key'
 const SECRET = Buffer.from('graph-secret').toString('base64')

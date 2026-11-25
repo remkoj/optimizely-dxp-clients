@@ -47,5 +47,3 @@ export function createHmacFetch(appKey: string, secret: string) : FetchAPI
     return fetch(newRequest) as ReturnType<FetchAPI>
   }
 }
-
-export default createHmacFetch

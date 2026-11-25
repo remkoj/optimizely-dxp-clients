@@ -58,12 +58,12 @@
   },
   "devDependencies": {
     "@hey-api/openapi-ts": "^0.99.0",
-    "@types/crypto-js": "^4.2.2",
+    "@remkoj/hey-api-wrapper": "workspace:6.0.0-rc.6",
     "@types/node": "^24.19.2",
     "typescript": "^6.0.3"
   },
   "dependencies": {
-    "crypto-js": "^4.2.0",
+    "@remkoj/hey-api-wrapper": "6.0.0-rc.6",
     "dotenv-expand": "^13.0.0",
     "graphql": "^16.15.0",
     "graphql-request": "^7.4.0",

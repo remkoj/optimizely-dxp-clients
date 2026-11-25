@@ -50,7 +50,7 @@ export const publishToVercelModule: CliModule<PublishToVercelProps> = {
 
     // Get current hooks
     try {
-      const currentHooks = await adminApi.webhooks.listWebhookHandler()
+      const currentHooks = await adminApi.listWebhookHandler()
       if (currentHooks.some(x => isCurrentRegistration(x, webhookTarget, verb, header, token))) {
         process.stdout.write("\n" + chalk.greenBright(chalk.bold(figures.tick) + " Webhook already registered, no action needed") + "\n")
         process.exitCode = 0
@@ -62,7 +62,7 @@ export const publishToVercelModule: CliModule<PublishToVercelProps> = {
         if (isSameTarget(hook, webhookTarget)) {
           process.stdout.write(`${chalk.yellow(chalk.bold(figures.arrowRight))} Removing webhook with outdated configuration: ${chalk.yellow(displayUrl(hook.request.url))}\n`)
           try {
-            await adminApi.webhooks.deleteWebhookHandler(hook.id)
+            await adminApi.deleteWebhookHandler({ path: { id: hook.id } })
             return true
           } catch {
             return false
@@ -72,14 +72,14 @@ export const publishToVercelModule: CliModule<PublishToVercelProps> = {
       }))
 
       // Register the hook
-      await adminApi.webhooks.createWebhookHandler(buildWebhookPayload(webhookTarget, verb, header, token))
+      await adminApi.createWebhookHandler({ body: buildWebhookPayload(webhookTarget, verb, header, token) })
 
       process.stdout.write("\n" + chalk.greenBright(`${chalk.bold(figures.tick)} ${webhookTarget.href} has been added as Webhook recipient to Optimizely Graph`) + "\n")
     } catch (e) {
       if (isApiError(e)) {
         process.stderr.write(chalk.redBright(`${chalk.bold(figures.cross)} Optimizely Graph returned an error: HTTP ${e.status}: ${e.statusText}`) + "\n")
         if (args.verbose)
-          console.error(chalk.redBright(JSON.stringify(e.body, undefined, 4)))
+          console.error(chalk.redBright(JSON.stringify(e.data, undefined, 4)))
       } else {
         process.stderr.write(chalk.redBright(`${chalk.bold(figures.cross)} Optimizely Graph returned an error`) + "\n")
       }

@@ -2506,6 +2506,8 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@remkoj/hey-api-wrapper@workspace:packages/hey-api-wrapper"
   dependencies:
+    "@types/crypto-js": "npm:^4.2.2"
+    crypto-js: "npm:^4.2.0"
     typescript: "npm:^6.0.3"
   languageName: unknown
   linkType: soft
@@ -2640,9 +2642,8 @@ __metadata:
   resolution: "@remkoj/optimizely-graph-client@workspace:packages/optimizely-graph-client"
   dependencies:
     "@hey-api/openapi-ts": "npm:^0.99.0"
-    "@types/crypto-js": "npm:^4.2.2"
+    "@remkoj/hey-api-wrapper": "workspace:6.0.0-rc.6"
     "@types/node": "npm:^24.19.2"
-    crypto-js: "npm:^4.2.0"
     dotenv-expand: "npm:^13.0.0"
     graphql: "npm:^16.15.0"
     graphql-request: "npm:^7.4.0"

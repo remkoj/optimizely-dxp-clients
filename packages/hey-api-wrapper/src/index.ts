@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-export type { OperationsList } from './types'
+export type { OperationsList, ApiClientConfig, ApiClientFunctions, ClassDefinition, ClassWithMixin } from './types'
 import type { ApiClientConfig, ApiClientFunctions, ClassWithMixin, OperationsList } from './types'
 
 /**
@@ -58,7 +58,7 @@ export function withOperations<TBase extends ApiClientStatic, TOperations extend
       //@ts-expect-error TypeScript can't check this as TOperations is dynamic
       const result = await Operations[propName](...operationArgs)
       if (result.error)
-        throw new ApiError(result)
+        throw this.createApiError(result)
       return result.data ? result.data : result;
     }
 
@@ -204,15 +204,28 @@ export abstract class ApiClient<
 
     if (this._config.debug) {
       const name = this._config.name ?? 'API Client';
+      const responseName = this._config.name ?? 'CMS API';
       this._client.interceptors.request.use(async (request) => {
         console.log(`🔍 [${ name }] Sending ${request.method} request to ${redactUrl(request.url)}`)
         return request
       })
       this._client.interceptors.response.use((response, request) => {
-        console.log(`✨ [CMS API] Received response ${response.status} ${response.statusText} of type ${response.headers.get('Content-Type') ?? 'unknown'} for ${redactUrl(request.url)}`)
+        console.log(`✨ [${ responseName }] Received response ${response.status} ${response.statusText} of type ${response.headers.get('Content-Type') ?? 'unknown'} for ${redactUrl(request.url)}`)
         return response
       })
     }
+  }
+
+  /**
+   * Creates the {@link ApiError} for a failed operation, using the configured
+   * client name in its default message (`'CMS API'` when no name is configured).
+   *
+   * @param result The failed operation result: the error payload plus the HTTP request and response.
+   * @returns The error to throw.
+   */
+  public createApiError(result: { error?: unknown, request?: Request, response?: Response }): ApiError
+  {
+    return new ApiError(result, this._config.name)
   }
 
   /**
@@ -278,10 +291,11 @@ export class ApiError extends Error {
 
   /**
    * @param data The operation error context: the error payload plus the HTTP request and response, stored as-is. A string error is used as the message after control characters are replaced and the length is bounded (the stored payload stays unchanged); otherwise the message is derived from the response status.
+   * @param apiName The API name used in the derived message (`Optimizely <apiName> Error: …`). Defaults to `'CMS API'`.
    */
-  constructor(data: { error?: unknown, request?: Request, response?: Response }) {
+  constructor(data: { error?: unknown, request?: Request, response?: Response }, apiName: string = 'CMS API') {
     const message = typeof data.error == 'string' ? sanitizeMessage(data.error) : ''
-    super(message.length > 0 ? message : `Optimizely CMS API Error: ${data.response?.status ?? 500} ${data.response?.statusText ?? 'Unknown error'}`)
+    super(message.length > 0 ? message : `Optimizely ${apiName} Error: ${data.response?.status ?? 500} ${data.response?.statusText ?? 'Unknown error'}`)
     this._ctx = data;
   }
 

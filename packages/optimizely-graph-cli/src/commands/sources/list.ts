@@ -32,7 +32,7 @@ export const GraphSourceListCommand: CliModule<CommandProps> = {
 
     const adminApi = createAdminApi(cgConfig)
     try {
-      const currentSources = (await adminApi.definitionV3.getContentV3SourceHandler()) as unknown as SourceInfo[]
+      const currentSources = (await adminApi.getContentV3SourceHandler()) as unknown as SourceInfo[]
       const sources = new Table({
         head: [chalk.yellow(chalk.bold("ID")), chalk.yellow(chalk.bold("Label")), chalk.yellow(chalk.bold("Languages"))],
         colWidths: [10, 50, 50]
@@ -48,7 +48,7 @@ export const GraphSourceListCommand: CliModule<CommandProps> = {
       if (isApiError(e)) {
         process.stderr.write(chalk.redBright(`${chalk.bold(figures.cross)} Optimizely Graph returned an error: HTTP ${e.status}: ${e.statusText}`) + "\n")
         if (args.verbose)
-          console.error(chalk.redBright(JSON.stringify(e.body, undefined, 4)))
+          console.error(chalk.redBright(JSON.stringify(e.data, undefined, 4)))
       } else {
         process.stderr.write(chalk.redBright(`${chalk.bold(figures.cross)} Optimizely Graph returned an unknown error`) + "\n")
         if (args.verbose)

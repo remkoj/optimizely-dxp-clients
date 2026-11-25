@@ -48,11 +48,10 @@ Do not hand-edit — overwritten on every `generate` run.
 
 The generated code is wrapped by the hand-written facade in `src/admin-api/`:
 
-- `services.ts`: `ApiError`, `unwrap` and the service classes (`webhooks`, `definitionV3`, ...) that keep the positional signatures of the previous (`openapi-typescript-codegen`) client and turn the HeyAPI `{data, error, response}` result into a value or a rejected `ApiError`.
-- `legacy-types.ts`: deprecated aliases of the previous model names (e.g. `ContentSource_V3` → `ContentSourceV3`).
-- `index.ts`: `OptimizelyGraphAdminApi`, `createClient` (default export) and `isApiError`.
-- `hey-api-wrapper` is deliberately **not** used here; the client instance is created per `createClient` call and signs requests through `hmac-fetch.ts`, which also reads the body of `Request` objects (HeyAPI calls `fetch(new Request(...))`).
-- Path ids are URL-encoded (`w/1` → `w%2F1`); methods return a plain `Promise`.
+- `index.ts`: `BaseAdminApi` extends the `ApiClient` of `@remkoj/hey-api-wrapper` (name `Graph Admin API`, `debug` taken from the Graph config) and owns the HMAC-signing client plus the hand-written `getJournal`, `postSourceContent` (NDJSON) and `getOpenApiSpec`; `OptimizelyGraphAdminApi` is that class extended with every generated operation through `withOperations(BaseAdminApi, Operations)` (flat methods, e.g. `listWebhookHandler()`, `deleteWebhookHandler({ path: { id } })`). Also exports `ApiError` (from the wrapper), `isApiError` (`instanceof`) and `createClient` (default export).
+- The client instance is created per `createClient` call and signs requests through `createHmacFetch` of `@remkoj/hey-api-wrapper/hmac` (`packages/hey-api-wrapper/src/hmac-fetch.ts`; also used by `src/client/client.ts` for `AuthMode.HMAC`; `crypto-js` is a dependency of the wrapper, not of this package), which also reads the body of `Request` objects (HeyAPI calls `fetch(new Request(...))`). The HMAC header is added inside that fetch, so it is not on `ApiError.request`.
+- Operation methods take the generated HeyAPI options (`{ path, query, body, ... }`) and return the data; an empty (e.g. 204) response resolves to the raw HeyAPI result. Generated operations with a text body (`postContentV2DataHandler`, `upsertStopwordHandler`, `upsertSynonymHandler`) JSON-stringify a string body unless `bodySerializer: null` is passed.
+- Path ids are URL-encoded (`w/1` → `w%2F1`). There is no hand-written service layer or legacy type alias file any more.
 
 ```bash
 yarn workspace @remkoj/optimizely-graph-client run generate
@@ -71,7 +70,7 @@ The webhook that Optimizely Graph invokes after a publish authenticates with a s
 - `resolvePublishHeader()` and `DEFAULT_PUBLISH_HEADER` are exported from `./config`; the header name is available as `client.siteInfo.publishHeader` (required member of `OptiGraphSiteInfo`).
 - The `OPTIMIZELY_DEBUG` configuration print masks `secret`, `app_key`, `single_key` and `publish` (`***`).
 - Expansion is limited to these two settings (`EXPANDED_BY_CONFIG`, exported from `./config`) and works on a copy of `process.env`. Other loaders of `.env` files must leave these two variables as-is so a value is expanded exactly once: the CLI's loader (`graph-cli/src/context/env.ts`) expands every other variable but skips `EXPANDED_BY_CONFIG`, so an unresolved reference never turns into a partial token and an escaped `\${...}` survives. Next.js expands its own `.env` files before the client sees the values, so a literal `${...}` in a token cannot be escaped reliably there; use a token without `${`.
-- Tests: `test/publish-config.test.ts` (header/token resolution), `test/admin-api.test.ts` (request contract of the Admin API client), `test/hmac-fetch.test.ts`.
+- Tests: `test/publish-config.test.ts` (header/token resolution), `test/admin-api.test.ts` (request contract of the Admin API client). The HMAC signing tests live in `packages/hey-api-wrapper/test/hmac-fetch.test.ts`.
 
 ## Channel domains
 

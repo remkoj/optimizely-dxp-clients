@@ -3,7 +3,7 @@
 > [!WARNING]
 > This package is obsolete. Use Optimizely's official [`@optimizely/cms-sdk`](https://www.npmjs.com/package/@optimizely/cms-sdk) and [`@optimizely/cms-cli`](https://www.npmjs.com/package/@optimizely/cms-cli) packages instead.
 
-> **Internal package.** Used by `@remkoj/optimizely-cms-api`. Not intended for direct use in application code.
+> **Internal package.** Used by `@remkoj/optimizely-cms-api` and `@remkoj/optimizely-graph-client`. Not intended for direct use in application code.
 
 Wraps a [`@hey-api`](https://heyapi.dev)-generated SDK into a single typed client class. Instead of calling raw operation functions, consumers get an object instance whose methods map one-to-one to the SDK operations, with authentication and error handling handled centrally.
 
@@ -50,8 +50,11 @@ Abstract base class. Subclass it (via `withOperations`) to build a concrete clie
 | `debug` | `true` when request/response logging is active |
 | `name` | Display name used in log output (from config, defaults to `'API Client'`) |
 | `client` | The underlying `@hey-api` network client |
+| `createApiError(result)` | Creates the `ApiError` thrown by the operation methods, using the configured `name` in its default message |
 
 Constructor signature: `new ApiClient(config: ApiClientConfig, client: NetworkClient)`.
+
+The configured `name` is used in the request log (`[<name>]`, default `[API Client]`), in the response log and in the default `ApiError` message (`Optimizely <name> Error: <status> <statusText>`). Without a configured name, the response log and the error message use `CMS API`, so existing output of `@remkoj/optimizely-cms-api` is unchanged.
 
 ### `withOperations(Base, Operations)`
 
@@ -67,7 +70,7 @@ Thrown by operation methods when the server returns an error response.
 
 | Property | Type | Description |
 |---|---|---|
-| `message` | `string` | Human-readable error (uses the error string or HTTP status) |
+| `message` | `string` | Human-readable error (uses the error string or `Optimizely <API name> Error: <HTTP status>`; the API name is the client's configured `name`, default `CMS API`) |
 | `data` | `unknown` | Raw error payload from the response |
 | `status` | `number` | HTTP status code |
 | `statusText` | `string` | HTTP status text |
@@ -88,6 +91,23 @@ Only `message` is sanitized by the package: control characters (e.g. line breaks
 | `OperationsList<T>` | Extracts the function-valued keys from an SDK module type |
 | `ApiClientFunctions<L>` | Maps `OperationsList` entries to their unwrapped return types |
 | `ClassWithMixin<TBase, Mixin>` | Result type of `withOperations` — `TBase` instance augmented with `Mixin` |
+| `ClassDefinition` | Constructor shape accepted by `withOperations` |
+
+## HMAC-signed fetch
+
+The `@remkoj/hey-api-wrapper/hmac` subpath provides `createHmacFetch(appKey, secret)`, a `fetch` implementation that signs each request with an `epi-hmac` Authorization header (used by the Optimizely Graph Admin API). The signature covers the App Key, method, path and query, a timestamp, a nonce and the MD5 hash of the request body.
+
+```typescript
+import { createHmacFetch } from '@remkoj/hey-api-wrapper/hmac'
+import { createClient, createConfig } from './client/client'
+
+const client = createClient(createConfig({
+  baseUrl: 'https://cg.optimizely.com',
+  fetch: createHmacFetch(appKey, secret) // secret is base64 encoded
+}))
+```
+
+The package has an `exports` map (`.`, `./hmac` and `./package.json`), so deep imports of `dist/*` are not possible. It depends on `crypto-js` for the signature.
 
 ## License
 

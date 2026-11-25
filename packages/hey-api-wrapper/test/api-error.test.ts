@@ -75,4 +75,13 @@ describe('ApiError', () => {
   it('falls back to the status message when the string error has no printable text', () => {
     expect(new ApiError(createContext('\r\n\t ')).message).toBe('Optimizely CMS API Error: 400 Bad Request')
   })
+
+  it('uses the name of the API in the derived message when provided', () => {
+    expect(new ApiError(createContext({ detail: 'x' }), 'Graph Admin API').message).toBe('Optimizely Graph Admin API Error: 400 Bad Request')
+    expect(new ApiError(createContext('\r\n\t '), 'Graph Admin API').message).toBe('Optimizely Graph Admin API Error: 400 Bad Request')
+  })
+
+  it('keeps the CMS API message when no name is provided', () => {
+    expect(new ApiError(createContext({ detail: 'x' }), undefined).message).toBe('Optimizely CMS API Error: 400 Bad Request')
+  })
 })

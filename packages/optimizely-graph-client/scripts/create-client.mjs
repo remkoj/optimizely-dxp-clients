@@ -6,8 +6,8 @@ const SPEC_URL = 'https://cg.optimizely.com/app/swagger/swagger.json'
 /**
  * Entry point: generates the typed Optimizely Graph Admin API client from the
  * live OpenAPI specification into `src/admin-api/client`. The hand-written
- * wrapper in `src/admin-api` (`index.ts`, `services.ts`) is not generated and
- * keeps the public API of the package stable.
+ * wrapper in `src/admin-api` (`index.ts`) is not generated and
+ * builds on `@remkoj/hey-api-wrapper`.
  *
  * @returns {Promise<void>}
  */

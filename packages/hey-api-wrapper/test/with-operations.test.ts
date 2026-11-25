@@ -56,4 +56,22 @@ describe('withOperations', () => {
     expect(apiError.data).toEqual({ detail: 'secret body' })
     expect(apiError.status).toBe(404)
   })
+
+  it('uses the configured client name in the message of the ApiError', async () => {
+    const response = new Response('{}', { status: 404, statusText: 'Not Found' })
+    const Api = createApi({ getItem: async () => ({ error: { detail: 'x' }, request: new Request('https://graph.example.com/'), response }) })
+
+    const failure = await new Api({ name: 'Graph Admin API' }, createNetworkClient()).getItem({}).catch((error: unknown) => error)
+
+    expect((failure as ApiError).message).toBe('Optimizely Graph Admin API Error: 404 Not Found')
+  })
+
+  it('keeps the CMS API message for a client without a name', async () => {
+    const response = new Response('{}', { status: 404, statusText: 'Not Found' })
+    const Api = createApi({ getItem: async () => ({ error: { detail: 'x' }, request: new Request('https://cms.example.com/'), response }) })
+
+    const failure = await new Api({}, createNetworkClient()).getItem({}).catch((error: unknown) => error)
+
+    expect((failure as ApiError).message).toBe('Optimizely CMS API Error: 404 Not Found')
+  })
 })

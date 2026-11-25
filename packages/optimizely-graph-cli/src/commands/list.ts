@@ -30,7 +30,7 @@ export const publishToVercelModule: CliModule<PublishToVercelProps> = {
 
     const adminApi = createAdminApi(cgConfig)
     try {
-      const currentHooks = await adminApi.webhooks.listWebhookHandler()
+      const currentHooks = await adminApi.listWebhookHandler()
       const hooks = new Table({
         head: [chalk.yellow(chalk.bold("ID")), chalk.yellow(chalk.bold("Method")), chalk.yellow(chalk.bold("Url"))],
         colWidths: [38, 8, 100]
@@ -45,7 +45,7 @@ export const publishToVercelModule: CliModule<PublishToVercelProps> = {
       if (isApiError(e)) {
         process.stderr.write(chalk.redBright(`${chalk.bold(figures.cross)} Optimizely Graph returned an error: HTTP ${e.status}: ${e.statusText}`) + "\n")
         if (args.verbose)
-          console.error(chalk.redBright(JSON.stringify(e.body, undefined, 4)))
+          console.error(chalk.redBright(JSON.stringify(e.data, undefined, 4)))
       } else {
         process.stderr.write(chalk.redBright(`${chalk.bold(figures.cross)} Optimizely Graph returned an unknown error`) + "\n")
         if (args.verbose)

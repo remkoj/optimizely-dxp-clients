@@ -14,8 +14,8 @@ export const GraphInfoApiService : ApiService<GraphInfoApiResponse> = {
 
     const adminApi = createAdminApi()
         
-    const hooks = await adminApi.webhooks.listWebhookHandler()
-    const sourceMap = await adminApi.definitionV3.getContentV3SourceHandler()
+    const hooks = await adminApi.listWebhookHandler()
+    const sourceMap = await adminApi.getContentV3SourceHandler()
     const sources : {label: string, languages: string[]}[] = []
     for (const sourceId in sourceMap) {
       const source = sourceMap[sourceId]

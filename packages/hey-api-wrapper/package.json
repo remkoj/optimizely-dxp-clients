@@ -14,6 +14,24 @@
   "type": "commonjs",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./hmac": {
+      "types": "./dist/hmac-fetch.d.ts",
+      "default": "./dist/hmac-fetch.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "typesVersions": {
+    "*": {
+      "hmac": [
+        "./dist/hmac-fetch.d.ts"
+      ]
+    }
+  },
   "files": [
     "./dist",
     "./AGENTS.md"
@@ -24,7 +42,11 @@
     "watch": "tsc --watch",
     "recompile": "yarn clean && tsc --build --force"
   },
+  "dependencies": {
+    "crypto-js": "^4.2.0"
+  },
   "devDependencies": {
+    "@types/crypto-js": "^4.2.2",
     "typescript": "^6.0.3"
   }
 }

@@ -37,14 +37,14 @@ export const GraphSourceClearCommand: CliModule<CommandProps> = {
     const adminApi = createAdminApi(cgConfig)
     try {
       process.stdout.write(`${chalk.yellow(chalk.bold(figures.arrowRight))} Loading content source: ${chalk.yellow(sourceId)}\n`)
-      const contentSource = (await adminApi.definitionV3.getContentV3SourceHandler(sourceId))[0] as SourceInfo
+      const contentSource = (await adminApi.getContentV3SourceHandler({ query: { id: sourceId } }))[0] as SourceInfo
       if (!(contentSource && contentSource.id == sourceId)) {
         throw new Error("An incorrect content source was returned by Optimizely Graph")
       }
 
       process.stdout.write(`${chalk.yellow(chalk.bold(figures.arrowRight))} Removing all content from ${chalk.yellow(contentSource.label)} (Languages: ${chalk.yellow(contentSource.languages.join(', '))})\n`)
 
-      await adminApi.definitionV2.deleteContentV2DataHandler(sourceId, contentSource.languages)
+      await adminApi.deleteContentV2DataHandler({ query: { id: sourceId, languages: contentSource.languages } })
 
       process.stdout.write(chalk.green(chalk.bold(figures.tick + " Done")) + "\n")
     } catch (e) {
@@ -55,7 +55,7 @@ export const GraphSourceClearCommand: CliModule<CommandProps> = {
           process.stderr.write(chalk.redBright(`${chalk.bold(figures.cross)} Optimizely Graph returned an error: HTTP ${e.status}: ${e.statusText}`) + "\n")
         }
         if (args.verbose)
-          console.error(chalk.redBright(JSON.stringify(e.body, undefined, 4)))
+          console.error(chalk.redBright(JSON.stringify(e.data, undefined, 4)))
       } else {
         process.stderr.write(chalk.redBright(`${chalk.bold(figures.cross)} Optimizely Graph returned an unknown error`) + "\n")
         if (args.verbose)

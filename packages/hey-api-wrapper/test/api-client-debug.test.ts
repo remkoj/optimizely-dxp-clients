@@ -54,7 +54,7 @@ describe('ApiClient debug logging', () => {
     expect(await interceptors.request(request)).toBe(request)
     expect(await interceptors.response(response, request)).toBe(response)
     expect(log).toHaveBeenCalledWith('🔍 [Test] Sending GET request to https://cms.example.com/api/items')
-    expect(log).toHaveBeenCalledWith('✨ [CMS API] Received response 200 OK of type application/json for https://cms.example.com/api/items')
+    expect(log).toHaveBeenCalledWith('✨ [Test] Received response 200 OK of type application/json for https://cms.example.com/api/items')
   })
 
   it('masks the query string values in the logged request URL', async () => {
@@ -96,5 +96,28 @@ describe('ApiClient debug logging', () => {
 
     expect(logged()).toContain('https://cms.example.com:8443/a/b%20c?x=***')
     expect(logged()).not.toContain('frag')
+  })
+
+  it('uses the client name as the prefix of the logged response', async () => {
+    const interceptors = createDebugClient()
+    const request = new Request('https://graph.example.com/api')
+
+    await interceptors.response(new Response(null, { status: 200, statusText: 'OK' }), request)
+
+    expect(log).toHaveBeenCalledWith('✨ [Test] Received response 200 OK of type unknown for https://graph.example.com/api')
+  })
+
+  it('keeps the CMS API prefix for the logged response of a client without a name', async () => {
+    const interceptors: { response?: ResponseInterceptor } = {}
+    new TestClient({ debug: true }, {
+      interceptors: {
+        request: { use: () => 0 },
+        response: { use: interceptor => { interceptors.response = interceptor; return 0 } }
+      }
+    })
+
+    await interceptors.response?.(new Response(null, { status: 200, statusText: 'OK' }), new Request('https://cms.example.com/api'))
+
+    expect(log).toHaveBeenCalledWith('✨ [CMS API] Received response 200 OK of type unknown for https://cms.example.com/api')
   })
 })

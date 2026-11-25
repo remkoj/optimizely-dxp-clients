@@ -2,8 +2,12 @@
 
 Internal package. Not intended for direct use.
 
-Consumed by `@remkoj/optimizely-cms-api` to wrap a `@hey-api`-generated SDK into
+Consumed by `@remkoj/optimizely-cms-api` and `@remkoj/optimizely-graph-client` (Admin API) to wrap a `@hey-api`-generated SDK into
 a single client object. Do not import this package directly in application code.
+
+## HMAC-signed fetch
+
+The `@remkoj/hey-api-wrapper/hmac` subpath exports `createHmacFetch(appKey, secret)`: a `fetch` implementation that adds an `epi-hmac` Authorization header (Optimizely Graph Admin API signature). Pass it to the HeyAPI client config, e.g. `createClient(createConfig({ baseUrl, fetch: createHmacFetch(appKey, secret) }))`. The secret is base64 encoded, as provided by Optimizely Graph. It is not part of the root export.
 
 ## Handling `ApiError`
 

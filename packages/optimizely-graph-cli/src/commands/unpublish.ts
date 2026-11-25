@@ -32,12 +32,12 @@ export const publishToVercelModule: CliModule<PublishToVercelProps> = {
     if (typeof (token_id) == 'string' && token_id.length > 24) {
       process.stdout.write(`Removing Webhook with ID: ${token_id}\n`)
       try {
-        await adminApi.webhooks.deleteWebhookHandler(token_id)
+        await adminApi.deleteWebhookHandler({ path: { id: token_id } })
       } catch (e) {
         if (isApiError(e)) {
           process.stderr.write(`!! Optimizely Graph returned an error: HTTP ${e.status}: ${e.statusText}\n`)
           if (args.verbose)
-            console.error(e.body)
+            console.error(e.data)
           process.exitCode = 1
           return
         } else {
@@ -62,7 +62,7 @@ export const publishToVercelModule: CliModule<PublishToVercelProps> = {
 
     // Delete hook by url
     try {
-      const currentHooks = await adminApi.webhooks.listWebhookHandler()
+      const currentHooks = await adminApi.listWebhookHandler()
       const hooks = currentHooks.filter(x => isSameTarget(x, webhookTarget))
 
       // Check if the hook is present
@@ -77,7 +77,7 @@ export const publishToVercelModule: CliModule<PublishToVercelProps> = {
         hooks.map(async hook => {
           const hookId = hook.id
           process.stdout.write(`Removing Webhook with ID: ${hookId}\n`)
-          await adminApi.webhooks.deleteWebhookHandler(hookId).then(() =>
+          await adminApi.deleteWebhookHandler({ path: { id: hookId } }).then(() =>
             process.stdout.write(`Removed WebHook with ID ${hookId} from ContentGraph\n`)
           )
           return true
@@ -87,7 +87,7 @@ export const publishToVercelModule: CliModule<PublishToVercelProps> = {
       if (isApiError(e)) {
         process.stderr.write(`!! Optimizely Graph returned an error: HTTP ${e.status}: ${e.statusText}\n`)
         if (args.verbose)
-          console.error(e.body)
+          console.error(e.data)
         process.exitCode = 1
         return
       } else {
